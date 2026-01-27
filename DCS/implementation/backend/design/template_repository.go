@@ -15,7 +15,7 @@ var ContractTemplateCreateRequest = Type("ContractTemplateCreateRequest", func()
 	Required("created_by")
 })
 
-var ContractTemplateCreateResult = Type("ContractTemplateCreateResult", func() {
+var ContractTemplateCreateResponse = Type("ContractTemplateCreateResponse", func() {
 	Description("Result for creating a contract template")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
@@ -55,7 +55,7 @@ var _ = Service("TemplateRepository", func() {
 			Response(StatusOK)
 		})
 
-		Result(ContractTemplateCreateResult)
+		Result(ContractTemplateCreateResponse)
 	})
 
 	// POST /template/submit

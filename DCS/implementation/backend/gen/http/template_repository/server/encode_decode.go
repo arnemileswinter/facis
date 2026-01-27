@@ -22,7 +22,7 @@ import (
 // TemplateRepository create endpoint.
 func EncodeCreateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(*templaterepository.ContractTemplateCreateResult)
+		res, _ := v.(*templaterepository.ContractTemplateCreateResponse)
 		enc := encoder(ctx, w)
 		body := NewCreateResponseBody(res)
 		w.WriteHeader(http.StatusOK)

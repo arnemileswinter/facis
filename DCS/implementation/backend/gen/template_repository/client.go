@@ -51,13 +51,13 @@ func NewClient(create, submit, update, updateManage, search, retrieve, retrieveB
 }
 
 // Create calls the "create" endpoint of the "TemplateRepository" service.
-func (c *Client) Create(ctx context.Context, p *ContractTemplateCreateRequest) (res *ContractTemplateCreateResult, err error) {
+func (c *Client) Create(ctx context.Context, p *ContractTemplateCreateRequest) (res *ContractTemplateCreateResponse, err error) {
 	var ires any
 	ires, err = c.CreateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(*ContractTemplateCreateResult), nil
+	return ires.(*ContractTemplateCreateResponse), nil
 }
 
 // Submit calls the "submit" endpoint of the "TemplateRepository" service.

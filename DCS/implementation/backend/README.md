@@ -50,6 +50,11 @@ goa gen digital-contracting-service/design
 
 ## Running the API Server
 
+### Environment Variables
+```
+export DATABASE_URL="user=username password=password dbname=database_name sslmode=disable"
+```
+
 ```
 go run ./cmd/dcs
 ```

@@ -61,10 +61,10 @@ func NewCreateRequestBody(p *templaterepository.ContractTemplateCreateRequest) *
 	return body
 }
 
-// NewCreateContractTemplateCreateResultOK builds a "TemplateRepository"
+// NewCreateContractTemplateCreateResponseOK builds a "TemplateRepository"
 // service "create" endpoint result from a HTTP "OK" response.
-func NewCreateContractTemplateCreateResultOK(body *CreateResponseBody) *templaterepository.ContractTemplateCreateResult {
-	v := &templaterepository.ContractTemplateCreateResult{
+func NewCreateContractTemplateCreateResponseOK(body *CreateResponseBody) *templaterepository.ContractTemplateCreateResponse {
+	v := &templaterepository.ContractTemplateCreateResponse{
 		Did:            *body.Did,
 		DocumentNumber: *body.DocumentNumber,
 		Version:        *body.Version,

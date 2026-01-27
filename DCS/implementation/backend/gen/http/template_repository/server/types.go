@@ -51,7 +51,7 @@ type CreateResponseBody struct {
 
 // NewCreateResponseBody builds the HTTP response body from the result of the
 // "create" endpoint of the "TemplateRepository" service.
-func NewCreateResponseBody(res *templaterepository.ContractTemplateCreateResult) *CreateResponseBody {
+func NewCreateResponseBody(res *templaterepository.ContractTemplateCreateResponse) *CreateResponseBody {
 	body := &CreateResponseBody{
 		Did:            res.Did,
 		DocumentNumber: res.DocumentNumber,

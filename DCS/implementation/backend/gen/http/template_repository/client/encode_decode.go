@@ -80,7 +80,7 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrValidationError("TemplateRepository", "create", err)
 			}
-			res := NewCreateContractTemplateCreateResultOK(&body)
+			res := NewCreateContractTemplateCreateResponseOK(&body)
 			return res, nil
 		default:
 			body, _ := io.ReadAll(resp.Body)

@@ -585,7 +585,7 @@ paths:
                 "200":
                     description: OK response.
                     schema:
-                        $ref: '#/definitions/ContractTemplateCreateResult'
+                        $ref: '#/definitions/ContractTemplateCreateResponse'
                         required:
                             - did
                             - document_number
@@ -768,8 +768,8 @@ definitions:
             name: Sed ullam minus quo nam.
         required:
             - created_by
-    ContractTemplateCreateResult:
-        title: ContractTemplateCreateResult
+    ContractTemplateCreateResponse:
+        title: ContractTemplateCreateResponse
         type: object
         properties:
             created_at:

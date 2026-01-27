@@ -14,7 +14,7 @@ import (
 // Template Repository APIs (/template/...)
 type Service interface {
 	// Create a new template.
-	Create(context.Context, *ContractTemplateCreateRequest) (res *ContractTemplateCreateResult, err error)
+	Create(context.Context, *ContractTemplateCreateRequest) (res *ContractTemplateCreateResponse, err error)
 	// with action flag { forwardTo: "approval" | "draft" } and optional
 	// reviewComments. allow resubmission path with approver comments.
 	Submit(context.Context) (res string, err error)
@@ -73,9 +73,9 @@ type ContractTemplateCreateRequest struct {
 	MetaData any
 }
 
-// ContractTemplateCreateResult is the result type of the TemplateRepository
+// ContractTemplateCreateResponse is the result type of the TemplateRepository
 // service create method.
-type ContractTemplateCreateResult struct {
+type ContractTemplateCreateResponse struct {
 	// Decentralized Identifier of the contract template
 	Did string
 	// The document number of the contract template

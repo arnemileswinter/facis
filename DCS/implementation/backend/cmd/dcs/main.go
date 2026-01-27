@@ -49,6 +49,18 @@ func main() {
 	}
 	log.Print(ctx, log.KV{K: "http-port", V: *httpPortF})
 
+	db, err := NewDatabaseConnection(ctx)
+	if err != nil {
+		log.Fatalf(ctx, err, "Could not connect to database")
+		os.Exit(1)
+	}
+
+	templateRepositorySrv, err := service.NewTemplateRepository(ctx, db)
+	if err != nil {
+		log.Fatalf(ctx, err, "Could not create template repository")
+		os.Exit(1)
+	}
+
 	// Initialize the service.
 	var (
 		contractStorageArchiveSvc       contractstoragearchive.Service
@@ -70,7 +82,7 @@ func main() {
 		processAuditAndComplianceSvc = service.NewProcessAuditAndCompliance()
 		signatureManagementSvc = service.NewSignatureManagement()
 		templateCatalogueIntegrationSvc = service.NewTemplateCatalogueIntegration()
-		templateRepositorySvc = service.NewTemplateRepository()
+		templateRepositorySvc = templateRepositorySrv
 	}
 
 	// Wrap the service in endpoints that can be invoked from other service

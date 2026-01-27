@@ -4,6 +4,7 @@ import (
 	"context"
 	templaterepository "digital-contracting-service/gen/template_repository"
 
+	"github.com/jmoiron/sqlx"
 	"goa.design/clue/log"
 )
 
@@ -12,14 +13,14 @@ import (
 type templateRepositorysrvc struct{}
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
-func NewTemplateRepository() templaterepository.Service {
-	return &templateRepositorysrvc{}
+func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository.Service, error) {
+	return &templateRepositorysrvc{}, nil
 }
 
 // Create a new template.
-func (s *templateRepositorysrvc) Create(ctx context.Context) (res string, err error) {
+func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.ContractTemplateCreateRequest) (*templaterepository.ContractTemplateCreateResponse, error) {
 	log.Printf(ctx, "templateRepository.create")
-	return
+	return &templaterepository.ContractTemplateCreateResponse{}, nil
 }
 
 // with action flag { forwardTo: "approval" | "draft" } and optional
