@@ -1,0 +1,988 @@
+openapi: 3.0.3
+info:
+    title: DCS API Server
+    version: 0.0.1
+servers:
+    - url: http://0.0.0.0:8991
+paths:
+    /archive/audit:
+        get:
+            tags:
+                - ContractStorageArchive
+            summary: audit ContractStorageArchive
+            description: retrieve audit logs.
+            operationId: ContractStorageArchive#audit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    example: Qui sit beatae eius.
+                                example:
+                                    - Eum rerum necessitatibus harum rem rerum.
+                                    - Voluptates perferendis.
+                                    - Soluta ratione delectus.
+                            example:
+                                - Sit occaecati dolore veritatis.
+                                - Explicabo natus.
+    /archive/delete:
+        delete:
+            tags:
+                - ContractStorageArchive
+            summary: delete ContractStorageArchive
+            description: permanently delete entry.
+            operationId: ContractStorageArchive#delete
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 2544702780290408626
+                                format: int64
+                            example: 677478719150566786
+    /archive/retrieve:
+        get:
+            tags:
+                - ContractStorageArchive
+            summary: retrieve ContractStorageArchive
+            description: retrieve archived items.
+            operationId: ContractStorageArchive#retrieve
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Ut eveniet velit voluptate.
+                            example: Nemo illum rerum dolores cum minus tempore.
+    /archive/search:
+        get:
+            tags:
+                - ContractStorageArchive
+            summary: search ContractStorageArchive
+            description: search archived records. search records by criteria.
+            operationId: ContractStorageArchive#search
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    example: Reiciendis provident nisi recusandae.
+                                example:
+                                    - Dolor ullam porro.
+                                    - Numquam inventore.
+                                    - Accusantium dolorem architecto non.
+                            example:
+                                - Accusamus quae laborum corrupti omnis est.
+                                - Porro est inventore exercitationem.
+    /archive/store:
+        post:
+            tags:
+                - ContractStorageArchive
+            summary: store ContractStorageArchive
+            description: store new contract or evidence.
+            operationId: ContractStorageArchive#store
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                example: Molestiae numquam ipsum.
+                            example: Consectetur eveniet autem illo aspernatur.
+    /archive/terminate:
+        post:
+            tags:
+                - ContractStorageArchive
+            summary: terminate ContractStorageArchive
+            description: terminate contract/archive entry.
+            operationId: ContractStorageArchive#terminate
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 3866624770269759251
+                                format: int64
+                            example: 6057305760517548774
+    /catalogue/template/discover:
+        get:
+            tags:
+                - TemplateCatalogueIntegration
+            summary: discover TemplateCatalogueIntegration
+            description: Discover templates via XFSC Catalogue.
+            operationId: TemplateCatalogueIntegration#discover
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Temporibus tempora vel quod quia maiores eligendi.
+                            example: Earum quas maiores laudantium cumque.
+    /catalogue/template/register:
+        post:
+            tags:
+                - TemplateCatalogueIntegration
+            summary: register TemplateCatalogueIntegration
+            description: Register template into XFSC Catalogue.
+            operationId: TemplateCatalogueIntegration#register
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Iste eos ut.
+                            example: Consequuntur nesciunt.
+    /catalogue/template/request:
+        post:
+            tags:
+                - TemplateCatalogueIntegration
+            summary: request TemplateCatalogueIntegration
+            description: Request template via XFSC Catalogue.
+            operationId: TemplateCatalogueIntegration#request
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Reiciendis corrupti et consequatur.
+                            example: Ut amet dolor provident quia velit.
+    /contract/approve:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: approve ContractWorkflowEngine
+            description: approve and forward contract.
+            operationId: ContractWorkflowEngine#approve
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 7174517916128506124
+                                format: int64
+                            example: 565872075522874840
+    /contract/audit:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: audit ContractWorkflowEngine
+            description: generate audit record.
+            operationId: ContractWorkflowEngine#audit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    example: Perspiciatis qui.
+                                example:
+                                    - Et qui voluptatem.
+                                    - Magnam non quod nam vero qui.
+                            example:
+                                - Eos consequuntur.
+                                - A voluptas illo quia.
+                                - Quos suscipit in.
+    /contract/create:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: create ContractWorkflowEngine
+            description: initiate new contract draft from template.
+            operationId: ContractWorkflowEngine#create
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                example: Architecto ducimus consequatur eius ducimus.
+                            example: Qui laudantium distinctio maxime excepturi illo voluptatem.
+    /contract/negotiate:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: negotiate ContractWorkflowEngine
+            description: propose changes.
+            operationId: ContractWorkflowEngine#negotiate
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                example: Vero suscipit perspiciatis consequuntur vero nulla.
+                            example: Molestiae non voluptate eos nam.
+    /contract/reject:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: reject ContractWorkflowEngine
+            description: reject with explanation.
+            operationId: ContractWorkflowEngine#reject
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 8917860846822803368
+                                format: int64
+                            example: 6361653321450838585
+    /contract/respond:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: respond ContractWorkflowEngine
+            description: provide feedback/findings. respond to counterpart changes.
+            operationId: ContractWorkflowEngine#respond
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                example: Et ipsum nostrum adipisci sequi quia.
+                            example: Voluptas quo.
+    /contract/retrieve:
+        get:
+            tags:
+                - ContractWorkflowEngine
+            summary: retrieve ContractWorkflowEngine
+            description: fetch submitted contract. fetch reviewed contract. fetch contract(s).
+            operationId: ContractWorkflowEngine#retrieve
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Id facilis odit repudiandae harum.
+                            example: Aut tempore eum commodi nostrum aut et.
+    /contract/review:
+        get:
+            tags:
+                - ContractWorkflowEngine
+            summary: review ContractWorkflowEngine
+            description: retrieve latest draft for comparison.
+            operationId: ContractWorkflowEngine#review
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Sed dicta possimus et.
+                            example: Nam omnis molestiae quia.
+    /contract/search:
+        get:
+            tags:
+                - ContractWorkflowEngine
+            summary: search ContractWorkflowEngine
+            description: locate contracts by metadata or state. filter/search across lifecycle states.
+            operationId: ContractWorkflowEngine#search
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    example: Vero nesciunt doloremque quis rerum.
+                                example:
+                                    - Occaecati nesciunt et qui aut.
+                                    - Doloremque quia velit eum non.
+                                    - Molestiae omnis nihil eaque sed veritatis odio.
+                            example:
+                                - Iusto et eveniet sapiente dolorem quasi.
+                                - Omnis ut nihil assumenda itaque deserunt voluptatem.
+                                - Quidem praesentium neque alias repellat.
+    /contract/store:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: store ContractWorkflowEngine
+            description: store evidence.
+            operationId: ContractWorkflowEngine#store
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 5844984563286070618
+                                format: int64
+                            example: 7519915948449812300
+    /contract/submit:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: submit ContractWorkflowEngine
+            description: finalize and submit contract for negotiation/review. finalize and submit negotiated version. finalize review outcome. finalize decision. finalize review outcome.
+            operationId: ContractWorkflowEngine#submit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                example: Aut omnis ut.
+                            example: Corporis dolores temporibus consequatur.
+    /contract/terminate:
+        post:
+            tags:
+                - ContractWorkflowEngine
+            summary: terminate ContractWorkflowEngine
+            description: terminate a contract.
+            operationId: ContractWorkflowEngine#terminate
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 4085842121464566424
+                                format: int64
+                            example: 8309292813512656172
+    /external/action:
+        post:
+            tags:
+                - ExternalTargetSystemApi
+            summary: action ExternalTargetSystemApi
+            description: Invoke external target system action (create/deploy) from DCS.
+            operationId: ExternalTargetSystemApi#action
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Adipisci rem.
+                            example: Aliquid voluptas qui unde sit.
+    /external/callback:
+        post:
+            tags:
+                - ExternalTargetSystemApi
+            summary: callback ExternalTargetSystemApi
+            description: Receive external target system callbacks/events into DCS.
+            operationId: ExternalTargetSystemApi#callback
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Labore molestiae excepturi est delectus voluptas aut.
+                            example: Deleniti sed accusantium beatae ea ut placeat.
+    /external/status:
+        get:
+            tags:
+                - ExternalTargetSystemApi
+            summary: status ExternalTargetSystemApi
+            description: Query external target system status from DCS.
+            operationId: ExternalTargetSystemApi#status
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Non hic.
+                            example: Eos eum velit repellendus eligendi molestias voluptatem.
+    /pac/audit:
+        post:
+            tags:
+                - ProcessAuditAndCompliance
+            summary: audit ProcessAuditAndCompliance
+            description: trigger an audit on selected scope.
+            operationId: ProcessAuditAndCompliance#audit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                example: Recusandae voluptates quisquam qui tenetur tenetur.
+                            example: Ut non.
+    /pac/monitor:
+        get:
+            tags:
+                - ProcessAuditAndCompliance
+            summary: monitor ProcessAuditAndCompliance
+            description: continuous monitoring and event retrieval.
+            operationId: ProcessAuditAndCompliance#monitor
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Molestias id illo.
+                            example: Voluptatibus id cumque totam pariatur.
+    /pac/report:
+        get:
+            tags:
+                - ProcessAuditAndCompliance
+            summary: audit_report ProcessAuditAndCompliance
+            description: generate and retrieve audit reports.
+            operationId: ProcessAuditAndCompliance#audit_report
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Optio aut molestiae quas.
+                            example: Placeat optio nam.
+        post:
+            tags:
+                - ProcessAuditAndCompliance
+            summary: incident_report ProcessAuditAndCompliance
+            description: submit non-compliance findings as case records.
+            operationId: ProcessAuditAndCompliance#incident_report
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Possimus minima.
+                            example: Mollitia quos perspiciatis totam magnam doloribus deleniti.
+    /peer/retrieve:
+        get:
+            tags:
+                - DcsToDcs
+            summary: retrieve DcsToDcs
+            description: Offer a policy-gated, read-only contract information endpoint between a DCS instance and a counterparty DCS
+            operationId: DcsToDcs#retrieve
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Ut et ut sit quasi.
+                            example: Temporibus labore a.
+    /signature/apply:
+        post:
+            tags:
+                - SignatureManagement
+            summary: apply SignatureManagement
+            description: apply digital signature.
+            operationId: SignatureManagement#apply
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 2593742624916226665
+                                format: int64
+                            example: 3625456927889074172
+    /signature/audit:
+        get:
+            tags:
+                - SignatureManagement
+            summary: audit SignatureManagement
+            description: retrieve compliance/audit logs.
+            operationId: SignatureManagement#audit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    example: Fuga sint vero distinctio ut quia.
+                                example:
+                                    - Omnis quos.
+                                    - Velit hic nesciunt quidem ab dolorum dolore.
+                                    - Ullam in repudiandae.
+                            example:
+                                - Et non enim quo.
+                                - Veritatis vel.
+                                - Necessitatibus vel.
+                                - Commodi omnis ullam beatae beatae.
+    /signature/compliance:
+        post:
+            tags:
+                - SignatureManagement
+            summary: compliance SignatureManagement
+            description: run compliance check.
+            operationId: SignatureManagement#compliance
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Distinctio odit ullam veritatis in ut.
+                            example: Dolor autem sed architecto sint.
+    /signature/retrieve:
+        get:
+            tags:
+                - SignatureManagement
+            summary: retrieve SignatureManagement
+            description: fetch contract & envelope.
+            operationId: SignatureManagement#retrieve
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: A fugiat.
+                            example: Consectetur fugit repellendus.
+    /signature/revoke:
+        post:
+            tags:
+                - SignatureManagement
+            summary: revoke SignatureManagement
+            description: revoke a signature.
+            operationId: SignatureManagement#revoke
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 2137099925132443672
+                                format: int64
+                            example: 5149337465612518448
+    /signature/validate:
+        post:
+            tags:
+                - SignatureManagement
+            summary: validate SignatureManagement
+            description: validate applied signature. validate contract signature(s).
+            operationId: SignatureManagement#validate
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Exercitationem enim magnam nesciunt.
+                            example: Consequatur adipisci autem ut facilis earum.
+    /signature/verify:
+        post:
+            tags:
+                - SignatureManagement
+            summary: verify SignatureManagement
+            description: check contract integrity & envelope.
+            operationId: SignatureManagement#verify
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Facilis aspernatur nihil.
+                            example: Tempora accusamus a.
+    /template/approve:
+        post:
+            tags:
+                - TemplateRepository
+            summary: approve TemplateRepository
+            description: mark template as approved, with optional decision notes.
+            operationId: TemplateRepository#approve
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 4989003194190811607
+                                format: int64
+                            example: 1384081189119003664
+    /template/archive:
+        post:
+            tags:
+                - TemplateRepository
+            summary: archive TemplateRepository
+            description: archive obsolete template.
+            operationId: TemplateRepository#archive
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 2645656827630979735
+                                format: int64
+                            example: 6349052502495912943
+    /template/audit:
+        get:
+            tags:
+                - TemplateRepository
+            summary: audit TemplateRepository
+            description: retrieve audit history of template actions.
+            operationId: TemplateRepository#audit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                                    example: Accusantium labore praesentium excepturi quia repudiandae sit.
+                                example:
+                                    - Illo molestias dolorem.
+                                    - Explicabo aliquam dolor sed illum officia aliquid.
+                            example:
+                                - Voluptatem odio nihil doloribus nisi eos.
+                                - Aspernatur neque et iusto quia.
+                                - Mollitia eveniet et aliquam.
+    /template/create:
+        post:
+            tags:
+                - TemplateRepository
+            summary: create TemplateRepository
+            description: Create a new template.
+            operationId: TemplateRepository#create
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ContractTemplateCreateRequest'
+                        example:
+                            created_by: Et fugit cupiditate harum id.
+                            description: Nostrum iusto vel.
+                            meta_data: Harum sunt quis eos est aliquid facere.
+                            name: Perferendis non mollitia.
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ContractTemplateCreateResult'
+                            example:
+                                created_at: Porro est molestias ut aut.
+                                created_by: Nisi nobis.
+                                description: Ut officia aut velit quibusdam et.
+                                did: Dolor sunt ducimus reiciendis.
+                                document_number: 886648842499456878
+                                meta_data: Autem est sit.
+                                name: Quo vel eos.
+                                state: Quam officia possimus nesciunt omnis impedit modi.
+                                version: 3553277016097207829
+    /template/register:
+        post:
+            tags:
+                - TemplateRepository
+            summary: register TemplateRepository
+            description: register new template into the repository.
+            operationId: TemplateRepository#register
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Aspernatur vitae reiciendis maiores reiciendis.
+                            example: Temporibus eaque corporis.
+    /template/reject:
+        post:
+            tags:
+                - TemplateRepository
+            summary: reject TemplateRepository
+            description: mark template as rejected, requiring reason field.
+            operationId: TemplateRepository#reject
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 7099108678024154957
+                                format: int64
+                            example: 2166732697826511228
+    /template/retrieve:
+        get:
+            tags:
+                - TemplateRepository
+            summary: retrieve TemplateRepository
+            description: load submitted template and history/provenance summary. fetch reviewed template with metadata, review history, and validation results. fetch all template entries for dashboard view.
+            operationId: TemplateRepository#retrieve
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Labore ut voluptas.
+                            example: Velit cum eos.
+    /template/retrieve/{template_id}:
+        get:
+            tags:
+                - TemplateRepository
+            summary: retrieve_by_id TemplateRepository
+            description: Retrieve a template by template id.
+            operationId: TemplateRepository#retrieve_by_id
+            parameters:
+                - name: template_id
+                  in: path
+                  description: Template ID
+                  required: true
+                  schema:
+                    type: string
+                    description: Template ID
+                    example: Harum nulla consequatur.
+                  example: Facilis earum provident ea.
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Maxime repudiandae eius minima velit.
+                            example: Soluta quia non quia delectus corporis perspiciatis.
+    /template/search:
+        get:
+            tags:
+                - TemplateRepository
+            summary: search TemplateRepository
+            description: perform filtered searches.
+            operationId: TemplateRepository#search
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    example: Minima eum.
+                                example:
+                                    - Mollitia reprehenderit ipsum.
+                                    - Deserunt quo alias non aut veniam.
+                                    - Provident eum laudantium.
+                            example:
+                                - Architecto provident tenetur odio ut.
+                                - Aut vel.
+                                - Et fugit ullam quia.
+    /template/submit:
+        post:
+            tags:
+                - TemplateRepository
+            summary: submit TemplateRepository
+            description: 'with action flag { forwardTo: "approval" | "draft" } and optional reviewComments. allow resubmission path with approver comments.'
+            operationId: TemplateRepository#submit
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                                example: Quaerat voluptatem dolores.
+                            example: Ullam eos.
+    /template/update:
+        post:
+            tags:
+                - TemplateRepository
+            summary: update_manage TemplateRepository
+            description: update metadata or status.
+            operationId: TemplateRepository#update_manage
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 4454111466214133295
+                                format: int64
+                            example: 7013452967619103713
+        put:
+            tags:
+                - TemplateRepository
+            summary: update TemplateRepository
+            description: persist reviewer edits (metadata/clauses/semantics).
+            operationId: TemplateRepository#update
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                type: integer
+                                example: 6673566024001635545
+                                format: int64
+                            example: 4210030102224530766
+    /template/verify:
+        post:
+            tags:
+                - TemplateRepository
+            summary: verify TemplateRepository
+            description: run policy, schema, and semantic validations; return findings.
+            operationId: TemplateRepository#verify
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Quod sint quasi nulla tempora dolor totam.
+                            example: Enim vero eos ut.
+    /webhook/node-red:
+        post:
+            tags:
+                - OrchestrationWebhooks
+            summary: node_red_webhook OrchestrationWebhooks
+            description: Expose Node-Red - compatible endpoints and webhook callbacks.
+            operationId: OrchestrationWebhooks#node_red_webhook
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                example: Optio numquam natus consectetur.
+                            example: Ut voluptatem eum.
+components:
+    schemas:
+        ContractTemplateCreateRequest:
+            type: object
+            properties:
+                created_by:
+                    type: string
+                    description: Identifier of who created the contract template
+                    example: Accusamus soluta libero consequatur voluptas recusandae.
+                description:
+                    type: string
+                    description: A description for that template
+                    example: Nemo fugiat.
+                meta_data:
+                    description: The metadata of the contract template
+                    example: Quia dolores aut.
+                name:
+                    type: string
+                    description: The name of the contract template
+                    example: Qui distinctio architecto laborum molestias et sed.
+            description: Contract template create request
+            example:
+                created_by: Sed quia.
+                description: Nemo ut a mollitia consequatur.
+                meta_data: Impedit tenetur earum.
+                name: Non at adipisci neque non at.
+            required:
+                - created_by
+        ContractTemplateCreateResult:
+            type: object
+            properties:
+                created_at:
+                    type: string
+                    description: The timestamp when the contract template was created
+                    example: Placeat qui omnis.
+                created_by:
+                    type: string
+                    description: Identifier of who created the contract template
+                    example: Ad ratione ut provident iusto et.
+                description:
+                    type: string
+                    description: A description for that template
+                    example: Dolor odit voluptas animi.
+                did:
+                    type: string
+                    description: Decentralized Identifier of the contract template
+                    example: Doloribus autem est sit ut sit quisquam.
+                document_number:
+                    type: integer
+                    description: The document number of the contract template
+                    example: 3247237675567998926
+                    format: int64
+                meta_data:
+                    description: The metadata of the contract template
+                    example: Delectus sit asperiores ipsa odio et.
+                name:
+                    type: string
+                    description: The name of the contract template
+                    example: Cupiditate in sit doloribus sequi.
+                state:
+                    type: string
+                    description: The state of the contract template
+                    example: Occaecati voluptas illum est est quaerat.
+                version:
+                    type: integer
+                    description: The version number of the contract template
+                    example: 4271090926872290015
+                    format: int64
+            description: Result for creating a contract template
+            example:
+                created_at: Odio repudiandae.
+                created_by: Quisquam rerum.
+                description: Quidem est consectetur dignissimos ut nostrum architecto.
+                did: Sed quis id dolor commodi.
+                document_number: 3145095894958482701
+                meta_data: Veniam aperiam impedit minima libero et et.
+                name: Fuga magnam labore expedita omnis.
+                state: Suscipit explicabo ut reiciendis qui eius.
+                version: 598575129859380841
+            required:
+                - did
+                - document_number
+                - version
+                - state
+                - created_by
+                - created_at
+                - meta_data
+tags:
+    - name: ContractStorageArchive
+      description: Contract Storage & Archive APIs (/archive/...)
+    - name: ContractWorkflowEngine
+      description: Contract Workflow Engine APIs (/contract/...)
+    - name: DcsToDcs
+      description: DCS supports direct interoperability between two or more DCS instances, enabling automated contract lifecycle operations across organizational boundaries.
+    - name: ExternalTargetSystemApi
+      description: 'Integration APIs between DCS (CWE/SM/CSA) and external target systems (e.g., ERP or AI service): create/deploy actions, status queries, and event callbacks.'
+    - name: OrchestrationWebhooks
+      description: Webhook and callback endpoints for external orchestration tools (e.g. Node-RED).
+    - name: ProcessAuditAndCompliance
+      description: Process Audit & Compliance Management APIs (/pac/...)
+    - name: SignatureManagement
+      description: Signature Management APIs (/signature/...)
+    - name: TemplateCatalogueIntegration
+      description: Integration APIs between Template Repository (TR) and XFSC Catalogue for template discovery, request, and registration.
+    - name: TemplateRepository
+      description: Template Repository APIs (/template/...)

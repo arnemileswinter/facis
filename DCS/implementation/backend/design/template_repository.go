@@ -4,6 +4,38 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
+var ContractTemplateCreateRequest = Type("ContractTemplateCreateRequest", func() {
+	Description("Contract template create request")
+
+	Attribute("name", String, "The name of the contract template")
+	Attribute("description", String, "A description for that template")
+	Attribute("created_by", String, "Identifier of who created the contract template")
+	Attribute("meta_data", Any, "The metadata of the contract template")
+
+	Required("created_by")
+})
+
+var ContractTemplateCreateResult = Type("ContractTemplateCreateResult", func() {
+	Description("Result for creating a contract template")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+
+	Attribute("document_number", Int, "The document number of the contract template")
+	Attribute("version", Int, "The version number of the contract template")
+
+	Attribute("state", String, "The state of the contract template")
+
+	Attribute("name", String, "The name of the contract template")
+	Attribute("description", String, "A description for that template")
+
+	Attribute("created_by", String, "Identifier of who created the contract template")
+	Attribute("created_at", String, "The timestamp when the contract template was created")
+
+	Attribute("meta_data", Any, "The metadata of the contract template")
+
+	Required("did", "document_number", "version", "state", "created_by", "created_at", "meta_data")
+})
+
 // Template Repository Service  (/template/...)
 var _ = Service("TemplateRepository", func() {
 	Description("Template Repository APIs (/template/...)")
@@ -16,12 +48,14 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:tr:components", "Single- or multi-tiered template generation")
 		Meta("dcs:ui", "Template Builder")
 
+		Payload(ContractTemplateCreateRequest)
+
 		HTTP(func() {
 			POST("/template/create")
 			Response(StatusOK)
 		})
 
-		Result(String)
+		Result(ContractTemplateCreateResult)
 	})
 
 	// POST /template/submit
