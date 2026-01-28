@@ -42,9 +42,9 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 	cmd := command.CreateTemplateContractCommand{
 		DID:         *did,
+		CreatedBy:   "",
 		Name:        req.Name,
 		Description: req.Description,
-		CreatedBy:   req.CreatedBy,
 		MetaData:    &jsonMetaData,
 	}
 	createHandler := command.CreateTemplateContractHandler{
@@ -56,29 +56,8 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	qry := query.GetContractTemplateQuery{
-		DID: *did,
-	}
-	queryHandler := query.GetContractTemplateHandler{
-		Ctx: ctx,
-		Db:  s.db,
-	}
-	contractTemplate, err := queryHandler.GetContractTemplate(qry)
-	if err != nil {
-		log.Errorf(ctx, err, "failed to get template contract")
-		return nil, templaterepository.MakeInternalError(err)
-	}
-
 	return &templaterepository.ContractTemplateCreateResponse{
-		Did:            contractTemplate.DID,
-		DocumentNumber: contractTemplate.DocumentNumber,
-		Version:        contractTemplate.Version,
-		State:          contractTemplate.State.String(),
-		Name:           &contractTemplate.Name,
-		Description:    &contractTemplate.Description,
-		CreatedBy:      contractTemplate.CreatedBy,
-		CreatedAt:      contractTemplate.CreatedAt.String(),
-		MetaData:       contractTemplate.MetaData,
+		Did: *did,
 	}, nil
 }
 
@@ -90,9 +69,32 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context) (res string, err er
 }
 
 // persist reviewer edits (metadata/clauses/semantics).
-func (s *templateRepositorysrvc) Update(ctx context.Context) (res int, err error) {
-	log.Printf(ctx, "templateRepository.update")
-	return
+func (s *templateRepositorysrvc) Update(ctx context.Context, req *templaterepository.ContractTemplateUpdateRequest) (res *templaterepository.ContractTemplateUpdateResponse, err error) {
+
+	metaData, err := datatype.NewJSON(req.MetaData)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to convert metadata")
+		return nil, templaterepository.MakeInternalError(err)
+	}
+	cmd := command.UpdateTemplateContractCommand{
+		DID:         req.Did,
+		UpdatedBy:   "",
+		Name:        req.Name,
+		Description: req.Description,
+		MetaData:    &metaData,
+	}
+	handler := command.UpdateTemplateContractHandler{
+		Db: s.db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to update template contract")
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	return &templaterepository.ContractTemplateUpdateResponse{
+		Did: req.Did,
+	}, nil
 }
 
 // update metadata or status.
@@ -116,9 +118,33 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res any, err err
 }
 
 // Retrieve a template by template id.
-func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, p *templaterepository.RetrieveByIDPayload) (res any, err error) {
-	log.Printf(ctx, "templateRepository.retrieve_by_id")
-	return
+func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
+
+	qry := query.RetrieveContractByIdQuery{
+		DID:         req.TemplateID,
+		RetrievedBy: "",
+	}
+	queryHandler := query.RetrieveContractTemplateByIdHandler{
+		Ctx: ctx,
+		Db:  s.db,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to get template contract")
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	return &templaterepository.ContractTemplateRetrieveByIDResponse{
+		Did:            contractTemplate.DID,
+		DocumentNumber: contractTemplate.DocumentNumber,
+		Version:        contractTemplate.Version,
+		State:          contractTemplate.State.String(),
+		Name:           &contractTemplate.Name,
+		Description:    &contractTemplate.Description,
+		CreatedBy:      contractTemplate.CreatedBy,
+		CreatedAt:      contractTemplate.CreatedAt.String(),
+		MetaData:       contractTemplate.MetaData,
+	}, nil
 }
 
 // run policy, schema, and semantic validations; return findings.

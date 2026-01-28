@@ -21,7 +21,7 @@ type Service interface {
 	// reviewComments. allow resubmission path with approver comments.
 	Submit(context.Context) (res string, err error)
 	// persist reviewer edits (metadata/clauses/semantics).
-	Update(context.Context) (res int, err error)
+	Update(context.Context, *ContractTemplateUpdateRequest) (res *ContractTemplateUpdateResponse, err error)
 	// update metadata or status.
 	UpdateManage(context.Context) (res int, err error)
 	// perform filtered searches.
@@ -31,7 +31,7 @@ type Service interface {
 	// template entries for dashboard view.
 	Retrieve(context.Context) (res any, err error)
 	// Retrieve a template by template id.
-	RetrieveByID(context.Context, *RetrieveByIDPayload) (res any, err error)
+	RetrieveByID(context.Context, *ContractTemplateRetrieveByIDRequest) (res *ContractTemplateRetrieveByIDResponse, err error)
 	// run policy, schema, and semantic validations; return findings.
 	Verify(context.Context) (res any, err error)
 	// mark template as approved, with optional decision notes.
@@ -69,8 +69,6 @@ type ContractTemplateCreateRequest struct {
 	Name *string
 	// A description for that template
 	Description *string
-	// Identifier of who created the contract template
-	CreatedBy string
 	// The metadata of the contract template
 	MetaData any
 }
@@ -78,6 +76,20 @@ type ContractTemplateCreateRequest struct {
 // ContractTemplateCreateResponse is the result type of the TemplateRepository
 // service create method.
 type ContractTemplateCreateResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string
+}
+
+// ContractTemplateRetrieveByIDRequest is the payload type of the
+// TemplateRepository service retrieve_by_id method.
+type ContractTemplateRetrieveByIDRequest struct {
+	// ID of the contract template
+	TemplateID string
+}
+
+// ContractTemplateRetrieveByIDResponse is the result type of the
+// TemplateRepository service retrieve_by_id method.
+type ContractTemplateRetrieveByIDResponse struct {
 	// Decentralized Identifier of the contract template
 	Did string
 	// The document number of the contract template
@@ -98,11 +110,24 @@ type ContractTemplateCreateResponse struct {
 	MetaData any
 }
 
-// RetrieveByIDPayload is the payload type of the TemplateRepository service
-// retrieve_by_id method.
-type RetrieveByIDPayload struct {
-	// Template ID
-	TemplateID string
+// ContractTemplateUpdateRequest is the payload type of the TemplateRepository
+// service update method.
+type ContractTemplateUpdateRequest struct {
+	// Decentralized Identifier of the contract template
+	Did string
+	// The name of the contract template
+	Name *string
+	// A description for that template
+	Description *string
+	// The metadata of the contract template
+	MetaData any
+}
+
+// ContractTemplateUpdateResponse is the result type of the TemplateRepository
+// service update method.
+type ContractTemplateUpdateResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string
 }
 
 // MakeBadRequest builds a goa.ServiceError from an error.

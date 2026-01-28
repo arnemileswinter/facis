@@ -49,10 +49,6 @@ func DecodeCreateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 			}
 			return nil, goa.DecodePayloadError(err.Error())
 		}
-		err = ValidateCreateRequestBody(&body)
-		if err != nil {
-			return nil, err
-		}
 		payload := NewCreateContractTemplateCreateRequest(&body)
 
 		return payload, nil
@@ -117,11 +113,82 @@ func EncodeSubmitResponse(encoder func(context.Context, http.ResponseWriter) goa
 // TemplateRepository update endpoint.
 func EncodeUpdateResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(int)
+		res, _ := v.(*templaterepository.ContractTemplateUpdateResponse)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewUpdateResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
+	}
+}
+
+// DecodeUpdateRequest returns a decoder for requests sent to the
+// TemplateRepository update endpoint.
+func DecodeUpdateRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.ContractTemplateUpdateRequest, error) {
+	return func(r *http.Request) (*templaterepository.ContractTemplateUpdateRequest, error) {
+		var (
+			body UpdateRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil, goa.MissingPayloadError()
+			}
+			var gerr *goa.ServiceError
+			if errors.As(err, &gerr) {
+				return nil, gerr
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = ValidateUpdateRequestBody(&body)
+		if err != nil {
+			return nil, err
+		}
+		payload := NewUpdateContractTemplateUpdateRequest(&body)
+
+		return payload, nil
+	}
+}
+
+// EncodeUpdateError returns an encoder for errors returned by the update
+// TemplateRepository endpoint.
+func EncodeUpdateError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "bad_request":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "internal_error":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewUpdateInternalErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 
@@ -165,9 +232,9 @@ func EncodeRetrieveResponse(encoder func(context.Context, http.ResponseWriter) g
 // TemplateRepository retrieve_by_id endpoint.
 func EncodeRetrieveByIDResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(any)
+		res, _ := v.(*templaterepository.ContractTemplateRetrieveByIDResponse)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewRetrieveByIDResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}
@@ -175,17 +242,59 @@ func EncodeRetrieveByIDResponse(encoder func(context.Context, http.ResponseWrite
 
 // DecodeRetrieveByIDRequest returns a decoder for requests sent to the
 // TemplateRepository retrieve_by_id endpoint.
-func DecodeRetrieveByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.RetrieveByIDPayload, error) {
-	return func(r *http.Request) (*templaterepository.RetrieveByIDPayload, error) {
+func DecodeRetrieveByIDRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.ContractTemplateRetrieveByIDRequest, error) {
+	return func(r *http.Request) (*templaterepository.ContractTemplateRetrieveByIDRequest, error) {
 		var (
 			templateID string
 
 			params = mux.Vars(r)
 		)
 		templateID = params["template_id"]
-		payload := NewRetrieveByIDPayload(templateID)
+		payload := NewRetrieveByIDContractTemplateRetrieveByIDRequest(templateID)
 
 		return payload, nil
+	}
+}
+
+// EncodeRetrieveByIDError returns an encoder for errors returned by the
+// retrieve_by_id TemplateRepository endpoint.
+func EncodeRetrieveByIDError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "bad_request":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewRetrieveByIDBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "internal_error":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewRetrieveByIDInternalErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 

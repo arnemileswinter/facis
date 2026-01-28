@@ -21,13 +21,33 @@ func BuildCreatePayload(templateRepositoryCreateBody string) (*templaterepositor
 	{
 		err = json.Unmarshal([]byte(templateRepositoryCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"created_by\": \"Et fugit cupiditate harum id.\",\n      \"description\": \"Nostrum iusto vel.\",\n      \"meta_data\": \"Harum sunt quis eos est aliquid facere.\",\n      \"name\": \"Perferendis non mollitia.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Nostrum iusto vel.\",\n      \"meta_data\": \"Et fugit cupiditate harum id.\",\n      \"name\": \"Perferendis non mollitia.\"\n   }'")
 		}
 	}
 	v := &templaterepository.ContractTemplateCreateRequest{
 		Name:        body.Name,
 		Description: body.Description,
-		CreatedBy:   body.CreatedBy,
+		MetaData:    body.MetaData,
+	}
+
+	return v, nil
+}
+
+// BuildUpdatePayload builds the payload for the TemplateRepository update
+// endpoint from CLI flags.
+func BuildUpdatePayload(templateRepositoryUpdateBody string) (*templaterepository.ContractTemplateUpdateRequest, error) {
+	var err error
+	var body UpdateRequestBody
+	{
+		err = json.Unmarshal([]byte(templateRepositoryUpdateBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Autem est sit.\",\n      \"did\": \"Aut velit quibusdam et et nisi nobis.\",\n      \"meta_data\": \"Soluta voluptatem dolore.\",\n      \"name\": \"Porro est molestias ut aut.\"\n   }'")
+		}
+	}
+	v := &templaterepository.ContractTemplateUpdateRequest{
+		Did:         body.Did,
+		Name:        body.Name,
+		Description: body.Description,
 		MetaData:    body.MetaData,
 	}
 
@@ -36,12 +56,12 @@ func BuildCreatePayload(templateRepositoryCreateBody string) (*templaterepositor
 
 // BuildRetrieveByIDPayload builds the payload for the TemplateRepository
 // retrieve_by_id endpoint from CLI flags.
-func BuildRetrieveByIDPayload(templateRepositoryRetrieveByIDTemplateID string) (*templaterepository.RetrieveByIDPayload, error) {
+func BuildRetrieveByIDPayload(templateRepositoryRetrieveByIDTemplateID string) (*templaterepository.ContractTemplateRetrieveByIDRequest, error) {
 	var templateID string
 	{
 		templateID = templateRepositoryRetrieveByIDTemplateID
 	}
-	v := &templaterepository.RetrieveByIDPayload{}
+	v := &templaterepository.ContractTemplateRetrieveByIDRequest{}
 	v.TemplateID = templateID
 
 	return v, nil

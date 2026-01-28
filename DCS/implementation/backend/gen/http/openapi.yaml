@@ -26,7 +26,7 @@ paths:
                         type: array
                         items:
                             type: string
-                            example: Ea iure eos.
+                            example: Aut aut.
             schemes:
                 - http
     /archive/delete:
@@ -70,7 +70,7 @@ paths:
                     schema:
                         type: array
                         items:
-                            example: Occaecati omnis.
+                            example: Laudantium voluptate et eius molestiae recusandae.
             schemes:
                 - http
     /archive/store:
@@ -170,7 +170,7 @@ paths:
                         type: array
                         items:
                             type: string
-                            example: Quasi id autem.
+                            example: Provident soluta aliquid deleniti rerum voluptatem.
             schemes:
                 - http
     /contract/create:
@@ -269,7 +269,7 @@ paths:
                     schema:
                         type: array
                         items:
-                            example: Et beatae assumenda architecto quaerat.
+                            example: Dicta voluptatem est dolor ut.
             schemes:
                 - http
     /contract/store:
@@ -449,7 +449,7 @@ paths:
                         type: array
                         items:
                             type: string
-                            example: Repellat culpa ducimus et.
+                            example: Illo dolor.
             schemes:
                 - http
     /signature/compliance:
@@ -563,7 +563,7 @@ paths:
                         type: array
                         items:
                             type: string
-                            example: Nemo ut a mollitia consequatur.
+                            example: Ullam porro vero numquam inventore et accusantium.
             schemes:
                 - http
     /template/create:
@@ -579,8 +579,6 @@ paths:
                   required: true
                   schema:
                     $ref: '#/definitions/ContractTemplateCreateRequest'
-                    required:
-                        - created_by
             responses:
                 "200":
                     description: OK response.
@@ -588,12 +586,6 @@ paths:
                         $ref: '#/definitions/ContractTemplateCreateResponse'
                         required:
                             - did
-                            - document_number
-                            - version
-                            - state
-                            - created_by
-                            - created_at
-                            - meta_data
                 "400":
                     description: Bad Request response.
                     schema:
@@ -655,13 +647,30 @@ paths:
             parameters:
                 - name: template_id
                   in: path
-                  description: Template ID
+                  description: ID of the contract template
                   required: true
                   type: string
             responses:
                 "200":
                     description: OK response.
-                    schema: {}
+                    schema:
+                        $ref: '#/definitions/ContractTemplateRetrieveByIDResponse'
+                        required:
+                            - did
+                            - document_number
+                            - version
+                            - state
+                            - created_by
+                            - created_at
+                            - meta_data
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/TemplateRepositoryRetrieveByIDBadRequestResponseBody'
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/TemplateRepositoryRetrieveByIDInternalErrorResponseBody'
             schemes:
                 - http
     /template/search:
@@ -677,7 +686,7 @@ paths:
                     schema:
                         type: array
                         items:
-                            example: Non at adipisci neque non at.
+                            example: Quia quia impedit tenetur.
             schemes:
                 - http
     /template/submit:
@@ -701,12 +710,29 @@ paths:
             summary: update TemplateRepository
             description: persist reviewer edits (metadata/clauses/semantics).
             operationId: TemplateRepository#update
+            parameters:
+                - name: UpdateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/ContractTemplateUpdateRequest'
+                    required:
+                        - did
             responses:
                 "200":
                     description: OK response.
                     schema:
-                        type: integer
-                        format: int64
+                        $ref: '#/definitions/ContractTemplateUpdateResponse'
+                        required:
+                            - did
+                "400":
+                    description: Bad Request response.
+                    schema:
+                        $ref: '#/definitions/TemplateRepositoryUpdateBadRequestResponseBody'
+                "500":
+                    description: Internal Server Error response.
+                    schema:
+                        $ref: '#/definitions/TemplateRepositoryUpdateInternalErrorResponseBody'
             schemes:
                 - http
         post:
@@ -754,79 +780,84 @@ definitions:
         title: ContractTemplateCreateRequest
         type: object
         properties:
-            created_by:
-                type: string
-                description: Identifier of who created the contract template
-                example: Adipisci et culpa nihil.
             description:
                 type: string
                 description: A description for that template
-                example: Qui in voluptas delectus tempora velit quod.
+                example: Sed odit assumenda maxime.
             meta_data:
                 description: The metadata of the contract template
-                example: Dolorum accusantium ut nesciunt voluptatem.
+                example: Qui hic aperiam dolor dolores.
             name:
                 type: string
                 description: The name of the contract template
-                example: Enim eius sequi rem odio facilis est.
+                example: Aliquam ut.
         example:
-            created_by: Accusamus soluta libero consequatur voluptas recusandae.
-            description: Nemo fugiat.
-            meta_data: Quia dolores aut.
-            name: Qui distinctio architecto laborum molestias et sed.
-        required:
-            - created_by
+            description: Id aspernatur et voluptatem dolores dolores.
+            meta_data: Sed ullam minus quo nam.
+            name: Ullam eos assumenda qui quis porro.
     ContractTemplateCreateResponse:
         title: ContractTemplateCreateResponse
+        type: object
+        properties:
+            did:
+                type: string
+                description: Decentralized Identifier of the contract template
+                example: Laudantium magni nobis perspiciatis nesciunt ut.
+        example:
+            did: Mollitia at.
+        required:
+            - did
+    ContractTemplateRetrieveByIDResponse:
+        title: ContractTemplateRetrieveByIDResponse
         type: object
         properties:
             created_at:
                 type: string
                 description: The timestamp when the contract template was created
-                example: Illo dolor.
+                example: Placeat qui omnis.
             created_by:
                 type: string
                 description: Identifier of who created the contract template
-                example: Provident soluta aliquid deleniti rerum voluptatem.
+                example: Unde ad ratione ut provident iusto et.
             description:
                 type: string
                 description: A description for that template
-                example: Dolor ut.
+                example: Sequi molestiae dolor odit voluptas.
             did:
                 type: string
                 description: Decentralized Identifier of the contract template
-                example: Iure eos esse ratione consequatur.
+                example: Enim doloribus autem est sit.
             document_number:
                 type: integer
                 description: The document number of the contract template
-                example: 3377303975254896836
+                example: 6152844219009445950
                 format: int64
             meta_data:
                 description: The metadata of the contract template
-                example: Laudantium magni nobis perspiciatis nesciunt ut.
+                example: Delectus sit asperiores ipsa odio et.
             name:
                 type: string
                 description: The name of the contract template
-                example: Aut saepe dicta voluptatem.
+                example: Quaerat ipsum cupiditate in sit.
             state:
                 type: string
                 description: The state of the contract template
-                example: Voluptate et eius molestiae recusandae nam.
+                example: Labore aliquid asperiores occaecati voluptas illum est.
             version:
                 type: integer
                 description: The version number of the contract template
-                example: 4184383606974475837
+                example: 6341435947507699747
                 format: int64
         example:
-            created_at: Ullam eos assumenda qui quis porro.
-            created_by: Qui hic aperiam dolor dolores.
-            description: Sed odit assumenda maxime.
-            did: Mollitia at.
-            document_number: 2974585346169789223
-            meta_data: Id aspernatur et voluptatem dolores dolores.
-            name: Et voluptatem et aliquam ut.
-            state: Qui totam unde voluptatem natus illo.
-            version: 1355185331211477979
+            created_at: Odio repudiandae.
+            created_by: Quisquam rerum.
+            description: Quidem est consectetur dignissimos ut nostrum architecto.
+            did: Sed quis id dolor commodi.
+            document_number: 3145095894958482701
+            meta_data: Veniam aperiam impedit minima libero et et.
+            name: Fuga magnam labore expedita omnis.
+            state: Suscipit explicabo ut reiciendis qui eius.
+            version: 598575129859380841
         required:
             - did
             - document_number
@@ -835,6 +866,44 @@ definitions:
             - created_by
             - created_at
             - meta_data
+    ContractTemplateUpdateRequest:
+        title: ContractTemplateUpdateRequest
+        type: object
+        properties:
+            description:
+                type: string
+                description: A description for that template
+                example: Molestias et sed nam.
+            did:
+                type: string
+                description: Decentralized Identifier of the contract template
+                example: Accusantium dolorum accusantium ut nesciunt.
+            meta_data:
+                description: The metadata of the contract template
+                example: Fugiat quod accusamus.
+            name:
+                type: string
+                description: The name of the contract template
+                example: Officia qui distinctio architecto.
+        example:
+            description: At adipisci neque non.
+            did: Libero consequatur voluptas recusandae ex quia.
+            meta_data: Nulla nemo ut a mollitia consequatur nihil.
+            name: Aut velit.
+        required:
+            - did
+    ContractTemplateUpdateResponse:
+        title: ContractTemplateUpdateResponse
+        type: object
+        properties:
+            did:
+                type: string
+                description: Decentralized Identifier of the contract template
+                example: Hic enim cum neque et repellat enim.
+        example:
+            did: Sequi rem odio facilis est.
+        required:
+            - did
     TemplateRepositoryCreateBadRequestResponseBody:
         title: 'Mediatype identifier: application/vnd.goa.error; view=default'
         type: object
@@ -842,7 +911,7 @@ definitions:
             fault:
                 type: boolean
                 description: Is the error a server-side fault?
-                example: false
+                example: true
             id:
                 type: string
                 description: ID is a unique identifier for this particular occurrence of the problem.
@@ -862,15 +931,15 @@ definitions:
             timeout:
                 type: boolean
                 description: Is the error a timeout?
-                example: true
+                example: false
         description: Bad request (default view)
         example:
             fault: true
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
-            temporary: true
-            timeout: true
+            temporary: false
+            timeout: false
         required:
             - name
             - id
@@ -908,11 +977,183 @@ definitions:
                 example: false
         description: Internal server error (default view)
         example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TemplateRepositoryRetrieveByIDBadRequestResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: false
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Bad request (default view)
+        example:
             fault: false
             id: 123abc
             message: parameter 'p' must be an integer
             name: bad_request
             temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TemplateRepositoryRetrieveByIDInternalErrorResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: false
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Internal server error (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: false
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TemplateRepositoryUpdateBadRequestResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: true
+        description: Bad request (default view)
+        example:
+            fault: true
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: false
+            timeout: true
+        required:
+            - name
+            - id
+            - message
+            - temporary
+            - timeout
+            - fault
+    TemplateRepositoryUpdateInternalErrorResponseBody:
+        title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+        type: object
+        properties:
+            fault:
+                type: boolean
+                description: Is the error a server-side fault?
+                example: true
+            id:
+                type: string
+                description: ID is a unique identifier for this particular occurrence of the problem.
+                example: 123abc
+            message:
+                type: string
+                description: Message is a human-readable explanation specific to this occurrence of the problem.
+                example: parameter 'p' must be an integer
+            name:
+                type: string
+                description: Name is the name of this class of errors.
+                example: bad_request
+            temporary:
+                type: boolean
+                description: Is the error temporary?
+                example: true
+            timeout:
+                type: boolean
+                description: Is the error a timeout?
+                example: false
+        description: Internal server error (default view)
+        example:
+            fault: false
+            id: 123abc
+            message: parameter 'p' must be an integer
+            name: bad_request
+            temporary: true
             timeout: false
         required:
             - name

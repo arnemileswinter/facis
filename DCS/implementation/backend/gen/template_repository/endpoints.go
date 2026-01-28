@@ -89,7 +89,8 @@ func NewSubmitEndpoint(s Service) goa.Endpoint {
 // "update" of service "TemplateRepository".
 func NewUpdateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		return s.Update(ctx)
+		p := req.(*ContractTemplateUpdateRequest)
+		return s.Update(ctx, p)
 	}
 }
 
@@ -121,7 +122,7 @@ func NewRetrieveEndpoint(s Service) goa.Endpoint {
 // "retrieve_by_id" of service "TemplateRepository".
 func NewRetrieveByIDEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*RetrieveByIDPayload)
+		p := req.(*ContractTemplateRetrieveByIDRequest)
 		return s.RetrieveByID(ctx, p)
 	}
 }

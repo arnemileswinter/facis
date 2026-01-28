@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 // JSON is a custom type for JSONB in PostgreSQL
@@ -52,6 +53,29 @@ func (j *JSON) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (j *JSON) IsNotNullValue() bool {
+
+	if j == nil {
+		return false
+	}
+
+	if len(*j) == 0 {
+		return false
+	}
+
+	var value interface{}
+	err := json.Unmarshal(*j, &value)
+	if err != nil {
+		return false
+	}
+
+	if value == nil {
+		return false
+	}
+
+	return true
+}
+
 // NewJSON creates a JSON-Type from any Go value
 func NewJSON(v any) (JSON, error) {
 	if v == nil {
@@ -60,7 +84,8 @@ func NewJSON(v any) (JSON, error) {
 
 	bytes, err := json.Marshal(v)
 	if err != nil {
-		return nil, err
+		// Rückgabe eines detaillierteren Fehlers, falls das Marshalling fehlschlägt
+		return nil, errors.New(fmt.Sprintf("failed to marshal value into JSON: %w", err))
 	}
 
 	return JSON(bytes), nil

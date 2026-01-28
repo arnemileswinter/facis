@@ -186,9 +186,29 @@ func (c *Client) BuildUpdateRequest(ctx context.Context, v any) (*http.Request, 
 	return req, nil
 }
 
+// EncodeUpdateRequest returns an encoder for requests sent to the
+// TemplateRepository update server.
+func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*templaterepository.ContractTemplateUpdateRequest)
+		if !ok {
+			return goahttp.ErrInvalidType("TemplateRepository", "update", "*templaterepository.ContractTemplateUpdateRequest", v)
+		}
+		body := NewUpdateRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("TemplateRepository", "update", err)
+		}
+		return nil
+	}
+}
+
 // DecodeUpdateResponse returns a decoder for responses returned by the
 // TemplateRepository update endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeUpdateResponse may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -206,14 +226,47 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body int
+				body UpdateResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("TemplateRepository", "update", err)
 			}
-			return body, nil
+			err = ValidateUpdateResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "update", err)
+			}
+			res := NewUpdateContractTemplateUpdateResponseOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body UpdateBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "update", err)
+			}
+			err = ValidateUpdateBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "update", err)
+			}
+			return nil, NewUpdateBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body UpdateInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "update", err)
+			}
+			err = ValidateUpdateInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "update", err)
+			}
+			return nil, NewUpdateInternalError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "update", resp.StatusCode, string(body))
@@ -378,9 +431,9 @@ func (c *Client) BuildRetrieveByIDRequest(ctx context.Context, v any) (*http.Req
 		templateID string
 	)
 	{
-		p, ok := v.(*templaterepository.RetrieveByIDPayload)
+		p, ok := v.(*templaterepository.ContractTemplateRetrieveByIDRequest)
 		if !ok {
-			return nil, goahttp.ErrInvalidType("TemplateRepository", "retrieve_by_id", "*templaterepository.RetrieveByIDPayload", v)
+			return nil, goahttp.ErrInvalidType("TemplateRepository", "retrieve_by_id", "*templaterepository.ContractTemplateRetrieveByIDRequest", v)
 		}
 		templateID = p.TemplateID
 	}
@@ -399,6 +452,10 @@ func (c *Client) BuildRetrieveByIDRequest(ctx context.Context, v any) (*http.Req
 // DecodeRetrieveByIDResponse returns a decoder for responses returned by the
 // TemplateRepository retrieve_by_id endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeRetrieveByIDResponse may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeRetrieveByIDResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -416,14 +473,47 @@ func DecodeRetrieveByIDResponse(decoder func(*http.Response) goahttp.Decoder, re
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body any
+				body RetrieveByIDResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("TemplateRepository", "retrieve_by_id", err)
 			}
-			return body, nil
+			err = ValidateRetrieveByIDResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "retrieve_by_id", err)
+			}
+			res := NewRetrieveByIDContractTemplateRetrieveByIDResponseOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body RetrieveByIDBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "retrieve_by_id", err)
+			}
+			err = ValidateRetrieveByIDBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "retrieve_by_id", err)
+			}
+			return nil, NewRetrieveByIDBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body RetrieveByIDInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "retrieve_by_id", err)
+			}
+			err = ValidateRetrieveByIDInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "retrieve_by_id", err)
+			}
+			return nil, NewRetrieveByIDInternalError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "retrieve_by_id", resp.StatusCode, string(body))

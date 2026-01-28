@@ -10,14 +10,12 @@ import (
 )
 
 type CreateTemplateContractCommand struct {
-	DID            string                       `db:"did"`
-	DocumentNumber int                          `db:"document_number"`
-	Version        int                          `db:"version"`
-	State          template_state.TemplateState `db:"state"`
-	Name           *string                      `db:"name"`
-	Description    *string                      `db:"description"`
-	CreatedBy      string                       `db:"created_by"`
-	MetaData       *datatype.JSON               `db:"meta_data"`
+	DID       string
+	CreatedBy string
+
+	Name        *string
+	Description *string
+	MetaData    *datatype.JSON
 }
 
 type CreateTemplateContractHandler struct {
@@ -28,21 +26,25 @@ type CreateTemplateContractHandler struct {
 func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand) error {
 	query := `
     INSERT INTO contract_templates (
-        did, document_number, version, state, name, 
-        description, created_by, meta_data
+        did, created_by, document_number, version, state, name, 
+        description, meta_data
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING created_at
 `
+	documentNumber := 0
+	version := 0
+	state := template_state.Created
+
 	var createdAt time.Time
 	err := h.Db.QueryRow(
 		query,
 		cmd.DID,
-		cmd.DocumentNumber,
-		cmd.Version,
-		cmd.State,
+		cmd.CreatedBy,
+		documentNumber,
+		version,
+		state,
 		cmd.Name,
 		cmd.Description,
-		cmd.CreatedBy,
 		cmd.MetaData,
 	).Scan(&createdAt)
 

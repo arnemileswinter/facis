@@ -75,13 +75,17 @@ func (c *Client) Submit(ctx context.Context) (res string, err error) {
 }
 
 // Update calls the "update" endpoint of the "TemplateRepository" service.
-func (c *Client) Update(ctx context.Context) (res int, err error) {
+// Update may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): Bad request
+//   - "internal_error" (type *goa.ServiceError): Internal server error
+//   - error: internal error
+func (c *Client) Update(ctx context.Context, p *ContractTemplateUpdateRequest) (res *ContractTemplateUpdateResponse, err error) {
 	var ires any
-	ires, err = c.UpdateEndpoint(ctx, nil)
+	ires, err = c.UpdateEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(int), nil
+	return ires.(*ContractTemplateUpdateResponse), nil
 }
 
 // UpdateManage calls the "update_manage" endpoint of the "TemplateRepository"
@@ -117,13 +121,17 @@ func (c *Client) Retrieve(ctx context.Context) (res any, err error) {
 
 // RetrieveByID calls the "retrieve_by_id" endpoint of the "TemplateRepository"
 // service.
-func (c *Client) RetrieveByID(ctx context.Context, p *RetrieveByIDPayload) (res any, err error) {
+// RetrieveByID may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): Bad request
+//   - "internal_error" (type *goa.ServiceError): Internal server error
+//   - error: internal error
+func (c *Client) RetrieveByID(ctx context.Context, p *ContractTemplateRetrieveByIDRequest) (res *ContractTemplateRetrieveByIDResponse, err error) {
 	var ires any
 	ires, err = c.RetrieveByIDEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(any), nil
+	return ires.(*ContractTemplateRetrieveByIDResponse), nil
 }
 
 // Verify calls the "verify" endpoint of the "TemplateRepository" service.

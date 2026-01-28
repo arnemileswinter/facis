@@ -160,7 +160,8 @@ func ParseEndpoint(
 
 		templateRepositorySubmitFlags = flag.NewFlagSet("submit", flag.ExitOnError)
 
-		templateRepositoryUpdateFlags = flag.NewFlagSet("update", flag.ExitOnError)
+		templateRepositoryUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
+		templateRepositoryUpdateBodyFlag = templateRepositoryUpdateFlags.String("body", "REQUIRED", "")
 
 		templateRepositoryUpdateManageFlags = flag.NewFlagSet("update-manage", flag.ExitOnError)
 
@@ -169,7 +170,7 @@ func ParseEndpoint(
 		templateRepositoryRetrieveFlags = flag.NewFlagSet("retrieve", flag.ExitOnError)
 
 		templateRepositoryRetrieveByIDFlags          = flag.NewFlagSet("retrieve-by-id", flag.ExitOnError)
-		templateRepositoryRetrieveByIDTemplateIDFlag = templateRepositoryRetrieveByIDFlags.String("template-id", "REQUIRED", "Template ID")
+		templateRepositoryRetrieveByIDTemplateIDFlag = templateRepositoryRetrieveByIDFlags.String("template-id", "REQUIRED", "ID of the contract template")
 
 		templateRepositoryVerifyFlags = flag.NewFlagSet("verify", flag.ExitOnError)
 
@@ -621,6 +622,7 @@ func ParseEndpoint(
 				endpoint = c.Submit()
 			case "update":
 				endpoint = c.Update()
+				data, err = templaterepositoryc.BuildUpdatePayload(*templateRepositoryUpdateBodyFlag)
 			case "update-manage":
 				endpoint = c.UpdateManage()
 			case "search":
@@ -1399,7 +1401,7 @@ func templateRepositoryCreateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository create --body '{\n      \"created_by\": \"Et fugit cupiditate harum id.\",\n      \"description\": \"Nostrum iusto vel.\",\n      \"meta_data\": \"Harum sunt quis eos est aliquid facere.\",\n      \"name\": \"Perferendis non mollitia.\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository create --body '{\n      \"description\": \"Nostrum iusto vel.\",\n      \"meta_data\": \"Et fugit cupiditate harum id.\",\n      \"name\": \"Perferendis non mollitia.\"\n   }'")
 }
 
 func templateRepositorySubmitUsage() {
@@ -1421,6 +1423,7 @@ func templateRepositorySubmitUsage() {
 func templateRepositoryUpdateUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] template-repository update", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -1428,10 +1431,11 @@ func templateRepositoryUpdateUsage() {
 	fmt.Fprintln(os.Stderr, `persist reviewer edits (metadata/clauses/semantics).`)
 
 	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository update")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository update --body '{\n      \"description\": \"Autem est sit.\",\n      \"did\": \"Aut velit quibusdam et et nisi nobis.\",\n      \"meta_data\": \"Soluta voluptatem dolore.\",\n      \"name\": \"Porro est molestias ut aut.\"\n   }'")
 }
 
 func templateRepositoryUpdateManageUsage() {
@@ -1493,11 +1497,11 @@ func templateRepositoryRetrieveByIDUsage() {
 	fmt.Fprintln(os.Stderr, `Retrieve a template by template id.`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -template-id STRING: Template ID`)
+	fmt.Fprintln(os.Stderr, `    -template-id STRING: ID of the contract template`)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Beatae necessitatibus repellendus.\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Voluptas et natus architecto rerum eum.\"")
 }
 
 func templateRepositoryVerifyUsage() {

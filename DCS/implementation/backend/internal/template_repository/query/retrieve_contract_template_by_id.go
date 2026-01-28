@@ -13,11 +13,12 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetContractTemplateQuery struct {
-	DID string
+type RetrieveContractByIdQuery struct {
+	DID         string
+	RetrievedBy string
 }
 
-type GetContractTemplateResponse struct {
+type RetrieveContractTemplateByIdResult struct {
 	DID            string                       `db:"did"`
 	DocumentNumber int                          `db:"document_number"`
 	Version        int                          `db:"version"`
@@ -29,13 +30,13 @@ type GetContractTemplateResponse struct {
 	MetaData       datatype.JSON                `db:"meta_data"`
 }
 
-type GetContractTemplateHandler struct {
+type RetrieveContractTemplateByIdHandler struct {
 	Ctx    context.Context
 	Db     *sqlx.DB
 	Logger *log.Logger
 }
 
-func (h *GetContractTemplateHandler) GetContractTemplate(query GetContractTemplateQuery) (*GetContractTemplateResponse, error) {
+func (h *RetrieveContractTemplateByIdHandler) Handle(query RetrieveContractByIdQuery) (*RetrieveContractTemplateByIdResult, error) {
 	sqlQuery := `
         SELECT 
             did,
@@ -51,7 +52,7 @@ func (h *GetContractTemplateHandler) GetContractTemplate(query GetContractTempla
         WHERE did = $1
     `
 
-	var contractTemplate GetContractTemplateResponse
+	var contractTemplate RetrieveContractTemplateByIdResult
 	err := h.Db.GetContext(h.Ctx, &contractTemplate, sqlQuery, query.DID)
 	if err != nil {
 		if err == sql.ErrNoRows {
