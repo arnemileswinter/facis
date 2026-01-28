@@ -24,6 +24,17 @@ type CreateRequestBody struct {
 	MetaData any `form:"meta_data,omitempty" json:"meta_data,omitempty" xml:"meta_data,omitempty"`
 }
 
+// SubmitRequestBody is the type of the "TemplateRepository" service "submit"
+// endpoint HTTP request body.
+type SubmitRequestBody struct {
+	// Decentralized Identifier of the contract template
+	Did *string `form:"did,omitempty" json:"did,omitempty" xml:"did,omitempty"`
+	// Action flag: approval | draft
+	ForwardTo *string `form:"forward_to,omitempty" json:"forward_to,omitempty" xml:"forward_to,omitempty"`
+	// Optional review comments
+	ReviewComments []string `form:"review_comments,omitempty" json:"review_comments,omitempty" xml:"review_comments,omitempty"`
+}
+
 // UpdateRequestBody is the type of the "TemplateRepository" service "update"
 // endpoint HTTP request body.
 type UpdateRequestBody struct {
@@ -44,12 +55,23 @@ type CreateResponseBody struct {
 	Did string `form:"did" json:"did" xml:"did"`
 }
 
+// SubmitResponseBody is the type of the "TemplateRepository" service "submit"
+// endpoint HTTP response body.
+type SubmitResponseBody struct {
+	// Decentralized Identifier of the contract template
+	Did string `form:"did" json:"did" xml:"did"`
+}
+
 // UpdateResponseBody is the type of the "TemplateRepository" service "update"
 // endpoint HTTP response body.
 type UpdateResponseBody struct {
 	// Decentralized Identifier of the contract template
 	Did string `form:"did" json:"did" xml:"did"`
 }
+
+// RetrieveResponseBody is the type of the "TemplateRepository" service
+// "retrieve" endpoint HTTP response body.
+type RetrieveResponseBody []*ContractTemplateRetrieveResponseResponse
 
 // RetrieveByIDResponseBody is the type of the "TemplateRepository" service
 // "retrieve_by_id" endpoint HTTP response body.
@@ -110,6 +132,42 @@ type CreateInternalErrorResponseBody struct {
 	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
+// SubmitBadRequestResponseBody is the type of the "TemplateRepository" service
+// "submit" endpoint HTTP response body for the "bad_request" error.
+type SubmitBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// SubmitInternalErrorResponseBody is the type of the "TemplateRepository"
+// service "submit" endpoint HTTP response body for the "internal_error" error.
+type SubmitInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
 // UpdateBadRequestResponseBody is the type of the "TemplateRepository" service
 // "update" endpoint HTTP response body for the "bad_request" error.
 type UpdateBadRequestResponseBody struct {
@@ -131,6 +189,43 @@ type UpdateBadRequestResponseBody struct {
 // UpdateInternalErrorResponseBody is the type of the "TemplateRepository"
 // service "update" endpoint HTTP response body for the "internal_error" error.
 type UpdateInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// RetrieveBadRequestResponseBody is the type of the "TemplateRepository"
+// service "retrieve" endpoint HTTP response body for the "bad_request" error.
+type RetrieveBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// RetrieveInternalErrorResponseBody is the type of the "TemplateRepository"
+// service "retrieve" endpoint HTTP response body for the "internal_error"
+// error.
+type RetrieveInternalErrorResponseBody struct {
 	// Name is the name of this class of errors.
 	Name string `form:"name" json:"name" xml:"name"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -184,10 +279,42 @@ type RetrieveByIDInternalErrorResponseBody struct {
 	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
+// ContractTemplateRetrieveResponseResponse is used to define fields on
+// response body types.
+type ContractTemplateRetrieveResponseResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string `form:"did" json:"did" xml:"did"`
+	// The document number of the contract template
+	DocumentNumber int `form:"document_number" json:"document_number" xml:"document_number"`
+	// The version number of the contract template
+	Version int `form:"version" json:"version" xml:"version"`
+	// The state of the contract template
+	State string `form:"state" json:"state" xml:"state"`
+	// The name of the contract template
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// A description for that template
+	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
+	// Identifier of who created the contract template
+	CreatedBy string `form:"created_by" json:"created_by" xml:"created_by"`
+	// The timestamp when the contract template was created
+	CreatedAt string `form:"created_at" json:"created_at" xml:"created_at"`
+	// The metadata of the contract template
+	MetaData any `form:"meta_data" json:"meta_data" xml:"meta_data"`
+}
+
 // NewCreateResponseBody builds the HTTP response body from the result of the
 // "create" endpoint of the "TemplateRepository" service.
 func NewCreateResponseBody(res *templaterepository.ContractTemplateCreateResponse) *CreateResponseBody {
 	body := &CreateResponseBody{
+		Did: res.Did,
+	}
+	return body
+}
+
+// NewSubmitResponseBody builds the HTTP response body from the result of the
+// "submit" endpoint of the "TemplateRepository" service.
+func NewSubmitResponseBody(res *templaterepository.TemplateContractSubmitResponse) *SubmitResponseBody {
+	body := &SubmitResponseBody{
 		Did: res.Did,
 	}
 	return body
@@ -198,6 +325,20 @@ func NewCreateResponseBody(res *templaterepository.ContractTemplateCreateRespons
 func NewUpdateResponseBody(res *templaterepository.ContractTemplateUpdateResponse) *UpdateResponseBody {
 	body := &UpdateResponseBody{
 		Did: res.Did,
+	}
+	return body
+}
+
+// NewRetrieveResponseBody builds the HTTP response body from the result of the
+// "retrieve" endpoint of the "TemplateRepository" service.
+func NewRetrieveResponseBody(res []*templaterepository.ContractTemplateRetrieveResponse) RetrieveResponseBody {
+	body := make([]*ContractTemplateRetrieveResponseResponse, len(res))
+	for i, val := range res {
+		if val == nil {
+			body[i] = nil
+			continue
+		}
+		body[i] = marshalTemplaterepositoryContractTemplateRetrieveResponseToContractTemplateRetrieveResponseResponse(val)
 	}
 	return body
 }
@@ -247,6 +388,34 @@ func NewCreateInternalErrorResponseBody(res *goa.ServiceError) *CreateInternalEr
 	return body
 }
 
+// NewSubmitBadRequestResponseBody builds the HTTP response body from the
+// result of the "submit" endpoint of the "TemplateRepository" service.
+func NewSubmitBadRequestResponseBody(res *goa.ServiceError) *SubmitBadRequestResponseBody {
+	body := &SubmitBadRequestResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewSubmitInternalErrorResponseBody builds the HTTP response body from the
+// result of the "submit" endpoint of the "TemplateRepository" service.
+func NewSubmitInternalErrorResponseBody(res *goa.ServiceError) *SubmitInternalErrorResponseBody {
+	body := &SubmitInternalErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
 // NewUpdateBadRequestResponseBody builds the HTTP response body from the
 // result of the "update" endpoint of the "TemplateRepository" service.
 func NewUpdateBadRequestResponseBody(res *goa.ServiceError) *UpdateBadRequestResponseBody {
@@ -265,6 +434,34 @@ func NewUpdateBadRequestResponseBody(res *goa.ServiceError) *UpdateBadRequestRes
 // result of the "update" endpoint of the "TemplateRepository" service.
 func NewUpdateInternalErrorResponseBody(res *goa.ServiceError) *UpdateInternalErrorResponseBody {
 	body := &UpdateInternalErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewRetrieveBadRequestResponseBody builds the HTTP response body from the
+// result of the "retrieve" endpoint of the "TemplateRepository" service.
+func NewRetrieveBadRequestResponseBody(res *goa.ServiceError) *RetrieveBadRequestResponseBody {
+	body := &RetrieveBadRequestResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewRetrieveInternalErrorResponseBody builds the HTTP response body from the
+// result of the "retrieve" endpoint of the "TemplateRepository" service.
+func NewRetrieveInternalErrorResponseBody(res *goa.ServiceError) *RetrieveInternalErrorResponseBody {
+	body := &RetrieveInternalErrorResponseBody{
 		Name:      res.Name,
 		ID:        res.ID,
 		Message:   res.Message,
@@ -316,6 +513,23 @@ func NewCreateContractTemplateCreateRequest(body *CreateRequestBody) *templatere
 	return v
 }
 
+// NewSubmitTemplateContractSubmitRequest builds a TemplateRepository service
+// submit endpoint payload.
+func NewSubmitTemplateContractSubmitRequest(body *SubmitRequestBody) *templaterepository.TemplateContractSubmitRequest {
+	v := &templaterepository.TemplateContractSubmitRequest{
+		Did:       *body.Did,
+		ForwardTo: body.ForwardTo,
+	}
+	if body.ReviewComments != nil {
+		v.ReviewComments = make([]string, len(body.ReviewComments))
+		for i, val := range body.ReviewComments {
+			v.ReviewComments[i] = val
+		}
+	}
+
+	return v
+}
+
 // NewUpdateContractTemplateUpdateRequest builds a TemplateRepository service
 // update endpoint payload.
 func NewUpdateContractTemplateUpdateRequest(body *UpdateRequestBody) *templaterepository.ContractTemplateUpdateRequest {
@@ -336,6 +550,14 @@ func NewRetrieveByIDContractTemplateRetrieveByIDRequest(templateID string) *temp
 	v.TemplateID = templateID
 
 	return v
+}
+
+// ValidateSubmitRequestBody runs the validations defined on SubmitRequestBody
+func ValidateSubmitRequestBody(body *SubmitRequestBody) (err error) {
+	if body.Did == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("did", "body"))
+	}
+	return
 }
 
 // ValidateUpdateRequestBody runs the validations defined on UpdateRequestBody

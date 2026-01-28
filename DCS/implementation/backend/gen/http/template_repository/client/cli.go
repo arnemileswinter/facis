@@ -21,13 +21,38 @@ func BuildCreatePayload(templateRepositoryCreateBody string) (*templaterepositor
 	{
 		err = json.Unmarshal([]byte(templateRepositoryCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Nostrum iusto vel.\",\n      \"meta_data\": \"Et fugit cupiditate harum id.\",\n      \"name\": \"Perferendis non mollitia.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Necessitatibus magnam et esse ex sapiente.\",\n      \"meta_data\": \"Est voluptate.\",\n      \"name\": \"Soluta voluptatem dolore.\"\n   }'")
 		}
 	}
 	v := &templaterepository.ContractTemplateCreateRequest{
 		Name:        body.Name,
 		Description: body.Description,
 		MetaData:    body.MetaData,
+	}
+
+	return v, nil
+}
+
+// BuildSubmitPayload builds the payload for the TemplateRepository submit
+// endpoint from CLI flags.
+func BuildSubmitPayload(templateRepositorySubmitBody string) (*templaterepository.TemplateContractSubmitRequest, error) {
+	var err error
+	var body SubmitRequestBody
+	{
+		err = json.Unmarshal([]byte(templateRepositorySubmitBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"did\": \"Vel doloremque et sunt recusandae sed.\",\n      \"forward_to\": \"Voluptates mollitia et voluptatem voluptatum eum consectetur.\",\n      \"review_comments\": [\n         \"Magni deleniti.\",\n         \"Ullam unde.\",\n         \"Excepturi dolor quaerat.\",\n         \"Unde doloribus.\"\n      ]\n   }'")
+		}
+	}
+	v := &templaterepository.TemplateContractSubmitRequest{
+		Did:       body.Did,
+		ForwardTo: body.ForwardTo,
+	}
+	if body.ReviewComments != nil {
+		v.ReviewComments = make([]string, len(body.ReviewComments))
+		for i, val := range body.ReviewComments {
+			v.ReviewComments[i] = val
+		}
 	}
 
 	return v, nil
@@ -41,7 +66,7 @@ func BuildUpdatePayload(templateRepositoryUpdateBody string) (*templaterepositor
 	{
 		err = json.Unmarshal([]byte(templateRepositoryUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Autem est sit.\",\n      \"did\": \"Aut velit quibusdam et et nisi nobis.\",\n      \"meta_data\": \"Soluta voluptatem dolore.\",\n      \"name\": \"Porro est molestias ut aut.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Voluptas et natus architecto rerum eum.\",\n      \"did\": \"Et eos delectus.\",\n      \"meta_data\": \"Beatae necessitatibus repellendus.\",\n      \"name\": \"Laudantium non accusamus eaque laudantium est id.\"\n   }'")
 		}
 	}
 	v := &templaterepository.ContractTemplateUpdateRequest{

@@ -1,18 +1,24 @@
 package template_state
 
+import (
+	"fmt"
+	"strings"
+)
+
 // TemplateState represents the lifecycle state of a contract template
 type TemplateState string
 
 const (
-	Draft      TemplateState = "DRAFT"
-	Submitted                = "SUBMITTED"
-	Reviewed                 = "REVIEWED"
-	Created                  = "CREATED"
-	Changed                  = "CHANGED"
-	Approved                 = "APPROVED"
-	Archived                 = "ARCHIVED"
-	Deprecated               = "DEPRECATED"
-	Deleted                  = "DELETED"
+	Draft     TemplateState = "DRAFT"
+	Submitted               = "SUBMITTED"
+	Reviewed                = "REVIEWED"
+
+	Created    = "CREATED"
+	Changed    = "CHANGED"
+	Approved   = "APPROVED"
+	Archived   = "ARCHIVED"
+	Deprecated = "DEPRECATED"
+	Deleted    = "DELETED"
 )
 
 var validStates = map[TemplateState]bool{
@@ -27,9 +33,18 @@ var validStates = map[TemplateState]bool{
 	Deleted:    true,
 }
 
+func NewTemplateState(s string) (TemplateState, error) {
+	ts := TemplateState(strings.ToUpper(s))
+	if !ts.IsValid() {
+		return "", fmt.Errorf(fmt.Sprintf("invalid template state: %s", s))
+	}
+	return ts, nil
+}
+
 // IsValid checks if the TemplateState is a valid role
 func (s TemplateState) IsValid() bool {
-	return validStates[s]
+	upper := TemplateState(strings.ToUpper(string(s)))
+	return validStates[upper]
 }
 
 // String returns the string representation of the TemplateState

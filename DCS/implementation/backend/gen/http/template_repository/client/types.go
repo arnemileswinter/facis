@@ -24,6 +24,17 @@ type CreateRequestBody struct {
 	MetaData any `form:"meta_data,omitempty" json:"meta_data,omitempty" xml:"meta_data,omitempty"`
 }
 
+// SubmitRequestBody is the type of the "TemplateRepository" service "submit"
+// endpoint HTTP request body.
+type SubmitRequestBody struct {
+	// Decentralized Identifier of the contract template
+	Did string `form:"did" json:"did" xml:"did"`
+	// Action flag: approval | draft
+	ForwardTo *string `form:"forward_to,omitempty" json:"forward_to,omitempty" xml:"forward_to,omitempty"`
+	// Optional review comments
+	ReviewComments []string `form:"review_comments,omitempty" json:"review_comments,omitempty" xml:"review_comments,omitempty"`
+}
+
 // UpdateRequestBody is the type of the "TemplateRepository" service "update"
 // endpoint HTTP request body.
 type UpdateRequestBody struct {
@@ -44,12 +55,23 @@ type CreateResponseBody struct {
 	Did *string `form:"did,omitempty" json:"did,omitempty" xml:"did,omitempty"`
 }
 
+// SubmitResponseBody is the type of the "TemplateRepository" service "submit"
+// endpoint HTTP response body.
+type SubmitResponseBody struct {
+	// Decentralized Identifier of the contract template
+	Did *string `form:"did,omitempty" json:"did,omitempty" xml:"did,omitempty"`
+}
+
 // UpdateResponseBody is the type of the "TemplateRepository" service "update"
 // endpoint HTTP response body.
 type UpdateResponseBody struct {
 	// Decentralized Identifier of the contract template
 	Did *string `form:"did,omitempty" json:"did,omitempty" xml:"did,omitempty"`
 }
+
+// RetrieveResponseBody is the type of the "TemplateRepository" service
+// "retrieve" endpoint HTTP response body.
+type RetrieveResponseBody []*ContractTemplateRetrieveResponseResponse
 
 // RetrieveByIDResponseBody is the type of the "TemplateRepository" service
 // "retrieve_by_id" endpoint HTTP response body.
@@ -110,6 +132,42 @@ type CreateInternalErrorResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
+// SubmitBadRequestResponseBody is the type of the "TemplateRepository" service
+// "submit" endpoint HTTP response body for the "bad_request" error.
+type SubmitBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// SubmitInternalErrorResponseBody is the type of the "TemplateRepository"
+// service "submit" endpoint HTTP response body for the "internal_error" error.
+type SubmitInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
 // UpdateBadRequestResponseBody is the type of the "TemplateRepository" service
 // "update" endpoint HTTP response body for the "bad_request" error.
 type UpdateBadRequestResponseBody struct {
@@ -131,6 +189,43 @@ type UpdateBadRequestResponseBody struct {
 // UpdateInternalErrorResponseBody is the type of the "TemplateRepository"
 // service "update" endpoint HTTP response body for the "internal_error" error.
 type UpdateInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// RetrieveBadRequestResponseBody is the type of the "TemplateRepository"
+// service "retrieve" endpoint HTTP response body for the "bad_request" error.
+type RetrieveBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// Is the error temporary?
+	Temporary *bool `form:"temporary,omitempty" json:"temporary,omitempty" xml:"temporary,omitempty"`
+	// Is the error a timeout?
+	Timeout *bool `form:"timeout,omitempty" json:"timeout,omitempty" xml:"timeout,omitempty"`
+	// Is the error a server-side fault?
+	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
+}
+
+// RetrieveInternalErrorResponseBody is the type of the "TemplateRepository"
+// service "retrieve" endpoint HTTP response body for the "internal_error"
+// error.
+type RetrieveInternalErrorResponseBody struct {
 	// Name is the name of this class of errors.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// ID is a unique identifier for this particular occurrence of the problem.
@@ -184,6 +279,29 @@ type RetrieveByIDInternalErrorResponseBody struct {
 	Fault *bool `form:"fault,omitempty" json:"fault,omitempty" xml:"fault,omitempty"`
 }
 
+// ContractTemplateRetrieveResponseResponse is used to define fields on
+// response body types.
+type ContractTemplateRetrieveResponseResponse struct {
+	// Decentralized Identifier of the contract template
+	Did *string `form:"did,omitempty" json:"did,omitempty" xml:"did,omitempty"`
+	// The document number of the contract template
+	DocumentNumber *int `form:"document_number,omitempty" json:"document_number,omitempty" xml:"document_number,omitempty"`
+	// The version number of the contract template
+	Version *int `form:"version,omitempty" json:"version,omitempty" xml:"version,omitempty"`
+	// The state of the contract template
+	State *string `form:"state,omitempty" json:"state,omitempty" xml:"state,omitempty"`
+	// The name of the contract template
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// A description for that template
+	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
+	// Identifier of who created the contract template
+	CreatedBy *string `form:"created_by,omitempty" json:"created_by,omitempty" xml:"created_by,omitempty"`
+	// The timestamp when the contract template was created
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// The metadata of the contract template
+	MetaData any `form:"meta_data,omitempty" json:"meta_data,omitempty" xml:"meta_data,omitempty"`
+}
+
 // NewCreateRequestBody builds the HTTP request body from the payload of the
 // "create" endpoint of the "TemplateRepository" service.
 func NewCreateRequestBody(p *templaterepository.ContractTemplateCreateRequest) *CreateRequestBody {
@@ -191,6 +309,22 @@ func NewCreateRequestBody(p *templaterepository.ContractTemplateCreateRequest) *
 		Name:        p.Name,
 		Description: p.Description,
 		MetaData:    p.MetaData,
+	}
+	return body
+}
+
+// NewSubmitRequestBody builds the HTTP request body from the payload of the
+// "submit" endpoint of the "TemplateRepository" service.
+func NewSubmitRequestBody(p *templaterepository.TemplateContractSubmitRequest) *SubmitRequestBody {
+	body := &SubmitRequestBody{
+		Did:       p.Did,
+		ForwardTo: p.ForwardTo,
+	}
+	if p.ReviewComments != nil {
+		body.ReviewComments = make([]string, len(p.ReviewComments))
+		for i, val := range p.ReviewComments {
+			body.ReviewComments[i] = val
+		}
 	}
 	return body
 }
@@ -247,6 +381,46 @@ func NewCreateInternalError(body *CreateInternalErrorResponseBody) *goa.ServiceE
 	return v
 }
 
+// NewSubmitTemplateContractSubmitResponseOK builds a "TemplateRepository"
+// service "submit" endpoint result from a HTTP "OK" response.
+func NewSubmitTemplateContractSubmitResponseOK(body *SubmitResponseBody) *templaterepository.TemplateContractSubmitResponse {
+	v := &templaterepository.TemplateContractSubmitResponse{
+		Did: *body.Did,
+	}
+
+	return v
+}
+
+// NewSubmitBadRequest builds a TemplateRepository service submit endpoint
+// bad_request error.
+func NewSubmitBadRequest(body *SubmitBadRequestResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewSubmitInternalError builds a TemplateRepository service submit endpoint
+// internal_error error.
+func NewSubmitInternalError(body *SubmitInternalErrorResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
 // NewUpdateContractTemplateUpdateResponseOK builds a "TemplateRepository"
 // service "update" endpoint result from a HTTP "OK" response.
 func NewUpdateContractTemplateUpdateResponseOK(body *UpdateResponseBody) *templaterepository.ContractTemplateUpdateResponse {
@@ -275,6 +449,51 @@ func NewUpdateBadRequest(body *UpdateBadRequestResponseBody) *goa.ServiceError {
 // NewUpdateInternalError builds a TemplateRepository service update endpoint
 // internal_error error.
 func NewUpdateInternalError(body *UpdateInternalErrorResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewRetrieveContractTemplateRetrieveResponseOK builds a "TemplateRepository"
+// service "retrieve" endpoint result from a HTTP "OK" response.
+func NewRetrieveContractTemplateRetrieveResponseOK(body []*ContractTemplateRetrieveResponseResponse) []*templaterepository.ContractTemplateRetrieveResponse {
+	v := make([]*templaterepository.ContractTemplateRetrieveResponse, len(body))
+	for i, val := range body {
+		if val == nil {
+			v[i] = nil
+			continue
+		}
+		v[i] = unmarshalContractTemplateRetrieveResponseResponseToTemplaterepositoryContractTemplateRetrieveResponse(val)
+	}
+
+	return v
+}
+
+// NewRetrieveBadRequest builds a TemplateRepository service retrieve endpoint
+// bad_request error.
+func NewRetrieveBadRequest(body *RetrieveBadRequestResponseBody) *goa.ServiceError {
+	v := &goa.ServiceError{
+		Name:      *body.Name,
+		ID:        *body.ID,
+		Message:   *body.Message,
+		Temporary: *body.Temporary,
+		Timeout:   *body.Timeout,
+		Fault:     *body.Fault,
+	}
+
+	return v
+}
+
+// NewRetrieveInternalError builds a TemplateRepository service retrieve
+// endpoint internal_error error.
+func NewRetrieveInternalError(body *RetrieveInternalErrorResponseBody) *goa.ServiceError {
 	v := &goa.ServiceError{
 		Name:      *body.Name,
 		ID:        *body.ID,
@@ -338,6 +557,14 @@ func NewRetrieveByIDInternalError(body *RetrieveByIDInternalErrorResponseBody) *
 
 // ValidateCreateResponseBody runs the validations defined on CreateResponseBody
 func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
+	if body.Did == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("did", "body"))
+	}
+	return
+}
+
+// ValidateSubmitResponseBody runs the validations defined on SubmitResponseBody
+func ValidateSubmitResponseBody(body *SubmitResponseBody) (err error) {
 	if body.Did == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("did", "body"))
 	}
@@ -427,6 +654,54 @@ func ValidateCreateInternalErrorResponseBody(body *CreateInternalErrorResponseBo
 	return
 }
 
+// ValidateSubmitBadRequestResponseBody runs the validations defined on
+// submit_bad_request_response_body
+func ValidateSubmitBadRequestResponseBody(body *SubmitBadRequestResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateSubmitInternalErrorResponseBody runs the validations defined on
+// submit_internal_error_response_body
+func ValidateSubmitInternalErrorResponseBody(body *SubmitInternalErrorResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
 // ValidateUpdateBadRequestResponseBody runs the validations defined on
 // update_bad_request_response_body
 func ValidateUpdateBadRequestResponseBody(body *UpdateBadRequestResponseBody) (err error) {
@@ -454,6 +729,54 @@ func ValidateUpdateBadRequestResponseBody(body *UpdateBadRequestResponseBody) (e
 // ValidateUpdateInternalErrorResponseBody runs the validations defined on
 // update_internal_error_response_body
 func ValidateUpdateInternalErrorResponseBody(body *UpdateInternalErrorResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateRetrieveBadRequestResponseBody runs the validations defined on
+// retrieve_bad_request_response_body
+func ValidateRetrieveBadRequestResponseBody(body *RetrieveBadRequestResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.Temporary == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("temporary", "body"))
+	}
+	if body.Timeout == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("timeout", "body"))
+	}
+	if body.Fault == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateRetrieveInternalErrorResponseBody runs the validations defined on
+// retrieve_internal_error_response_body
+func ValidateRetrieveInternalErrorResponseBody(body *RetrieveInternalErrorResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -519,6 +842,33 @@ func ValidateRetrieveByIDInternalErrorResponseBody(body *RetrieveByIDInternalErr
 	}
 	if body.Fault == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("fault", "body"))
+	}
+	return
+}
+
+// ValidateContractTemplateRetrieveResponseResponse runs the validations
+// defined on ContractTemplateRetrieveResponseResponse
+func ValidateContractTemplateRetrieveResponseResponse(body *ContractTemplateRetrieveResponseResponse) (err error) {
+	if body.Did == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("did", "body"))
+	}
+	if body.DocumentNumber == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("document_number", "body"))
+	}
+	if body.Version == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("version", "body"))
+	}
+	if body.State == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("state", "body"))
+	}
+	if body.CreatedBy == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("created_by", "body"))
+	}
+	if body.CreatedAt == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("created_at", "body"))
+	}
+	if body.MetaData == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("meta_data", "body"))
 	}
 	return
 }

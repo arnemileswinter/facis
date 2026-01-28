@@ -81,7 +81,8 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 // "submit" of service "TemplateRepository".
 func NewSubmitEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		return s.Submit(ctx)
+		p := req.(*TemplateContractSubmitRequest)
+		return s.Submit(ctx, p)
 	}
 }
 

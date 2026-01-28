@@ -33,7 +33,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 `
 	documentNumber := 0
 	version := 0
-	state := template_state.Created
+	state := template_state.Draft
 
 	var createdAt time.Time
 	err := h.Db.QueryRow(

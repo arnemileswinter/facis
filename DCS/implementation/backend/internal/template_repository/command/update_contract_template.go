@@ -57,9 +57,18 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	query += ` WHERE did = $` + strconv.Itoa(paramIndex) + `;`
 	params = append(params, cmd.DID)
 
-	err := h.Db.QueryRow(query, params...).Err()
+	result, err := h.Db.Exec(query, params...)
 	if err != nil {
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("couldn't update template contract")
 	}
 
 	// updatedAt := time.Now()

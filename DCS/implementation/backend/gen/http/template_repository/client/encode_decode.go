@@ -16,6 +16,7 @@ import (
 	"net/url"
 
 	goahttp "goa.design/goa/v3/http"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // BuildCreateRequest instantiates a HTTP request object with method and path
@@ -136,9 +137,29 @@ func (c *Client) BuildSubmitRequest(ctx context.Context, v any) (*http.Request, 
 	return req, nil
 }
 
+// EncodeSubmitRequest returns an encoder for requests sent to the
+// TemplateRepository submit server.
+func EncodeSubmitRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*templaterepository.TemplateContractSubmitRequest)
+		if !ok {
+			return goahttp.ErrInvalidType("TemplateRepository", "submit", "*templaterepository.TemplateContractSubmitRequest", v)
+		}
+		body := NewSubmitRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("TemplateRepository", "submit", err)
+		}
+		return nil
+	}
+}
+
 // DecodeSubmitResponse returns a decoder for responses returned by the
 // TemplateRepository submit endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeSubmitResponse may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeSubmitResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -156,14 +177,47 @@ func DecodeSubmitResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body string
+				body SubmitResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("TemplateRepository", "submit", err)
 			}
-			return body, nil
+			err = ValidateSubmitResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "submit", err)
+			}
+			res := NewSubmitTemplateContractSubmitResponseOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body SubmitBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "submit", err)
+			}
+			err = ValidateSubmitBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "submit", err)
+			}
+			return nil, NewSubmitBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body SubmitInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "submit", err)
+			}
+			err = ValidateSubmitInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "submit", err)
+			}
+			return nil, NewSubmitInternalError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "submit", resp.StatusCode, string(body))
@@ -392,6 +446,10 @@ func (c *Client) BuildRetrieveRequest(ctx context.Context, v any) (*http.Request
 // DecodeRetrieveResponse returns a decoder for responses returned by the
 // TemplateRepository retrieve endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeRetrieveResponse may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeRetrieveResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -409,14 +467,53 @@ func DecodeRetrieveResponse(decoder func(*http.Response) goahttp.Decoder, restor
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body any
+				body RetrieveResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("TemplateRepository", "retrieve", err)
 			}
-			return body, nil
+			for _, e := range body {
+				if e != nil {
+					if err2 := ValidateContractTemplateRetrieveResponseResponse(e); err2 != nil {
+						err = goa.MergeErrors(err, err2)
+					}
+				}
+			}
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "retrieve", err)
+			}
+			res := NewRetrieveContractTemplateRetrieveResponseOK(body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body RetrieveBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "retrieve", err)
+			}
+			err = ValidateRetrieveBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "retrieve", err)
+			}
+			return nil, NewRetrieveBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body RetrieveInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "retrieve", err)
+			}
+			err = ValidateRetrieveInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "retrieve", err)
+			}
+			return nil, NewRetrieveInternalError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "retrieve", resp.StatusCode, string(body))
@@ -819,4 +916,23 @@ func DecodeAuditResponse(decoder func(*http.Response) goahttp.Decoder, restoreBo
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "audit", resp.StatusCode, string(body))
 		}
 	}
+}
+
+// unmarshalContractTemplateRetrieveResponseResponseToTemplaterepositoryContractTemplateRetrieveResponse
+// builds a value of type *templaterepository.ContractTemplateRetrieveResponse
+// from a value of type *ContractTemplateRetrieveResponseResponse.
+func unmarshalContractTemplateRetrieveResponseResponseToTemplaterepositoryContractTemplateRetrieveResponse(v *ContractTemplateRetrieveResponseResponse) *templaterepository.ContractTemplateRetrieveResponse {
+	res := &templaterepository.ContractTemplateRetrieveResponse{
+		Did:            *v.Did,
+		DocumentNumber: *v.DocumentNumber,
+		Version:        *v.Version,
+		State:          *v.State,
+		Name:           v.Name,
+		Description:    v.Description,
+		CreatedBy:      *v.CreatedBy,
+		CreatedAt:      *v.CreatedAt,
+		MetaData:       v.MetaData,
+	}
+
+	return res
 }

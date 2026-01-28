@@ -158,7 +158,8 @@ func ParseEndpoint(
 		templateRepositoryCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
 		templateRepositoryCreateBodyFlag = templateRepositoryCreateFlags.String("body", "REQUIRED", "")
 
-		templateRepositorySubmitFlags = flag.NewFlagSet("submit", flag.ExitOnError)
+		templateRepositorySubmitFlags    = flag.NewFlagSet("submit", flag.ExitOnError)
+		templateRepositorySubmitBodyFlag = templateRepositorySubmitFlags.String("body", "REQUIRED", "")
 
 		templateRepositoryUpdateFlags    = flag.NewFlagSet("update", flag.ExitOnError)
 		templateRepositoryUpdateBodyFlag = templateRepositoryUpdateFlags.String("body", "REQUIRED", "")
@@ -620,6 +621,7 @@ func ParseEndpoint(
 				data, err = templaterepositoryc.BuildCreatePayload(*templateRepositoryCreateBodyFlag)
 			case "submit":
 				endpoint = c.Submit()
+				data, err = templaterepositoryc.BuildSubmitPayload(*templateRepositorySubmitBodyFlag)
 			case "update":
 				endpoint = c.Update()
 				data, err = templaterepositoryc.BuildUpdatePayload(*templateRepositoryUpdateBodyFlag)
@@ -1401,12 +1403,13 @@ func templateRepositoryCreateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository create --body '{\n      \"description\": \"Nostrum iusto vel.\",\n      \"meta_data\": \"Et fugit cupiditate harum id.\",\n      \"name\": \"Perferendis non mollitia.\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository create --body '{\n      \"description\": \"Necessitatibus magnam et esse ex sapiente.\",\n      \"meta_data\": \"Est voluptate.\",\n      \"name\": \"Soluta voluptatem dolore.\"\n   }'")
 }
 
 func templateRepositorySubmitUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] template-repository submit", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -1414,10 +1417,11 @@ func templateRepositorySubmitUsage() {
 	fmt.Fprintln(os.Stderr, `with action flag { forwardTo: "approval" | "draft" } and optional reviewComments. allow resubmission path with approver comments.`)
 
 	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository submit")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository submit --body '{\n      \"did\": \"Vel doloremque et sunt recusandae sed.\",\n      \"forward_to\": \"Voluptates mollitia et voluptatem voluptatum eum consectetur.\",\n      \"review_comments\": [\n         \"Magni deleniti.\",\n         \"Ullam unde.\",\n         \"Excepturi dolor quaerat.\",\n         \"Unde doloribus.\"\n      ]\n   }'")
 }
 
 func templateRepositoryUpdateUsage() {
@@ -1435,7 +1439,7 @@ func templateRepositoryUpdateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository update --body '{\n      \"description\": \"Autem est sit.\",\n      \"did\": \"Aut velit quibusdam et et nisi nobis.\",\n      \"meta_data\": \"Soluta voluptatem dolore.\",\n      \"name\": \"Porro est molestias ut aut.\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository update --body '{\n      \"description\": \"Voluptas et natus architecto rerum eum.\",\n      \"did\": \"Et eos delectus.\",\n      \"meta_data\": \"Beatae necessitatibus repellendus.\",\n      \"name\": \"Laudantium non accusamus eaque laudantium est id.\"\n   }'")
 }
 
 func templateRepositoryUpdateManageUsage() {
@@ -1501,7 +1505,7 @@ func templateRepositoryRetrieveByIDUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Voluptas et natus architecto rerum eum.\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Aut aut.\"")
 }
 
 func templateRepositoryVerifyUsage() {

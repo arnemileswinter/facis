@@ -19,7 +19,7 @@ type Service interface {
 	Create(context.Context, *ContractTemplateCreateRequest) (res *ContractTemplateCreateResponse, err error)
 	// with action flag { forwardTo: "approval" | "draft" } and optional
 	// reviewComments. allow resubmission path with approver comments.
-	Submit(context.Context) (res string, err error)
+	Submit(context.Context, *TemplateContractSubmitRequest) (res *TemplateContractSubmitResponse, err error)
 	// persist reviewer edits (metadata/clauses/semantics).
 	Update(context.Context, *ContractTemplateUpdateRequest) (res *ContractTemplateUpdateResponse, err error)
 	// update metadata or status.
@@ -29,7 +29,7 @@ type Service interface {
 	// load submitted template and history/provenance summary. fetch reviewed
 	// template with metadata, review history, and validation results. fetch all
 	// template entries for dashboard view.
-	Retrieve(context.Context) (res any, err error)
+	Retrieve(context.Context) (res []*ContractTemplateRetrieveResponse, err error)
 	// Retrieve a template by template id.
 	RetrieveByID(context.Context, *ContractTemplateRetrieveByIDRequest) (res *ContractTemplateRetrieveByIDResponse, err error)
 	// run policy, schema, and semantic validations; return findings.
@@ -110,6 +110,28 @@ type ContractTemplateRetrieveByIDResponse struct {
 	MetaData any
 }
 
+// Result for retrieving a contract template
+type ContractTemplateRetrieveResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string
+	// The document number of the contract template
+	DocumentNumber int
+	// The version number of the contract template
+	Version int
+	// The state of the contract template
+	State string
+	// The name of the contract template
+	Name *string
+	// A description for that template
+	Description *string
+	// Identifier of who created the contract template
+	CreatedBy string
+	// The timestamp when the contract template was created
+	CreatedAt string
+	// The metadata of the contract template
+	MetaData any
+}
+
 // ContractTemplateUpdateRequest is the payload type of the TemplateRepository
 // service update method.
 type ContractTemplateUpdateRequest struct {
@@ -126,6 +148,24 @@ type ContractTemplateUpdateRequest struct {
 // ContractTemplateUpdateResponse is the result type of the TemplateRepository
 // service update method.
 type ContractTemplateUpdateResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string
+}
+
+// TemplateContractSubmitRequest is the payload type of the TemplateRepository
+// service submit method.
+type TemplateContractSubmitRequest struct {
+	// Decentralized Identifier of the contract template
+	Did string
+	// Action flag: approval | draft
+	ForwardTo *string
+	// Optional review comments
+	ReviewComments []string
+}
+
+// TemplateContractSubmitResponse is the result type of the TemplateRepository
+// service submit method.
+type TemplateContractSubmitResponse struct {
 	// Decentralized Identifier of the contract template
 	Did string
 }

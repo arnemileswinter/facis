@@ -6,6 +6,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/template_repository/command"
+	"digital-contracting-service/internal/template_repository/datatype/action_flag"
 	"digital-contracting-service/internal/template_repository/query"
 
 	"github.com/jmoiron/sqlx"
@@ -30,13 +31,11 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 	jsonMetaData, err := datatype.NewJSON(req.MetaData)
 	if err != nil {
-		log.Errorf(ctx, err, "failed to convert metadata")
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
 	did, err := base.GetDID()
 	if err != nil {
-		log.Errorf(ctx, err, "failed to generate uuid")
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
@@ -52,7 +51,6 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		log.Errorf(ctx, err, "failed to create template contract")
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
@@ -63,9 +61,47 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 // with action flag { forwardTo: "approval" | "draft" } and optional
 // reviewComments. allow resubmission path with approver comments.
-func (s *templateRepositorysrvc) Submit(ctx context.Context) (res string, err error) {
-	log.Printf(ctx, "templateRepository.submit")
-	return
+func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templaterepository.TemplateContractSubmitRequest) (res *templaterepository.TemplateContractSubmitResponse, err error) {
+
+	var actionFlag *action_flag.ActionFlag
+	if req.ForwardTo != nil {
+		flag, err := action_flag.NewActionFlag(*req.ForwardTo)
+		if err != nil {
+			return nil, templaterepository.MakeInternalError(err)
+		}
+		actionFlag = &flag
+	}
+
+	stateQuery := query.GetContractTemplateStateQuery{
+		DID: req.Did,
+	}
+	stateHandler := query.GetContractTemplateStateHandler{
+		Db:  s.db,
+		Ctx: ctx,
+	}
+	stateResult, err := stateHandler.Handle(stateQuery)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	cmd := command.SubmitTemplateContractCommand{
+		DID:                   req.Did,
+		SubmittedBy:           "",
+		ContractTemplateState: stateResult.State,
+		ActionFlag:            actionFlag,
+		ReviewComments:        req.ReviewComments,
+	}
+	handler := command.SubmitTemplateContractHandler{
+		Db: s.db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	return &templaterepository.TemplateContractSubmitResponse{
+		Did: req.Did,
+	}, nil
 }
 
 // persist reviewer edits (metadata/clauses/semantics).
@@ -73,7 +109,6 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 
 	metaData, err := datatype.NewJSON(req.MetaData)
 	if err != nil {
-		log.Errorf(ctx, err, "failed to convert metadata")
 		return nil, templaterepository.MakeInternalError(err)
 	}
 	cmd := command.UpdateTemplateContractCommand{
@@ -88,7 +123,6 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		log.Errorf(ctx, err, "failed to update template contract")
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
@@ -112,25 +146,51 @@ func (s *templateRepositorysrvc) Search(ctx context.Context) (res []any, err err
 // load submitted template and history/provenance summary. fetch reviewed
 // template with metadata, review history, and validation results. fetch all
 // template entries for dashboard view.
-func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res any, err error) {
-	log.Printf(ctx, "templateRepository.retrieve")
-	return
+func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templaterepository.ContractTemplateRetrieveResponse, err error) {
+
+	qry := query.GetAllContractTemplatesQuery{
+		RetrievedBy: "",
+	}
+	queryHandler := query.GetAllContractTemplateHandler{
+		Ctx: ctx,
+		Db:  s.db,
+	}
+	result, err := queryHandler.Handle(qry)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	var contractTemplates []*templaterepository.ContractTemplateRetrieveResponse
+	for _, item := range result {
+		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateRetrieveResponse{
+			Did:            item.DID,
+			DocumentNumber: item.DocumentNumber,
+			Version:        item.Version,
+			State:          item.State.String(),
+			Name:           &item.Name,
+			Description:    &item.Description,
+			CreatedBy:      item.CreatedBy,
+			CreatedAt:      item.CreatedAt.String(),
+			MetaData:       item.MetaData,
+		})
+	}
+
+	return contractTemplates, nil
 }
 
 // Retrieve a template by template id.
 func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
 
-	qry := query.RetrieveContractByIdQuery{
+	qry := query.GetContractTemplateByIdQuery{
 		DID:         req.TemplateID,
 		RetrievedBy: "",
 	}
-	queryHandler := query.RetrieveContractTemplateByIdHandler{
+	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
 		Db:  s.db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		log.Errorf(ctx, err, "failed to get template contract")
 		return nil, templaterepository.MakeInternalError(err)
 	}
 

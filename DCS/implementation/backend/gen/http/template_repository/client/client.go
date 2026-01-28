@@ -132,10 +132,15 @@ func (c *Client) Create() goa.Endpoint {
 // TemplateRepository service submit server.
 func (c *Client) Submit() goa.Endpoint {
 	var (
+		encodeRequest  = EncodeSubmitRequest(c.encoder)
 		decodeResponse = DecodeSubmitResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildSubmitRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
 		if err != nil {
 			return nil, err
 		}

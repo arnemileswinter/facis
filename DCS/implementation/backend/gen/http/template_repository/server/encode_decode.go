@@ -101,11 +101,82 @@ func EncodeCreateError(encoder func(context.Context, http.ResponseWriter) goahtt
 // TemplateRepository submit endpoint.
 func EncodeSubmitResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(string)
+		res, _ := v.(*templaterepository.TemplateContractSubmitResponse)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewSubmitResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
+	}
+}
+
+// DecodeSubmitRequest returns a decoder for requests sent to the
+// TemplateRepository submit endpoint.
+func DecodeSubmitRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.TemplateContractSubmitRequest, error) {
+	return func(r *http.Request) (*templaterepository.TemplateContractSubmitRequest, error) {
+		var (
+			body SubmitRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil, goa.MissingPayloadError()
+			}
+			var gerr *goa.ServiceError
+			if errors.As(err, &gerr) {
+				return nil, gerr
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = ValidateSubmitRequestBody(&body)
+		if err != nil {
+			return nil, err
+		}
+		payload := NewSubmitTemplateContractSubmitRequest(&body)
+
+		return payload, nil
+	}
+}
+
+// EncodeSubmitError returns an encoder for errors returned by the submit
+// TemplateRepository endpoint.
+func EncodeSubmitError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "bad_request":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewSubmitBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "internal_error":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewSubmitInternalErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 
@@ -220,11 +291,53 @@ func EncodeSearchResponse(encoder func(context.Context, http.ResponseWriter) goa
 // TemplateRepository retrieve endpoint.
 func EncodeRetrieveResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(any)
+		res, _ := v.([]*templaterepository.ContractTemplateRetrieveResponse)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewRetrieveResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
+	}
+}
+
+// EncodeRetrieveError returns an encoder for errors returned by the retrieve
+// TemplateRepository endpoint.
+func EncodeRetrieveError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "bad_request":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewRetrieveBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "internal_error":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewRetrieveInternalErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 
@@ -368,4 +481,23 @@ func EncodeAuditResponse(encoder func(context.Context, http.ResponseWriter) goah
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}
+}
+
+// marshalTemplaterepositoryContractTemplateRetrieveResponseToContractTemplateRetrieveResponseResponse
+// builds a value of type *ContractTemplateRetrieveResponseResponse from a
+// value of type *templaterepository.ContractTemplateRetrieveResponse.
+func marshalTemplaterepositoryContractTemplateRetrieveResponseToContractTemplateRetrieveResponseResponse(v *templaterepository.ContractTemplateRetrieveResponse) *ContractTemplateRetrieveResponseResponse {
+	res := &ContractTemplateRetrieveResponseResponse{
+		Did:            v.Did,
+		DocumentNumber: v.DocumentNumber,
+		Version:        v.Version,
+		State:          v.State,
+		Name:           v.Name,
+		Description:    v.Description,
+		CreatedBy:      v.CreatedBy,
+		CreatedAt:      v.CreatedAt,
+		MetaData:       v.MetaData,
+	}
+
+	return res
 }
