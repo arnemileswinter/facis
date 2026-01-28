@@ -1497,7 +1497,7 @@ func templateRepositoryRetrieveByIDUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Voluptas et natus architecto rerum eum.\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Beatae necessitatibus repellendus.\"")
 }
 
 func templateRepositoryVerifyUsage() {

@@ -49,6 +49,42 @@ type CreateResponseBody struct {
 	MetaData any `form:"meta_data" json:"meta_data" xml:"meta_data"`
 }
 
+// CreateBadRequestResponseBody is the type of the "TemplateRepository" service
+// "create" endpoint HTTP response body for the "bad_request" error.
+type CreateBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// CreateInternalErrorResponseBody is the type of the "TemplateRepository"
+// service "create" endpoint HTTP response body for the "internal_error" error.
+type CreateInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
 // NewCreateResponseBody builds the HTTP response body from the result of the
 // "create" endpoint of the "TemplateRepository" service.
 func NewCreateResponseBody(res *templaterepository.ContractTemplateCreateResponse) *CreateResponseBody {
@@ -62,6 +98,34 @@ func NewCreateResponseBody(res *templaterepository.ContractTemplateCreateRespons
 		CreatedBy:      res.CreatedBy,
 		CreatedAt:      res.CreatedAt,
 		MetaData:       res.MetaData,
+	}
+	return body
+}
+
+// NewCreateBadRequestResponseBody builds the HTTP response body from the
+// result of the "create" endpoint of the "TemplateRepository" service.
+func NewCreateBadRequestResponseBody(res *goa.ServiceError) *CreateBadRequestResponseBody {
+	body := &CreateBadRequestResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewCreateInternalErrorResponseBody builds the HTTP response body from the
+// result of the "create" endpoint of the "TemplateRepository" service.
+func NewCreateInternalErrorResponseBody(res *goa.ServiceError) *CreateInternalErrorResponseBody {
+	body := &CreateInternalErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
 	}
 	return body
 }

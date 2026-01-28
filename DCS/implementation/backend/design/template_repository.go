@@ -49,13 +49,17 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:ui", "Template Builder")
 
 		Payload(ContractTemplateCreateRequest)
+		Result(ContractTemplateCreateResponse)
+
+		Error("bad_request", ErrorResult, "Bad request")
+		Error("internal_error", ErrorResult, "Internal server error")
 
 		HTTP(func() {
 			POST("/template/create")
 			Response(StatusOK)
+			Response("bad_request", StatusBadRequest)
+			Response("internal_error", StatusInternalServerError)
 		})
-
-		Result(ContractTemplateCreateResponse)
 	})
 
 	// POST /template/submit

@@ -3,6 +3,10 @@ package service
 import (
 	"context"
 	templaterepository "digital-contracting-service/gen/template_repository"
+	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/template_repository/command"
+	"digital-contracting-service/internal/template_repository/query"
 
 	"github.com/jmoiron/sqlx"
 	"goa.design/clue/log"
@@ -10,17 +14,72 @@ import (
 
 // TemplateRepository service example implementation.
 // The example methods log the requests and return zero values.
-type templateRepositorysrvc struct{}
+type templateRepositorysrvc struct {
+	db *sqlx.DB
+}
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
 func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository.Service, error) {
-	return &templateRepositorysrvc{}, nil
+	return &templateRepositorysrvc{
+		db: db,
+	}, nil
 }
 
 // Create a new template.
 func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.ContractTemplateCreateRequest) (*templaterepository.ContractTemplateCreateResponse, error) {
-	log.Printf(ctx, "templateRepository.create")
-	return &templaterepository.ContractTemplateCreateResponse{}, nil
+
+	jsonMetaData, err := datatype.NewJSON(req.MetaData)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to convert metadata")
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	did, err := base.GetDID()
+	if err != nil {
+		log.Errorf(ctx, err, "failed to generate uuid")
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	cmd := command.CreateTemplateContractCommand{
+		DID:         *did,
+		Name:        req.Name,
+		Description: req.Description,
+		CreatedBy:   req.CreatedBy,
+		MetaData:    &jsonMetaData,
+	}
+	createHandler := command.CreateTemplateContractHandler{
+		Db: s.db,
+	}
+	err = createHandler.Handle(cmd)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to create template contract")
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	qry := query.GetContractTemplateQuery{
+		DID: *did,
+	}
+	queryHandler := query.GetContractTemplateHandler{
+		Ctx: ctx,
+		Db:  s.db,
+	}
+	contractTemplate, err := queryHandler.GetContractTemplate(qry)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to get template contract")
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	return &templaterepository.ContractTemplateCreateResponse{
+		Did:            contractTemplate.DID,
+		DocumentNumber: contractTemplate.DocumentNumber,
+		Version:        contractTemplate.Version,
+		State:          contractTemplate.State.String(),
+		Name:           &contractTemplate.Name,
+		Description:    &contractTemplate.Description,
+		CreatedBy:      contractTemplate.CreatedBy,
+		CreatedAt:      contractTemplate.CreatedAt.String(),
+		MetaData:       contractTemplate.MetaData,
+	}, nil
 }
 
 // with action flag { forwardTo: "approval" | "draft" } and optional

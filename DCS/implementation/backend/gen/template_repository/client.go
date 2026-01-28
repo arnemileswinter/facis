@@ -51,6 +51,10 @@ func NewClient(create, submit, update, updateManage, search, retrieve, retrieveB
 }
 
 // Create calls the "create" endpoint of the "TemplateRepository" service.
+// Create may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): Bad request
+//   - "internal_error" (type *goa.ServiceError): Internal server error
+//   - error: internal error
 func (c *Client) Create(ctx context.Context, p *ContractTemplateCreateRequest) (res *ContractTemplateCreateResponse, err error) {
 	var ires any
 	ires, err = c.CreateEndpoint(ctx, p)

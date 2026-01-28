@@ -9,6 +9,8 @@ package templaterepository
 
 import (
 	"context"
+
+	goa "goa.design/goa/v3/pkg"
 )
 
 // Template Repository APIs (/template/...)
@@ -101,4 +103,14 @@ type ContractTemplateCreateResponse struct {
 type RetrieveByIDPayload struct {
 	// Template ID
 	TemplateID string
+}
+
+// MakeBadRequest builds a goa.ServiceError from an error.
+func MakeBadRequest(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "bad_request", false, false, false)
+}
+
+// MakeInternalError builds a goa.ServiceError from an error.
+func MakeInternalError(err error) *goa.ServiceError {
+	return goa.NewServiceError(err, "internal_error", false, false, false)
 }

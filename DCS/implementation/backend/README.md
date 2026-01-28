@@ -52,7 +52,7 @@ goa gen digital-contracting-service/design
 
 ### Environment Variables
 ```
-export DATABASE_URL="user=username password=password dbname=database_name sslmode=disable"
+export DATABASE_URL="user=username password=password dbname=postgres sslmode=disable"
 ```
 
 ```

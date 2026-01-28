@@ -52,6 +52,10 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // DecodeCreateResponse returns a decoder for responses returned by the
 // TemplateRepository create endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeCreateResponse may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -82,6 +86,34 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewCreateContractTemplateCreateResponseOK(&body)
 			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body CreateBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "create", err)
+			}
+			err = ValidateCreateBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "create", err)
+			}
+			return nil, NewCreateBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body CreateInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "create", err)
+			}
+			err = ValidateCreateInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "create", err)
+			}
+			return nil, NewCreateInternalError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "create", resp.StatusCode, string(body))
