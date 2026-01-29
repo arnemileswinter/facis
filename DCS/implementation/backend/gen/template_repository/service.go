@@ -19,7 +19,7 @@ type Service interface {
 	Create(context.Context, *ContractTemplateCreateRequest) (res *ContractTemplateCreateResponse, err error)
 	// with action flag { forwardTo: "approval" | "draft" } and optional
 	// reviewComments. allow resubmission path with approver comments.
-	Submit(context.Context, *TemplateContractSubmitRequest) (res *TemplateContractSubmitResponse, err error)
+	Submit(context.Context, *ContractTemplateSubmitRequest) (res *ContractTemplateSubmitResponse, err error)
 	// persist reviewer edits (metadata/clauses/semantics).
 	Update(context.Context, *ContractTemplateUpdateRequest) (res *ContractTemplateUpdateResponse, err error)
 	// update metadata or status.
@@ -35,9 +35,9 @@ type Service interface {
 	// run policy, schema, and semantic validations; return findings.
 	Verify(context.Context) (res any, err error)
 	// mark template as approved, with optional decision notes.
-	Approve(context.Context) (res int, err error)
+	Approve(context.Context, *ContractTemplateApproveRequest) (res *ContractTemplateApproveResponse, err error)
 	// mark template as rejected, requiring reason field.
-	Reject(context.Context) (res int, err error)
+	Reject(context.Context, *ContractTemplateRejectRequest) (res *ContractTemplateRejectResponse, err error)
 	// register new template into the repository.
 	Register(context.Context) (res any, err error)
 	// archive obsolete template.
@@ -62,6 +62,22 @@ const ServiceName = "TemplateRepository"
 // MethodKey key.
 var MethodNames = [13]string{"create", "submit", "update", "update_manage", "search", "retrieve", "retrieve_by_id", "verify", "approve", "reject", "register", "archive", "audit"}
 
+// ContractTemplateApproveRequest is the payload type of the TemplateRepository
+// service approve method.
+type ContractTemplateApproveRequest struct {
+	// Decentralized Identifier of the contract template
+	Did string
+	// A list of decision notes
+	DecisionNotes []string
+}
+
+// ContractTemplateApproveResponse is the result type of the TemplateRepository
+// service approve method.
+type ContractTemplateApproveResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string
+}
+
 // ContractTemplateCreateRequest is the payload type of the TemplateRepository
 // service create method.
 type ContractTemplateCreateRequest struct {
@@ -76,6 +92,22 @@ type ContractTemplateCreateRequest struct {
 // ContractTemplateCreateResponse is the result type of the TemplateRepository
 // service create method.
 type ContractTemplateCreateResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string
+}
+
+// ContractTemplateRejectRequest is the payload type of the TemplateRepository
+// service reject method.
+type ContractTemplateRejectRequest struct {
+	// Decentralized Identifier of the contract template
+	Did string
+	// Reason for rejecting the contract template
+	Reason string
+}
+
+// ContractTemplateRejectResponse is the result type of the TemplateRepository
+// service reject method.
+type ContractTemplateRejectResponse struct {
 	// Decentralized Identifier of the contract template
 	Did string
 }
@@ -132,6 +164,24 @@ type ContractTemplateRetrieveResponse struct {
 	MetaData any
 }
 
+// ContractTemplateSubmitRequest is the payload type of the TemplateRepository
+// service submit method.
+type ContractTemplateSubmitRequest struct {
+	// Decentralized Identifier of the contract template
+	Did string
+	// Action flag: approval | draft
+	ForwardTo *string
+	// Optional review comments
+	ReviewComments []string
+}
+
+// ContractTemplateSubmitResponse is the result type of the TemplateRepository
+// service submit method.
+type ContractTemplateSubmitResponse struct {
+	// Decentralized Identifier of the contract template
+	Did string
+}
+
 // ContractTemplateUpdateRequest is the payload type of the TemplateRepository
 // service update method.
 type ContractTemplateUpdateRequest struct {
@@ -148,24 +198,6 @@ type ContractTemplateUpdateRequest struct {
 // ContractTemplateUpdateResponse is the result type of the TemplateRepository
 // service update method.
 type ContractTemplateUpdateResponse struct {
-	// Decentralized Identifier of the contract template
-	Did string
-}
-
-// TemplateContractSubmitRequest is the payload type of the TemplateRepository
-// service submit method.
-type TemplateContractSubmitRequest struct {
-	// Decentralized Identifier of the contract template
-	Did string
-	// Action flag: approval | draft
-	ForwardTo *string
-	// Optional review comments
-	ReviewComments []string
-}
-
-// TemplateContractSubmitResponse is the result type of the TemplateRepository
-// service submit method.
-type TemplateContractSubmitResponse struct {
 	// Decentralized Identifier of the contract template
 	Did string
 }

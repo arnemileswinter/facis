@@ -81,7 +81,7 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 // "submit" of service "TemplateRepository".
 func NewSubmitEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*TemplateContractSubmitRequest)
+		p := req.(*ContractTemplateSubmitRequest)
 		return s.Submit(ctx, p)
 	}
 }
@@ -140,7 +140,8 @@ func NewVerifyEndpoint(s Service) goa.Endpoint {
 // "approve" of service "TemplateRepository".
 func NewApproveEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		return s.Approve(ctx)
+		p := req.(*ContractTemplateApproveRequest)
+		return s.Approve(ctx, p)
 	}
 }
 
@@ -148,7 +149,8 @@ func NewApproveEndpoint(s Service) goa.Endpoint {
 // "reject" of service "TemplateRepository".
 func NewRejectEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		return s.Reject(ctx)
+		p := req.(*ContractTemplateRejectRequest)
+		return s.Reject(ctx, p)
 	}
 }
 

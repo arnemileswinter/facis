@@ -10,11 +10,11 @@ import (
 )
 
 type SubmitTemplateContractCommand struct {
-	DID                   string
-	SubmittedBy           string
-	ContractTemplateState template_state.TemplateState
-	ActionFlag            *action_flag.ActionFlag
-	ReviewComments        []string
+	DID                          string
+	SubmittedBy                  string
+	CurrentContractTemplateState template_state.TemplateState
+	ActionFlag                   *action_flag.ActionFlag
+	ReviewComments               []string
 }
 
 type SubmitTemplateContractHandler struct {
@@ -24,31 +24,45 @@ type SubmitTemplateContractHandler struct {
 
 func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand) error {
 
-	query := `UPDATE contract_templates SET
-        	state = $2
-    	WHERE did = $1
-`
+	var nextTemplateState template_state.TemplateState
+	if cmd.CurrentContractTemplateState == template_state.Draft {
 
-	var state template_state.TemplateState
-	if cmd.ContractTemplateState == template_state.Draft {
-		state = template_state.Submitted
-	} else if cmd.ContractTemplateState == template_state.Submitted {
+		nextTemplateState = template_state.Submitted
+
+	} else if cmd.CurrentContractTemplateState == template_state.Submitted {
 
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Approval {
-				state = template_state.Approved
+				nextTemplateState = template_state.Reviewed
 			} else if *cmd.ActionFlag == action_flag.Draft {
-				state = template_state.Draft
+				nextTemplateState = template_state.Draft
+			}
+		} else {
+			return errors.New("action flags is missing")
+		}
+
+	} else if cmd.CurrentContractTemplateState == template_state.Reviewed {
+
+		if cmd.ActionFlag != nil {
+			if *cmd.ActionFlag == action_flag.Draft {
+				nextTemplateState = template_state.Reviewed
+			} else {
+				return errors.New("invalid action flag for this contract template state")
 			}
 		} else {
 			return errors.New("action flags is missing")
 		}
 
 	} else {
-		return errors.New("invalid state")
+		return errors.New("current template contract state is invalid")
 	}
 
-	result, err := h.Db.Exec(query, cmd.DID, state)
+	query := `UPDATE contract_templates SET
+        	state = $2
+    	WHERE did = $1
+`
+
+	result, err := h.Db.Exec(query, cmd.DID, nextTemplateState)
 	if err != nil {
 		return err
 	}
@@ -59,7 +73,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 	}
 
 	if rowsAffected == 0 {
-		return errors.New("couldn't submit contract template")
+		return errors.New("couldn't update contract template state")
 	}
 
 	// submittedAt := time.Now()

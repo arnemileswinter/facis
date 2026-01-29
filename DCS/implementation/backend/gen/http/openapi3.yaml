@@ -21,16 +21,15 @@ paths:
                                 type: array
                                 items:
                                     type: string
-                                    example: Expedita pariatur.
+                                    example: Cumque magnam consequatur tempora aliquam.
                                 example:
-                                    - Eligendi qui veniam et tempora.
-                                    - Molestias rerum non autem veniam in.
-                                    - Impedit aliquam.
+                                    - Ipsam consequuntur debitis exercitationem dolor earum aut.
+                                    - Voluptate asperiores maiores.
+                                    - Ut inventore est cupiditate.
                             example:
-                                - Recusandae voluptate voluptatem.
-                                - Culpa aut.
-                                - Sed est.
-                                - Aut itaque sint a dolor.
+                                - Ut ad earum architecto error dolores quisquam.
+                                - Aut beatae aliquam.
+                                - Quibusdam reprehenderit nobis cum aut provident.
     /archive/delete:
         delete:
             tags:
@@ -45,9 +44,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 969744445983650858
+                                example: 6699818035712156833
                                 format: int64
-                            example: 3258891804790532639
+                            example: 6785615606802931915
     /archive/retrieve:
         get:
             tags:
@@ -61,8 +60,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Possimus occaecati id accusantium sapiente nesciunt unde.
-                            example: Voluptate asperiores maiores.
+                                example: Quia inventore sint.
+                            example: Minus ut cupiditate voluptatem illo excepturi.
     /archive/search:
         get:
             tags:
@@ -78,17 +77,17 @@ paths:
                             schema:
                                 type: array
                                 items:
-                                    example: Est quaerat dolorum.
+                                    example: Commodi distinctio.
                                 example:
-                                    - Nemo sunt maxime.
-                                    - Deserunt asperiores.
-                                    - Ut est.
-                                    - Occaecati magni ducimus et quia ipsa rem.
+                                    - Aliquid autem doloribus ipsum.
+                                    - Autem porro beatae qui.
+                                    - Consequuntur ipsa suscipit in.
+                                    - Eos doloribus modi esse non eum.
                             example:
-                                - Inventore est cupiditate sit eaque.
-                                - Quia et.
-                                - Quasi quia perferendis non.
-                                - Aut rem sunt qui commodi quis qui.
+                                - In eum tempora qui.
+                                - Est voluptatibus aliquam et.
+                                - Dolore sapiente.
+                                - Sunt omnis in soluta.
     /archive/store:
         post:
             tags:
@@ -103,8 +102,8 @@ paths:
                         application/json:
                             schema:
                                 type: string
-                                example: Et labore.
-                            example: Molestias excepturi ab.
+                                example: Vitae minus facilis sit quia aspernatur nostrum.
+                            example: Qui in aspernatur suscipit accusantium rerum et.
     /archive/terminate:
         post:
             tags:
@@ -119,9 +118,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 2947236714699159287
+                                example: 2427128541200620647
                                 format: int64
-                            example: 1590988363609283399
+                            example: 1907095252696168234
     /catalogue/template/discover:
         get:
             tags:
@@ -135,8 +134,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Ut consectetur ea ipsum aut itaque.
-                            example: Doloremque nihil expedita sapiente.
+                                example: Quam nihil est hic aut quibusdam.
+                            example: Mollitia et suscipit.
     /catalogue/template/register:
         post:
             tags:
@@ -150,8 +149,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Aut dolor sapiente non est.
-                            example: Sint aut ab molestiae autem suscipit.
+                                example: Necessitatibus quia omnis illo id.
+                            example: Ea rerum quia maiores eius atque distinctio.
     /catalogue/template/request:
         post:
             tags:
@@ -165,8 +164,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Excepturi numquam odio.
-                            example: Minus nemo impedit voluptas.
+                                example: Ut ut aut.
+                            example: Minus quasi quia deserunt.
     /contract/approve:
         post:
             tags:
@@ -181,9 +180,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 7591064020019314365
+                                example: 1360339265723347280
                                 format: int64
-                            example: 1008036822465760424
+                            example: 1175526578171162258
     /contract/audit:
         post:
             tags:
@@ -200,15 +199,15 @@ paths:
                                 type: array
                                 items:
                                     type: string
-                                    example: Fugiat animi et.
+                                    example: Doloremque dolores et libero temporibus eius distinctio.
                                 example:
-                                    - Fugit quo dolore et optio.
-                                    - Ab autem nemo suscipit placeat.
+                                    - Qui sint minus iste.
+                                    - Facilis dolor est non laboriosam rerum dolor.
+                                    - Dolor et.
                             example:
-                                - Sapiente est animi numquam.
-                                - Culpa aut eaque corrupti aut.
-                                - Illum eaque voluptas ullam magnam neque sit.
-                                - Quia id nulla qui voluptas quo.
+                                - Quo perspiciatis est inventore quia.
+                                - Eaque magni quas est quos at.
+                                - Iure doloremque cum fuga cum.
     /contract/create:
         post:
             tags:
@@ -223,8 +222,8 @@ paths:
                         application/json:
                             schema:
                                 type: string
-                                example: Illum sed et consequuntur ea non.
-                            example: Repellendus delectus.
+                                example: Eaque praesentium quia et et.
+                            example: Sint ducimus voluptatem at deserunt itaque ut.
     /contract/negotiate:
         post:
             tags:
@@ -239,8 +238,8 @@ paths:
                         application/json:
                             schema:
                                 type: string
-                                example: Quisquam inventore est.
-                            example: Sed alias qui.
+                                example: Commodi quis qui est molestias.
+                            example: Dolores perspiciatis vel nesciunt.
     /contract/reject:
         post:
             tags:
@@ -255,9 +254,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 5425923329142306165
+                                example: 8977143831295874199
                                 format: int64
-                            example: 8994036492269817150
+                            example: 5433856523718324632
     /contract/respond:
         post:
             tags:
@@ -272,8 +271,8 @@ paths:
                         application/json:
                             schema:
                                 type: string
-                                example: Ut quod adipisci laudantium.
-                            example: Illum molestiae sit eos est.
+                                example: Ab architecto culpa.
+                            example: Fugit est cum.
     /contract/retrieve:
         get:
             tags:
@@ -287,8 +286,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Ab nesciunt molestiae voluptatem.
-                            example: Deleniti voluptatem.
+                                example: Sed est.
+                            example: Voluptate nam nobis quae.
     /contract/review:
         get:
             tags:
@@ -302,8 +301,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Maxime voluptatum consequatur aut possimus nesciunt.
-                            example: Similique error rerum pariatur architecto.
+                                example: Voluptas recusandae voluptate voluptatem culpa culpa aut.
+                            example: Sit sapiente dolores cum velit.
     /contract/search:
         get:
             tags:
@@ -319,16 +318,17 @@ paths:
                             schema:
                                 type: array
                                 items:
-                                    example: Voluptate repudiandae rerum dignissimos consequatur iure cupiditate.
+                                    example: Aut itaque sint a dolor.
                                 example:
-                                    - Accusantium sed culpa veritatis.
-                                    - Voluptatibus nisi.
-                                    - Asperiores consequatur enim repellendus aut consectetur animi.
+                                    - Delectus voluptatem eos corrupti ducimus.
+                                    - Sed alias qui.
+                                    - Illum molestiae sit eos est.
+                                    - Similique error rerum pariatur architecto.
                             example:
-                                - Doloremque dolores et libero temporibus eius distinctio.
-                                - Assumenda qui.
-                                - Minus iste dolorem facilis dolor est non.
-                                - Rerum dolor.
+                                - Reprehenderit ullam.
+                                - Porro dolor.
+                                - Laboriosam voluptas commodi cum aut.
+                                - Nihil corporis nemo qui.
     /contract/store:
         post:
             tags:
@@ -343,9 +343,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 708699522170545434
+                                example: 3308567273675147076
                                 format: int64
-                            example: 6524573890171445624
+                            example: 3274892015326086096
     /contract/submit:
         post:
             tags:
@@ -360,8 +360,8 @@ paths:
                         application/json:
                             schema:
                                 type: string
-                                example: Magni sint voluptas voluptatem vero voluptatem distinctio.
-                            example: Eos corrupti ducimus.
+                                example: Quia perferendis non quia aut rem sunt.
+                            example: Optio sit dolorem.
     /contract/terminate:
         post:
             tags:
@@ -376,9 +376,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 2717190114722980792
+                                example: 1021246417591650917
                                 format: int64
-                            example: 4673293825507822425
+                            example: 4336400334084963017
     /external/action:
         post:
             tags:
@@ -392,8 +392,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Aut eos natus quos et voluptatem et.
-                            example: Voluptatum ipsam iste.
+                                example: Animi numquam.
+                            example: Et mollitia atque suscipit.
     /external/callback:
         post:
             tags:
@@ -407,8 +407,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Ut occaecati nisi voluptatum aperiam.
-                            example: Quidem delectus.
+                                example: Illum eaque voluptas ullam magnam neque sit.
+                            example: Hic voluptas aliquid quia est cupiditate enim.
     /external/status:
         get:
             tags:
@@ -422,8 +422,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Id exercitationem sint.
-                            example: Veniam iste hic ad.
+                                example: Culpa aut eaque corrupti aut.
+                            example: Ullam sunt ad.
     /pac/audit:
         post:
             tags:
@@ -438,8 +438,8 @@ paths:
                         application/json:
                             schema:
                                 type: string
-                                example: Magni delectus molestiae aut.
-                            example: Dolores corporis sint veritatis dolor quia.
+                                example: Dolorem velit ut voluptatem ut voluptates.
+                            example: Ea ad ipsum dolore porro.
     /pac/monitor:
         get:
             tags:
@@ -453,8 +453,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Corrupti sed.
-                            example: Ad voluptate et.
+                                example: Veniam iste hic ad.
+                            example: Sequi voluptas eum est quia illum.
     /pac/report:
         get:
             tags:
@@ -468,8 +468,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Dolorem autem voluptatem consequatur.
-                            example: Unde quasi ea quas in at.
+                                example: Voluptatum ipsam iste.
+                            example: Suscipit sint.
         post:
             tags:
                 - ProcessAuditAndCompliance
@@ -482,8 +482,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Quam ex enim distinctio libero a tempora.
-                            example: Dolore aut.
+                                example: Quidem delectus.
+                            example: Autem qui.
     /peer/retrieve:
         get:
             tags:
@@ -497,8 +497,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Quo dolores.
-                            example: Dolorem velit ut voluptatem ut voluptates.
+                                example: Repellat at sapiente.
+                            example: Et vero suscipit earum quia.
     /signature/apply:
         post:
             tags:
@@ -513,9 +513,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 3395927865544028577
+                                example: 5335131232028750731
                                 format: int64
-                            example: 2589184405562821928
+                            example: 8636769363429175347
     /signature/audit:
         get:
             tags:
@@ -532,15 +532,15 @@ paths:
                                 type: array
                                 items:
                                     type: string
-                                    example: Occaecati sed omnis.
+                                    example: Ut ad voluptate et fugiat dolore aut.
                                 example:
-                                    - Quia aperiam quisquam et non.
-                                    - Et quibusdam enim.
-                                    - Velit qui tempore aperiam eos asperiores ut.
-                                    - Dignissimos officiis quis et culpa et.
+                                    - Sint id et ea.
+                                    - Aut delectus.
                             example:
-                                - Nihil est hic aut quibusdam soluta ut.
-                                - Aut deserunt necessitatibus.
+                                - Ut vitae qui minima quis quae aspernatur.
+                                - Quae facere quia adipisci est.
+                                - Ut voluptatem facere fuga amet.
+                                - Ipsa non et sapiente.
     /signature/compliance:
         post:
             tags:
@@ -554,8 +554,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Quia ut aut cum recusandae unde.
-                            example: Omnis illo id quod fugiat tempora.
+                                example: Quod voluptatem et saepe ullam.
+                            example: Sunt accusamus vel consectetur mollitia quis.
     /signature/retrieve:
         get:
             tags:
@@ -569,8 +569,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Voluptatum beatae consequatur.
-                            example: Sed sint id et.
+                                example: Officiis harum accusantium et impedit eum.
+                            example: Rerum hic deleniti iste quis.
     /signature/revoke:
         post:
             tags:
@@ -585,9 +585,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 309584822053730246
+                                example: 5503443466390989611
                                 format: int64
-                            example: 8648868370470185288
+                            example: 2040529344303597673
     /signature/validate:
         post:
             tags:
@@ -601,8 +601,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Est dolorem dolorem.
-                            example: Voluptatem et saepe.
+                                example: Quasi ea quas.
+                            example: Architecto est repellendus ipsam occaecati.
     /signature/verify:
         post:
             tags:
@@ -616,8 +616,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Aspernatur facere corporis nesciunt non est.
-                            example: Id aut delectus.
+                                example: Dolores corporis sint veritatis dolor quia.
+                            example: Ut distinctio omnis repudiandae omnis quidem quae.
     /template/approve:
         post:
             tags:
@@ -625,16 +625,39 @@ paths:
             summary: approve TemplateRepository
             description: mark template as approved, with optional decision notes.
             operationId: TemplateRepository#approve
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ContractTemplateApproveRequest'
+                        example:
+                            decision_notes:
+                                - Et culpa.
+                                - Accusantium dolorum accusantium ut nesciunt.
+                                - Officia qui distinctio architecto.
+                            did: Qui in voluptas delectus tempora velit quod.
             responses:
                 "200":
                     description: OK response.
                     content:
                         application/json:
                             schema:
-                                type: integer
-                                example: 7261025626675692736
-                                format: int64
-                            example: 1758212657225952913
+                                $ref: '#/components/schemas/ContractTemplateApproveResponse'
+                            example:
+                                did: Molestias et sed nam.
+                "400":
+                    description: 'bad_request: Bad request'
+                    content:
+                        application/vnd.goa.error:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                "500":
+                    description: 'internal_error: Internal server error'
+                    content:
+                        application/vnd.goa.error:
+                            schema:
+                                $ref: '#/components/schemas/Error'
     /template/archive:
         post:
             tags:
@@ -649,9 +672,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 8374115834877588580
+                                example: 8243861884500819645
                                 format: int64
-                            example: 3669580576340856114
+                            example: 8670660472776979760
     /template/audit:
         get:
             tags:
@@ -668,17 +691,17 @@ paths:
                                 type: array
                                 items:
                                     type: string
-                                    example: Eum maiores vitae minus.
+                                    example: Sit nihil architecto ratione et.
                                 example:
-                                    - Quia aspernatur.
-                                    - Tempore repellendus veritatis cumque magnam.
-                                    - Tempora aliquam architecto.
-                                    - Ipsam consequuntur debitis exercitationem dolor earum aut.
+                                    - Libero ut.
+                                    - Omnis suscipit.
+                                    - In quis modi molestiae saepe.
+                                    - Ratione veniam et recusandae in.
                             example:
-                                - Debitis est voluptatibus aliquam.
-                                - Est dolore sapiente sint sunt omnis.
-                                - Soluta quos qui in.
-                                - Suscipit accusantium.
+                                - Ab facilis aut quod.
+                                - Ipsa tenetur commodi quis voluptatem exercitationem iusto.
+                                - Omnis cupiditate qui.
+                                - Veniam maxime rerum.
     /template/create:
         post:
             tags:
@@ -693,9 +716,9 @@ paths:
                         schema:
                             $ref: '#/components/schemas/ContractTemplateCreateRequest'
                         example:
-                            description: Necessitatibus magnam et esse ex sapiente.
-                            meta_data: Est voluptate.
-                            name: Soluta voluptatem dolore.
+                            description: Vel doloremque et sunt recusandae sed.
+                            meta_data: Voluptates mollitia et voluptatem voluptatum eum consectetur.
+                            name: Aut quo voluptatem omnis.
             responses:
                 "200":
                     description: OK response.
@@ -704,7 +727,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ContractTemplateCreateResponse'
                             example:
-                                did: Quae et blanditiis nihil.
+                                did: Quibusdam magni deleniti dicta ullam.
                 "400":
                     description: 'bad_request: Bad request'
                     content:
@@ -730,8 +753,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Suscipit in molestiae eos doloribus modi.
-                            example: Cupiditate voluptatem illo excepturi aut voluptatem in.
+                                example: Iusto ut eos.
+                            example: Voluptatibus deserunt iure.
     /template/reject:
         post:
             tags:
@@ -739,16 +762,36 @@ paths:
             summary: reject TemplateRepository
             description: mark template as rejected, requiring reason field.
             operationId: TemplateRepository#reject
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ContractTemplateRejectRequest'
+                        example:
+                            did: Voluptas recusandae.
+                            reason: Quia dolores aut.
             responses:
                 "200":
                     description: OK response.
                     content:
                         application/json:
                             schema:
-                                type: integer
-                                example: 7963258637562398747
-                                format: int64
-                            example: 1996019604163990965
+                                $ref: '#/components/schemas/ContractTemplateRejectResponse'
+                            example:
+                                did: Non at adipisci neque non at.
+                "400":
+                    description: 'bad_request: Bad request'
+                    content:
+                        application/vnd.goa.error:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                "500":
+                    description: 'internal_error: Internal server error'
+                    content:
+                        application/vnd.goa.error:
+                            schema:
+                                $ref: '#/components/schemas/Error'
     /template/retrieve:
         get:
             tags:
@@ -766,43 +809,52 @@ paths:
                                 items:
                                     $ref: '#/components/schemas/ContractTemplateRetrieveResponse'
                                 example:
-                                    - created_at: Quasi id autem.
-                                      created_by: Cumque et beatae assumenda architecto quaerat.
-                                      description: Aspernatur occaecati omnis eveniet ea iure.
-                                      did: Eos non temporibus non qui dolorem.
-                                      document_number: 4166337592319625211
-                                      meta_data: Repellat culpa ducimus et.
-                                      name: Impedit impedit est voluptas voluptas id.
-                                      state: Occaecati perspiciatis cumque.
-                                      version: 9122291519645283215
-                                    - created_at: Quasi id autem.
-                                      created_by: Cumque et beatae assumenda architecto quaerat.
-                                      description: Aspernatur occaecati omnis eveniet ea iure.
-                                      did: Eos non temporibus non qui dolorem.
-                                      document_number: 4166337592319625211
-                                      meta_data: Repellat culpa ducimus et.
-                                      name: Impedit impedit est voluptas voluptas id.
-                                      state: Occaecati perspiciatis cumque.
-                                      version: 9122291519645283215
+                                    - created_at: Aut aut.
+                                      created_by: Et eius molestiae recusandae.
+                                      description: Natus laudantium.
+                                      did: Quasi id autem.
+                                      document_number: 9206763425114248083
+                                      meta_data: Dicta voluptatem est dolor ut.
+                                      name: Iure eos esse ratione consequatur.
+                                      state: Ducimus et.
+                                      version: 7302364942790791781
+                                    - created_at: Aut aut.
+                                      created_by: Et eius molestiae recusandae.
+                                      description: Natus laudantium.
+                                      did: Quasi id autem.
+                                      document_number: 9206763425114248083
+                                      meta_data: Dicta voluptatem est dolor ut.
+                                      name: Iure eos esse ratione consequatur.
+                                      state: Ducimus et.
+                                      version: 7302364942790791781
+                                    - created_at: Aut aut.
+                                      created_by: Et eius molestiae recusandae.
+                                      description: Natus laudantium.
+                                      did: Quasi id autem.
+                                      document_number: 9206763425114248083
+                                      meta_data: Dicta voluptatem est dolor ut.
+                                      name: Iure eos esse ratione consequatur.
+                                      state: Ducimus et.
+                                      version: 7302364942790791781
                             example:
-                                - created_at: Quasi id autem.
-                                  created_by: Cumque et beatae assumenda architecto quaerat.
-                                  description: Aspernatur occaecati omnis eveniet ea iure.
-                                  did: Eos non temporibus non qui dolorem.
-                                  document_number: 4166337592319625211
-                                  meta_data: Repellat culpa ducimus et.
-                                  name: Impedit impedit est voluptas voluptas id.
-                                  state: Occaecati perspiciatis cumque.
-                                  version: 9122291519645283215
-                                - created_at: Quasi id autem.
-                                  created_by: Cumque et beatae assumenda architecto quaerat.
-                                  description: Aspernatur occaecati omnis eveniet ea iure.
-                                  did: Eos non temporibus non qui dolorem.
-                                  document_number: 4166337592319625211
-                                  meta_data: Repellat culpa ducimus et.
-                                  name: Impedit impedit est voluptas voluptas id.
-                                  state: Occaecati perspiciatis cumque.
-                                  version: 9122291519645283215
+                                - created_at: Aut aut.
+                                  created_by: Et eius molestiae recusandae.
+                                  description: Natus laudantium.
+                                  did: Quasi id autem.
+                                  document_number: 9206763425114248083
+                                  meta_data: Dicta voluptatem est dolor ut.
+                                  name: Iure eos esse ratione consequatur.
+                                  state: Ducimus et.
+                                  version: 7302364942790791781
+                                - created_at: Aut aut.
+                                  created_by: Et eius molestiae recusandae.
+                                  description: Natus laudantium.
+                                  did: Quasi id autem.
+                                  document_number: 9206763425114248083
+                                  meta_data: Dicta voluptatem est dolor ut.
+                                  name: Iure eos esse ratione consequatur.
+                                  state: Ducimus et.
+                                  version: 7302364942790791781
                 "400":
                     description: 'bad_request: Bad request'
                     content:
@@ -830,8 +882,8 @@ paths:
                   schema:
                     type: string
                     description: ID of the contract template
-                    example: Omnis suscipit.
-                  example: In quis modi molestiae saepe.
+                    example: Iure nobis.
+                  example: Eos in porro.
             responses:
                 "200":
                     description: OK response.
@@ -840,15 +892,15 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ContractTemplateRetrieveByIDResponse'
                             example:
-                                created_at: Nihil porro qui totam.
-                                created_by: Mollitia at.
-                                description: Laudantium magni nobis perspiciatis nesciunt ut.
-                                did: Dicta voluptatem est dolor ut.
-                                document_number: 281758007857943350
-                                meta_data: Voluptatem natus illo.
-                                name: Earum illo dolor.
-                                state: Aliquid deleniti rerum.
-                                version: 1088163813797186908
+                                created_at: Ullam eos assumenda qui quis porro.
+                                created_by: Qui hic aperiam dolor dolores.
+                                description: Sed odit assumenda maxime.
+                                did: Mollitia at.
+                                document_number: 2974585346169789223
+                                meta_data: Id aspernatur et voluptatem dolores dolores.
+                                name: Et voluptatem et aliquam ut.
+                                state: Qui totam unde voluptatem natus illo.
+                                version: 1355185331211477979
                 "400":
                     description: 'bad_request: Bad request'
                     content:
@@ -876,17 +928,14 @@ paths:
                             schema:
                                 type: array
                                 items:
-                                    example: Officia architecto.
+                                    example: Maxime minus nemo impedit.
                                 example:
-                                    - Nulla consequatur dignissimos quos nesciunt.
-                                    - Occaecati a sit quia.
-                                    - Sint ratione commodi distinctio.
-                                    - Itaque aliquid autem.
+                                    - Sint aut ab molestiae autem suscipit.
+                                    - Rerum sapiente deserunt sequi sapiente.
                             example:
-                                - Deserunt sequi sapiente accusamus esse cumque tempore.
-                                - Mollitia iusto ut eos temporibus.
-                                - Sit nihil architecto ratione et.
-                                - Adipisci libero.
+                                - Perferendis autem in id harum qui.
+                                - Ut excepturi et ducimus facere quo corrupti.
+                                - Explicabo iure.
     /template/submit:
         post:
             tags:
@@ -899,24 +948,24 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/TemplateContractSubmitRequest'
+                            $ref: '#/components/schemas/ContractTemplateSubmitRequest'
                         example:
-                            did: Vel doloremque et sunt recusandae sed.
-                            forward_to: Voluptates mollitia et voluptatem voluptatum eum consectetur.
+                            did: At qui autem quia voluptates.
+                            forward_to: Dolorem sapiente.
                             review_comments:
-                                - Magni deleniti.
-                                - Ullam unde.
-                                - Excepturi dolor quaerat.
-                                - Unde doloribus.
+                                - Et eos delectus.
+                                - Laudantium non accusamus eaque laudantium est id.
+                                - Voluptas et natus architecto rerum eum.
+                                - Beatae necessitatibus repellendus.
             responses:
                 "200":
                     description: OK response.
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/TemplateContractSubmitResponse'
+                                $ref: '#/components/schemas/ContractTemplateSubmitResponse'
                             example:
-                                did: Sit at qui autem.
+                                did: Hic quas.
                 "400":
                     description: 'bad_request: Bad request'
                     content:
@@ -943,9 +992,9 @@ paths:
                         application/json:
                             schema:
                                 type: integer
-                                example: 6157481442599455266
+                                example: 492114160714712474
                                 format: int64
-                            example: 6371275071096917029
+                            example: 3818269374661136974
         put:
             tags:
                 - TemplateRepository
@@ -959,10 +1008,10 @@ paths:
                         schema:
                             $ref: '#/components/schemas/ContractTemplateUpdateRequest'
                         example:
-                            description: Voluptas et natus architecto rerum eum.
-                            did: Et eos delectus.
-                            meta_data: Beatae necessitatibus repellendus.
-                            name: Laudantium non accusamus eaque laudantium est id.
+                            description: Rem cupiditate cupiditate.
+                            did: Et dicta vel.
+                            meta_data: Ab perferendis dolorem ut ea in.
+                            name: Facilis odio.
             responses:
                 "200":
                     description: OK response.
@@ -971,7 +1020,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ContractTemplateUpdateResponse'
                             example:
-                                did: Hic quas.
+                                did: Dicta earum voluptatum.
                 "400":
                     description: 'bad_request: Bad request'
                     content:
@@ -997,8 +1046,8 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Sed autem porro beatae qui.
-                            example: Ratione veniam et recusandae in.
+                                example: Cumque tempore ut.
+                            example: Excepturi necessitatibus aut.
     /webhook/node-red:
         post:
             tags:
@@ -1012,39 +1061,107 @@ paths:
                     content:
                         application/json:
                             schema:
-                                example: Molestiae aliquam temporibus.
-                            example: Officiis harum accusantium et impedit eum.
+                                example: Quia id nulla qui voluptas quo.
+                            example: Saepe et quaerat.
 components:
     schemas:
+        ContractTemplateApproveRequest:
+            type: object
+            properties:
+                decision_notes:
+                    type: array
+                    items:
+                        type: string
+                        example: Aspernatur facere corporis nesciunt non est.
+                    description: A list of decision notes
+                    example:
+                        - Est dolorem dolorem.
+                        - Officiis occaecati sed.
+                did:
+                    type: string
+                    description: Decentralized Identifier of the contract template
+                    example: Voluptatum beatae consequatur.
+            description: Contract template approve request
+            example:
+                decision_notes:
+                    - Et quibusdam enim.
+                    - Velit qui tempore aperiam eos asperiores ut.
+                    - Dignissimos officiis quis et culpa et.
+                    - Quia ut aut cum recusandae unde.
+                did: Voluptates similique quia aperiam quisquam et.
+            required:
+                - did
+        ContractTemplateApproveResponse:
+            type: object
+            properties:
+                did:
+                    type: string
+                    description: Decentralized Identifier of the contract template
+                    example: Ut consectetur ea ipsum aut itaque.
+            description: Result for retrieving a contract template by id
+            example:
+                did: Excepturi numquam odio.
+            required:
+                - did
         ContractTemplateCreateRequest:
             type: object
             properties:
                 description:
                     type: string
                     description: A description for that template
-                    example: Praesentium excepturi quia repudiandae.
+                    example: Voluptatem consequatur.
                 meta_data:
                     description: The metadata of the contract template
-                    example: Dicta qui illo molestias dolorem sed.
+                    example: Autem ut.
                 name:
                     type: string
                     description: The name of the contract template
-                    example: Maiores reiciendis aliquid voluptate accusantium.
+                    example: Tempora accusamus a.
             description: Contract template create request
             example:
-                description: Aliquid debitis nemo illum rerum dolores cum.
-                meta_data: Tempore eaque eos accusamus quae laborum corrupti.
-                name: Aliquam dolor sed illum.
+                description: Et non enim quo.
+                meta_data: Veritatis vel.
+                name: Earum ipsa laborum.
         ContractTemplateCreateResponse:
             type: object
             properties:
                 did:
                     type: string
                     description: Decentralized Identifier of the contract template
-                    example: Est dolor porro est inventore exercitationem.
+                    example: Necessitatibus vel.
             description: Result for creating a contract template
             example:
-                did: Consectetur eveniet autem illo aspernatur.
+                did: Commodi omnis ullam beatae beatae.
+            required:
+                - did
+        ContractTemplateRejectRequest:
+            type: object
+            properties:
+                did:
+                    type: string
+                    description: Decentralized Identifier of the contract template
+                    example: Aut dolor sapiente non est.
+                reason:
+                    type: string
+                    description: Reason for rejecting the contract template
+                    example: Totam ut modi.
+            description: Contract template retrieve by id request
+            example:
+                did: Iure repellat ipsum officia.
+                reason: Consectetur similique.
+            required:
+                - did
+                - reason
+        ContractTemplateRejectResponse:
+            type: object
+            properties:
+                did:
+                    type: string
+                    description: Decentralized Identifier of the contract template
+                    example: Consequatur dignissimos.
+            description: Result for retrieving a contract template by id
+            example:
+                did: Nesciunt dolor occaecati a.
             required:
                 - did
         ContractTemplateRetrieveByIDRequest:
@@ -1053,10 +1170,10 @@ components:
                 template_id:
                     type: string
                     description: ID of the contract template
-                    example: Minus et fugit.
+                    example: Qui accusantium sed.
             description: Contract template retrieve by id request
             example:
-                template_id: Quia illo velit cum eos modi harum.
+                template_id: Veritatis delectus.
             required:
                 - template_id
         ContractTemplateRetrieveByIDResponse:
@@ -1065,51 +1182,51 @@ components:
                 created_at:
                     type: string
                     description: The timestamp when the contract template was created
-                    example: Nihil doloribus nisi.
+                    example: Saepe ab autem nemo suscipit placeat delectus.
                 created_by:
                     type: string
                     description: Identifier of who created the contract template
-                    example: Eaque corporis aut consequatur unde voluptatem.
+                    example: Dolore et.
                 description:
                     type: string
                     description: A description for that template
-                    example: Velit odio.
+                    example: Incidunt fugit.
                 did:
                     type: string
                     description: Decentralized Identifier of the contract template
-                    example: Consequatur quam facilis earum provident.
+                    example: Nisi aut asperiores consequatur enim repellendus.
                 document_number:
                     type: integer
                     description: The document number of the contract template
-                    example: 9078570089367054262
+                    example: 7105541680451005366
                     format: int64
                 meta_data:
                     description: The metadata of the contract template
-                    example: Atque aspernatur neque et iusto quia.
+                    example: Dolores qui.
                 name:
                     type: string
                     description: The name of the contract template
-                    example: Enim vero eos ut.
+                    example: Fugiat animi et.
                 state:
                     type: string
                     description: The state of the contract template
-                    example: Quia non quia delectus corporis perspiciatis.
+                    example: Est sed in totam.
                 version:
                     type: integer
                     description: The version number of the contract template
-                    example: 1290277735002454176
+                    example: 3033471241921218884
                     format: int64
             description: Result for retrieving a contract template by id
             example:
-                created_at: Dolore corrupti delectus asperiores autem aut iusto.
-                created_by: Voluptatem velit sed vero occaecati.
-                description: Vitae debitis.
-                did: Mollitia eveniet et aliquam.
-                document_number: 1056781419160284888
-                meta_data: Eos animi laborum veritatis cupiditate.
-                name: Sunt veritatis et et suscipit dolores.
-                state: Totam similique dolorum reiciendis.
-                version: 4650894262499133558
+                created_at: Corrupti sed.
+                created_by: Dolorem autem voluptatem consequatur.
+                description: Magni delectus molestiae aut.
+                did: Eos natus quos et voluptatem.
+                document_number: 406769059849823768
+                meta_data: Quam ex enim distinctio libero a tempora.
+                name: Voluptatum aperiam et molestiae aliquam temporibus.
+                state: Exercitationem sint cum ut occaecati.
+                version: 1515403755185993625
             required:
                 - did
                 - document_number
@@ -1124,51 +1241,51 @@ components:
                 created_at:
                     type: string
                     description: The timestamp when the contract template was created
-                    example: Necessitatibus vel.
+                    example: Rerum molestias rerum non autem veniam in.
                 created_by:
                     type: string
                     description: Identifier of who created the contract template
-                    example: Veritatis vel.
+                    example: Est eligendi qui veniam et.
                 description:
                     type: string
                     description: A description for that template
-                    example: Laborum vitae et non enim quo.
+                    example: Expedita pariatur.
                 did:
                     type: string
                     description: Decentralized Identifier of the contract template
-                    example: Consectetur fugit repellendus.
+                    example: Asperiores est ut est quae.
                 document_number:
                     type: integer
                     description: The document number of the contract template
-                    example: 841325136931723046
+                    example: 4077311612696131558
                     format: int64
                 meta_data:
                     description: The metadata of the contract template
-                    example: Commodi omnis ullam beatae beatae.
+                    example: Impedit aliquam.
                 name:
                     type: string
                     description: The name of the contract template
-                    example: Consequatur adipisci autem ut facilis earum.
+                    example: Rem id et labore quos voluptatibus.
                 state:
                     type: string
                     description: The state of the contract template
-                    example: A alias.
+                    example: Et quia.
                 version:
                     type: integer
                     description: The version number of the contract template
-                    example: 3673781195744267971
+                    example: 4002354735825961595
                     format: int64
             description: Result for retrieving a contract template
             example:
-                created_at: Voluptatem alias dolores architecto provident tenetur.
-                created_by: Ullam eos.
-                description: Consequuntur nesciunt.
-                did: Dolor autem sed architecto sint.
-                document_number: 4868152360019307510
-                meta_data: Ut autem aut.
-                name: Amet dolor provident quia velit.
-                state: Maiores laudantium cumque asperiores.
-                version: 2603452809852102205
+                created_at: Ab nesciunt molestiae voluptatem.
+                created_by: Maxime voluptatum consequatur aut possimus nesciunt.
+                description: Ut quod adipisci laudantium.
+                did: Illum sed et consequuntur ea non.
+                document_number: 8054008141091789632
+                meta_data: Voluptate repudiandae rerum dignissimos consequatur iure cupiditate.
+                name: Quisquam inventore est.
+                state: Voluptas voluptatem vero voluptatem distinctio.
+                version: 3099199381256790718
             required:
                 - did
                 - document_number
@@ -1177,30 +1294,74 @@ components:
                 - created_by
                 - created_at
                 - meta_data
+        ContractTemplateSubmitRequest:
+            type: object
+            properties:
+                did:
+                    type: string
+                    description: Decentralized Identifier of the contract template
+                    example: Dolor autem sed architecto sint.
+                forward_to:
+                    type: string
+                    description: 'Action flag: approval | draft'
+                    example: Earum quas maiores laudantium cumque.
+                review_comments:
+                    type: array
+                    items:
+                        type: string
+                        example: Ut amet dolor provident quia velit.
+                    description: Optional review comments
+                    example:
+                        - Nesciunt tenetur ullam eos facilis voluptatem.
+                        - Dolores architecto provident tenetur odio.
+                        - Autem aut vel minus et fugit ullam.
+                        - Illo velit cum eos modi.
+            description: Contract template submit request
+            example:
+                did: Nulla consequatur quam facilis earum provident.
+                forward_to: Maxime soluta quia.
+                review_comments:
+                    - Delectus corporis perspiciatis quos enim vero eos.
+                    - Accusamus velit odio temporibus eaque corporis aut.
+                    - Unde voluptatem.
+            required:
+                - did
+        ContractTemplateSubmitResponse:
+            type: object
+            properties:
+                did:
+                    type: string
+                    description: Decentralized Identifier of the contract template
+                    example: Nihil doloribus nisi.
+            description: Result for submitting a contract template
+            example:
+                did: Atque aspernatur neque et iusto quia.
+            required:
+                - did
         ContractTemplateUpdateRequest:
             type: object
             properties:
                 description:
                     type: string
                     description: A description for that template
-                    example: Voluptas qui unde sit eum.
+                    example: Reiciendis ipsa sunt veritatis et et.
                 did:
                     type: string
                     description: Decentralized Identifier of the contract template
-                    example: Illo quia voluptatibus quos suscipit.
+                    example: Mollitia eveniet et aliquam.
                 meta_data:
                     description: The metadata of the contract template
-                    example: Eum velit repellendus eligendi molestias voluptatem.
+                    example: Dolores praesentium vitae debitis.
                 name:
                     type: string
                     description: The name of the contract template
-                    example: Soluta temporibus labore a cum.
+                    example: Sit quisquam totam similique.
             description: Contract template update request
             example:
-                description: Ut non.
-                did: Deleniti sed accusantium beatae ea ut placeat.
-                meta_data: Placeat optio nam.
-                name: Ut voluptatem eum.
+                description: Eos animi laborum veritatis cupiditate.
+                did: Voluptatem velit sed vero occaecati.
+                meta_data: Possimus occaecati id accusantium sapiente nesciunt unde.
+                name: Dolore corrupti delectus asperiores autem aut iusto.
             required:
                 - did
         ContractTemplateUpdateResponse:
@@ -1209,10 +1370,10 @@ components:
                 did:
                     type: string
                     description: Decentralized Identifier of the contract template
-                    example: Voluptatibus id cumque totam pariatur.
+                    example: Est quaerat dolorum.
             description: Result for updating a contract template
             example:
-                did: Mollitia quos perspiciatis totam magnam doloribus deleniti.
+                did: Enim nemo sunt maxime nihil.
             required:
                 - did
         Error:
@@ -1221,7 +1382,7 @@ components:
                 fault:
                     type: boolean
                     description: Is the error a server-side fault?
-                    example: false
+                    example: true
                 id:
                     type: string
                     description: ID is a unique identifier for this particular occurrence of the problem.
@@ -1241,14 +1402,14 @@ components:
                 timeout:
                     type: boolean
                     description: Is the error a timeout?
-                    example: true
+                    example: false
             description: Bad request
             example:
                 fault: true
                 id: 123abc
                 message: parameter 'p' must be an integer
                 name: bad_request
-                temporary: false
+                temporary: true
                 timeout: true
             required:
                 - name
@@ -1257,49 +1418,6 @@ components:
                 - temporary
                 - timeout
                 - fault
-        TemplateContractSubmitRequest:
-            type: object
-            properties:
-                did:
-                    type: string
-                    description: Decentralized Identifier of the contract template
-                    example: Dolorem et distinctio sit occaecati dolore veritatis.
-                forward_to:
-                    type: string
-                    description: 'Action flag: approval | draft'
-                    example: Explicabo natus.
-                review_comments:
-                    type: array
-                    items:
-                        type: string
-                        example: Qui laudantium distinctio maxime excepturi illo voluptatem.
-                    description: Optional review comments
-                    example:
-                        - Dolores temporibus.
-                        - Delectus molestiae non voluptate eos nam.
-                        - Voluptas quo.
-            description: Contract template submit request
-            example:
-                did: Nam omnis molestiae quia.
-                forward_to: Aut tempore eum commodi nostrum aut et.
-                review_comments:
-                    - Iusto et eveniet sapiente dolorem quasi.
-                    - Omnis ut nihil assumenda itaque deserunt voluptatem.
-                    - Quidem praesentium neque alias repellat.
-            required:
-                - did
-        TemplateContractSubmitResponse:
-            type: object
-            properties:
-                did:
-                    type: string
-                    description: Decentralized Identifier of the contract template
-                    example: Provident vero qui aliquam eius.
-            description: Result for submitting a contract template
-            example:
-                did: Consequuntur dignissimos a.
-            required:
-                - did
 tags:
     - name: ContractStorageArchive
       description: Contract Storage & Archive APIs (/archive/...)

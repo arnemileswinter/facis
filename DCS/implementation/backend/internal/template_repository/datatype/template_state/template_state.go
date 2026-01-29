@@ -12,22 +12,21 @@ const (
 	Draft     TemplateState = "DRAFT"
 	Submitted               = "SUBMITTED"
 	Reviewed                = "REVIEWED"
+	Approved                = "APPROVED"
 
-	Created    = "CREATED"
 	Changed    = "CHANGED"
-	Approved   = "APPROVED"
 	Archived   = "ARCHIVED"
 	Deprecated = "DEPRECATED"
 	Deleted    = "DELETED"
 )
 
 var validStates = map[TemplateState]bool{
-	Draft:      true,
-	Submitted:  true,
-	Reviewed:   true,
-	Created:    true,
+	Draft:     true,
+	Submitted: true,
+	Reviewed:  true,
+	Approved:  true,
+
 	Changed:    true,
-	Approved:   true,
 	Archived:   true,
 	Deprecated: true,
 	Deleted:    true,

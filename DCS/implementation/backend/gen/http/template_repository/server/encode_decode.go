@@ -101,7 +101,7 @@ func EncodeCreateError(encoder func(context.Context, http.ResponseWriter) goahtt
 // TemplateRepository submit endpoint.
 func EncodeSubmitResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(*templaterepository.TemplateContractSubmitResponse)
+		res, _ := v.(*templaterepository.ContractTemplateSubmitResponse)
 		enc := encoder(ctx, w)
 		body := NewSubmitResponseBody(res)
 		w.WriteHeader(http.StatusOK)
@@ -111,8 +111,8 @@ func EncodeSubmitResponse(encoder func(context.Context, http.ResponseWriter) goa
 
 // DecodeSubmitRequest returns a decoder for requests sent to the
 // TemplateRepository submit endpoint.
-func DecodeSubmitRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.TemplateContractSubmitRequest, error) {
-	return func(r *http.Request) (*templaterepository.TemplateContractSubmitRequest, error) {
+func DecodeSubmitRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.ContractTemplateSubmitRequest, error) {
+	return func(r *http.Request) (*templaterepository.ContractTemplateSubmitRequest, error) {
 		var (
 			body SubmitRequestBody
 			err  error
@@ -132,7 +132,7 @@ func DecodeSubmitRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.
 		if err != nil {
 			return nil, err
 		}
-		payload := NewSubmitTemplateContractSubmitRequest(&body)
+		payload := NewSubmitContractTemplateSubmitRequest(&body)
 
 		return payload, nil
 	}
@@ -427,11 +427,82 @@ func EncodeVerifyResponse(encoder func(context.Context, http.ResponseWriter) goa
 // TemplateRepository approve endpoint.
 func EncodeApproveResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(int)
+		res, _ := v.(*templaterepository.ContractTemplateApproveResponse)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewApproveResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
+	}
+}
+
+// DecodeApproveRequest returns a decoder for requests sent to the
+// TemplateRepository approve endpoint.
+func DecodeApproveRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.ContractTemplateApproveRequest, error) {
+	return func(r *http.Request) (*templaterepository.ContractTemplateApproveRequest, error) {
+		var (
+			body ApproveRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil, goa.MissingPayloadError()
+			}
+			var gerr *goa.ServiceError
+			if errors.As(err, &gerr) {
+				return nil, gerr
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = ValidateApproveRequestBody(&body)
+		if err != nil {
+			return nil, err
+		}
+		payload := NewApproveContractTemplateApproveRequest(&body)
+
+		return payload, nil
+	}
+}
+
+// EncodeApproveError returns an encoder for errors returned by the approve
+// TemplateRepository endpoint.
+func EncodeApproveError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "bad_request":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewApproveBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "internal_error":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewApproveInternalErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 
@@ -439,11 +510,82 @@ func EncodeApproveResponse(encoder func(context.Context, http.ResponseWriter) go
 // TemplateRepository reject endpoint.
 func EncodeRejectResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, any) error {
 	return func(ctx context.Context, w http.ResponseWriter, v any) error {
-		res, _ := v.(int)
+		res, _ := v.(*templaterepository.ContractTemplateRejectResponse)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewRejectResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
+	}
+}
+
+// DecodeRejectRequest returns a decoder for requests sent to the
+// TemplateRepository reject endpoint.
+func DecodeRejectRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (*templaterepository.ContractTemplateRejectRequest, error) {
+	return func(r *http.Request) (*templaterepository.ContractTemplateRejectRequest, error) {
+		var (
+			body RejectRequestBody
+			err  error
+		)
+		err = decoder(r).Decode(&body)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return nil, goa.MissingPayloadError()
+			}
+			var gerr *goa.ServiceError
+			if errors.As(err, &gerr) {
+				return nil, gerr
+			}
+			return nil, goa.DecodePayloadError(err.Error())
+		}
+		err = ValidateRejectRequestBody(&body)
+		if err != nil {
+			return nil, err
+		}
+		payload := NewRejectContractTemplateRejectRequest(&body)
+
+		return payload, nil
+	}
+}
+
+// EncodeRejectError returns an encoder for errors returned by the reject
+// TemplateRepository endpoint.
+func EncodeRejectError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(ctx context.Context, err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		var en goa.GoaErrorNamer
+		if !errors.As(v, &en) {
+			return encodeError(ctx, w, v)
+		}
+		switch en.GoaErrorName() {
+		case "bad_request":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewRejectBadRequestResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusBadRequest)
+			return enc.Encode(body)
+		case "internal_error":
+			var res *goa.ServiceError
+			errors.As(v, &res)
+			enc := encoder(ctx, w)
+			var body any
+			if formatter != nil {
+				body = formatter(ctx, res)
+			} else {
+				body = NewRejectInternalErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", res.GoaErrorName())
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
 	}
 }
 

@@ -175,9 +175,11 @@ func ParseEndpoint(
 
 		templateRepositoryVerifyFlags = flag.NewFlagSet("verify", flag.ExitOnError)
 
-		templateRepositoryApproveFlags = flag.NewFlagSet("approve", flag.ExitOnError)
+		templateRepositoryApproveFlags    = flag.NewFlagSet("approve", flag.ExitOnError)
+		templateRepositoryApproveBodyFlag = templateRepositoryApproveFlags.String("body", "REQUIRED", "")
 
-		templateRepositoryRejectFlags = flag.NewFlagSet("reject", flag.ExitOnError)
+		templateRepositoryRejectFlags    = flag.NewFlagSet("reject", flag.ExitOnError)
+		templateRepositoryRejectBodyFlag = templateRepositoryRejectFlags.String("body", "REQUIRED", "")
 
 		templateRepositoryRegisterFlags = flag.NewFlagSet("register", flag.ExitOnError)
 
@@ -638,8 +640,10 @@ func ParseEndpoint(
 				endpoint = c.Verify()
 			case "approve":
 				endpoint = c.Approve()
+				data, err = templaterepositoryc.BuildApprovePayload(*templateRepositoryApproveBodyFlag)
 			case "reject":
 				endpoint = c.Reject()
+				data, err = templaterepositoryc.BuildRejectPayload(*templateRepositoryRejectBodyFlag)
 			case "register":
 				endpoint = c.Register()
 			case "archive":
@@ -1403,7 +1407,7 @@ func templateRepositoryCreateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository create --body '{\n      \"description\": \"Necessitatibus magnam et esse ex sapiente.\",\n      \"meta_data\": \"Est voluptate.\",\n      \"name\": \"Soluta voluptatem dolore.\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository create --body '{\n      \"description\": \"Vel doloremque et sunt recusandae sed.\",\n      \"meta_data\": \"Voluptates mollitia et voluptatem voluptatum eum consectetur.\",\n      \"name\": \"Aut quo voluptatem omnis.\"\n   }'")
 }
 
 func templateRepositorySubmitUsage() {
@@ -1421,7 +1425,7 @@ func templateRepositorySubmitUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository submit --body '{\n      \"did\": \"Vel doloremque et sunt recusandae sed.\",\n      \"forward_to\": \"Voluptates mollitia et voluptatem voluptatum eum consectetur.\",\n      \"review_comments\": [\n         \"Magni deleniti.\",\n         \"Ullam unde.\",\n         \"Excepturi dolor quaerat.\",\n         \"Unde doloribus.\"\n      ]\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository submit --body '{\n      \"did\": \"At qui autem quia voluptates.\",\n      \"forward_to\": \"Dolorem sapiente.\",\n      \"review_comments\": [\n         \"Et eos delectus.\",\n         \"Laudantium non accusamus eaque laudantium est id.\",\n         \"Voluptas et natus architecto rerum eum.\",\n         \"Beatae necessitatibus repellendus.\"\n      ]\n   }'")
 }
 
 func templateRepositoryUpdateUsage() {
@@ -1439,7 +1443,7 @@ func templateRepositoryUpdateUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository update --body '{\n      \"description\": \"Voluptas et natus architecto rerum eum.\",\n      \"did\": \"Et eos delectus.\",\n      \"meta_data\": \"Beatae necessitatibus repellendus.\",\n      \"name\": \"Laudantium non accusamus eaque laudantium est id.\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository update --body '{\n      \"description\": \"Rem cupiditate cupiditate.\",\n      \"did\": \"Et dicta vel.\",\n      \"meta_data\": \"Ab perferendis dolorem ut ea in.\",\n      \"name\": \"Facilis odio.\"\n   }'")
 }
 
 func templateRepositoryUpdateManageUsage() {
@@ -1505,7 +1509,7 @@ func templateRepositoryRetrieveByIDUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Aut aut.\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository retrieve-by-id --template-id \"Nesciunt ut.\"")
 }
 
 func templateRepositoryVerifyUsage() {
@@ -1527,6 +1531,7 @@ func templateRepositoryVerifyUsage() {
 func templateRepositoryApproveUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] template-repository approve", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -1534,15 +1539,17 @@ func templateRepositoryApproveUsage() {
 	fmt.Fprintln(os.Stderr, `mark template as approved, with optional decision notes.`)
 
 	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository approve")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository approve --body '{\n      \"decision_notes\": [\n         \"Et culpa.\",\n         \"Accusantium dolorum accusantium ut nesciunt.\",\n         \"Officia qui distinctio architecto.\"\n      ],\n      \"did\": \"Qui in voluptas delectus tempora velit quod.\"\n   }'")
 }
 
 func templateRepositoryRejectUsage() {
 	// Header with flags
 	fmt.Fprintf(os.Stderr, "%s [flags] template-repository reject", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -1550,10 +1557,11 @@ func templateRepositoryRejectUsage() {
 	fmt.Fprintln(os.Stderr, `mark template as rejected, requiring reason field.`)
 
 	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository reject")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "template-repository reject --body '{\n      \"did\": \"Voluptas recusandae.\",\n      \"reason\": \"Quia dolores aut.\"\n   }'")
 }
 
 func templateRepositoryRegisterUsage() {

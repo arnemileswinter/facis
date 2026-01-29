@@ -21,7 +21,7 @@ func BuildCreatePayload(templateRepositoryCreateBody string) (*templaterepositor
 	{
 		err = json.Unmarshal([]byte(templateRepositoryCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Necessitatibus magnam et esse ex sapiente.\",\n      \"meta_data\": \"Est voluptate.\",\n      \"name\": \"Soluta voluptatem dolore.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Vel doloremque et sunt recusandae sed.\",\n      \"meta_data\": \"Voluptates mollitia et voluptatem voluptatum eum consectetur.\",\n      \"name\": \"Aut quo voluptatem omnis.\"\n   }'")
 		}
 	}
 	v := &templaterepository.ContractTemplateCreateRequest{
@@ -35,16 +35,16 @@ func BuildCreatePayload(templateRepositoryCreateBody string) (*templaterepositor
 
 // BuildSubmitPayload builds the payload for the TemplateRepository submit
 // endpoint from CLI flags.
-func BuildSubmitPayload(templateRepositorySubmitBody string) (*templaterepository.TemplateContractSubmitRequest, error) {
+func BuildSubmitPayload(templateRepositorySubmitBody string) (*templaterepository.ContractTemplateSubmitRequest, error) {
 	var err error
 	var body SubmitRequestBody
 	{
 		err = json.Unmarshal([]byte(templateRepositorySubmitBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"did\": \"Vel doloremque et sunt recusandae sed.\",\n      \"forward_to\": \"Voluptates mollitia et voluptatem voluptatum eum consectetur.\",\n      \"review_comments\": [\n         \"Magni deleniti.\",\n         \"Ullam unde.\",\n         \"Excepturi dolor quaerat.\",\n         \"Unde doloribus.\"\n      ]\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"did\": \"At qui autem quia voluptates.\",\n      \"forward_to\": \"Dolorem sapiente.\",\n      \"review_comments\": [\n         \"Et eos delectus.\",\n         \"Laudantium non accusamus eaque laudantium est id.\",\n         \"Voluptas et natus architecto rerum eum.\",\n         \"Beatae necessitatibus repellendus.\"\n      ]\n   }'")
 		}
 	}
-	v := &templaterepository.TemplateContractSubmitRequest{
+	v := &templaterepository.ContractTemplateSubmitRequest{
 		Did:       body.Did,
 		ForwardTo: body.ForwardTo,
 	}
@@ -66,7 +66,7 @@ func BuildUpdatePayload(templateRepositoryUpdateBody string) (*templaterepositor
 	{
 		err = json.Unmarshal([]byte(templateRepositoryUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Voluptas et natus architecto rerum eum.\",\n      \"did\": \"Et eos delectus.\",\n      \"meta_data\": \"Beatae necessitatibus repellendus.\",\n      \"name\": \"Laudantium non accusamus eaque laudantium est id.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Rem cupiditate cupiditate.\",\n      \"did\": \"Et dicta vel.\",\n      \"meta_data\": \"Ab perferendis dolorem ut ea in.\",\n      \"name\": \"Facilis odio.\"\n   }'")
 		}
 	}
 	v := &templaterepository.ContractTemplateUpdateRequest{
@@ -88,6 +88,49 @@ func BuildRetrieveByIDPayload(templateRepositoryRetrieveByIDTemplateID string) (
 	}
 	v := &templaterepository.ContractTemplateRetrieveByIDRequest{}
 	v.TemplateID = templateID
+
+	return v, nil
+}
+
+// BuildApprovePayload builds the payload for the TemplateRepository approve
+// endpoint from CLI flags.
+func BuildApprovePayload(templateRepositoryApproveBody string) (*templaterepository.ContractTemplateApproveRequest, error) {
+	var err error
+	var body ApproveRequestBody
+	{
+		err = json.Unmarshal([]byte(templateRepositoryApproveBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"decision_notes\": [\n         \"Et culpa.\",\n         \"Accusantium dolorum accusantium ut nesciunt.\",\n         \"Officia qui distinctio architecto.\"\n      ],\n      \"did\": \"Qui in voluptas delectus tempora velit quod.\"\n   }'")
+		}
+	}
+	v := &templaterepository.ContractTemplateApproveRequest{
+		Did: body.Did,
+	}
+	if body.DecisionNotes != nil {
+		v.DecisionNotes = make([]string, len(body.DecisionNotes))
+		for i, val := range body.DecisionNotes {
+			v.DecisionNotes[i] = val
+		}
+	}
+
+	return v, nil
+}
+
+// BuildRejectPayload builds the payload for the TemplateRepository reject
+// endpoint from CLI flags.
+func BuildRejectPayload(templateRepositoryRejectBody string) (*templaterepository.ContractTemplateRejectRequest, error) {
+	var err error
+	var body RejectRequestBody
+	{
+		err = json.Unmarshal([]byte(templateRepositoryRejectBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"did\": \"Voluptas recusandae.\",\n      \"reason\": \"Quia dolores aut.\"\n   }'")
+		}
+	}
+	v := &templaterepository.ContractTemplateRejectRequest{
+		Did:    body.Did,
+		Reason: body.Reason,
+	}
 
 	return v, nil
 }

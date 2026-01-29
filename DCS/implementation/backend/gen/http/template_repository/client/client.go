@@ -275,10 +275,15 @@ func (c *Client) Verify() goa.Endpoint {
 // TemplateRepository service approve server.
 func (c *Client) Approve() goa.Endpoint {
 	var (
+		encodeRequest  = EncodeApproveRequest(c.encoder)
 		decodeResponse = DecodeApproveResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildApproveRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
 		if err != nil {
 			return nil, err
 		}
@@ -294,10 +299,15 @@ func (c *Client) Approve() goa.Endpoint {
 // TemplateRepository service reject server.
 func (c *Client) Reject() goa.Endpoint {
 	var (
+		encodeRequest  = EncodeRejectRequest(c.encoder)
 		decodeResponse = DecodeRejectResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildRejectRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
 		if err != nil {
 			return nil, err
 		}

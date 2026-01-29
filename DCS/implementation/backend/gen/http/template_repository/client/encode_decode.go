@@ -141,9 +141,9 @@ func (c *Client) BuildSubmitRequest(ctx context.Context, v any) (*http.Request, 
 // TemplateRepository submit server.
 func EncodeSubmitRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*templaterepository.TemplateContractSubmitRequest)
+		p, ok := v.(*templaterepository.ContractTemplateSubmitRequest)
 		if !ok {
-			return goahttp.ErrInvalidType("TemplateRepository", "submit", "*templaterepository.TemplateContractSubmitRequest", v)
+			return goahttp.ErrInvalidType("TemplateRepository", "submit", "*templaterepository.ContractTemplateSubmitRequest", v)
 		}
 		body := NewSubmitRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
@@ -188,7 +188,7 @@ func DecodeSubmitResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrValidationError("TemplateRepository", "submit", err)
 			}
-			res := NewSubmitTemplateContractSubmitResponseOK(&body)
+			res := NewSubmitContractTemplateSubmitResponseOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
@@ -683,9 +683,29 @@ func (c *Client) BuildApproveRequest(ctx context.Context, v any) (*http.Request,
 	return req, nil
 }
 
+// EncodeApproveRequest returns an encoder for requests sent to the
+// TemplateRepository approve server.
+func EncodeApproveRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*templaterepository.ContractTemplateApproveRequest)
+		if !ok {
+			return goahttp.ErrInvalidType("TemplateRepository", "approve", "*templaterepository.ContractTemplateApproveRequest", v)
+		}
+		body := NewApproveRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("TemplateRepository", "approve", err)
+		}
+		return nil
+	}
+}
+
 // DecodeApproveResponse returns a decoder for responses returned by the
 // TemplateRepository approve endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeApproveResponse may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeApproveResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -703,14 +723,47 @@ func DecodeApproveResponse(decoder func(*http.Response) goahttp.Decoder, restore
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body int
+				body ApproveResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("TemplateRepository", "approve", err)
 			}
-			return body, nil
+			err = ValidateApproveResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "approve", err)
+			}
+			res := NewApproveContractTemplateApproveResponseOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body ApproveBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "approve", err)
+			}
+			err = ValidateApproveBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "approve", err)
+			}
+			return nil, NewApproveBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body ApproveInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "approve", err)
+			}
+			err = ValidateApproveInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "approve", err)
+			}
+			return nil, NewApproveInternalError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "approve", resp.StatusCode, string(body))
@@ -733,9 +786,29 @@ func (c *Client) BuildRejectRequest(ctx context.Context, v any) (*http.Request, 
 	return req, nil
 }
 
+// EncodeRejectRequest returns an encoder for requests sent to the
+// TemplateRepository reject server.
+func EncodeRejectRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*templaterepository.ContractTemplateRejectRequest)
+		if !ok {
+			return goahttp.ErrInvalidType("TemplateRepository", "reject", "*templaterepository.ContractTemplateRejectRequest", v)
+		}
+		body := NewRejectRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("TemplateRepository", "reject", err)
+		}
+		return nil
+	}
+}
+
 // DecodeRejectResponse returns a decoder for responses returned by the
 // TemplateRepository reject endpoint. restoreBody controls whether the
 // response body should be restored after having been read.
+// DecodeRejectResponse may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): http.StatusBadRequest
+//   - "internal_error" (type *goa.ServiceError): http.StatusInternalServerError
+//   - error: internal error
 func DecodeRejectResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
@@ -753,14 +826,47 @@ func DecodeRejectResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body int
+				body RejectResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("TemplateRepository", "reject", err)
 			}
-			return body, nil
+			err = ValidateRejectResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "reject", err)
+			}
+			res := NewRejectContractTemplateRejectResponseOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body RejectBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "reject", err)
+			}
+			err = ValidateRejectBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "reject", err)
+			}
+			return nil, NewRejectBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body RejectInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("TemplateRepository", "reject", err)
+			}
+			err = ValidateRejectInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("TemplateRepository", "reject", err)
+			}
+			return nil, NewRejectInternalError(&body)
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("TemplateRepository", "reject", resp.StatusCode, string(body))

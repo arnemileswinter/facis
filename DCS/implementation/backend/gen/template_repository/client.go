@@ -69,13 +69,13 @@ func (c *Client) Create(ctx context.Context, p *ContractTemplateCreateRequest) (
 //   - "bad_request" (type *goa.ServiceError): Bad request
 //   - "internal_error" (type *goa.ServiceError): Internal server error
 //   - error: internal error
-func (c *Client) Submit(ctx context.Context, p *TemplateContractSubmitRequest) (res *TemplateContractSubmitResponse, err error) {
+func (c *Client) Submit(ctx context.Context, p *ContractTemplateSubmitRequest) (res *ContractTemplateSubmitResponse, err error) {
 	var ires any
 	ires, err = c.SubmitEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(*TemplateContractSubmitResponse), nil
+	return ires.(*ContractTemplateSubmitResponse), nil
 }
 
 // Update calls the "update" endpoint of the "TemplateRepository" service.
@@ -153,23 +153,31 @@ func (c *Client) Verify(ctx context.Context) (res any, err error) {
 }
 
 // Approve calls the "approve" endpoint of the "TemplateRepository" service.
-func (c *Client) Approve(ctx context.Context) (res int, err error) {
+// Approve may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): Bad request
+//   - "internal_error" (type *goa.ServiceError): Internal server error
+//   - error: internal error
+func (c *Client) Approve(ctx context.Context, p *ContractTemplateApproveRequest) (res *ContractTemplateApproveResponse, err error) {
 	var ires any
-	ires, err = c.ApproveEndpoint(ctx, nil)
+	ires, err = c.ApproveEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(int), nil
+	return ires.(*ContractTemplateApproveResponse), nil
 }
 
 // Reject calls the "reject" endpoint of the "TemplateRepository" service.
-func (c *Client) Reject(ctx context.Context) (res int, err error) {
+// Reject may return the following errors:
+//   - "bad_request" (type *goa.ServiceError): Bad request
+//   - "internal_error" (type *goa.ServiceError): Internal server error
+//   - error: internal error
+func (c *Client) Reject(ctx context.Context, p *ContractTemplateRejectRequest) (res *ContractTemplateRejectResponse, err error) {
 	var ires any
-	ires, err = c.RejectEndpoint(ctx, nil)
+	ires, err = c.RejectEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(int), nil
+	return ires.(*ContractTemplateRejectResponse), nil
 }
 
 // Register calls the "register" endpoint of the "TemplateRepository" service.

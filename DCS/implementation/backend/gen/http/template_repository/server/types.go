@@ -48,6 +48,24 @@ type UpdateRequestBody struct {
 	MetaData any `form:"meta_data,omitempty" json:"meta_data,omitempty" xml:"meta_data,omitempty"`
 }
 
+// ApproveRequestBody is the type of the "TemplateRepository" service "approve"
+// endpoint HTTP request body.
+type ApproveRequestBody struct {
+	// Decentralized Identifier of the contract template
+	Did *string `form:"did,omitempty" json:"did,omitempty" xml:"did,omitempty"`
+	// A list of decision notes
+	DecisionNotes []string `form:"decision_notes,omitempty" json:"decision_notes,omitempty" xml:"decision_notes,omitempty"`
+}
+
+// RejectRequestBody is the type of the "TemplateRepository" service "reject"
+// endpoint HTTP request body.
+type RejectRequestBody struct {
+	// Decentralized Identifier of the contract template
+	Did *string `form:"did,omitempty" json:"did,omitempty" xml:"did,omitempty"`
+	// Reason for rejecting the contract template
+	Reason *string `form:"reason,omitempty" json:"reason,omitempty" xml:"reason,omitempty"`
+}
+
 // CreateResponseBody is the type of the "TemplateRepository" service "create"
 // endpoint HTTP response body.
 type CreateResponseBody struct {
@@ -94,6 +112,20 @@ type RetrieveByIDResponseBody struct {
 	CreatedAt string `form:"created_at" json:"created_at" xml:"created_at"`
 	// The metadata of the contract template
 	MetaData any `form:"meta_data" json:"meta_data" xml:"meta_data"`
+}
+
+// ApproveResponseBody is the type of the "TemplateRepository" service
+// "approve" endpoint HTTP response body.
+type ApproveResponseBody struct {
+	// Decentralized Identifier of the contract template
+	Did string `form:"did" json:"did" xml:"did"`
+}
+
+// RejectResponseBody is the type of the "TemplateRepository" service "reject"
+// endpoint HTTP response body.
+type RejectResponseBody struct {
+	// Decentralized Identifier of the contract template
+	Did string `form:"did" json:"did" xml:"did"`
 }
 
 // CreateBadRequestResponseBody is the type of the "TemplateRepository" service
@@ -279,6 +311,78 @@ type RetrieveByIDInternalErrorResponseBody struct {
 	Fault bool `form:"fault" json:"fault" xml:"fault"`
 }
 
+// ApproveBadRequestResponseBody is the type of the "TemplateRepository"
+// service "approve" endpoint HTTP response body for the "bad_request" error.
+type ApproveBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// ApproveInternalErrorResponseBody is the type of the "TemplateRepository"
+// service "approve" endpoint HTTP response body for the "internal_error" error.
+type ApproveInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// RejectBadRequestResponseBody is the type of the "TemplateRepository" service
+// "reject" endpoint HTTP response body for the "bad_request" error.
+type RejectBadRequestResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
+// RejectInternalErrorResponseBody is the type of the "TemplateRepository"
+// service "reject" endpoint HTTP response body for the "internal_error" error.
+type RejectInternalErrorResponseBody struct {
+	// Name is the name of this class of errors.
+	Name string `form:"name" json:"name" xml:"name"`
+	// ID is a unique identifier for this particular occurrence of the problem.
+	ID string `form:"id" json:"id" xml:"id"`
+	// Message is a human-readable explanation specific to this occurrence of the
+	// problem.
+	Message string `form:"message" json:"message" xml:"message"`
+	// Is the error temporary?
+	Temporary bool `form:"temporary" json:"temporary" xml:"temporary"`
+	// Is the error a timeout?
+	Timeout bool `form:"timeout" json:"timeout" xml:"timeout"`
+	// Is the error a server-side fault?
+	Fault bool `form:"fault" json:"fault" xml:"fault"`
+}
+
 // ContractTemplateRetrieveResponseResponse is used to define fields on
 // response body types.
 type ContractTemplateRetrieveResponseResponse struct {
@@ -313,7 +417,7 @@ func NewCreateResponseBody(res *templaterepository.ContractTemplateCreateRespons
 
 // NewSubmitResponseBody builds the HTTP response body from the result of the
 // "submit" endpoint of the "TemplateRepository" service.
-func NewSubmitResponseBody(res *templaterepository.TemplateContractSubmitResponse) *SubmitResponseBody {
+func NewSubmitResponseBody(res *templaterepository.ContractTemplateSubmitResponse) *SubmitResponseBody {
 	body := &SubmitResponseBody{
 		Did: res.Did,
 	}
@@ -356,6 +460,24 @@ func NewRetrieveByIDResponseBody(res *templaterepository.ContractTemplateRetriev
 		CreatedBy:      res.CreatedBy,
 		CreatedAt:      res.CreatedAt,
 		MetaData:       res.MetaData,
+	}
+	return body
+}
+
+// NewApproveResponseBody builds the HTTP response body from the result of the
+// "approve" endpoint of the "TemplateRepository" service.
+func NewApproveResponseBody(res *templaterepository.ContractTemplateApproveResponse) *ApproveResponseBody {
+	body := &ApproveResponseBody{
+		Did: res.Did,
+	}
+	return body
+}
+
+// NewRejectResponseBody builds the HTTP response body from the result of the
+// "reject" endpoint of the "TemplateRepository" service.
+func NewRejectResponseBody(res *templaterepository.ContractTemplateRejectResponse) *RejectResponseBody {
+	body := &RejectResponseBody{
+		Did: res.Did,
 	}
 	return body
 }
@@ -501,6 +623,62 @@ func NewRetrieveByIDInternalErrorResponseBody(res *goa.ServiceError) *RetrieveBy
 	return body
 }
 
+// NewApproveBadRequestResponseBody builds the HTTP response body from the
+// result of the "approve" endpoint of the "TemplateRepository" service.
+func NewApproveBadRequestResponseBody(res *goa.ServiceError) *ApproveBadRequestResponseBody {
+	body := &ApproveBadRequestResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewApproveInternalErrorResponseBody builds the HTTP response body from the
+// result of the "approve" endpoint of the "TemplateRepository" service.
+func NewApproveInternalErrorResponseBody(res *goa.ServiceError) *ApproveInternalErrorResponseBody {
+	body := &ApproveInternalErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewRejectBadRequestResponseBody builds the HTTP response body from the
+// result of the "reject" endpoint of the "TemplateRepository" service.
+func NewRejectBadRequestResponseBody(res *goa.ServiceError) *RejectBadRequestResponseBody {
+	body := &RejectBadRequestResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
+// NewRejectInternalErrorResponseBody builds the HTTP response body from the
+// result of the "reject" endpoint of the "TemplateRepository" service.
+func NewRejectInternalErrorResponseBody(res *goa.ServiceError) *RejectInternalErrorResponseBody {
+	body := &RejectInternalErrorResponseBody{
+		Name:      res.Name,
+		ID:        res.ID,
+		Message:   res.Message,
+		Temporary: res.Temporary,
+		Timeout:   res.Timeout,
+		Fault:     res.Fault,
+	}
+	return body
+}
+
 // NewCreateContractTemplateCreateRequest builds a TemplateRepository service
 // create endpoint payload.
 func NewCreateContractTemplateCreateRequest(body *CreateRequestBody) *templaterepository.ContractTemplateCreateRequest {
@@ -513,10 +691,10 @@ func NewCreateContractTemplateCreateRequest(body *CreateRequestBody) *templatere
 	return v
 }
 
-// NewSubmitTemplateContractSubmitRequest builds a TemplateRepository service
+// NewSubmitContractTemplateSubmitRequest builds a TemplateRepository service
 // submit endpoint payload.
-func NewSubmitTemplateContractSubmitRequest(body *SubmitRequestBody) *templaterepository.TemplateContractSubmitRequest {
-	v := &templaterepository.TemplateContractSubmitRequest{
+func NewSubmitContractTemplateSubmitRequest(body *SubmitRequestBody) *templaterepository.ContractTemplateSubmitRequest {
+	v := &templaterepository.ContractTemplateSubmitRequest{
 		Did:       *body.Did,
 		ForwardTo: body.ForwardTo,
 	}
@@ -552,6 +730,33 @@ func NewRetrieveByIDContractTemplateRetrieveByIDRequest(templateID string) *temp
 	return v
 }
 
+// NewApproveContractTemplateApproveRequest builds a TemplateRepository service
+// approve endpoint payload.
+func NewApproveContractTemplateApproveRequest(body *ApproveRequestBody) *templaterepository.ContractTemplateApproveRequest {
+	v := &templaterepository.ContractTemplateApproveRequest{
+		Did: *body.Did,
+	}
+	if body.DecisionNotes != nil {
+		v.DecisionNotes = make([]string, len(body.DecisionNotes))
+		for i, val := range body.DecisionNotes {
+			v.DecisionNotes[i] = val
+		}
+	}
+
+	return v
+}
+
+// NewRejectContractTemplateRejectRequest builds a TemplateRepository service
+// reject endpoint payload.
+func NewRejectContractTemplateRejectRequest(body *RejectRequestBody) *templaterepository.ContractTemplateRejectRequest {
+	v := &templaterepository.ContractTemplateRejectRequest{
+		Did:    *body.Did,
+		Reason: *body.Reason,
+	}
+
+	return v
+}
+
 // ValidateSubmitRequestBody runs the validations defined on SubmitRequestBody
 func ValidateSubmitRequestBody(body *SubmitRequestBody) (err error) {
 	if body.Did == nil {
@@ -564,6 +769,25 @@ func ValidateSubmitRequestBody(body *SubmitRequestBody) (err error) {
 func ValidateUpdateRequestBody(body *UpdateRequestBody) (err error) {
 	if body.Did == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("did", "body"))
+	}
+	return
+}
+
+// ValidateApproveRequestBody runs the validations defined on ApproveRequestBody
+func ValidateApproveRequestBody(body *ApproveRequestBody) (err error) {
+	if body.Did == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("did", "body"))
+	}
+	return
+}
+
+// ValidateRejectRequestBody runs the validations defined on RejectRequestBody
+func ValidateRejectRequestBody(body *RejectRequestBody) (err error) {
+	if body.Did == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("did", "body"))
+	}
+	if body.Reason == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("reason", "body"))
 	}
 	return
 }
