@@ -25,6 +25,7 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 	if cmd.CurrentContractTemplateState != template_state.Reviewed {
 		return errors.New("current template contract state is invalid")
 	}
+
 	query := `UPDATE contract_templates SET
         	state = $2
     	WHERE did = $1
