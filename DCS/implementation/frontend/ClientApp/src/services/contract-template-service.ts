@@ -1,13 +1,13 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const API_BASE_URL = import.meta.env.API_BASE_URL
 
 const http = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: "http://localhost:8991",
     headers: { 'Content-Type': 'application/json' }
 })
 
-export const TemplateService = {
+export const ContractTemplateService = {
     create(data: any) {
         return http.post('/template/create', data).then(res => res.data)
     },
@@ -21,7 +21,12 @@ export const TemplateService = {
     },
 
     retrieve() {
-        return http.get('/template/retrieve').then(res => res.data)
+        return http.get('/template/retrieve')
+            .then(res => Array.isArray(res.data) ? res.data : [])
+            .catch(err => {
+                console.error('Retrieve Error:', err)
+                return []
+            })
     },
 
     retrieveById(templateId: string) {
