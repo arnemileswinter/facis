@@ -49,6 +49,14 @@ Generate the Goa code under `gen/` after modifying `design/design.go`:
 goa gen digital-contracting-service/design
 ```
 
+## Running tests
+```
+export DATABASE_URL="user=username password=password dbname=test_postgres sslmode=disable"
+```
+
+```
+go test -v ./...
+```
 
 ## Running the API Server
 

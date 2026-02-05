@@ -45,7 +45,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Draft {
-				nextTemplateState = template_state.Reviewed
+				nextTemplateState = template_state.Draft
 			} else {
 				return errors.New("invalid action flag for this contract template state")
 			}

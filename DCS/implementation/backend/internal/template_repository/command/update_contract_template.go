@@ -2,6 +2,7 @@ package command
 
 import (
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"errors"
 	"log"
 	"strconv"
@@ -12,6 +13,8 @@ import (
 type UpdateTemplateContractCommand struct {
 	DID       string
 	UpdatedBy string
+
+	CurrentContractTemplateState template_state.TemplateState
 
 	Name        *string
 	Description *string
@@ -24,6 +27,11 @@ type UpdateTemplateContractHandler struct {
 }
 
 func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand) error {
+
+	if cmd.CurrentContractTemplateState != template_state.Draft {
+		return errors.New("invalid contract template state")
+	}
+
 	query := `UPDATE contract_templates SET`
 
 	var params []interface{}
