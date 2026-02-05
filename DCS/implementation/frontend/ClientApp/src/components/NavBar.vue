@@ -3,26 +3,28 @@
     <div class="flex flex-col flex-grow bg-gray-900 pt-5 overflow-y-auto border-r border-white/5">
 
       <div class="flex items-center flex-shrink-0 px-6 mb-8">
-        <!-- <img class="h-8 w-auto" src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500" alt="Logo" /> -->
-        <div class=" mb-10 text-white font-bold text-2xl tracking-tight">
-          DCS </div>
+        <div class="text-white font-bold text-2xl tracking-tight">DCS</div>
       </div>
+
       <nav class="flex-1 px-3 space-y-1">
-        <RouterLink v-for="route in navigationRoutes" :key="route.path" :to="route.path" v-slot="{ isActive }"
-          class="group flex items-center px-3 py-2 text-sm font-semibold rounded-md transition-colors duration-200"
-          :class="[
+        <RouterLink v-for="route in navigationRoutes" :key="route.path" :to="route.path" custom
+          v-slot="{ isActive, navigate }">
+          <a @click="navigate" href="javascript:void(0)" :class="[
             isActive
               ? 'bg-gray-800 text-white'
-              : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              : 'text-gray-400 hover:text-white hover:bg-gray-800',
+            'group flex items-center px-3 py-2 text-sm font-semibold rounded-md transition-colors duration-200 cursor-pointer'
           ]">
-          <component :is="route.meta?.icon" class="flex-shrink-0 w-6 h-6 mr-3 transition-colors duration-200"
-            :class="[isActive ? 'text-white' : 'text-gray-400 group-hover:text-white']" aria-hidden="true" />
-
-          {{ route.name }}
+            <component :is="route.meta?.icon" :class="[
+              isActive ? 'text-white' : 'text-gray-400 group-hover:text-white',
+              'flex-shrink-0 w-6 h-6 mr-3 transition-colors duration-200'
+            ]" aria-hidden="true" />
+            {{ route.name }}
+          </a>
         </RouterLink>
       </nav>
 
-      <div class="flex-shrink-0 flex p-4 bg-gray-900">
+      <div class="flex-shrink-0 flex p-4 bg-gray-900 border-t border-white/5">
         <div class="flex items-center w-full">
           <img class="h-9 w-9 rounded-full ring-2 ring-white/10"
             src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
@@ -35,12 +37,11 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 
 const router = useRouter()
 
