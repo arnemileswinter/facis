@@ -4,17 +4,20 @@ import type { TableItem } from '../models/table-item'
 import Pagination from './Pagination.vue'
 import TableRow from './TableRow.vue'
 
-const { items } = defineProps<{
+const { items, headers = [] } = defineProps<{
   items: T[]
+  readonly headers?: string[]
 }>()
 
 const itemsPerPage = ref(4)
 
-const headers = ['id', 'name']
+if (headers.length === 0) {
+  headers.push('id', 'name')
+}
 
 const pages = computed(() => Math.ceil(items.length / itemsPerPage.value))
 const currentPage = ref(1)
-const sortBy = ref('id')
+const sortBy = ref(headers[0]!)
 const sortOrder = ref(1)
 
 const itemsSorted = computed(() => {
@@ -47,7 +50,7 @@ function sortItemsBy(item: string) {
 <template>
   <div class="m-4">
     <div class="overflow-x-auto">
-      <table class="m-4">
+      <table class="m-4 w-full">
         <thead>
           <tr>
             <template v-for="header in headers">
@@ -71,8 +74,10 @@ function sortItemsBy(item: string) {
         </thead>
         <tbody>
           <template v-for="item in itemsDisplayed">
-            <TableRow :item="item">
-              <template #extraCols="{ item }"></template>
+            <TableRow :item="item" :hide-default="headers.length > 2">
+              <template #extraCols="{ item }">
+                <slot name="extraCols" :item="item"></slot>
+              </template>
             </TableRow>
           </template>
         </tbody>
