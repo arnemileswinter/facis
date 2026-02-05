@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Table from '../components/Table.vue'
+import DataTable from '../components/DataTable.vue'
 import type { TableItem } from '../models/table-item'
 
 const tableItems: TableItem[] = [
@@ -10,5 +10,5 @@ const tableItems: TableItem[] = [
 </script>
 
 <template>
-  <Table :items="tableItems" />
+  <DataTable :items="tableItems" />
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends TableItem">
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref } from 'vue'
 import type { TableItem } from '../models/table-item'
 import Pagination from './Pagination.vue'
 import TableRow from './TableRow.vue'
@@ -8,11 +8,12 @@ const { items } = defineProps<{
   items: T[]
 }>()
 
-const itemsPerPage = ref(2)
+const itemsPerPage = ref(4)
 
 const headers = ['id', 'name']
-const pages = ref(0)
-const page = ref(1)
+
+const pages = computed(() => Math.ceil(items.length / itemsPerPage.value))
+const currentPage = ref(1)
 const sortBy = ref('id')
 const sortOrder = ref(1)
 
@@ -27,13 +28,13 @@ const itemsSorted = computed(() => {
 })
 
 const itemsDisplayed = computed(() => {
-  const from = (page.value - 1) * itemsPerPage.value
+  const from = (currentPage.value - 1) * itemsPerPage.value
   const to = from + itemsPerPage.value
   return itemsSorted.value.slice(from, to)
 })
 
-function changePage(selectedPage: number) {
-  page.value = selectedPage
+function handlePageChange(selectedPage: number) {
+  currentPage.value = selectedPage
 }
 
 function sortItemsBy(item: string) {
@@ -41,10 +42,6 @@ function sortItemsBy(item: string) {
   sortOrder.value = sortBy.value === sorter ? -sortOrder.value : 1
   sortBy.value = sorter
 }
-
-watchEffect(() => {
-  pages.value = Math.ceil(items.length / itemsPerPage.value)
-})
 </script>
 
 <template>
@@ -56,14 +53,14 @@ watchEffect(() => {
             <template v-for="header in headers">
               <th>
                 <button
-                  class="cursor-pointer p-2"
+                  class="cursor-pointer p-2 hover:bg-gray-200"
                   :class="{ border: header === sortBy }"
                   @click="sortItemsBy(header)"
                   :aria-sort="
                     header === sortBy ? (sortOrder === 1 ? 'ascending' : 'descending') : 'none'
                   "
                 >
-                  <span>{{ header.toLocaleUpperCase('de') }}</span
+                  <span class="mr-1">{{ header.toLocaleUpperCase('de') }}</span
                   ><span v-if="header !== sortBy">↕</span><span v-else-if="sortOrder === 1">↑</span
                   ><span v-else>↓</span>
                 </button>
@@ -75,12 +72,12 @@ watchEffect(() => {
         <tbody>
           <template v-for="item in itemsDisplayed">
             <TableRow :item="item">
-              <template #extraRows="{ item }"></template>
+              <template #extraCols="{ item }"></template>
             </TableRow>
           </template>
         </tbody>
       </table>
     </div>
-    <Pagination v-model:pages="pages" @change="changePage" />
+    <Pagination v-model:pages="pages" @page-change="handlePageChange" />
   </div>
 </template>

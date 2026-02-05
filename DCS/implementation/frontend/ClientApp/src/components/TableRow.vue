@@ -10,9 +10,9 @@ defineProps<{
   <tr>
     <th class="pl-8">{{ item.id }}</th>
     <td class="pl-8">{{ item.name }}</td>
-    <slot name="extraRows" :item="item"></slot>
+    <slot name="extraCols" :item="item"></slot>
     <td class="pl-8">
-      <button class="cursor-pointer">Edit</button>
+      <button class="cursor-pointer border p-1 hover:bg-gray-200">Edit</button>
     </td>
   </tr>
 </template>

@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 
 const emit = defineEmits<{
-  change: [value: number]
+  pageChange: [value: number]
 }>()
 
 const pages = defineModel<number>('pages', {
@@ -14,7 +14,7 @@ const currentPage = ref(1)
 
 watch(currentPage, (newPage, oldPage) => {
   if (newPage !== oldPage) {
-    emit('change', currentPage.value)
+    emit('pageChange', currentPage.value)
   }
 })
 </script>

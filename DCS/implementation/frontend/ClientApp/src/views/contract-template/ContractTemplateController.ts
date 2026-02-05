@@ -1,8 +1,9 @@
-import { ref, onMounted } from 'vue'
+import { onMounted, ref, type Ref } from 'vue'
+import type { ContractTemplate } from '../../models/contract-template'
 import { ContractTemplateService } from '../../services/contract-template-service'
 
 export function useTemplateTable() {
-    const templates = ref([])
+    const templates: Ref<ContractTemplate[]> = ref([])
     const loading = ref(true)
     const error = ref('')
 
@@ -12,6 +13,7 @@ export function useTemplateTable() {
         try {
             const data = await ContractTemplateService.retrieve()
             console.log(data)
+            templates.value = data
 
         } catch (err: any) {
             error.value = err.message || 'Fehler beim Laden der Templates'
