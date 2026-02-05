@@ -1,4 +1,7 @@
 <template>
+  <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">
+    Contract Templates
+  </h2>
   <div>
     <div v-if="loading">Lade Templates...</div>
     <div v-else-if="error">{{ error }}</div>
@@ -18,7 +21,7 @@ import DataTable from '../../components/DataTable.vue'
 import { useTemplateTable } from './ContractTemplateController'
 
 const { templates, loading, error, refresh } = useTemplateTable()
- const headers = [
+const headers = [
   'did',
   'documentNumber',
   'name',
