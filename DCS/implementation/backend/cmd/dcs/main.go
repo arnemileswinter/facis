@@ -49,11 +49,12 @@ func main() {
 	}
 	log.Print(ctx, log.KV{K: "http-port", V: *httpPortF})
 
-	db, err := NewDatabaseConnection(ctx)
+	db, err := NewDatabaseConnection()
 	if err != nil {
 		log.Fatalf(ctx, err, "Could not connect to database")
 		os.Exit(1)
 	}
+	defer db.Close()
 
 	templateRepositorySrv, err := service.NewTemplateRepository(ctx, db)
 	if err != nil {

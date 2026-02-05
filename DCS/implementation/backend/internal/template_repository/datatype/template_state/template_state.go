@@ -10,14 +10,14 @@ type TemplateState string
 
 const (
 	Draft     TemplateState = "DRAFT"
-	Submitted               = "SUBMITTED"
-	Reviewed                = "REVIEWED"
-	Approved                = "APPROVED"
+	Submitted TemplateState = "SUBMITTED"
+	Reviewed  TemplateState = "REVIEWED"
+	Approved  TemplateState = "APPROVED"
 
-	Changed    = "CHANGED"
-	Archived   = "ARCHIVED"
-	Deprecated = "DEPRECATED"
-	Deleted    = "DELETED"
+	Changed    TemplateState = "CHANGED"
+	Archived   TemplateState = "ARCHIVED"
+	Deprecated TemplateState = "DEPRECATED"
+	Deleted    TemplateState = "DELETED"
 )
 
 var validStates = map[TemplateState]bool{

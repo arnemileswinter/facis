@@ -21,8 +21,10 @@ Preliminary design, experiments, and preparatory work for the Digital Contractin
 │   └── template_repository.go      # Design description for the Template Repository api
 ├── gen/              # Goa-generated transport & types (DO NOT EDIT)
 ├── internal
-|   └── datatype/     # Used data types for the application
-│   └── service/      # Application service implementations
+│   └── base/         # Files that are used by every DCS component
+│   └── datatype/     # Used data types for the application
+│   └── service/      # Application endpoint implementations
+│   └── template_repository     # Implementation for the template repository component
 ├── go.mod
 ├── go.sum
 └── README.md
