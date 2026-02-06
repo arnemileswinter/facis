@@ -20,12 +20,12 @@ watch(currentPage, (newPage, oldPage) => {
 </script>
 
 <template>
-  <div v-if="pages > 0" class="flex justify-center">
-    <template v-for="page in pages">
+  <div v-if="pages > 0" class="join w-full justify-center">
+    <template v-for="page in pages" :key="page">
       <button
         type="button"
-        class="border p-2 my-0 cursor-pointer hover:bg-blue-200"
-        :class="{ 'bg-amber-400': page == currentPage }"
+        class="join-item btn btn-outline btn-accent"
+        :class="{ 'btn-active': page == currentPage }"
         @click="currentPage = page"
       >
         {{ page }}

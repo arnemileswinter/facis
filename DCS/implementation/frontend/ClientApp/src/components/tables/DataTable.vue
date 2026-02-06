@@ -1,8 +1,9 @@
 <script setup lang="ts" generic="T extends TableItem">
 import { computed, ref } from 'vue'
-import type { TableItem } from '../models/table-item'
-import Pagination from './Pagination.vue'
+import type { TableItem } from '../../models/table-item'
+import Pagination from '../Pagination.vue'
 import TableRow from './TableRow.vue'
+import { BarsArrowDownIcon, BarsArrowUpIcon, ChevronUpDownIcon } from '@heroicons/vue/20/solid'
 
 const { items, headers = [] } = defineProps<{
   items: T[]
@@ -49,23 +50,23 @@ function sortItemsBy(item: string) {
 
 <template>
   <div class="m-4">
-    <div class="overflow-x-auto">
-      <table class="m-4 w-full">
+    <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+      <table class="table m-4 w-full">
         <thead>
           <tr>
             <template v-for="header in headers">
               <th>
                 <button
-                  class="cursor-pointer p-2 hover:bg-gray-200"
-                  :class="{ border: header === sortBy }"
+                  class="btn btn-ghost p-2"
+                  :class="{ 'btn-outline': header === sortBy }"
                   @click="sortItemsBy(header)"
-                  :aria-sort="
-                    header === sortBy ? (sortOrder === 1 ? 'ascending' : 'descending') : 'none'
-                  "
+                  :aria-sort="header === sortBy ? (sortOrder === 1 ? 'ascending' : 'descending') : 'none'"
                 >
-                  <span class="mr-1">{{ header.toLocaleUpperCase('de') }}</span
-                  ><span v-if="header !== sortBy">↕</span><span v-else-if="sortOrder === 1">↑</span
-                  ><span v-else>↓</span>
+                  <span>{{ header.toLocaleUpperCase('de') }}</span
+                  ><ChevronUpDownIcon v-if="header !== sortBy" class="w-5 h-5" /><BarsArrowUpIcon
+                    v-else-if="sortOrder === 1"
+                    class="w-5 h-5"
+                  /><BarsArrowDownIcon v-else class="w-5 h-5" />
                 </button>
               </th>
             </template>
@@ -73,7 +74,7 @@ function sortItemsBy(item: string) {
           </tr>
         </thead>
         <tbody>
-          <template v-for="item in itemsDisplayed">
+          <template v-for="(item, i) in itemsDisplayed" :key="i">
             <TableRow :item="item" :hide-default="headers.length > 2">
               <template #extraCols="{ item }">
                 <slot name="extraCols" :item="item"></slot>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DataTable from '../components/DataTable.vue'
+import DataTable from '../components/tables/DataTable.vue'
 import type { TableItem } from '../models/table-item'
 
 const tableItems: TableItem[] = [

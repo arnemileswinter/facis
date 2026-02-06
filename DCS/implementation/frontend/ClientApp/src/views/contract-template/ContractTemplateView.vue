@@ -1,5 +1,5 @@
 <template>
-  <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">
+  <h2 class="text-2xl/7 font-bold sm:truncate sm:text-3xl sm:tracking-tight">
     Contract Templates
   </h2>
   <button class="btn">Neu</button>
@@ -13,13 +13,15 @@
           <ContractTemplateTableRowData :template="item" />
         </template>
       </DataTable>
+      <TemplateList :items="templates" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import ContractTemplateTableRowData from '../../components/ContractTemplateTableRowData.vue'
-import DataTable from '../../components/DataTable.vue'
+import ContractTemplateTableRowData from '../../components/tables/ContractTemplateTableRowData.vue'
+import DataTable from '../../components/tables/DataTable.vue'
+import TemplateList from '../../components/lists/template-list/TemplateList.vue'
 import { useTemplateTable } from './ContractTemplateController'
 
 const { templates, loading, error, refresh } = useTemplateTable()
