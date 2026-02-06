@@ -2,6 +2,8 @@
   <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight dark:text-white">
     Contract Templates
   </h2>
+  <button class="btn">Neu</button>
+
   <div>
     <div v-if="loading">Lade Templates...</div>
     <div v-else-if="error">{{ error }}</div>

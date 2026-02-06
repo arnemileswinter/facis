@@ -2,9 +2,9 @@ import type { ContractTemplateType } from "../types/contract-template-type"
 
 export interface ContractTemplate {
     did: string
-    createdBy: string
-    createdAt: string
-    documentNumber: number
+    created_by: string
+    created_at: string
+    document_number: number
     version: number
     state: ContractTemplateType
     name: string

@@ -1,11 +1,13 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
 @layer base {
-  html, body, #app {
-    /* Ein etwas helleres Dunkelgrau für den Hauptinhalt */
-    background-color: var(--color-gray-800); 
-    color: var(--color-gray-100);
-    margin: 0;
-    min-height: 100vh;
-  }
+    html,
+    body,
+    #app {
+        background-color: var(--color-gray-800);
+        color: var(--color-gray-100);
+        margin: 0;
+        min-height: 100vh;
+    }
 }
