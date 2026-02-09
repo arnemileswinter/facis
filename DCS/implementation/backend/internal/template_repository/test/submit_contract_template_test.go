@@ -33,6 +33,11 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		ReviewComments: []string{},
+		Assignees: []string{
+			"Test User 2",
+			"Test User 3",
+			"Test User 4",
+		},
 	}
 	handler := command.SubmitTemplateContractHandler{
 		Ctx: ctx,

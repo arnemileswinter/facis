@@ -45,7 +45,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 		Description: cmd.Description,
 		MetaData:    cmd.MetaData,
 	}
-	err = template_repository.CreateContractTemplate(ctx, tx, data)
+	createdAt, err := template_repository.CreateContractTemplate(ctx, tx, data)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 		Name:        cmd.Name,
 		Description: cmd.Description,
 		MetaData:    cmd.MetaData,
-		OccurredAt:  time.Now(),
+		OccurredAt:  *createdAt,
 	}
 	err = event.CreateNewEvent(h.Ctx, tx, evt)
 	if err != nil {

@@ -27,7 +27,7 @@ type ContractTemplateData struct {
 	MetaData       *datatype.JSON               `db:"meta_data"`
 }
 
-func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) error {
+func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) (*time.Time, error) {
 	query := `
     INSERT INTO contract_templates (
         did, created_by, updated_by, state, name, 
@@ -47,10 +47,10 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 		data.MetaData,
 	).Scan(&createdAt)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &createdAt, nil
 }
 
 func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string) (*ContractTemplateData, error) {

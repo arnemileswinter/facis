@@ -5,6 +5,7 @@ import (
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/datatype/action_flag"
+	"digital-contracting-service/internal/template_repository/datatype/review_task_state"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	templateevents "digital-contracting-service/internal/template_repository/event"
 	"errors"
@@ -18,6 +19,7 @@ type SubmitTemplateContractCommand struct {
 	SubmittedBy    string
 	ActionFlag     *action_flag.ActionFlag
 	ReviewComments []string
+	Assignees      []string
 }
 
 type SubmitTemplateContractHandler struct {
@@ -44,12 +46,33 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 	var nextTemplateState template_state.TemplateState
 	if coreData.State == template_state.Draft {
 
-		//query := `
-		//	INSERT INTO contract_templates_review_task (
-		//		did, created_by, updated_by
-		//	) VALUES ($1, $2, $3, $4, $5, $6, $7)
-		//	RETURNING created_at
-		//`
+		for _, assignee := range cmd.Assignees {
+			reviewTask := template_repository.ReviewTaskData{
+				DID:            cmd.DID,
+				DocumentNumber: coreData.DocumentNumber,
+				Version:        coreData.Version,
+				Assignee:       assignee,
+				State:          review_task_state.Open,
+				CreatedBy:      cmd.SubmittedBy,
+			}
+			createdAt, err := template_repository.CreateReviewTask(ctx, tx, reviewTask)
+			if err != nil {
+				return err
+			}
+
+			evt := templateevents.ContractTemplateCreateReviewTaskEvent{
+				DID:            coreData.DID,
+				DocumentNumber: coreData.DocumentNumber,
+				Version:        coreData.Version,
+				CreatedBy:      cmd.SubmittedBy,
+				Assignee:       assignee,
+				OccurredAt:     *createdAt,
+			}
+			err = event.CreateNewEvent(h.Ctx, tx, evt)
+			if err != nil {
+				return err
+			}
+		}
 
 		nextTemplateState = template_state.Submitted
 

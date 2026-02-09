@@ -21,7 +21,7 @@ type ContractTemplateCreatedEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateCreatedEvent) EventType() string {
-	return event_type.CreatedContractTemplate.String()
+	return event_type.CreateContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
@@ -62,7 +62,7 @@ type ContractTemplateApprovedEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateApprovedEvent) EventType() string {
-	return event_type.ApprovedContractTemplate.String()
+	return event_type.ApproveContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
@@ -81,7 +81,7 @@ type ContractTemplateRejectedEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateRejectedEvent) EventType() string {
-	return event_type.RejectedContractTemplate.String()
+	return event_type.RejectContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
@@ -105,7 +105,7 @@ type ContractTemplateUpdatedEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateUpdatedEvent) EventType() string {
-	return event_type.UpdatedContractTemplate.String()
+	return event_type.UpdateContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
@@ -122,7 +122,7 @@ type ContractTemplateRetrievedAllEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateRetrievedAllEvent) EventType() string {
-	return event_type.RetrievedAllContractTemplates.String()
+	return event_type.RetrieveAllContractTemplates.String()
 }
 
 // GetDID implements the Event interface.
@@ -140,10 +140,31 @@ type ContractTemplateRetrievedByIdEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateRetrievedByIdEvent) EventType() string {
-	return event_type.RetrievedContractTemplateById.String()
+	return event_type.RetrieveContractTemplateById.String()
 }
 
 // GetDID implements the Event interface.
 func (e ContractTemplateRetrievedByIdEvent) GetDID() string {
+	return e.DID
+}
+
+// ContractTemplateCreateReviewTaskEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type ContractTemplateCreateReviewTaskEvent struct {
+	DID            string    `json:"did"`
+	DocumentNumber int       `db:"document_number"`
+	Version        int       `db:"version"`
+	Assignee       string    `json:"assignee"`
+	CreatedBy      string    `json:"updated_by"`
+	OccurredAt     time.Time `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateCreateReviewTaskEvent) EventType() string {
+	return event_type.CreateContractTemplateReviewTask.String()
+}
+
+// GetDID implements the Event interface.
+func (e ContractTemplateCreateReviewTaskEvent) GetDID() string {
 	return e.DID
 }
