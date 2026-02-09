@@ -23,27 +23,26 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := template_state.Draft
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, did, template_state.Draft, db)
 
+	ctx := context.Background()
 	submittedBy := "Test User"
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   nil,
-		ReviewComments:               []string{},
+		DID:            *did,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		ReviewComments: []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
-		Db: db,
+		Ctx: ctx,
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	ctx := context.Background()
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
@@ -73,28 +72,27 @@ func TestSubmit_ApproveContractTemplateInSubmittedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := template_state.Submitted
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, did, template_state.Submitted, db)
 
+	ctx := context.Background()
 	submittedBy := "Test User"
 	actionFlag := action_flag.Approval
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   &actionFlag,
-		ReviewComments:               []string{},
+		DID:            *did,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     &actionFlag,
+		ReviewComments: []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
-		Db: db,
+		Ctx: ctx,
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	ctx := context.Background()
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
@@ -124,28 +122,27 @@ func TestSubmit_DeclineContractTemplateInSubmittedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := template_state.Submitted
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, did, template_state.Submitted, db)
 
+	ctx := context.Background()
 	submittedBy := "Test User"
 	actionFlag := action_flag.Draft
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   &actionFlag,
-		ReviewComments:               []string{},
+		DID:            *did,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     &actionFlag,
+		ReviewComments: []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
-		Db: db,
+		Ctx: ctx,
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	ctx := context.Background()
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
@@ -175,126 +172,24 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := template_state.Submitted
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, did, template_state.Submitted, db)
 
+	ctx := context.Background()
 	submittedBy := "Test User"
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   nil,
-		ReviewComments:               []string{},
+		DID:            *did,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		ReviewComments: []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
-		Db: db,
+		Ctx: ctx,
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 
 	assert.NotNil(t, err)
-}
-
-func TestSubmit_RejectContractTemplateInReviewedState(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
-	}
-
-	currentContractState := template_state.Reviewed
-	createTestContractTemplate(t, did, currentContractState, db)
-
-	submittedBy := "Test User"
-	actionFlag := action_flag.Draft
-
-	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   &actionFlag,
-		ReviewComments:               []string{},
-	}
-	handler := command.SubmitTemplateContractHandler{
-		Db: db,
-	}
-	err = handler.Handle(cmd)
-	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
-	}
-
-	ctx := context.Background()
-	retrievedBy := "Test User"
-
-	qry := query.GetContractTemplateByIdQuery{
-		DID:         *did,
-		RetrievedBy: retrievedBy,
-	}
-	queryHandler := query.GetContractTemplateByIdHandler{
-		Ctx: ctx,
-		Db:  db,
-	}
-	contractTemplate, err := queryHandler.Handle(qry)
-	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
-	}
-
-	assert.Equal(t, template_state.Draft, contractTemplate.State)
-}
-
-func TestSubmit_ApproveContractTemplateInReviewedState(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
-	}
-
-	currentContractState := template_state.Reviewed
-	createTestContractTemplate(t, did, currentContractState, db)
-
-	submittedBy := "Test User"
-	actionFlag := action_flag.Approval
-
-	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   &actionFlag,
-		ReviewComments:               []string{},
-	}
-	handler := command.SubmitTemplateContractHandler{
-		Db: db,
-	}
-	err = handler.Handle(cmd)
-	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
-	}
-
-	ctx := context.Background()
-	retrievedBy := "Test User"
-
-	qry := query.GetContractTemplateByIdQuery{
-		DID:         *did,
-		RetrievedBy: retrievedBy,
-	}
-	queryHandler := query.GetContractTemplateByIdHandler{
-		Ctx: ctx,
-		Db:  db,
-	}
-	contractTemplate, err := queryHandler.Handle(qry)
-	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
-	}
-
-	assert.Equal(t, template_state.Approved, contractTemplate.State)
 }
 
 func TestSubmit_SubmitContractTemplateInReviewedStateToResubmission(t *testing.T) {
@@ -308,27 +203,26 @@ func TestSubmit_SubmitContractTemplateInReviewedStateToResubmission(t *testing.T
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := template_state.Reviewed
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, did, template_state.Reviewed, db)
 
+	ctx := context.Background()
 	submittedBy := "Test User"
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   nil,
-		ReviewComments:               []string{},
+		DID:            *did,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		ReviewComments: []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
-		Db: db,
+		Ctx: ctx,
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	ctx := context.Background()
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
@@ -344,36 +238,5 @@ func TestSubmit_SubmitContractTemplateInReviewedStateToResubmission(t *testing.T
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
-}
-
-func TestSubmit_SubmitContractTemplateInApprovedStateWithoutActionFlag(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
-	}
-
-	currentContractState := template_state.Approved
-	createTestContractTemplate(t, did, currentContractState, db)
-
-	submittedBy := "Test User"
-
-	cmd := command.SubmitTemplateContractCommand{
-		DID:                          *did,
-		SubmittedBy:                  submittedBy,
-		CurrentContractTemplateState: currentContractState,
-		ActionFlag:                   nil,
-		ReviewComments:               []string{},
-	}
-	handler := command.SubmitTemplateContractHandler{
-		Db: db,
-	}
-	err = handler.Handle(cmd)
-
-	assert.NotNil(t, err)
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
 }

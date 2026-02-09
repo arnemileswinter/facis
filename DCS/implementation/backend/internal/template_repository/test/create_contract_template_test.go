@@ -41,7 +41,8 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 		MetaData:    &jsonMetaData,
 	}
 	createHandler := command.CreateTemplateContractHandler{
-		Db: db,
+		Ctx: context.Background(),
+		DB:  db,
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {

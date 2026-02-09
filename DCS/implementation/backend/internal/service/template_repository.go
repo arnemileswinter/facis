@@ -73,24 +73,11 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		actionFlag = &flag
 	}
 
-	stateQuery := query.GetContractTemplateStateQuery{
-		DID: req.Did,
-	}
-	stateHandler := query.GetContractTemplateStateHandler{
-		Db:  s.DB,
-		Ctx: ctx,
-	}
-	stateResult, err := stateHandler.Handle(stateQuery)
-	if err != nil {
-		return nil, templaterepository.MakeInternalError(err)
-	}
-
 	cmd := command.SubmitTemplateContractCommand{
-		DID:                          req.Did,
-		SubmittedBy:                  "",
-		CurrentContractTemplateState: stateResult.State,
-		ActionFlag:                   actionFlag,
-		ReviewComments:               req.ReviewComments,
+		DID:            req.Did,
+		SubmittedBy:    "",
+		ActionFlag:     actionFlag,
+		ReviewComments: req.ReviewComments,
 	}
 	handler := command.SubmitTemplateContractHandler{
 		DB: s.DB,

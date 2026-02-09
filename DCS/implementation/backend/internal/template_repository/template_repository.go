@@ -46,7 +46,7 @@ func ReadContractTemplateData(ctx context.Context, tx *sql.Tx, did string) (*Con
 func ReadContractTemplateState(ctx context.Context, tx *sql.Tx, did string) (*template_state.TemplateState, error) {
 	var state template_state.TemplateState
 	err := tx.QueryRowContext(ctx, `
-        SELECT did, state
+        SELECT state
         FROM contract_templates WHERE did = $1
     `, did).Scan(&state)
 	if err != nil {

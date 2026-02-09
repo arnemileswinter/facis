@@ -2,6 +2,8 @@ package event
 
 import (
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/template_repository/datatype/action_flag"
+	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"time"
 )
 
@@ -28,13 +30,13 @@ func (e ContractTemplateCreatedEvent) GetDID() string {
 // ContractTemplateSubmittedEvent is emitted when a template is submitted for review.
 // This event signals state transition and includes reviewer comments.
 type ContractTemplateSubmittedEvent struct {
-	DID            string    `json:"did"`
-	PreviousState  string    `json:"previous_state"`
-	NewState       string    `json:"new_state"`
-	SubmittedBy    string    `json:"submitted_by"`
-	ActionFlag     string    `json:"action_flag"`
-	ReviewComments []string  `json:"review_comments,omitempty"`
-	OccurredAt     time.Time `json:"occurred_at"`
+	DID            string                       `json:"did"`
+	PreviousState  template_state.TemplateState `json:"previous_state"`
+	NewState       template_state.TemplateState `json:"new_state"`
+	SubmittedBy    string                       `json:"submitted_by"`
+	ActionFlag     *action_flag.ActionFlag      `json:"action_flag"`
+	ReviewComments []string                     `json:"review_comments,omitempty"`
+	OccurredAt     time.Time                    `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.

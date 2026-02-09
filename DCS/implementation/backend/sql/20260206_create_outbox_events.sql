@@ -3,21 +3,16 @@
 -- This ensures events are never lost even if NATS is unavailable
 
 CREATE TABLE IF NOT EXISTS outbox_events (
-    -- Primary Key
     id BIGSERIAL PRIMARY KEY,
 
-    -- Event Metadata
     event_type VARCHAR(64) NOT NULL,
     event_data JSONB NOT NULL,
 
-    -- Context/Reference
     did VARCHAR(255),
-    
-    -- Processing Status
+
     processed BOOLEAN DEFAULT FALSE,
     processed_at TIMESTAMP,
-    
-    -- Timestamps
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

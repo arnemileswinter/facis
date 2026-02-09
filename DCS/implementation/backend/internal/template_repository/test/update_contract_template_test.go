@@ -39,15 +39,15 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	description := "Updated Description"
 
 	cmd := command.UpdateTemplateContractCommand{
-		DID:                          *did,
-		UpdatedBy:                    updateBy,
-		CurrentContractTemplateState: currentContractState,
-		Name:                         &name,
-		Description:                  &description,
-		MetaData:                     &jsonMetaData,
+		DID:         *did,
+		UpdatedBy:   updateBy,
+		Name:        &name,
+		Description: &description,
+		MetaData:    &jsonMetaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
-		Db: db,
+		Ctx: context.Background(),
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -109,7 +109,8 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 		MetaData:    &jsonMetaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
-		Db: db,
+		Ctx: context.Background(),
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 
@@ -150,7 +151,8 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T)
 		MetaData:    &jsonMetaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
-		Db: db,
+		Ctx: context.Background(),
+		DB:  db,
 	}
 	err = handler.Handle(cmd)
 

@@ -3,18 +3,19 @@ package command
 import (
 	"context"
 	"digital-contracting-service/internal/base/event"
+	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	templateevents "digital-contracting-service/internal/template_repository/event"
+	"errors"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type RejectTemplateContractCommand struct {
-	DID                          string
-	RejectedBy                   string
-	CurrentContractTemplateState template_state.TemplateState
-	Reason                       string
+	DID        string
+	RejectedBy string
+	Reason     string
 }
 
 type RejectTemplateContractHandler struct {
@@ -33,21 +34,21 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return err
 	}
 
-	//currentState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID)
-	//if err != nil {
-	//	return err
-	//}
+	currentTemplateState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID)
+	if err != nil {
+		return err
+	}
 
-	//if *currentState != template_state.Draft {
-	//	return errors.New("invalid contract template state")
-	//}
+	if *currentTemplateState != template_state.Reviewed {
+		return errors.New("invalid contract template state")
+	}
 
 	query := `UPDATE contract_templates SET
         	state = $2
     	WHERE did = $1
 `
 
-	_, err = tx.ExecContext(ctx, query, cmd.DID, template_state.Approved)
+	_, err = tx.ExecContext(ctx, query, cmd.DID, template_state.Draft)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,5 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return err
 	}
 
-	return nil
-
-	return nil
+	return tx.Commit()
 }
