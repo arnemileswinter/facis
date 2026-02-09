@@ -12,7 +12,10 @@ import (
 )
 
 func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
-	cleanTableStatement := "DELETE FROM contract_templates;"
+	cleanTableStatement := `
+	-- noinspection SqlWithoutWhere
+	DELETE FROM contract_templates;
+`
 	_, err := db.Exec(cleanTableStatement)
 	if err != nil {
 		t.Fatalf("Failed to clean table: %v", err)

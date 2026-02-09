@@ -29,10 +29,10 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
-	defer tx.Rollback()
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	currentTemplateState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID)
 	if err != nil {

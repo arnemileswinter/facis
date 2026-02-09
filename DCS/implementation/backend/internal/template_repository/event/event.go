@@ -48,7 +48,7 @@ func (e ContractTemplateSubmittedEvent) GetDID() string {
 
 // EventType implements the Event interface.
 func (e ContractTemplateSubmittedEvent) EventType() string {
-	return event_type.SubmittedContractTemplate.String()
+	return event_type.SubmitContractTemplate.String()
 }
 
 // ContractTemplateApprovedEvent is emitted when a template is approved.

@@ -31,10 +31,10 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
-	defer tx.Rollback()
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	data := template_repository.ContractTemplateData{
 		DID:         cmd.DID,

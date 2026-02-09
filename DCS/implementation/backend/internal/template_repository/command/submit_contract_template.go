@@ -33,10 +33,10 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
-	defer tx.Rollback()
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
 	coreData, err := template_repository.ReadContractTemplateCoreData(ctx, tx, cmd.DID)
 	if err != nil {
