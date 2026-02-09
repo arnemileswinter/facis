@@ -14,11 +14,6 @@ const (
 	Submitted TemplateState = "SUBMITTED"
 	Reviewed  TemplateState = "REVIEWED"
 	Approved  TemplateState = "APPROVED"
-
-	Changed    TemplateState = "CHANGED"
-	Archived   TemplateState = "ARCHIVED"
-	Deprecated TemplateState = "DEPRECATED"
-	Deleted    TemplateState = "DELETED"
 )
 
 var validStates = map[TemplateState]bool{
@@ -26,11 +21,6 @@ var validStates = map[TemplateState]bool{
 	Submitted: true,
 	Reviewed:  true,
 	Approved:  true,
-
-	Changed:    true,
-	Archived:   true,
-	Deprecated: true,
-	Deleted:    true,
 }
 
 func NewTemplateState(s string) (TemplateState, error) {

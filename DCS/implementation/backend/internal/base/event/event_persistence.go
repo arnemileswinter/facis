@@ -13,7 +13,6 @@ import (
 // This interface ensures consistency across event handling.
 type Event interface {
 	// EventType returns the name of the event (used as NATS subject).
-	// Examples: "TemplateCreatedEvent", "TemplateSubmittedEvent"
 	EventType() string
 
 	// GetDID returns the entity DID for event reference and correlation.

@@ -55,6 +55,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 		CreatedBy:   cmd.CreatedBy,
 		Name:        cmd.Name,
 		Description: cmd.Description,
+		MetaData:    cmd.MetaData,
 		OccurredAt:  time.Now(),
 	}
 	err = event.CreateNewEvent(h.Ctx, tx, evt)

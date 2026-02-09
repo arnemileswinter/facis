@@ -8,13 +8,19 @@ import (
 type EventType string
 
 const (
-	CreateContractTemplate EventType = "CreateContractTemplate"
-	SubmitContractTemplate EventType = "SubmitContractTemplate"
+	CreatedContractTemplate   EventType = "CREATE_CONTRACT_TEMPLATE"
+	SubmittedContractTemplate EventType = "SUBMITTED_CONTRACT_TEMPLATE"
+	ApprovedContractTemplate  EventType = "APPROVED_CONTRACT_TEMPLATE"
+	RejectedContractTemplate  EventType = "REJECTED_CONTRACT_TEMPLATE"
+	UpdatedContractTemplate   EventType = "UPDATE_CONTRACT_TEMPLATE"
 )
 
 var validStates = map[EventType]bool{
-	CreateContractTemplate: true,
-	SubmitContractTemplate: true,
+	CreatedContractTemplate:   true,
+	SubmittedContractTemplate: true,
+	ApprovedContractTemplate:  true,
+	RejectedContractTemplate:  true,
+	UpdatedContractTemplate:   true,
 }
 
 func NewEventType(s string) (EventType, error) {

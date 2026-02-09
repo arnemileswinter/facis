@@ -3,6 +3,7 @@ package event
 import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/template_repository/datatype/action_flag"
+	"digital-contracting-service/internal/template_repository/datatype/event_type"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"time"
 )
@@ -10,16 +11,17 @@ import (
 // ContractTemplateCreatedEvent is emitted when a new contract template is created.
 // This event signals initial template creation with metadata.
 type ContractTemplateCreatedEvent struct {
-	DID         string    `json:"did"`
-	CreatedBy   string    `json:"created_by"`
-	Name        *string   `json:"name"`
-	Description *string   `json:"description"`
-	OccurredAt  time.Time `json:"occurred_at"`
+	DID         string         `json:"did"`
+	CreatedBy   string         `json:"created_by"`
+	Name        *string        `json:"name"`
+	Description *string        `json:"description"`
+	MetaData    *datatype.JSON `json:"metadata"`
+	OccurredAt  time.Time      `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
 func (e ContractTemplateCreatedEvent) EventType() string {
-	return "TemplateCreatedEvent"
+	return event_type.CreatedContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
@@ -39,14 +41,14 @@ type ContractTemplateSubmittedEvent struct {
 	OccurredAt     time.Time                    `json:"occurred_at"`
 }
 
-// EventType implements the Event interface.
-func (e ContractTemplateSubmittedEvent) EventType() string {
-	return "TemplateSubmittedEvent"
-}
-
 // GetDID implements the Event interface.
 func (e ContractTemplateSubmittedEvent) GetDID() string {
 	return e.DID
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateSubmittedEvent) EventType() string {
+	return event_type.SubmittedContractTemplate.String()
 }
 
 // ContractTemplateApprovedEvent is emitted when a template is approved.
@@ -60,7 +62,7 @@ type ContractTemplateApprovedEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateApprovedEvent) EventType() string {
-	return "TemplateApprovedEvent"
+	return event_type.ApprovedContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
@@ -79,7 +81,7 @@ type ContractTemplateRejectedEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateRejectedEvent) EventType() string {
-	return "TemplateRejectedEvent"
+	return event_type.RejectedContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
@@ -103,7 +105,7 @@ type ContractTemplateUpdatedEvent struct {
 
 // EventType implements the Event interface.
 func (e ContractTemplateUpdatedEvent) EventType() string {
-	return "TemplateUpdatedEvent"
+	return event_type.UpdatedContractTemplate.String()
 }
 
 // GetDID implements the Event interface.

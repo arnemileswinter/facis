@@ -38,6 +38,7 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 	sqlQuery := `
         SELECT *
         FROM contract_templates
+        ORDER BY did;
     `
 
 	var contractTemplates []GetAllContractTemplateResult

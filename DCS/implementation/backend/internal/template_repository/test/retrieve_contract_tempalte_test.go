@@ -5,6 +5,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"digital-contracting-service/internal/template_repository/query"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -59,6 +60,7 @@ func TestSubmit_RetrieveAllContractTemplate(t *testing.T) {
 		dids = append(dids, *did)
 		createTestContractTemplate(t, did, template_state.Draft, db)
 	}
+	sort.Strings(dids)
 
 	ctx := context.Background()
 
