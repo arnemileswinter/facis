@@ -205,23 +205,10 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context) (res any, err error
 // mark template as approved, with optional decision notes.
 func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepository.ContractTemplateApproveRequest) (res *templaterepository.ContractTemplateApproveResponse, err error) {
 
-	stateQuery := query.GetContractTemplateStateQuery{
-		DID: req.Did,
-	}
-	stateHandler := query.GetContractTemplateStateHandler{
-		Ctx: ctx,
-		Db:  s.DB,
-	}
-	stateResult, err := stateHandler.Handle(stateQuery)
-	if err != nil {
-		return nil, templaterepository.MakeInternalError(err)
-	}
-
 	cmd := command.ApproveTemplateContractCommand{
-		DID:                          req.Did,
-		ApprovedBy:                   "",
-		CurrentContractTemplateState: stateResult.State,
-		DecisionNotes:                req.DecisionNotes,
+		DID:           req.Did,
+		ApprovedBy:    "",
+		DecisionNotes: req.DecisionNotes,
 	}
 	handler := command.ApproveTemplateContractHandler{
 		DB: s.DB,
@@ -240,23 +227,10 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 // mark template as rejected, requiring reason field.
 func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templaterepository.ContractTemplateRejectRequest) (res *templaterepository.ContractTemplateRejectResponse, err error) {
 
-	stateQuery := query.GetContractTemplateStateQuery{
-		DID: req.Did,
-	}
-	stateHandler := query.GetContractTemplateStateHandler{
-		Ctx: ctx,
-		Db:  s.DB,
-	}
-	stateResult, err := stateHandler.Handle(stateQuery)
-	if err != nil {
-		return nil, templaterepository.MakeInternalError(err)
-	}
-
 	cmd := command.RejectTemplateContractCommand{
-		DID:                          req.Did,
-		RejectedBy:                   "",
-		CurrentContractTemplateState: stateResult.State,
-		Reason:                       req.Reason,
+		DID:        req.Did,
+		RejectedBy: "",
+		Reason:     req.Reason,
 	}
 	handler := command.RejectTemplateContractHandler{
 		Ctx: ctx,

@@ -17,12 +17,6 @@ func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
 	if err != nil {
 		t.Fatalf("Failed to clean table: %v", err)
 	}
-
-	//cleanTableStatement = "DELETE FROM outbox_events;"
-	//_, err = db.Exec(cleanTableStatement)
-	//if err != nil {
-	//	t.Fatalf("Failed to clean table: %v", err)
-	//}
 }
 
 func createTestContractTemplate(t *testing.T, did *string, state template_state.TemplateState, db *sqlx.DB) {

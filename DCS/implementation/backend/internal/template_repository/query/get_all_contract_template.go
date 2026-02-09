@@ -11,7 +11,6 @@ import (
 )
 
 type GetAllContractTemplatesQuery struct {
-	State       string
 	RetrievedBy string
 }
 
