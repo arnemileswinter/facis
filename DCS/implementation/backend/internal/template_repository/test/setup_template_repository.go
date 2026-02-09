@@ -11,32 +11,11 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func dropAndCreateContractTemplateTable(t *testing.T, db *sqlx.DB) {
-	dropStatement := `DROP TABLE IF EXISTS contract_templates`
-
-	createStatement := `
-    CREATE TABLE IF NOT EXISTS contract_templates (
-    did VARCHAR(255) PRIMARY KEY CHECK (did <> '' AND did IS NOT NULL),
-    created_by VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    document_number INT NOT NULL,
-    version INT NOT NULL,
-    state VARCHAR(16) NOT NULL,
-
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    meta_data JSONB
-);
-`
-
-	_, err := db.Exec(dropStatement)
+func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
+	cleanTableStatement := "DELETE FROM contract_templates;"
+	_, err := db.Exec(cleanTableStatement)
 	if err != nil {
-		t.Fatalf("Failed to drop table: %v", err)
-	}
-
-	_, err = db.Exec(createStatement)
-	if err != nil {
-		t.Fatalf("Failed to create table: %v", err)
+		t.Fatalf("Failed to clean table: %v", err)
 	}
 }
 

@@ -15,7 +15,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {

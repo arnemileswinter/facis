@@ -24,6 +24,8 @@ type GetAllContractTemplateResult struct {
 	Description    string                       `db:"description"`
 	CreatedBy      string                       `db:"created_by"`
 	CreatedAt      time.Time                    `db:"created_at"`
+	UpdatedBy      string                       `db:"updated_by"`
+	UpdatedAt      time.Time                    `db:"updated_at"`
 	MetaData       datatype.JSON                `db:"meta_data"`
 }
 

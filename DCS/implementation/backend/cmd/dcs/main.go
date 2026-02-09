@@ -21,6 +21,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/nats-io/nats.go"
 	"goa.design/clue/debug"
 	"goa.design/clue/log"
 )
@@ -55,6 +56,12 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
+
+	_, err = nats.Connect(nats.DefaultURL)
+	if err != nil {
+		log.Fatalf(ctx, err, "Could not connect to nats service")
+		os.Exit(1)
+	}
 
 	templateRepositorySrv, err := service.NewTemplateRepository(ctx, db)
 	if err != nil {

@@ -18,7 +18,7 @@ type SubmitTemplateContractCommand struct {
 }
 
 type SubmitTemplateContractHandler struct {
-	Db     *sqlx.DB
+	DB     *sqlx.DB
 	Logger *log.Logger
 }
 
@@ -62,7 +62,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
     	WHERE did = $1
 `
 
-	result, err := h.Db.Exec(query, cmd.DID, nextTemplateState)
+	result, err := h.DB.Exec(query, cmd.DID, nextTemplateState)
 	if err != nil {
 		return err
 	}

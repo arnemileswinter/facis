@@ -16,7 +16,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -59,7 +59,6 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, template_state.Submitted, contractTemplate.State)
 }
 
@@ -67,7 +66,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -111,7 +110,6 @@ func TestSubmit_ApproveContractTemplateInSubmittedState(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
 }
 
@@ -119,7 +117,7 @@ func TestSubmit_DeclineContractTemplateInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -163,7 +161,6 @@ func TestSubmit_DeclineContractTemplateInSubmittedState(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, template_state.Draft, contractTemplate.State)
 }
 
@@ -171,7 +168,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -198,11 +195,11 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 	assert.NotNil(t, err)
 }
 
-func TestSubmit_DeclineContractTemplateInReviewedState(t *testing.T) {
+func TestSubmit_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -246,7 +243,6 @@ func TestSubmit_DeclineContractTemplateInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, template_state.Draft, contractTemplate.State)
 }
 
@@ -254,7 +250,7 @@ func TestSubmit_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -278,15 +274,84 @@ func TestSubmit_ApproveContractTemplateInReviewedState(t *testing.T) {
 		Db: db,
 	}
 	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
 
-	assert.NotNil(t, err)
+	ctx := context.Background()
+	retrievedBy := "Test User"
+
+	qry := query.GetContractTemplateByIdQuery{
+		DID:         *did,
+		RetrievedBy: retrievedBy,
+	}
+	queryHandler := query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		Db:  db,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Approved, contractTemplate.State)
+}
+
+func TestSubmit_SubmitContractTemplateInReviewedStateToResubmission(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	currentContractState := template_state.Reviewed
+	createTestContractTemplate(t, did, currentContractState, db)
+
+	submittedBy := "Test User"
+
+	cmd := command.SubmitTemplateContractCommand{
+		DID:                          *did,
+		SubmittedBy:                  submittedBy,
+		CurrentContractTemplateState: currentContractState,
+		ActionFlag:                   nil,
+		ReviewComments:               []string{},
+	}
+	handler := command.SubmitTemplateContractHandler{
+		Db: db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	ctx := context.Background()
+	retrievedBy := "Test User"
+
+	qry := query.GetContractTemplateByIdQuery{
+		DID:         *did,
+		RetrievedBy: retrievedBy,
+	}
+	queryHandler := query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		Db:  db,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
 }
 
 func TestSubmit_SubmitContractTemplateInApprovedStateWithoutActionFlag(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {

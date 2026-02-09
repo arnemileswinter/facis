@@ -27,6 +27,8 @@ type GetContractTemplateByIdResult struct {
 	Description    string                       `db:"description"`
 	CreatedBy      string                       `db:"created_by"`
 	CreatedAt      time.Time                    `db:"created_at"`
+	UpdatedBy      string                       `db:"updated_by"`
+	UpdatedAt      time.Time                    `db:"updated_at"`
 	MetaData       datatype.JSON                `db:"meta_data"`
 }
 
@@ -47,6 +49,8 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
             description,
             created_by,
             created_at,
+            updated_by,
+            updated_at,
             meta_data
         FROM contract_templates
         WHERE did = $1

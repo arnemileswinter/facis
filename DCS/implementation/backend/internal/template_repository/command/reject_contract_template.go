@@ -1,9 +1,11 @@
 package command
 
 import (
+	"context"
+	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
-	"errors"
-	"log"
+	templateevents "digital-contracting-service/internal/template_repository/event"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -16,41 +18,52 @@ type RejectTemplateContractCommand struct {
 }
 
 type RejectTemplateContractHandler struct {
-	Db     *sqlx.DB
-	Logger *log.Logger
+	Ctx context.Context
+	DB  *sqlx.DB
 }
 
 func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand) error {
 
-	if cmd.CurrentContractTemplateState != template_state.Reviewed {
-		return errors.New("current template contract state is invalid")
+	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	defer cancel()
+
+	tx, err := h.DB.BeginTx(ctx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		return err
 	}
 
-	if len(cmd.Reason) == 0 {
-		return errors.New("reason for rejecting contract template is required")
-	}
+	//currentState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID)
+	//if err != nil {
+	//	return err
+	//}
+
+	//if *currentState != template_state.Draft {
+	//	return errors.New("invalid contract template state")
+	//}
 
 	query := `UPDATE contract_templates SET
         	state = $2
     	WHERE did = $1
 `
-	state := template_state.Draft
 
-	result, err := h.Db.Exec(query, cmd.DID, state)
+	_, err = tx.ExecContext(ctx, query, cmd.DID, template_state.Approved)
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	evt := templateevents.ContractTemplateRejectedEvent{
+		DID:        cmd.DID,
+		RejectedBy: cmd.RejectedBy,
+		Reason:     cmd.Reason,
+		OccurredAt: time.Now(),
+	}
+	err = event.CreateNewEvent(h.Ctx, tx, evt)
 	if err != nil {
 		return err
 	}
 
-	if rowsAffected == 0 {
-		return errors.New("couldn't update contract template state")
-	}
-
-	// submittedAt := time.Now()
+	return nil
 
 	return nil
 }

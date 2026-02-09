@@ -16,7 +16,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -79,7 +79,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {
@@ -120,7 +120,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T)
 
 	db := setupTestDB(t)
 
-	dropAndCreateContractTemplateTable(t, db)
+	cleanupContractTemplateTable(t, db)
 
 	did, err := base.GetDID()
 	if err != nil {

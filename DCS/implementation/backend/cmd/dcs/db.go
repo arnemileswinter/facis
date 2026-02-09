@@ -23,5 +23,8 @@ func NewDatabaseConnection() (*sqlx.DB, error) {
 		log.Fatalln(err)
 	}
 
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+
 	return db, nil
 }

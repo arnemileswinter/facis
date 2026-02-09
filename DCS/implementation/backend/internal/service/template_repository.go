@@ -16,13 +16,13 @@ import (
 // TemplateRepository service example implementation.
 // The example methods log the requests and return zero values.
 type templateRepositorysrvc struct {
-	db *sqlx.DB
+	DB *sqlx.DB
 }
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
 func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository.Service, error) {
 	return &templateRepositorysrvc{
-		db: db,
+		DB: db,
 	}, nil
 }
 
@@ -47,7 +47,8 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 		MetaData:    &jsonMetaData,
 	}
 	createHandler := command.CreateTemplateContractHandler{
-		Db: s.db,
+		Ctx: ctx,
+		DB:  s.DB,
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
@@ -76,7 +77,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		DID: req.Did,
 	}
 	stateHandler := query.GetContractTemplateStateHandler{
-		Db:  s.db,
+		Db:  s.DB,
 		Ctx: ctx,
 	}
 	stateResult, err := stateHandler.Handle(stateQuery)
@@ -92,7 +93,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		ReviewComments:               req.ReviewComments,
 	}
 	handler := command.SubmitTemplateContractHandler{
-		Db: s.db,
+		DB: s.DB,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -119,7 +120,8 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		MetaData:    &metaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
-		Db: s.db,
+		Ctx: ctx,
+		DB:  s.DB,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -153,7 +155,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templater
 	}
 	queryHandler := query.GetAllContractTemplateHandler{
 		Ctx: ctx,
-		Db:  s.db,
+		Db:  s.DB,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -187,7 +189,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  s.db,
+		Db:  s.DB,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -220,8 +222,8 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		DID: req.Did,
 	}
 	stateHandler := query.GetContractTemplateStateHandler{
-		Db:  s.db,
 		Ctx: ctx,
+		Db:  s.DB,
 	}
 	stateResult, err := stateHandler.Handle(stateQuery)
 	if err != nil {
@@ -235,7 +237,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		DecisionNotes:                req.DecisionNotes,
 	}
 	handler := command.ApproveTemplateContractHandler{
-		Db: s.db,
+		DB: s.DB,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -255,8 +257,8 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		DID: req.Did,
 	}
 	stateHandler := query.GetContractTemplateStateHandler{
-		Db:  s.db,
 		Ctx: ctx,
+		Db:  s.DB,
 	}
 	stateResult, err := stateHandler.Handle(stateQuery)
 	if err != nil {
@@ -270,7 +272,8 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		Reason:                       req.Reason,
 	}
 	handler := command.RejectTemplateContractHandler{
-		Db: s.db,
+		Ctx: ctx,
+		DB:  s.DB,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
