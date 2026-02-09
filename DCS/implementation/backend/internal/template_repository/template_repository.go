@@ -57,3 +57,25 @@ func ReadContractTemplateState(ctx context.Context, tx *sql.Tx, did string) (*te
 	}
 	return &state, nil
 }
+
+type ContractTemplateCoreData struct {
+	DID            string                       `db:"did"`
+	DocumentNumber int                          `db:"document_number"`
+	Version        int                          `db:"version"`
+	State          template_state.TemplateState `db:"state"`
+}
+
+func ReadContractTemplateCoreData(ctx context.Context, tx *sql.Tx, did string) (*ContractTemplateCoreData, error) {
+	var coreData ContractTemplateCoreData
+	err := tx.QueryRowContext(ctx, `
+        SELECT did, document_number, version, state
+        FROM contract_templates WHERE did = $1
+    `, did).Scan(&coreData)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", did))
+		}
+		return nil, err
+	}
+	return &coreData, nil
+}

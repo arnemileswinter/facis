@@ -36,17 +36,24 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 		return err
 	}
 
-	currentTemplateState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID)
+	coreData, err := template_repository.ReadContractTemplateCoreData(ctx, tx, cmd.DID)
 	if err != nil {
 		return err
 	}
 
 	var nextTemplateState template_state.TemplateState
-	if *currentTemplateState == template_state.Draft {
+	if coreData.State == template_state.Draft {
+
+		//query := `
+		//	INSERT INTO contract_templates_review_task (
+		//		did, created_by, updated_by
+		//	) VALUES ($1, $2, $3, $4, $5, $6, $7)
+		//	RETURNING created_at
+		//`
 
 		nextTemplateState = template_state.Submitted
 
-	} else if *currentTemplateState == template_state.Submitted {
+	} else if coreData.State == template_state.Submitted {
 
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Approval {
@@ -58,7 +65,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 			return errors.New("action flags is missing")
 		}
 
-	} else if *currentTemplateState == template_state.Reviewed {
+	} else if coreData.State == template_state.Reviewed {
 
 		nextTemplateState = template_state.Submitted
 
@@ -79,7 +86,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 	evt := templateevents.ContractTemplateSubmittedEvent{
 		DID:            cmd.DID,
 		SubmittedBy:    cmd.SubmittedBy,
-		PreviousState:  *currentTemplateState,
+		PreviousState:  coreData.State,
 		NewState:       nextTemplateState,
 		ActionFlag:     cmd.ActionFlag,
 		ReviewComments: cmd.ReviewComments,
