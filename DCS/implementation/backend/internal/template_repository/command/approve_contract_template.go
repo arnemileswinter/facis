@@ -28,7 +28,7 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
 	defer cancel()
 
-	tx, err := h.DB.BeginTx(ctx, nil)
+	tx, err := h.DB.BeginTxx(ctx, nil)
 	defer tx.Rollback()
 	if err != nil {
 		return err
@@ -43,12 +43,7 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 		return errors.New("invalid contract template state")
 	}
 
-	query := `UPDATE contract_templates SET
-        	state = $2
-    	WHERE did = $1	
-`
-
-	_, err = tx.ExecContext(ctx, query, cmd.DID, template_state.Approved)
+	err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, template_state.Approved)
 	if err != nil {
 		return err
 	}

@@ -7,7 +7,10 @@ import (
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type ContractTemplateData struct {
@@ -24,7 +27,33 @@ type ContractTemplateData struct {
 	MetaData       *datatype.JSON               `db:"meta_data"`
 }
 
-func ReadContractTemplateData(ctx context.Context, tx *sql.Tx, did string) (*ContractTemplateData, error) {
+func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) error {
+	query := `
+    INSERT INTO contract_templates (
+        did, created_by, updated_by, state, name, 
+        description, meta_data
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+    RETURNING created_at
+`
+
+	var createdAt time.Time
+	err := tx.QueryRowContext(ctx, query,
+		data.DID,
+		data.CreatedBy,
+		data.CreatedBy, // Use created_by for updated_by
+		data.State,
+		data.Name,
+		data.Description,
+		data.MetaData,
+	).Scan(&createdAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string) (*ContractTemplateData, error) {
 	var ct ContractTemplateData
 	err := tx.QueryRowContext(ctx, `
         SELECT did, document_number, version, state, name, description,
@@ -43,7 +72,7 @@ func ReadContractTemplateData(ctx context.Context, tx *sql.Tx, did string) (*Con
 	return &ct, nil
 }
 
-func ReadContractTemplateState(ctx context.Context, tx *sql.Tx, did string) (*template_state.TemplateState, error) {
+func ReadContractTemplateState(ctx context.Context, tx *sqlx.Tx, did string) (*template_state.TemplateState, error) {
 	var state template_state.TemplateState
 	err := tx.QueryRowContext(ctx, `
         SELECT state
@@ -65,12 +94,12 @@ type ContractTemplateCoreData struct {
 	State          template_state.TemplateState `db:"state"`
 }
 
-func ReadContractTemplateCoreData(ctx context.Context, tx *sql.Tx, did string) (*ContractTemplateCoreData, error) {
+func ReadContractTemplateCoreData(ctx context.Context, tx *sqlx.Tx, did string) (*ContractTemplateCoreData, error) {
 	var coreData ContractTemplateCoreData
-	err := tx.QueryRowContext(ctx, `
+	err := tx.GetContext(ctx, &coreData, `
         SELECT did, document_number, version, state
         FROM contract_templates WHERE did = $1
-    `, did).Scan(&coreData)
+    `, did)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", did))
@@ -78,4 +107,68 @@ func ReadContractTemplateCoreData(ctx context.Context, tx *sql.Tx, did string) (
 		return nil, err
 	}
 	return &coreData, nil
+}
+
+func UpdateContractTemplateState(ctx context.Context, tx *sqlx.Tx, did string, state template_state.TemplateState) error {
+	query := `UPDATE contract_templates SET
+        	state = $2
+    	WHERE did = $1	
+`
+	_, err := tx.ExecContext(ctx, query, did, state)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func createQuery(data ContractTemplateData) (*string, []interface{}, error) {
+	query := `UPDATE contract_templates SET`
+
+	var params []interface{}
+	paramIndex := 1
+
+	if data.Name != nil {
+		query += ` name = $` + strconv.Itoa(paramIndex) + `,`
+		params = append(params, data.Name)
+		paramIndex++
+	}
+
+	if data.Description != nil {
+		query += ` description = $` + strconv.Itoa(paramIndex) + `,`
+		params = append(params, data.Description)
+		paramIndex++
+	}
+
+	if data.MetaData != nil && data.MetaData.IsNotNullValue() {
+		query += ` meta_data = $` + strconv.Itoa(paramIndex) + `,`
+		params = append(params, data.MetaData)
+		paramIndex++
+	}
+
+	if len(params) == 0 {
+		return nil, nil, errors.New("no parameters found")
+	}
+
+	// Remove last comma
+	query = query[:len(query)-1]
+
+	query += ` WHERE did = $` + strconv.Itoa(paramIndex) + `;`
+	params = append(params, data.DID)
+
+	return &query, params, nil
+}
+
+func UpdateTemplateContractData(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) error {
+	query, params, err := createQuery(data)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, *query, params...)
+	if err != nil {
+		return err
+	}
+
+	return err
 }

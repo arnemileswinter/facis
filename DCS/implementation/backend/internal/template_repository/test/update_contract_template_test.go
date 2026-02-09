@@ -26,6 +26,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	currentContractState := template_state.Draft
 	createTestContractTemplate(t, did, currentContractState, db)
 
+	ctx := context.Background()
 	updateBy := "Test User"
 	metaData := map[string]interface{}{
 		"test": "update",
@@ -46,7 +47,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 		MetaData:    &jsonMetaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
-		Ctx: context.Background(),
+		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
@@ -54,7 +55,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	ctx := context.Background()
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
@@ -70,8 +70,10 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
+	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, name, contractTemplate.Name)
 	assert.Equal(t, description, contractTemplate.Description)
+	assert.Equal(t, updateBy, contractTemplate.UpdatedBy)
 	//assert.Equal(t, jsonMetaData, contractTemplate.MetaData)
 }
 

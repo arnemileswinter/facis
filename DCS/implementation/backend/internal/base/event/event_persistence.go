@@ -2,10 +2,11 @@ package event
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/jmoiron/sqlx"
 )
 
 // Event interface must be implemented by all event types.
@@ -37,7 +38,7 @@ type Event interface {
 //	if err := event.CreateNewEvent(ctx, tx, evt); err != nil {
 //	    return err
 //	}
-func CreateNewEvent(ctx context.Context, tx *sql.Tx, evt Event) error {
+func CreateNewEvent(ctx context.Context, tx *sqlx.Tx, evt Event) error {
 	if evt == nil {
 		return errors.New("event cannot be nil")
 	}
@@ -91,7 +92,7 @@ func CreateNewEvent(ctx context.Context, tx *sql.Tx, evt Event) error {
 //	if err := event.CreateNewEvents(ctx, tx, evts...); err != nil {
 //	    return err
 //	}
-func CreateNewEvents(ctx context.Context, tx *sql.Tx, events ...Event) error {
+func CreateNewEvents(ctx context.Context, tx *sqlx.Tx, events ...Event) error {
 	if len(events) == 0 {
 		return nil // Nothing to store
 	}

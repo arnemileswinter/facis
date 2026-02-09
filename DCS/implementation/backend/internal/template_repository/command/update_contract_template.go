@@ -8,7 +8,6 @@ import (
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	templateevents "digital-contracting-service/internal/template_repository/event"
 	"errors"
-	"strconv"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -27,54 +26,12 @@ type UpdateTemplateContractHandler struct {
 	DB  *sqlx.DB
 }
 
-func createQuery(cmd UpdateTemplateContractCommand) (*string, []interface{}, error) {
-	query := `UPDATE contract_templates SET`
-
-	var params []interface{}
-	paramIndex := 1
-
-	if cmd.Name != nil {
-		query += ` name = $` + strconv.Itoa(paramIndex) + `,`
-		params = append(params, cmd.Name)
-		paramIndex++
-	}
-
-	if cmd.Description != nil {
-		query += ` description = $` + strconv.Itoa(paramIndex) + `,`
-		params = append(params, cmd.Description)
-		paramIndex++
-	}
-
-	if cmd.MetaData != nil && cmd.MetaData.IsNotNullValue() {
-		query += ` meta_data = $` + strconv.Itoa(paramIndex) + `,`
-		params = append(params, cmd.MetaData)
-		paramIndex++
-	}
-
-	if len(params) == 0 {
-		return nil, nil, errors.New("no parameters found")
-	}
-
-	// Remove last comma
-	query = query[:len(query)-1]
-
-	query += ` WHERE did = $` + strconv.Itoa(paramIndex) + `;`
-	params = append(params, cmd.DID)
-
-	return &query, params, nil
-}
-
 func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand) error {
-
-	query, params, err := createQuery(cmd)
-	if err != nil {
-		return err
-	}
 
 	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
 	defer cancel()
 
-	tx, err := h.DB.BeginTx(ctx, nil)
+	tx, err := h.DB.BeginTxx(ctx, nil)
 	defer tx.Rollback()
 	if err != nil {
 		return err
@@ -89,7 +46,13 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 		return errors.New("invalid contract template state")
 	}
 
-	_, err = tx.ExecContext(ctx, *query, params...)
+	newData := template_repository.ContractTemplateData{
+		DID:         cmd.DID,
+		Name:        cmd.Name,
+		Description: cmd.Description,
+		MetaData:    cmd.MetaData,
+	}
+	err = template_repository.UpdateTemplateContractData(ctx, tx, newData)
 	if err != nil {
 		return err
 	}

@@ -30,7 +30,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
 	defer cancel()
 
-	tx, err := h.DB.BeginTx(ctx, nil)
+	tx, err := h.DB.BeginTxx(ctx, nil)
 	defer tx.Rollback()
 	if err != nil {
 		return err
@@ -73,12 +73,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 		return errors.New("current template contract state is invalid")
 	}
 
-	query := `UPDATE contract_templates SET
-        	state = $2
-    	WHERE did = $1
-`
-
-	_, err = tx.ExecContext(ctx, query, cmd.DID, nextTemplateState)
+	err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, nextTemplateState)
 	if err != nil {
 		return err
 	}
