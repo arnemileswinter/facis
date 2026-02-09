@@ -3,8 +3,10 @@ package query
 import (
 	"context"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
+	templateevents "digital-contracting-service/internal/template_repository/event"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -46,6 +48,16 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 	}
 
 	data, err := template_repository.ReadContractTemplateData(ctx, tx, query.DID)
+	if err != nil {
+		return nil, err
+	}
+
+	evt := templateevents.ContractTemplateRetrievedByIdEvent{
+		DID:         query.DID,
+		RetrievedBy: query.RetrievedBy,
+		OccurredAt:  time.Now(),
+	}
+	err = event.CreateNewEvent(h.Ctx, tx, evt)
 	if err != nil {
 		return nil, err
 	}

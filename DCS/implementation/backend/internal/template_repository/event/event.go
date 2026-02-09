@@ -112,3 +112,38 @@ func (e ContractTemplateUpdatedEvent) EventType() string {
 func (e ContractTemplateUpdatedEvent) GetDID() string {
 	return e.DID
 }
+
+// ContractTemplateRetrievedAllEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type ContractTemplateRetrievedAllEvent struct {
+	RetrievedBy string    `json:"updated_by"`
+	OccurredAt  time.Time `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateRetrievedAllEvent) EventType() string {
+	return event_type.RetrievedAllContractTemplates.String()
+}
+
+// GetDID implements the Event interface.
+func (e ContractTemplateRetrievedAllEvent) GetDID() string {
+	return "*"
+}
+
+// ContractTemplateRetrievedByIdEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type ContractTemplateRetrievedByIdEvent struct {
+	DID         string    `json:"did"`
+	RetrievedBy string    `json:"updated_by"`
+	OccurredAt  time.Time `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateRetrievedByIdEvent) EventType() string {
+	return event_type.RetrievedContractTemplateById.String()
+}
+
+// GetDID implements the Event interface.
+func (e ContractTemplateRetrievedByIdEvent) GetDID() string {
+	return e.DID
+}
