@@ -58,7 +58,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -66,7 +66,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 	}
 
 	assert.Equal(t, *did, contractTemplate.DID)
-	assert.Equal(t, name, contractTemplate.Name)
-	assert.Equal(t, description, contractTemplate.Description)
-	assert.Equal(t, jsonMetaData, contractTemplate.MetaData)
+	assert.Equal(t, name, *contractTemplate.Name)
+	assert.Equal(t, description, *contractTemplate.Description)
+	assert.Equal(t, jsonMetaData, *contractTemplate.MetaData)
 }

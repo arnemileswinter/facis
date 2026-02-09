@@ -63,7 +63,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -71,8 +71,8 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	}
 
 	assert.Equal(t, *did, contractTemplate.DID)
-	assert.Equal(t, name, contractTemplate.Name)
-	assert.Equal(t, description, contractTemplate.Description)
+	assert.Equal(t, name, *contractTemplate.Name)
+	assert.Equal(t, description, *contractTemplate.Description)
 	assert.Equal(t, updateBy, contractTemplate.UpdatedBy)
 	//assert.Equal(t, jsonMetaData, contractTemplate.MetaData)
 }

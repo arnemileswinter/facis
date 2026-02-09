@@ -142,7 +142,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templater
 	}
 	queryHandler := query.GetAllContractTemplateHandler{
 		Ctx: ctx,
-		Db:  s.DB,
+		DB:  s.DB,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -176,7 +176,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  s.DB,
+		DB:  s.DB,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -188,8 +188,8 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 		DocumentNumber: contractTemplate.DocumentNumber,
 		Version:        contractTemplate.Version,
 		State:          contractTemplate.State.String(),
-		Name:           &contractTemplate.Name,
-		Description:    &contractTemplate.Description,
+		Name:           contractTemplate.Name,
+		Description:    contractTemplate.Description,
 		CreatedBy:      contractTemplate.CreatedBy,
 		CreatedAt:      contractTemplate.CreatedAt.String(),
 		MetaData:       contractTemplate.MetaData,

@@ -40,20 +40,22 @@ CREATE INDEX idx_contract_templates_updated_by ON contract_templates(updated_by)
 
 ------------------------------------------------------------------------------------------------------------------------
 
+CREATE TYPE review_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED');
+
 CREATE TABLE IF NOT EXISTS contract_templates_review_task
 (
     did             VARCHAR(255) PRIMARY KEY CHECK (did <> '' AND did IS NOT NULL),
+
+    document_number INT                     DEFAULT 1 CHECK (document_number > 0),
+    version         INT                     DEFAULT 1 CHECK (version > 0),
+
+    state review_task_state NOT NULL,
 
     created_by      VARCHAR(255)   NOT NULL,
     created_at      TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     updated_by      VARCHAR(255),
-    updated_at      TIMESTAMP               DEFAULT CURRENT_TIMESTAMP,
-
-    document_number INT                     DEFAULT 1 CHECK (document_number > 0),
-    version         INT                     DEFAULT 1 CHECK (version > 0),
-
-    state           template_state NOT NULL
+    updated_at      TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TRIGGER contract_templates_review_task_update_updated_at

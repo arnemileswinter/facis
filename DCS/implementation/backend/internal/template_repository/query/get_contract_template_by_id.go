@@ -10,30 +10,31 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplatesQuery struct {
+type GetContractTemplateByIdQuery struct {
+	DID         string
 	RetrievedBy string
 }
 
-type GetAllContractTemplateResult struct {
+type GetContractTemplateByIdResult struct {
 	DID            string                       `db:"did"`
 	DocumentNumber int                          `db:"document_number"`
 	Version        int                          `db:"version"`
 	State          template_state.TemplateState `db:"state"`
-	Name           string                       `db:"name"`
-	Description    string                       `db:"description"`
+	Name           *string                      `db:"name"`
+	Description    *string                      `db:"description"`
 	CreatedBy      string                       `db:"created_by"`
 	CreatedAt      time.Time                    `db:"created_at"`
 	UpdatedBy      string                       `db:"updated_by"`
 	UpdatedAt      time.Time                    `db:"updated_at"`
-	MetaData       datatype.JSON                `db:"meta_data"`
+	MetaData       *datatype.JSON               `db:"meta_data"`
 }
 
-type GetAllContractTemplateHandler struct {
+type GetContractTemplateByIdHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuery) ([]GetAllContractTemplateResult, error) {
+func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQuery) (*GetContractTemplateByIdResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
 	defer cancel()
@@ -44,7 +45,7 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 		return nil, err
 	}
 
-	contractTemplates, err := template_repository.ReadAllContractTemplateData(ctx, tx)
+	data, err := template_repository.ReadContractTemplateData(ctx, tx, query.DID)
 	if err != nil {
 		return nil, err
 	}
@@ -54,22 +55,17 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 		return nil, err
 	}
 
-	result := make([]GetAllContractTemplateResult, len(contractTemplates))
-	for i, data := range contractTemplates {
-		result[i] = GetAllContractTemplateResult{
-			DID:            data.DID,
-			DocumentNumber: data.DocumentNumber,
-			Version:        data.Version,
-			State:          data.State,
-			Name:           *data.Name,
-			Description:    *data.Description,
-			CreatedBy:      data.CreatedBy,
-			CreatedAt:      data.CreatedAt,
-			UpdatedBy:      data.UpdatedBy,
-			UpdatedAt:      data.UpdatedAt,
-			MetaData:       *data.MetaData,
-		}
-	}
-
-	return result, nil
+	return &GetContractTemplateByIdResult{
+		DID:            query.DID,
+		DocumentNumber: data.DocumentNumber,
+		Version:        data.Version,
+		State:          data.State,
+		Name:           data.Name,
+		Description:    data.Description,
+		CreatedBy:      data.CreatedBy,
+		CreatedAt:      data.CreatedAt,
+		UpdatedBy:      data.UpdatedBy,
+		UpdatedAt:      data.UpdatedAt,
+		MetaData:       data.MetaData,
+	}, nil
 }

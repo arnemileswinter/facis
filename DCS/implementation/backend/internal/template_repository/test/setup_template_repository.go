@@ -68,7 +68,7 @@ func createTestContractTemplate(t *testing.T, did *string, state template_state.
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	_, err = queryHandler.Handle(qry)
 	if err != nil {

@@ -51,7 +51,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -59,6 +59,8 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	}
 
 	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	//reviewTaks, err := queryHandler.Handle(qry)
 }
 
 func TestSubmit_ApproveContractTemplateInSubmittedState(t *testing.T) {
@@ -101,7 +103,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedState(t *testing.T) {
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -151,7 +153,7 @@ func TestSubmit_DeclineContractTemplateInSubmittedState(t *testing.T) {
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -231,7 +233,7 @@ func TestSubmit_SubmitContractTemplateInReviewedStateToResubmission(t *testing.T
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {

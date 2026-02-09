@@ -7,18 +7,16 @@ import (
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type GetContractTemplateByIdQuery struct {
-	DID         string
-	RetrievedBy string
+type GetAllContractTemplateReviewTasksForDID struct {
+	DID string
 }
 
-type GetContractTemplateByIdResult struct {
+type GetAllContractTemplateReviewTasksForDIDResult struct {
 	DID            string                       `db:"did"`
 	DocumentNumber int                          `db:"document_number"`
 	Version        int                          `db:"version"`
@@ -32,32 +30,28 @@ type GetContractTemplateByIdResult struct {
 	MetaData       datatype.JSON                `db:"meta_data"`
 }
 
-type GetContractTemplateByIdHandler struct {
-	Ctx    context.Context
-	Db     *sqlx.DB
-	Logger *log.Logger
+type GetAllContractTemplateReviewTasksForDIDHandler struct {
+	Ctx context.Context
+	Db  *sqlx.DB
 }
 
-func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQuery) (*GetContractTemplateByIdResult, error) {
+func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllContractTemplateReviewTasksForDID) (*GetAllContractTemplateReviewTasksForDIDResult, error) {
 	sqlQuery := `
         SELECT 
             did,
             document_number,
             version,
             state,
-            name,
-            description,
             created_by,
             created_at,
             updated_by,
-            updated_at,
-            meta_data
-        FROM contract_templates
+            updated_at
+        FROM contract_templates_review_task
         WHERE did = $1
     `
 
-	var contractTemplate GetContractTemplateByIdResult
-	err := h.Db.GetContext(h.Ctx, &contractTemplate, sqlQuery, query.DID)
+	var result GetAllContractTemplateReviewTasksForDIDResult
+	err := h.Db.GetContext(h.Ctx, &result, sqlQuery, query.DID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", query.DID))
@@ -65,5 +59,5 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 		return nil, err
 	}
 
-	return &contractTemplate, nil
+	return &result, nil
 }

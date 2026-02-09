@@ -49,7 +49,7 @@ func TestSubmit_ApproveContractTemplateInReviewedState(t *testing.T) {
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
-		Db:  db,
+		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
