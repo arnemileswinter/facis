@@ -9,7 +9,7 @@ import (
 )
 
 type ReviewTaskData struct {
-	ID             string                            `json:"id"`
+	ID             string                            `db:"id"`
 	DID            string                            `db:"did"`
 	DocumentNumber int                               `db:"document_number"`
 	Version        int                               `db:"version"`
@@ -30,7 +30,7 @@ func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*t
 `
 
 	var createdAt time.Time
-	err := tx.QueryRowContext(ctx, query,
+	err := tx.GetContext(ctx, &createdAt, query,
 		data.DID,
 		data.DocumentNumber,
 		data.Version,
@@ -38,10 +38,25 @@ func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*t
 		data.Assignee,
 		data.CreatedBy,
 		data.CreatedBy, // Use created_by for updated_by
-	).Scan(&createdAt)
+	)
 	if err != nil {
 		return nil, err
 	}
 
 	return &createdAt, nil
+}
+
+func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewTaskData, error) {
+	query := `
+        SELECT id, did, document_number, version, state, assignee,
+               created_by, created_at, updated_by, updated_at
+        FROM contract_templates_review_task WHERE did = $1
+    `
+
+	var reviewTasks []ReviewTaskData
+	err := tx.SelectContext(ctx, &reviewTasks, query, did)
+	if err != nil {
+		return nil, err
+	}
+	return reviewTasks, nil
 }

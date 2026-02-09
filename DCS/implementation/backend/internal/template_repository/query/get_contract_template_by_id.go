@@ -18,17 +18,17 @@ type GetContractTemplateByIdQuery struct {
 }
 
 type GetContractTemplateByIdResult struct {
-	DID            string                       `db:"did"`
-	DocumentNumber int                          `db:"document_number"`
-	Version        int                          `db:"version"`
-	State          template_state.TemplateState `db:"state"`
-	Name           *string                      `db:"name"`
-	Description    *string                      `db:"description"`
-	CreatedBy      string                       `db:"created_by"`
-	CreatedAt      time.Time                    `db:"created_at"`
-	UpdatedBy      string                       `db:"updated_by"`
-	UpdatedAt      time.Time                    `db:"updated_at"`
-	MetaData       *datatype.JSON               `db:"meta_data"`
+	DID            string
+	DocumentNumber int
+	Version        int
+	State          template_state.TemplateState
+	Name           *string
+	Description    *string
+	CreatedBy      string
+	CreatedAt      time.Time
+	UpdatedBy      string
+	UpdatedAt      time.Time
+	MetaData       *datatype.JSON
 }
 
 type GetContractTemplateByIdHandler struct {
@@ -42,10 +42,10 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
-	defer tx.Rollback()
 	if err != nil {
 		return nil, err
 	}
+	defer tx.Rollback()
 
 	data, err := template_repository.ReadContractTemplateData(ctx, tx, query.DID)
 	if err != nil {

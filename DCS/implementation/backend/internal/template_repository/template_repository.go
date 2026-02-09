@@ -37,7 +37,7 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 `
 
 	var createdAt time.Time
-	err := tx.QueryRowContext(ctx, query,
+	err := tx.GetContext(ctx, &createdAt, query,
 		data.DID,
 		data.CreatedBy,
 		data.CreatedBy, // Use created_by for updated_by
@@ -45,7 +45,7 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 		data.Name,
 		data.Description,
 		data.MetaData,
-	).Scan(&createdAt)
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -54,12 +54,14 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 }
 
 func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string) (*ContractTemplateData, error) {
-	var ct ContractTemplateData
-	err := tx.GetContext(ctx, &ct, `
+	query := `
         SELECT did, document_number, version, state, name, description,
                created_by, created_at, updated_by, updated_at, meta_data
         FROM contract_templates WHERE did = $1
-    `, did)
+    `
+
+	var ct ContractTemplateData
+	err := tx.GetContext(ctx, &ct, query, did)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", did))
@@ -70,13 +72,14 @@ func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string) (*Co
 }
 
 func ReadAllContractTemplateData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateData, error) {
-	var cts []ContractTemplateData
-	err := tx.SelectContext(ctx, &cts, `
+	query := `
         SELECT did, document_number, version, state, name, description,
                created_by, created_at, updated_by, updated_at, meta_data
         FROM contract_templates
-        ORDER BY did
-    `)
+    `
+
+	var cts []ContractTemplateData
+	err := tx.SelectContext(ctx, &cts, query)
 	if err != nil {
 		return []ContractTemplateData{}, err
 	}
@@ -91,11 +94,13 @@ type ContractTemplateCoreData struct {
 }
 
 func ReadContractTemplateCoreData(ctx context.Context, tx *sqlx.Tx, did string) (*ContractTemplateCoreData, error) {
-	var coreData ContractTemplateCoreData
-	err := tx.GetContext(ctx, &coreData, `
+	query := `
         SELECT did, document_number, version, state
         FROM contract_templates WHERE did = $1
-    `, did)
+    `
+
+	var coreData ContractTemplateCoreData
+	err := tx.GetContext(ctx, &coreData, query, did)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", did))
@@ -106,11 +111,13 @@ func ReadContractTemplateCoreData(ctx context.Context, tx *sqlx.Tx, did string) 
 }
 
 func ReadContractTemplateState(ctx context.Context, tx *sqlx.Tx, did string) (*template_state.TemplateState, error) {
-	var state template_state.TemplateState
-	err := tx.QueryRowContext(ctx, `
+	query := `
         SELECT state
         FROM contract_templates WHERE did = $1
-    `, did).Scan(&state)
+    `
+
+	var state template_state.TemplateState
+	err := tx.GetContext(ctx, &state, query, did)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", did))

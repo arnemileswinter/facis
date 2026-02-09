@@ -5,8 +5,10 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/template_repository/command"
 	"digital-contracting-service/internal/template_repository/datatype/action_flag"
+	"digital-contracting-service/internal/template_repository/datatype/review_task_state"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"digital-contracting-service/internal/template_repository/query"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,7 +67,26 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 
 	assert.Equal(t, template_state.Submitted, contractTemplate.State)
 
-	//reviewTaks, err := queryHandler.Handle(qry)
+	queryReviewTasks := query.GetAllContractTemplateReviewTasksForDID{
+		DID:         *did,
+		RetrievedBy: retrievedBy,
+	}
+	handlerReviewTasks := query.GetAllContractTemplateReviewTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	reviewTasks, err := handlerReviewTasks.Handle(queryReviewTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	for _, reviewTask := range reviewTasks {
+		assert.Equal(t, review_task_state.Open, reviewTask.State)
+
+		if !slices.Contains(cmd.Assignees, reviewTask.Assignee) {
+			t.Fatalf("Assignee not found in review tasks: %v", reviewTask)
+		}
+	}
 }
 
 func TestSubmit_ApproveContractTemplateInSubmittedState(t *testing.T) {

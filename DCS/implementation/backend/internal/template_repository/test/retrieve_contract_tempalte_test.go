@@ -5,6 +5,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	"digital-contracting-service/internal/template_repository/query"
+	"slices"
 	"sort"
 	"testing"
 
@@ -78,8 +79,11 @@ func TestSubmit_RetrieveAllContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	for i, ct := range contractTemplate {
-		assert.Equal(t, dids[i], ct.DID)
+	for _, ct := range contractTemplate {
 		assert.Equal(t, template_state.Draft, ct.State)
+
+		if !slices.Contains(dids, ct.DID) {
+			t.Errorf("DID not found in retrieved contract template: %v", ct.DID)
+		}
 	}
 }

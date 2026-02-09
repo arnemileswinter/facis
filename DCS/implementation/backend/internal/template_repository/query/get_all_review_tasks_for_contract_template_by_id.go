@@ -2,40 +2,39 @@ package query
 
 import (
 	"context"
-	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
-	"digital-contracting-service/internal/template_repository/datatype/template_state"
+	"digital-contracting-service/internal/template_repository/datatype/review_task_state"
 	templateevents "digital-contracting-service/internal/template_repository/event"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplatesQuery struct {
+type GetAllContractTemplateReviewTasksForDID struct {
+	DID         string
 	RetrievedBy string
 }
 
-type GetAllContractTemplateResult struct {
+type GetAllContractTemplateReviewTasksForDIDResult struct {
+	ID             int
 	DID            string
 	DocumentNumber int
 	Version        int
-	State          template_state.TemplateState
-	Name           string
-	Description    string
+	State          review_task_state.ReviewTaskState
+	Assignee       string
 	CreatedBy      string
 	CreatedAt      time.Time
 	UpdatedBy      string
 	UpdatedAt      time.Time
-	MetaData       datatype.JSON
 }
 
-type GetAllContractTemplateHandler struct {
+type GetAllContractTemplateReviewTasksForDIDHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuery) ([]GetAllContractTemplateResult, error) {
+func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllContractTemplateReviewTasksForDID) ([]GetAllContractTemplateReviewTasksForDIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
 	defer cancel()
@@ -46,12 +45,13 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 	}
 	defer tx.Rollback()
 
-	contractTemplates, err := template_repository.ReadAllContractTemplateData(ctx, tx)
+	reviewTasks, err := template_repository.ReadAllReviewTasks(ctx, tx, query.DID)
 	if err != nil {
 		return nil, err
 	}
 
-	evt := templateevents.ContractTemplateRetrievedAllEvent{
+	evt := templateevents.ContractTemplateRetrieveAllReviewTasksEvent{
+		DID:         query.DID,
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}
@@ -65,20 +65,18 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 		return nil, err
 	}
 
-	result := make([]GetAllContractTemplateResult, len(contractTemplates))
-	for i, data := range contractTemplates {
-		result[i] = GetAllContractTemplateResult{
+	result := make([]GetAllContractTemplateReviewTasksForDIDResult, len(reviewTasks))
+	for i, data := range reviewTasks {
+		result[i] = GetAllContractTemplateReviewTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
 			State:          data.State,
-			Name:           *data.Name,
-			Description:    *data.Description,
+			Assignee:       data.Assignee,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,
 			UpdatedBy:      data.UpdatedBy,
 			UpdatedAt:      data.UpdatedAt,
-			MetaData:       *data.MetaData,
 		}
 	}
 
