@@ -26,7 +26,7 @@ var validStates = map[TemplateState]bool{
 func NewTemplateState(s string) (TemplateState, error) {
 	ts := TemplateState(strings.ToUpper(s))
 	if !ts.IsValid() {
-		return "", fmt.Errorf(fmt.Sprintf("invalid template state: %s", s))
+		return "", fmt.Errorf("invalid template state: %s", s)
 	}
 	return ts, nil
 }

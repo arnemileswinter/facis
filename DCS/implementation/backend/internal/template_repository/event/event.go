@@ -151,12 +151,11 @@ func (e ContractTemplateRetrievedByIdEvent) GetDID() string {
 // ContractTemplateCreateReviewTaskEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type ContractTemplateCreateReviewTaskEvent struct {
-	DID            string    `json:"did"`
-	DocumentNumber int       `db:"document_number"`
-	Version        int       `db:"version"`
-	Assignee       string    `json:"assignee"`
-	CreatedBy      string    `json:"updated_by"`
-	OccurredAt     time.Time `json:"occurred_at"`
+	DID        string    `json:"did"`
+	Version    int       `db:"version"`
+	Assignee   string    `json:"assignee"`
+	CreatedBy  string    `json:"updated_by"`
+	OccurredAt time.Time `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.

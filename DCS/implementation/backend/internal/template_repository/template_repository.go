@@ -14,17 +14,16 @@ import (
 )
 
 type ContractTemplateData struct {
-	DID            string                       `db:"did"`
-	DocumentNumber int                          `db:"document_number"`
-	Version        int                          `db:"version"`
-	State          template_state.TemplateState `db:"state"`
-	Name           *string                      `db:"name"`
-	Description    *string                      `db:"description"`
-	CreatedBy      string                       `db:"created_by"`
-	CreatedAt      time.Time                    `db:"created_at"`
-	UpdatedBy      string                       `db:"updated_by"`
-	UpdatedAt      time.Time                    `db:"updated_at"`
-	MetaData       *datatype.JSON               `db:"meta_data"`
+	DID         string                       `db:"did"`
+	Version     int                          `db:"version"`
+	State       template_state.TemplateState `db:"state"`
+	Name        *string                      `db:"name"`
+	Description *string                      `db:"description"`
+	CreatedBy   string                       `db:"created_by"`
+	CreatedAt   time.Time                    `db:"created_at"`
+	UpdatedBy   string                       `db:"updated_by"`
+	UpdatedAt   time.Time                    `db:"updated_at"`
+	MetaData    *datatype.JSON               `db:"meta_data"`
 }
 
 func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) (*time.Time, error) {
@@ -55,7 +54,7 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 
 func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string) (*ContractTemplateData, error) {
 	query := `
-        SELECT did, document_number, version, state, name, description,
+        SELECT did, version, state, name, description,
                created_by, created_at, updated_by, updated_at, meta_data
         FROM contract_templates WHERE did = $1
     `
@@ -73,7 +72,7 @@ func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string) (*Co
 
 func ReadAllContractTemplateData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateData, error) {
 	query := `
-        SELECT did, document_number, version, state, name, description,
+        SELECT did, version, state, name, description,
                created_by, created_at, updated_by, updated_at, meta_data
         FROM contract_templates
     `
@@ -87,15 +86,14 @@ func ReadAllContractTemplateData(ctx context.Context, tx *sqlx.Tx) ([]ContractTe
 }
 
 type ContractTemplateCoreData struct {
-	DID            string                       `db:"did"`
-	DocumentNumber int                          `db:"document_number"`
-	Version        int                          `db:"version"`
-	State          template_state.TemplateState `db:"state"`
+	DID     string                       `db:"did"`
+	Version int                          `db:"version"`
+	State   template_state.TemplateState `db:"state"`
 }
 
 func ReadContractTemplateCoreData(ctx context.Context, tx *sqlx.Tx, did string) (*ContractTemplateCoreData, error) {
 	query := `
-        SELECT did, document_number, version, state
+        SELECT did, version, state
         FROM contract_templates WHERE did = $1
     `
 

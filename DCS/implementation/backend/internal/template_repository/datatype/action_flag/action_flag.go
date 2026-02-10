@@ -1,7 +1,6 @@
 package action_flag
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -21,7 +20,7 @@ var validFlag = map[ActionFlag]bool{
 func NewActionFlag(s string) (ActionFlag, error) {
 	flag := ActionFlag(strings.ToUpper(s))
 	if !flag.IsValid() {
-		return "", errors.New(fmt.Sprintf("invalid action flag: %s", s))
+		return "", fmt.Errorf("invalid action flag: %s", s)
 	}
 	return flag, nil
 }

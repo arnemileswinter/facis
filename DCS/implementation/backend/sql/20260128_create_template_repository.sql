@@ -1,22 +1,21 @@
 CREATE TYPE template_state AS ENUM ('DRAFT', 'SUBMITTED', 'REVIEWED', 'APPROVED');
 
 CREATE TABLE IF NOT EXISTS contract_templates (
-                                                  did VARCHAR(255) PRIMARY KEY CHECK (did <> '' AND did IS NOT NULL),
+    did VARCHAR(255),
+    version INT DEFAULT 1,
 
-                                                  created_by VARCHAR(255) NOT NULL,
-                                                  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(255) NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    state template_state NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    meta_data JSONB DEFAULT '{}'::jsonb,
 
-                                                  updated_by VARCHAR(255) NOT NULL,
-                                                  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-                                                  document_number INT DEFAULT 1 CHECK (document_number > 0),
-                                                  version INT DEFAULT 1 CHECK (version > 0),
-
-                                                  state template_state NOT NULL,
-
-                                                  name VARCHAR(255) NOT NULL,
-                                                  description TEXT,
-                                                  meta_data JSONB DEFAULT '{}'::jsonb
+    CONSTRAINT pk_contract_templates PRIMARY KEY (did, version),
+    CONSTRAINT chk_did_not_empty CHECK (did <> ''),
+    CONSTRAINT chk_version_positive CHECK (version > 0)
 );
 
 -- Trigger for updating updated_at
@@ -46,20 +45,19 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
 (
     id              BIGSERIAL PRIMARY KEY,
 
-    did             VARCHAR(255) CHECK (did <> '' AND did IS NOT NULL),
-
-    document_number INT NOT NULL,
+    did             VARCHAR(255) CHECK (did <> ''),
     version         INT NOT NULL,
 
     state review_task_state NOT NULL,
-
     assignee VARCHAR(255) CHECK (assignee <> '' AND assignee IS NOT NULL),
-
     created_by      VARCHAR(255) NOT NULL,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
     updated_by      VARCHAR(255) NOT NULL,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_review_task_contract_template
+        FOREIGN KEY (did, version)
+        REFERENCES contract_templates(did, version)
 );
 
 CREATE TRIGGER contract_templates_review_task_update_updated_at

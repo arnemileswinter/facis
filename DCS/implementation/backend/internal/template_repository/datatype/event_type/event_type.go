@@ -33,7 +33,7 @@ var validStates = map[EventType]bool{
 func NewEventType(s string) (EventType, error) {
 	ts := EventType(strings.ToUpper(s))
 	if !ts.IsValid() {
-		return "", fmt.Errorf(fmt.Sprintf("invalid template state: %s", s))
+		return "", fmt.Errorf("invalid event type: %s", s)
 	}
 	return ts, nil
 }

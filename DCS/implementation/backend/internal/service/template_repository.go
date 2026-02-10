@@ -152,15 +152,14 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templater
 	var contractTemplates []*templaterepository.ContractTemplateRetrieveResponse
 	for _, item := range result {
 		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateRetrieveResponse{
-			Did:            item.DID,
-			DocumentNumber: item.DocumentNumber,
-			Version:        item.Version,
-			State:          item.State.String(),
-			Name:           &item.Name,
-			Description:    &item.Description,
-			CreatedBy:      item.CreatedBy,
-			CreatedAt:      item.CreatedAt.String(),
-			MetaData:       item.MetaData,
+			Did:         item.DID,
+			Version:     item.Version,
+			State:       item.State.String(),
+			Name:        &item.Name,
+			Description: &item.Description,
+			CreatedBy:   item.CreatedBy,
+			CreatedAt:   item.CreatedAt.String(),
+			MetaData:    item.MetaData,
 		})
 	}
 
@@ -184,15 +183,14 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 	}
 
 	return &templaterepository.ContractTemplateRetrieveByIDResponse{
-		Did:            contractTemplate.DID,
-		DocumentNumber: contractTemplate.DocumentNumber,
-		Version:        contractTemplate.Version,
-		State:          contractTemplate.State.String(),
-		Name:           contractTemplate.Name,
-		Description:    contractTemplate.Description,
-		CreatedBy:      contractTemplate.CreatedBy,
-		CreatedAt:      contractTemplate.CreatedAt.String(),
-		MetaData:       contractTemplate.MetaData,
+		Did:         contractTemplate.DID,
+		Version:     contractTemplate.Version,
+		State:       contractTemplate.State.String(),
+		Name:        contractTemplate.Name,
+		Description: contractTemplate.Description,
+		CreatedBy:   contractTemplate.CreatedBy,
+		CreatedAt:   contractTemplate.CreatedAt.String(),
+		MetaData:    contractTemplate.MetaData,
 	}, nil
 }
 

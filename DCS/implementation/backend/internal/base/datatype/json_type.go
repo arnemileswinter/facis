@@ -85,7 +85,7 @@ func NewJSON(v any) (JSON, error) {
 	bytes, err := json.Marshal(v)
 	if err != nil {
 		// Rückgabe eines detaillierteren Fehlers, falls das Marshalling fehlschlägt
-		return nil, errors.New(fmt.Sprintf("failed to marshal value into JSON: %w", err))
+		return nil, fmt.Errorf("failed to marshal value into JSON: %w", err)
 	}
 
 	return JSON(bytes), nil

@@ -23,7 +23,7 @@ var validStates = map[ReviewTaskState]bool{
 func NewReviewTaskState(s string) (ReviewTaskState, error) {
 	ts := ReviewTaskState(strings.ToUpper(s))
 	if !ts.IsValid() {
-		return "", fmt.Errorf(fmt.Sprintf("invalid review task state: %s", s))
+		return "", fmt.Errorf("invalid review task state: %s", s)
 	}
 	return ts, nil
 }
