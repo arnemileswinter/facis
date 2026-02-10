@@ -23,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import ContractTemplateTableRowData from '../../components/ContractTemplateTableRowData.vue'
-import DataTable from '../../components/DataTable.vue'
+import ContractTemplateTableRowData from '../../components/tables/ContractTemplateTableRowData.vue'
+import DataTable from '../../components/tables/DataTable.vue'
 import { useTemplateTable } from './ContractTemplateController'
 
 const { templates, loading, error, refresh } = useTemplateTable()
