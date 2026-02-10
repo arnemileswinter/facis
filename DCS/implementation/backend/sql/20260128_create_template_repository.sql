@@ -55,6 +55,10 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
     updated_by      VARCHAR(255) NOT NULL,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    review_comments TEXT,
+
+    closed BOOLEAN DEFAULT FALSE,
+
     CONSTRAINT fk_review_task_contract_template
         FOREIGN KEY (did, version)
         REFERENCES contract_templates(did, version)

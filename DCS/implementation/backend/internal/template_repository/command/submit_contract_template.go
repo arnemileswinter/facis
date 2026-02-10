@@ -78,8 +78,33 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Approval {
-				nextTemplateState = template_state.Reviewed
+
+				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.ReviewComments)
+				if err != nil {
+					return err
+				}
+
+				exist, err := template_repository.ExistReviewTaskInState(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy, review_task_state.Open)
+				if err != nil {
+					return err
+				}
+
+				if !exist {
+					nextTemplateState = template_state.Reviewed
+				}
+
 			} else if *cmd.ActionFlag == action_flag.Draft {
+
+				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.ReviewComments)
+				if err != nil {
+					return err
+				}
+
+				err = template_repository.CloseReviewTasks(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy)
+				if err != nil {
+					return err
+				}
+
 				nextTemplateState = template_state.Draft
 			}
 		} else {
@@ -94,23 +119,25 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 		return errors.New("current template contract state is invalid")
 	}
 
-	err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, nextTemplateState)
-	if err != nil {
-		return err
-	}
+	if coreData.State != nextTemplateState {
+		err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, nextTemplateState)
+		if err != nil {
+			return err
+		}
 
-	evt := templateevents.ContractTemplateSubmittedEvent{
-		DID:            cmd.DID,
-		SubmittedBy:    cmd.SubmittedBy,
-		PreviousState:  coreData.State,
-		NewState:       nextTemplateState,
-		ActionFlag:     cmd.ActionFlag,
-		ReviewComments: cmd.ReviewComments,
-		OccurredAt:     time.Now(),
-	}
-	err = event.CreateNewEvent(h.Ctx, tx, evt)
-	if err != nil {
-		return err
+		evt := templateevents.ContractTemplateSubmittedEvent{
+			DID:            cmd.DID,
+			SubmittedBy:    cmd.SubmittedBy,
+			PreviousState:  coreData.State,
+			NewState:       nextTemplateState,
+			ActionFlag:     cmd.ActionFlag,
+			ReviewComments: cmd.ReviewComments,
+			OccurredAt:     time.Now(),
+		}
+		err = event.CreateNewEvent(h.Ctx, tx, evt)
+		if err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()

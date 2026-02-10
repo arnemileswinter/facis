@@ -58,3 +58,49 @@ func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewT
 	}
 	return reviewTasks, nil
 }
+
+func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, version int, assignee string, state review_task_state.ReviewTaskState, reviewComments []string) error {
+	query := `
+        UPDATE contract_templates SET state = $4, review_comments = $5
+        FROM contract_templates_review_task WHERE did = $1 AND version = $2 AND assignee = $3
+    `
+
+	var comments string
+	for _, comment := range reviewComments {
+		comments += comment + ";"
+	}
+	_, err := tx.ExecContext(ctx, query, did, version, assignee, state, comments)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func CloseReviewTasks(ctx context.Context, tx *sqlx.Tx, did string, version int, assignee string) error {
+	query := `
+        UPDATE contract_templates SET closed = true
+        FROM contract_templates_review_task WHERE did = $1 AND version = $2
+    `
+
+	_, err := tx.ExecContext(ctx, query, did, version, assignee)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func ExistReviewTaskInState(ctx context.Context, tx *sqlx.Tx, did string, version int, assignee string, state review_task_state.ReviewTaskState) (bool, error) {
+	query := `
+        SELECT did, version, state, assignee, state
+        FROM contract_templates_review_task WHERE did = $1 AND version = $2 AND assignee = $3 AND state = $4
+    `
+
+	var reviewTasks []ReviewTaskData
+	err := tx.SelectContext(ctx, &reviewTasks, query, did, version, assignee, state)
+	if err != nil {
+		return false, err
+	}
+	return len(reviewTasks) > 0, nil
+}
