@@ -1,4 +1,4 @@
-CREATE TYPE template_state AS ENUM ('DRAFT', 'SUBMITTED', 'REVIEWED', 'APPROVED');
+CREATE TYPE template_state AS ENUM ('DRAFT', 'SUBMITTED', 'REJECTED', 'REVIEWED', 'APPROVED');
 
 CREATE TABLE IF NOT EXISTS contract_templates (
     did VARCHAR(255),
@@ -41,7 +41,7 @@ CREATE INDEX idx_contract_templates_updated_by ON contract_templates(updated_by)
 
 ------------------------------------------------------------------------------------------------------------------------
 
-CREATE TYPE review_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED');
+CREATE TYPE review_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'CANCELLED');
 
 CREATE TABLE IF NOT EXISTS contract_templates_review_task
 (
@@ -59,8 +59,6 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     review_comments TEXT,
-
-    closed BOOLEAN DEFAULT FALSE,
 
     CONSTRAINT fk_review_task_contract_template
         FOREIGN KEY (did, document_number, version)

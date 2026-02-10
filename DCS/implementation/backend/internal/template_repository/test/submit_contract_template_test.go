@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/command"
 	"digital-contracting-service/internal/template_repository/datatype/action_flag"
 	"digital-contracting-service/internal/template_repository/datatype/review_task_state"
@@ -103,7 +104,40 @@ func TestSubmit_ApproveContractTemplateInSubmittedState(t *testing.T) {
 	createTestContractTemplate(t, did, template_state.Submitted, db)
 
 	ctx := context.Background()
+
 	submittedBy := "Test User"
+
+	assignees := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	tx, err := db.BeginTxx(ctx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		t.Fatalf("Failed to begin transaction: %v", err)
+	}
+
+	for _, assignee := range assignees {
+		reviewTask := template_repository.ReviewTaskData{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			Assignee:       assignee,
+			State:          review_task_state.Open,
+			CreatedBy:      submittedBy,
+		}
+		_, err = template_repository.CreateReviewTask(ctx, tx, reviewTask)
+		if err != nil {
+			t.Fatalf("Failed to create review task: %v", err)
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		t.Fatalf("Failed to commit transaction: %v", err)
+	}
+
 	actionFlag := action_flag.Approval
 
 	cmd := command.SubmitTemplateContractCommand{

@@ -9,15 +9,17 @@ import (
 type ReviewTaskState string
 
 const (
-	Open     ReviewTaskState = "OPEN"
-	Approved ReviewTaskState = "APPROVED"
-	Rejected ReviewTaskState = "REJECTED"
+	Open      ReviewTaskState = "OPEN"
+	Approved  ReviewTaskState = "APPROVED"
+	Rejected  ReviewTaskState = "REJECTED"
+	Cancelled ReviewTaskState = "CANCELLED"
 )
 
 var validStates = map[ReviewTaskState]bool{
-	Open:     true,
-	Approved: true,
-	Rejected: true,
+	Open:      true,
+	Approved:  true,
+	Rejected:  true,
+	Cancelled: true,
 }
 
 func NewReviewTaskState(s string) (ReviewTaskState, error) {

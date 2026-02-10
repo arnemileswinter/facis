@@ -12,6 +12,7 @@ type TemplateState string
 const (
 	Draft     TemplateState = "DRAFT"
 	Submitted TemplateState = "SUBMITTED"
+	Rejected  TemplateState = "REJECTED"
 	Reviewed  TemplateState = "REVIEWED"
 	Approved  TemplateState = "APPROVED"
 )
@@ -19,6 +20,7 @@ const (
 var validStates = map[TemplateState]bool{
 	Draft:     true,
 	Submitted: true,
+	Rejected:  true,
 	Reviewed:  true,
 	Approved:  true,
 }

@@ -81,12 +81,12 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Approval {
 
-				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.ReviewComments)
+				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.ReviewComments)
 				if err != nil {
 					return err
 				}
 
-				exist, err := template_repository.ExistReviewTaskInState(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy, review_task_state.Open)
+				exist, err := template_repository.ExistReviewTaskInState(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Open)
 				if err != nil {
 					return err
 				}
@@ -97,12 +97,12 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 
 			} else if *cmd.ActionFlag == action_flag.Draft {
 
-				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.ReviewComments)
+				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.ReviewComments)
 				if err != nil {
 					return err
 				}
 
-				err = template_repository.CloseReviewTasks(h.Ctx, tx, coreData.DID, coreData.Version, cmd.SubmittedBy)
+				err = template_repository.CancelReviewTasks(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
