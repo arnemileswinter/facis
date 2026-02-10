@@ -8,6 +8,8 @@ const emit = defineEmits<{
 const search = ref('')
 
 function searchList() {
+  if (search.value.length < 1) return
+
   console.log(`Searching: ${search.value}`)
   emit('search', search.value)
 }

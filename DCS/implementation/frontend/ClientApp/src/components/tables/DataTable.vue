@@ -84,6 +84,6 @@ function sortItemsBy(item: string) {
         </tbody>
       </table>
     </div>
-    <Pagination v-model:pages="pages" @page-change="handlePageChange" />
+    <Pagination :pages="pages" @page-change="handlePageChange" />
   </div>
 </template>

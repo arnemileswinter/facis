@@ -11,8 +11,8 @@ const sortPopover = useTemplateRef('sortPopover')
 const sortBy = defineModel<string>('sortBy', { required: true })
 const sortOrder = defineModel<number>('sortOrder', { required: true })
 
-function sortItemsBy(item: string) {
-  const newSorter = props.sorter.has(item) ? item : props.sorter.keys().next().value!
+function sortItemsBy(key: string) {
+  const newSorter = props.sorter.has(key) ? key : props.sorter.keys().next().value!
   sortOrder.value = sortBy.value === newSorter ? -sortOrder.value : 1
   sortBy.value = newSorter
   sortPopover.value?.hidePopover()

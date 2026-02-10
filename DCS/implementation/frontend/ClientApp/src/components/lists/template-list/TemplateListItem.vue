@@ -22,9 +22,14 @@ defineProps<{
           <div>Created by: {{ item.created_by }}</div>
           <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
         </div>
-        <div class="card-actions justify-end">
-          <button class="btn btn-outline btn-info">View</button>
-          <button class="btn btn-outline btn-warning">Edit</button>
+        <div class="card-actions justify-between">
+          <div class="card-actions justify-start">
+            <input type="checkbox" class="checkbox checkbox-xl checkbox-accent" />
+          </div>
+          <div class="card-actions justify-end">
+            <button class="btn btn-outline btn-info">View</button>
+            <button class="btn btn-outline btn-warning">Edit</button>
+          </div>
         </div>
       </div>
     </div>

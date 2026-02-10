@@ -5,10 +5,9 @@ const emit = defineEmits<{
   pageChange: [value: number]
 }>()
 
-const pages = defineModel<number>('pages', {
-  required: true,
-  set: (value) => (value >= 0 ? Math.floor(value) : 0),
-})
+defineProps<{
+  pages: number
+}>()
 
 const currentPage = ref(1)
 
@@ -24,7 +23,7 @@ watch(currentPage, (newPage, oldPage) => {
     <template v-for="page in pages" :key="page">
       <button
         type="button"
-        class="join-item btn btn-outline btn-accent"
+        class="btn join-item btn-outline btn-accent"
         :class="{ 'btn-active': page == currentPage }"
         @click="currentPage = page"
       >
