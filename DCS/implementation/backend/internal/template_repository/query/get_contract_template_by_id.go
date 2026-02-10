@@ -18,16 +18,17 @@ type GetContractTemplateByIdQuery struct {
 }
 
 type GetContractTemplateByIdResult struct {
-	DID         string
-	Version     int
-	State       template_state.TemplateState
-	Name        *string
-	Description *string
-	CreatedBy   string
-	CreatedAt   time.Time
-	UpdatedBy   string
-	UpdatedAt   time.Time
-	MetaData    *datatype.JSON
+	DID            string
+	DocumentNumber int
+	Version        int
+	State          template_state.TemplateState
+	Name           *string
+	Description    *string
+	CreatedBy      string
+	CreatedAt      time.Time
+	UpdatedBy      string
+	UpdatedAt      time.Time
+	MetaData       *datatype.JSON
 }
 
 type GetContractTemplateByIdHandler struct {
@@ -67,15 +68,16 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 	}
 
 	return &GetContractTemplateByIdResult{
-		DID:         query.DID,
-		Version:     data.Version,
-		State:       data.State,
-		Name:        data.Name,
-		Description: data.Description,
-		CreatedBy:   data.CreatedBy,
-		CreatedAt:   data.CreatedAt,
-		UpdatedBy:   data.UpdatedBy,
-		UpdatedAt:   data.UpdatedAt,
-		MetaData:    data.MetaData,
+		DID:            query.DID,
+		DocumentNumber: data.DocumentNumber,
+		Version:        data.Version,
+		State:          data.State,
+		Name:           data.Name,
+		Description:    data.Description,
+		CreatedBy:      data.CreatedBy,
+		CreatedAt:      data.CreatedAt,
+		UpdatedBy:      data.UpdatedBy,
+		UpdatedAt:      data.UpdatedAt,
+		MetaData:       data.MetaData,
 	}, nil
 }

@@ -63,6 +63,7 @@ var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", 
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 
+	Attribute("document_number", Int, "The document number of the contract template")
 	Attribute("version", Int, "The version number of the contract template")
 
 	Attribute("state", String, "The state of the contract template")
@@ -75,7 +76,7 @@ var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", 
 
 	Attribute("meta_data", Any, "The metadata of the contract template")
 
-	Required("did", "version", "state", "created_by", "created_at", "meta_data")
+	Required("did", "document_number", "version", "state", "created_by", "created_at", "meta_data")
 })
 
 var ContractTemplateRetrieveByIdRequest = Type("ContractTemplateRetrieveByIdRequest", func() {
@@ -91,6 +92,7 @@ var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdRes
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 
+	Attribute("document_number", Int, "The document number of the contract template")
 	Attribute("version", Int, "The version number of the contract template")
 
 	Attribute("state", String, "The state of the contract template")
@@ -103,7 +105,7 @@ var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdRes
 
 	Attribute("meta_data", Any, "The metadata of the contract template")
 
-	Required("did", "version", "state", "created_by", "created_at", "meta_data")
+	Required("did", "document_number", "version", "state", "created_by", "created_at", "meta_data")
 })
 
 var ContractTemplateApproveRequest = Type("ContractTemplateApproveRequest", func() {

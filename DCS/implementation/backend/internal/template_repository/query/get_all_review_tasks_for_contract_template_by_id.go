@@ -17,15 +17,16 @@ type GetAllContractTemplateReviewTasksForDID struct {
 }
 
 type GetAllContractTemplateReviewTasksForDIDResult struct {
-	ID        int
-	DID       string
-	Version   int
-	State     review_task_state.ReviewTaskState
-	Assignee  string
-	CreatedBy string
-	CreatedAt time.Time
-	UpdatedBy string
-	UpdatedAt time.Time
+	ID             int
+	DID            string
+	DocumentNumber int
+	Version        int
+	State          review_task_state.ReviewTaskState
+	Assignee       string
+	CreatedBy      string
+	CreatedAt      time.Time
+	UpdatedBy      string
+	UpdatedAt      time.Time
 }
 
 type GetAllContractTemplateReviewTasksForDIDHandler struct {
@@ -67,14 +68,15 @@ func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllCont
 	result := make([]GetAllContractTemplateReviewTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
 		result[i] = GetAllContractTemplateReviewTasksForDIDResult{
-			DID:       data.DID,
-			Version:   data.Version,
-			State:     data.State,
-			Assignee:  data.Assignee,
-			CreatedBy: data.CreatedBy,
-			CreatedAt: data.CreatedAt,
-			UpdatedBy: data.UpdatedBy,
-			UpdatedAt: data.UpdatedAt,
+			DID:            data.DID,
+			DocumentNumber: data.DocumentNumber,
+			Version:        data.Version,
+			State:          data.State,
+			Assignee:       data.Assignee,
+			CreatedBy:      data.CreatedBy,
+			CreatedAt:      data.CreatedAt,
+			UpdatedBy:      data.UpdatedBy,
+			UpdatedAt:      data.UpdatedAt,
 		}
 	}
 

@@ -17,16 +17,17 @@ type GetAllContractTemplatesQuery struct {
 }
 
 type GetAllContractTemplateResult struct {
-	DID         string
-	Version     int
-	State       template_state.TemplateState
-	Name        string
-	Description string
-	CreatedBy   string
-	CreatedAt   time.Time
-	UpdatedBy   string
-	UpdatedAt   time.Time
-	MetaData    datatype.JSON
+	DID            string
+	DocumentNumber int
+	Version        int
+	State          template_state.TemplateState
+	Name           string
+	Description    string
+	CreatedBy      string
+	CreatedAt      time.Time
+	UpdatedBy      string
+	UpdatedAt      time.Time
+	MetaData       datatype.JSON
 }
 
 type GetAllContractTemplateHandler struct {
@@ -67,16 +68,17 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 	result := make([]GetAllContractTemplateResult, len(contractTemplates))
 	for i, data := range contractTemplates {
 		result[i] = GetAllContractTemplateResult{
-			DID:         data.DID,
-			Version:     data.Version,
-			State:       data.State,
-			Name:        *data.Name,
-			Description: *data.Description,
-			CreatedBy:   data.CreatedBy,
-			CreatedAt:   data.CreatedAt,
-			UpdatedBy:   data.UpdatedBy,
-			UpdatedAt:   data.UpdatedAt,
-			MetaData:    *data.MetaData,
+			DID:            data.DID,
+			DocumentNumber: data.DocumentNumber,
+			Version:        data.Version,
+			State:          data.State,
+			Name:           *data.Name,
+			Description:    *data.Description,
+			CreatedBy:      data.CreatedBy,
+			CreatedAt:      data.CreatedAt,
+			UpdatedBy:      data.UpdatedBy,
+			UpdatedAt:      data.UpdatedAt,
+			MetaData:       *data.MetaData,
 		}
 	}
 

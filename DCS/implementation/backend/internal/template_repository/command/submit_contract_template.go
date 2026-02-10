@@ -48,11 +48,12 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 
 		for _, assignee := range cmd.Assignees {
 			reviewTask := template_repository.ReviewTaskData{
-				DID:       cmd.DID,
-				Version:   coreData.Version,
-				Assignee:  assignee,
-				State:     review_task_state.Open,
-				CreatedBy: cmd.SubmittedBy,
+				DID:            cmd.DID,
+				DocumentNumber: coreData.DocumentNumber,
+				Version:        coreData.Version,
+				Assignee:       assignee,
+				State:          review_task_state.Open,
+				CreatedBy:      cmd.SubmittedBy,
 			}
 			createdAt, err := template_repository.CreateReviewTask(ctx, tx, reviewTask)
 			if err != nil {
@@ -60,11 +61,12 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 			}
 
 			evt := templateevents.ContractTemplateCreateReviewTaskEvent{
-				DID:        coreData.DID,
-				Version:    coreData.Version,
-				CreatedBy:  cmd.SubmittedBy,
-				Assignee:   assignee,
-				OccurredAt: *createdAt,
+				DID:            coreData.DID,
+				DocumentNumber: coreData.DocumentNumber,
+				Version:        coreData.Version,
+				CreatedBy:      cmd.SubmittedBy,
+				Assignee:       assignee,
+				OccurredAt:     *createdAt,
 			}
 			err = event.CreateNewEvent(h.Ctx, tx, evt)
 			if err != nil {

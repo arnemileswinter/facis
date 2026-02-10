@@ -2,6 +2,7 @@ CREATE TYPE template_state AS ENUM ('DRAFT', 'SUBMITTED', 'REVIEWED', 'APPROVED'
 
 CREATE TABLE IF NOT EXISTS contract_templates (
     did VARCHAR(255),
+    document_number INT DEFAULT 1,
     version INT DEFAULT 1,
 
     created_by VARCHAR(255) NOT NULL,
@@ -13,8 +14,9 @@ CREATE TABLE IF NOT EXISTS contract_templates (
     description TEXT,
     meta_data JSONB DEFAULT '{}'::jsonb,
 
-    CONSTRAINT pk_contract_templates PRIMARY KEY (did, version),
+    CONSTRAINT pk_contract_templates PRIMARY KEY (did, document_number, version),
     CONSTRAINT chk_did_not_empty CHECK (did <> ''),
+    CONSTRAINT chk_document_number_positive CHECK (document_number > 0),
     CONSTRAINT chk_version_positive CHECK (version > 0)
 );
 
@@ -46,6 +48,7 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
     id              BIGSERIAL PRIMARY KEY,
 
     did             VARCHAR(255) CHECK (did <> ''),
+    document_number INT NOT NULL,
     version         INT NOT NULL,
 
     state review_task_state NOT NULL,
@@ -60,8 +63,8 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
     closed BOOLEAN DEFAULT FALSE,
 
     CONSTRAINT fk_review_task_contract_template
-        FOREIGN KEY (did, version)
-        REFERENCES contract_templates(did, version)
+        FOREIGN KEY (did, document_number, version)
+        REFERENCES contract_templates(did, document_number, version)
 );
 
 CREATE TRIGGER contract_templates_review_task_update_updated_at
