@@ -1,12 +1,4 @@
 @import "tailwindcss";
-@plugin "daisyui";
-
-@layer base {
-    html,
-    body,
-    #app {
-        background-color: var(--color-gray-800);
-        margin: 0;
-        min-height: 100vh;
-    }
-}
+ @plugin "daisyui" {
+   themes: nord --default, dark --prefersdark;
+ }
