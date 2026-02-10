@@ -98,10 +98,17 @@ func handleHTTPServer(ctx context.Context, u *url.URL, contractStorageArchiveEnd
 	templatecatalogueintegrationsvr.Mount(mux, templateCatalogueIntegrationServer)
 	templaterepositorysvr.Mount(mux, templateRepositoryServer)
 
+	// Validate OIDC configuration
+	oidcIssuerURL := os.Getenv("OIDC_ISSUER_URL")
+	oidcClientID := os.Getenv("OIDC_CLIENT_ID")
+	if oidcIssuerURL == "" || oidcClientID == "" {
+		log.Fatalf(ctx, nil, "OIDC configuration missing: OIDC_ISSUER_URL and OIDC_CLIENT_ID environment variables must be specified")
+	}
+
 	// Initialize OIDC validator
 	oidcValidator, err := middleware.NewOIDCValidator(ctx, middleware.OIDCConfig{
-		IssuerURL: os.Getenv("OIDC_ISSUER_URL"),
-		ClientID:  os.Getenv("OIDC_CLIENT_ID"),
+		IssuerURL: oidcIssuerURL,
+		ClientID:  oidcClientID,
 	})
 	if err != nil {
 		log.Fatalf(ctx, err, "failed to initialize OIDC validator")
