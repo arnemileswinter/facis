@@ -3,6 +3,8 @@ module digital-contracting-service
 go 1.25.4
 
 require (
+	github.com/coreos/go-oidc/v3 v3.17.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	goa.design/clue v1.2.3
 	goa.design/goa/v3 v3.24.1
 )
@@ -12,6 +14,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dimfeld/httppath v0.0.0-20170720192232-ee938bf73598 // indirect
 	github.com/go-chi/chi/v5 v5.2.4 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -23,6 +26,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/oauth2 v0.32.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/term v0.39.0 // indirect

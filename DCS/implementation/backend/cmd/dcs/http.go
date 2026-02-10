@@ -20,8 +20,11 @@ import (
 	signaturemanagement "digital-contracting-service/gen/signature_management"
 	templatecatalogueintegration "digital-contracting-service/gen/template_catalogue_integration"
 	templaterepository "digital-contracting-service/gen/template_repository"
+	"digital-contracting-service/internal/auth"
+	"digital-contracting-service/internal/middleware"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 	"time"
 
@@ -95,7 +98,17 @@ func handleHTTPServer(ctx context.Context, u *url.URL, contractStorageArchiveEnd
 	templatecatalogueintegrationsvr.Mount(mux, templateCatalogueIntegrationServer)
 	templaterepositorysvr.Mount(mux, templateRepositoryServer)
 
+	// Initialize OIDC validator
+	oidcValidator, err := middleware.NewOIDCValidator(ctx, middleware.OIDCConfig{
+		IssuerURL: os.Getenv("OIDC_ISSUER_URL"),
+		ClientID:  os.Getenv("OIDC_CLIENT_ID"),
+	})
+	if err != nil {
+		log.Fatalf(ctx, err, "failed to initialize OIDC validator")
+	}
+
 	var handler http.Handler = mux
+	handler = auth.OIDCMiddleware(oidcValidator)(handler)
 	if dbg {
 		// Log query and response bodies if debug logs are enabled.
 		handler = debug.HTTP()(handler)

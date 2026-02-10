@@ -44,6 +44,11 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          env:
+            - name: OIDC_ISSUER_URL
+              value: {{ .Values.oidc.issuerURL | quote }}
+            - name: OIDC_CLIENT_ID
+              value: {{ .Values.oidc.clientID | quote }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

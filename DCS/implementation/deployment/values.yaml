@@ -122,3 +122,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# OIDC Configuration
+oidc:
+  issuerURL: "https://keycloak.example.com/auth/realms/dcs"
+  clientID: "dcs-service"
