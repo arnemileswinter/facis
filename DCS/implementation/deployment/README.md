@@ -210,12 +210,11 @@ The script will:
 1. Verify all required tools are installed
 2. Validate the kubeconfig file
 3. Check for Traefik ingress controller
-4. Wait for ingress External-IP assignment
-5. Deploy the Helm chart
-6. Create TLS secrets
-7. Configure Keycloak authentication
-8. Create user and assign roles
-9. Wait for the service to be ready
+4. Create the deployment namespace
+5. Replace placeholders in the Helm values
+6. Deploy the Helm chart
+7. Create TLS secrets
+8. Wait for the service to be ready
 
 ---
 
