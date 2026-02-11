@@ -4,36 +4,36 @@ import (
 	"context"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
-	"digital-contracting-service/internal/template_repository/datatype/review_task_state"
+	aopprovaltaskstate "digital-contracting-service/internal/template_repository/datatype/approval_task_state"
 	templateevents "digital-contracting-service/internal/template_repository/event"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplateReviewTasksForDID struct {
+type GetAllContractTemplateApprovalTasksForDID struct {
 	DID         string
 	RetrievedBy string
 }
 
-type GetAllContractTemplateReviewTasksForDIDResult struct {
+type GetAllContractTemplateApprovalTasksForDIDResult struct {
 	ID             int
 	DID            string
 	DocumentNumber int
 	Version        int
-	State          review_task_state.ReviewTaskState
-	Reviewer       string
+	State          aopprovaltaskstate.ApprovalTaskState
+	Approver       string
 	CreatedBy      string
 	CreatedAt      time.Time
 	CancelledAt    *time.Time
 }
 
-type GetAllContractTemplateReviewTasksForDIDHandler struct {
+type GetAllContractTemplateApprovalTasksForDIDHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllContractTemplateReviewTasksForDID) ([]GetAllContractTemplateReviewTasksForDIDResult, error) {
+func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllContractTemplateApprovalTasksForDID) ([]GetAllContractTemplateApprovalTasksForDIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
 	defer cancel()
@@ -44,7 +44,7 @@ func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllCont
 	}
 	defer tx.Rollback()
 
-	reviewTasks, err := template_repository.ReadAllReviewTasks(ctx, tx, query.DID)
+	reviewTasks, err := template_repository.ReadAllApprovalTasks(ctx, tx, query.DID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,14 +64,14 @@ func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllCont
 		return nil, err
 	}
 
-	result := make([]GetAllContractTemplateReviewTasksForDIDResult, len(reviewTasks))
+	result := make([]GetAllContractTemplateApprovalTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
-		result[i] = GetAllContractTemplateReviewTasksForDIDResult{
+		result[i] = GetAllContractTemplateApprovalTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
 			State:          data.State,
-			Reviewer:       data.Reviewer,
+			Approver:       data.Approver,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,
 			CancelledAt:    data.CancelledAt,

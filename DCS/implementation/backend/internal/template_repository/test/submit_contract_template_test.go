@@ -34,11 +34,11 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	submittedBy := "Test User"
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    submittedBy,
-		ActionFlag:     nil,
-		ReviewComments: nil,
-		Assignees: []string{
+		DID:         *did,
+		SubmittedBy: submittedBy,
+		ActionFlag:  nil,
+		Comments:    nil,
+		Reviewer: []string{
 			"Test User 2",
 			"Test User 3",
 			"Test User 4",
@@ -86,25 +86,25 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	for _, reviewTask := range reviewTasks {
 		assert.Equal(t, review_task_state.Open, reviewTask.State)
 
-		if !slices.Contains(cmd.Assignees, reviewTask.Assignee) {
-			t.Fatalf("Assignee not found in review tasks: %v", reviewTask)
+		if !slices.Contains(cmd.Reviewer, reviewTask.Reviewer) {
+			t.Fatalf("Reviewer not found in review tasks: %v", reviewTask)
 		}
 	}
 }
 
-func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did string, submittedBy string, assignees []string) error {
+func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did string, submittedBy string, reviewers []string) error {
 	tx, err := db.BeginTxx(ctx, nil)
 	defer tx.Rollback()
 	if err != nil {
 		t.Fatalf("Failed to begin transaction: %v", err)
 	}
 
-	for _, assignee := range assignees {
+	for _, reviewer := range reviewers {
 		reviewTask := template_repository.ReviewTaskData{
 			DID:            did,
 			DocumentNumber: 1,
 			Version:        1,
-			Assignee:       assignee,
+			Reviewer:       reviewer,
 			State:          review_task_state.Open,
 			CreatedBy:      submittedBy,
 		}
@@ -116,7 +116,7 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did strin
 	return tx.Commit()
 }
 
-func TestSubmit_OneAssigneeApprovedContractTemplateInSubmittedState(t *testing.T) {
+func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -132,7 +132,7 @@ func TestSubmit_OneAssigneeApprovedContractTemplateInSubmittedState(t *testing.T
 	ctx := context.Background()
 	submittedBy := "Test User"
 
-	assignees := []string{
+	reviewers := []string{
 		"Test User 1",
 		"Test User 2",
 		"Test User 3",
@@ -140,7 +140,7 @@ func TestSubmit_OneAssigneeApprovedContractTemplateInSubmittedState(t *testing.T
 
 	ctxTx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, assignees)
+	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
 	if err != nil {
 		t.Fatalf("Failed to create review tasks: %v", err)
 	}
@@ -149,10 +149,10 @@ func TestSubmit_OneAssigneeApprovedContractTemplateInSubmittedState(t *testing.T
 
 	submittedBy = "Test User 1"
 	cmd := command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    submittedBy,
-		ActionFlag:     &actionFlag,
-		ReviewComments: []string{},
+		DID:         *did,
+		SubmittedBy: submittedBy,
+		ActionFlag:  &actionFlag,
+		Comments:    []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
 		Ctx: ctx,
@@ -181,7 +181,7 @@ func TestSubmit_OneAssigneeApprovedContractTemplateInSubmittedState(t *testing.T
 	assert.Equal(t, template_state.Submitted, contractTemplate.State)
 }
 
-func TestSubmit_AllAssigneesApprovedContractTemplateInSubmittedState(t *testing.T) {
+func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -197,7 +197,7 @@ func TestSubmit_AllAssigneesApprovedContractTemplateInSubmittedState(t *testing.
 	ctx := context.Background()
 	submittedBy := "Test User"
 
-	assignees := []string{
+	reviewers := []string{
 		"Test User 1",
 		"Test User 2",
 		"Test User 3",
@@ -205,19 +205,19 @@ func TestSubmit_AllAssigneesApprovedContractTemplateInSubmittedState(t *testing.
 
 	ctxTx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, assignees)
+	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
 	if err != nil {
 		t.Fatalf("Failed to create review tasks: %v", err)
 	}
 
 	actionFlag := action_flag.Approval
 
-	for _, assignee := range assignees {
+	for _, reviewer := range reviewers {
 		cmd := command.SubmitTemplateContractCommand{
-			DID:            *did,
-			SubmittedBy:    assignee,
-			ActionFlag:     &actionFlag,
-			ReviewComments: []string{},
+			DID:         *did,
+			SubmittedBy: reviewer,
+			ActionFlag:  &actionFlag,
+			Comments:    []string{},
 		}
 		handler := command.SubmitTemplateContractHandler{
 			Ctx: ctx,
@@ -247,7 +247,7 @@ func TestSubmit_AllAssigneesApprovedContractTemplateInSubmittedState(t *testing.
 	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
 }
 
-func TestSubmit_OneAssigneeDeclinesContractTemplateInSubmittedState(t *testing.T) {
+func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -263,7 +263,7 @@ func TestSubmit_OneAssigneeDeclinesContractTemplateInSubmittedState(t *testing.T
 	ctx := context.Background()
 	submittedBy := "Test User"
 
-	assignees := []string{
+	reviewers := []string{
 		"Test User 1",
 		"Test User 2",
 		"Test User 3",
@@ -271,7 +271,7 @@ func TestSubmit_OneAssigneeDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	ctxTx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, assignees)
+	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
 	if err != nil {
 		t.Fatalf("Failed to create review tasks: %v", err)
 	}
@@ -279,10 +279,10 @@ func TestSubmit_OneAssigneeDeclinesContractTemplateInSubmittedState(t *testing.T
 	actionFlag := action_flag.Draft
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    assignees[1],
-		ActionFlag:     &actionFlag,
-		ReviewComments: []string{},
+		DID:         *did,
+		SubmittedBy: reviewers[1],
+		ActionFlag:  &actionFlag,
+		Comments:    []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
 		Ctx: ctx,
@@ -330,18 +330,18 @@ func TestSubmit_CompleteWithCreateRejectAndApproveTheContractTemplate(t *testing
 	ctx := context.Background()
 	submittedBy := "Test User"
 
-	assignees := []string{
+	reviewers := []string{
 		"Test User 1",
 		"Test User 2",
 		"Test User 3",
 	}
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    submittedBy,
-		ActionFlag:     nil,
-		ReviewComments: nil,
-		Assignees:      assignees,
+		DID:         *did,
+		SubmittedBy: submittedBy,
+		ActionFlag:  nil,
+		Comments:    nil,
+		Reviewer:    reviewers,
 	}
 	handler := command.SubmitTemplateContractHandler{
 		Ctx: ctx,
@@ -385,22 +385,22 @@ func TestSubmit_CompleteWithCreateRejectAndApproveTheContractTemplate(t *testing
 	for _, reviewTask := range reviewTasks {
 		assert.Equal(t, review_task_state.Open, reviewTask.State)
 
-		if !slices.Contains(cmd.Assignees, reviewTask.Assignee) {
-			t.Fatalf("Assignee not found in review tasks: %v", reviewTask)
+		if !slices.Contains(cmd.Reviewer, reviewTask.Reviewer) {
+			t.Fatalf("Reviewer not found in review tasks: %v", reviewTask)
 		}
 	}
 
 	/**
-	First assignee approves the Contract Template
+	First reviewer approves the Contract Template
 	*/
 	actionFlag := action_flag.Approval
 
 	submittedBy = "Test User 1"
 	cmd = command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    submittedBy,
-		ActionFlag:     &actionFlag,
-		ReviewComments: []string{},
+		DID:         *did,
+		SubmittedBy: submittedBy,
+		ActionFlag:  &actionFlag,
+		Comments:    []string{},
 	}
 	handler = command.SubmitTemplateContractHandler{
 		Ctx: ctx,
@@ -429,15 +429,15 @@ func TestSubmit_CompleteWithCreateRejectAndApproveTheContractTemplate(t *testing
 	assert.Equal(t, template_state.Submitted, contractTemplate.State)
 
 	/**
-	Second assignee declined the Contract Template
+	Second reviewer declined the Contract Template
 	*/
 	actionFlag = action_flag.Draft
 
 	cmd = command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    assignees[1],
-		ActionFlag:     &actionFlag,
-		ReviewComments: []string{},
+		DID:         *did,
+		SubmittedBy: reviewers[1],
+		ActionFlag:  &actionFlag,
+		Comments:    []string{},
 	}
 	handler = command.SubmitTemplateContractHandler{
 		Ctx: ctx,
@@ -470,11 +470,11 @@ func TestSubmit_CompleteWithCreateRejectAndApproveTheContractTemplate(t *testing
 	*/
 	submittedBy = "Test User"
 	cmd = command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    submittedBy,
-		ActionFlag:     nil,
-		ReviewComments: nil,
-		Assignees:      assignees,
+		DID:         *did,
+		SubmittedBy: submittedBy,
+		ActionFlag:  nil,
+		Comments:    nil,
+		Reviewer:    reviewers,
 	}
 	handler = command.SubmitTemplateContractHandler{
 		Ctx: ctx,
@@ -518,16 +518,16 @@ func TestSubmit_CompleteWithCreateRejectAndApproveTheContractTemplate(t *testing
 	assert.Equal(t, len(reviewTasks), 6)
 
 	/**
-	All assignees approve the Contract Template
+	All reviewer approve the Contract Template
 	*/
 	actionFlag = action_flag.Approval
 
-	for _, assignee := range assignees {
+	for _, reviewer := range reviewers {
 		cmd := command.SubmitTemplateContractCommand{
-			DID:            *did,
-			SubmittedBy:    assignee,
-			ActionFlag:     &actionFlag,
-			ReviewComments: []string{},
+			DID:         *did,
+			SubmittedBy: reviewer,
+			ActionFlag:  &actionFlag,
+			Comments:    []string{},
 		}
 		handler := command.SubmitTemplateContractHandler{
 			Ctx: ctx,
@@ -574,10 +574,10 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 	submittedBy := "Test User"
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    submittedBy,
-		ActionFlag:     nil,
-		ReviewComments: []string{},
+		DID:         *did,
+		SubmittedBy: submittedBy,
+		ActionFlag:  nil,
+		Comments:    []string{},
 	}
 	handler := command.SubmitTemplateContractHandler{
 		Ctx: ctx,
@@ -586,53 +586,4 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 	err = handler.Handle(cmd)
 
 	assert.NotNil(t, err)
-}
-
-func TestSubmit_SubmitContractTemplateInReviewedStateToResubmission(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
-	}
-
-	createTestContractTemplate(t, did, template_state.Reviewed, db)
-
-	ctx := context.Background()
-	submittedBy := "Test User"
-
-	cmd := command.SubmitTemplateContractCommand{
-		DID:            *did,
-		SubmittedBy:    submittedBy,
-		ActionFlag:     nil,
-		ReviewComments: []string{},
-	}
-	handler := command.SubmitTemplateContractHandler{
-		Ctx: ctx,
-		DB:  db,
-	}
-	err = handler.Handle(cmd)
-	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
-	}
-
-	retrievedBy := "Test User"
-
-	qry := query.GetContractTemplateByIdQuery{
-		DID:         *did,
-		RetrievedBy: retrievedBy,
-	}
-	queryHandler := query.GetContractTemplateByIdHandler{
-		Ctx: ctx,
-		DB:  db,
-	}
-	contractTemplate, err := queryHandler.Handle(qry)
-	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
-	}
-
-	assert.Equal(t, template_state.Submitted, contractTemplate.State)
 }

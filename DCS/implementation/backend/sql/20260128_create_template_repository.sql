@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
     version         INT NOT NULL,
 
     state review_task_state NOT NULL,
-    assignee VARCHAR(255) CHECK (assignee <> '' AND assignee IS NOT NULL),
+    reviewer VARCHAR(255) CHECK (reviewer <> '' AND reviewer IS NOT NULL),
     created_by      VARCHAR(255) NOT NULL,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -63,4 +63,28 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
     CONSTRAINT fk_review_task_contract_template
         FOREIGN KEY (did, document_number, version)
         REFERENCES contract_templates(did, document_number, version)
+);
+
+------------------------------------------------------------------------------------------------------------------------
+
+CREATE TYPE approval_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'RESUBMITTED');
+
+CREATE TABLE IF NOT EXISTS contract_templates_approval_task
+(
+    id              BIGSERIAL PRIMARY KEY,
+
+    did             VARCHAR(255) CHECK (did <> ''),
+    document_number INT NOT NULL,
+    version         INT NOT NULL,
+
+    state approval_task_state NOT NULL,
+    approver VARCHAR(255) CHECK (approver <> '' AND approver IS NOT NULL),
+    created_by      VARCHAR(255) NOT NULL,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    COMMENTS TEXT,
+
+    CONSTRAINT fk_review_task_contract_template
+        FOREIGN KEY (did, document_number, version)
+            REFERENCES contract_templates(did, document_number, version)
 );

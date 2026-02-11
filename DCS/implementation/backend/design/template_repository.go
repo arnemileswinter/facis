@@ -25,7 +25,7 @@ var ContractTemplateSubmitRequest = Type("ContractTemplateSubmitRequest", func()
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("forward_to", String, "Action flag: approval | draft")
-	Attribute("review_comments", ArrayOf(String), "Optional review comments")
+	Attribute("comments", ArrayOf(String), "Optional comments")
 
 	Required("did")
 })
@@ -82,9 +82,9 @@ var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", 
 var ContractTemplateRetrieveByIdRequest = Type("ContractTemplateRetrieveByIdRequest", func() {
 	Description("Contract template retrieve by id request")
 
-	Attribute("template_id", String, "ID of the contract template")
+	Attribute("did", String, "DID of the contract template")
 
-	Required("template_id")
+	Required("did")
 })
 
 var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdResponse", func() {
@@ -265,7 +265,7 @@ var _ = Service("TemplateRepository", func() {
 		})
 	})
 
-	// GET /template/retrieve/{template_id}
+	// GET /template/retrieve/{did}
 	Method("retrieve_by_id", func() {
 		Description("Retrieve a template by template id.")
 		Meta("dcs:requirements", "DCS-IR-TR-02", "DCS-IR-TR-03", "DCS-FR-TR-19")
@@ -280,8 +280,8 @@ var _ = Service("TemplateRepository", func() {
 		Error("internal_error", ErrorResult, "Internal server error")
 
 		HTTP(func() {
-			GET("/template/retrieve/{template_id}")
-			Param("template_id")
+			GET("/template/retrieve/{did}")
+			Param("did")
 			Response(StatusOK)
 			Response("bad_request", StatusBadRequest)
 			Response("internal_error", StatusInternalServerError)

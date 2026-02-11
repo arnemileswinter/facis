@@ -15,11 +15,12 @@ import (
 )
 
 type SubmitTemplateContractCommand struct {
-	DID            string
-	SubmittedBy    string
-	ActionFlag     *action_flag.ActionFlag
-	ReviewComments []string
-	Assignees      []string
+	DID         string
+	SubmittedBy string
+	ActionFlag  *action_flag.ActionFlag
+	Comments    []string
+	Reviewer    []string
+	Approver    *string
 }
 
 type SubmitTemplateContractHandler struct {
@@ -46,12 +47,12 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 	var nextTemplateState template_state.TemplateState
 	if coreData.State == template_state.Draft || coreData.State == template_state.Rejected {
 
-		for _, assignee := range cmd.Assignees {
+		for _, reviewer := range cmd.Reviewer {
 			reviewTask := template_repository.ReviewTaskData{
 				DID:            cmd.DID,
 				DocumentNumber: coreData.DocumentNumber,
 				Version:        coreData.Version,
-				Assignee:       assignee,
+				Reviewer:       reviewer,
 				State:          review_task_state.Open,
 				CreatedBy:      cmd.SubmittedBy,
 			}
@@ -65,7 +66,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 				DocumentNumber: coreData.DocumentNumber,
 				Version:        coreData.Version,
 				CreatedBy:      cmd.SubmittedBy,
-				Assignee:       assignee,
+				Reviewer:       reviewer,
 				OccurredAt:     *createdAt,
 			}
 			err = event.CreateNewEvent(ctx, tx, evt)
@@ -81,7 +82,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Approval {
 
-				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.ReviewComments)
+				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.Comments)
 				if err != nil {
 					return err
 				}
@@ -97,7 +98,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 
 			} else if *cmd.ActionFlag == action_flag.Draft {
 
-				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.ReviewComments)
+				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.Comments)
 				if err != nil {
 					return err
 				}
@@ -128,13 +129,13 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 		}
 
 		evt := templateevents.ContractTemplateSubmittedEvent{
-			DID:            cmd.DID,
-			SubmittedBy:    cmd.SubmittedBy,
-			PreviousState:  coreData.State,
-			NewState:       nextTemplateState,
-			ActionFlag:     cmd.ActionFlag,
-			ReviewComments: cmd.ReviewComments,
-			OccurredAt:     time.Now(),
+			DID:           cmd.DID,
+			SubmittedBy:   cmd.SubmittedBy,
+			PreviousState: coreData.State,
+			NewState:      nextTemplateState,
+			ActionFlag:    cmd.ActionFlag,
+			Comments:      cmd.Comments,
+			OccurredAt:    time.Now(),
 		}
 		err = event.CreateNewEvent(ctx, tx, evt)
 		if err != nil {

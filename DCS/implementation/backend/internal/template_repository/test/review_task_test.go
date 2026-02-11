@@ -48,7 +48,7 @@ func TestSubmit_CreateReviewTasks(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
-			Assignee:       assignee,
+			Reviewer:       assignee,
 			State:          review_task_state.Open,
 			CreatedBy:      submittedBy,
 		}
@@ -107,7 +107,7 @@ func TestSubmit_CreateReviewTasksAndApproveThem(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
-			Assignee:       assignee,
+			Reviewer:       assignee,
 			State:          review_task_state.Open,
 			CreatedBy:      submittedBy,
 		}
@@ -173,7 +173,7 @@ func TestSubmit_CreateReviewTasksAndCancelThem(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
-			Assignee:       assignee,
+			Reviewer:       assignee,
 			State:          review_task_state.Open,
 			CreatedBy:      submittedBy,
 		}

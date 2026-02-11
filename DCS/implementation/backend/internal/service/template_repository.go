@@ -74,10 +74,10 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 	}
 
 	cmd := command.SubmitTemplateContractCommand{
-		DID:            req.Did,
-		SubmittedBy:    "",
-		ActionFlag:     actionFlag,
-		ReviewComments: req.ReviewComments,
+		DID:         req.Did,
+		SubmittedBy: "",
+		ActionFlag:  actionFlag,
+		Comments:    req.Comments,
 	}
 	handler := command.SubmitTemplateContractHandler{
 		DB: s.DB,
@@ -171,7 +171,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templater
 func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
 
 	qry := query.GetContractTemplateByIdQuery{
-		DID:         req.TemplateID,
+		DID:         req.Did,
 		RetrievedBy: "",
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{

@@ -14,7 +14,7 @@ type ReviewTaskData struct {
 	DocumentNumber int                               `db:"document_number"`
 	Version        int                               `db:"version"`
 	State          review_task_state.ReviewTaskState `db:"state"`
-	Assignee       string                            `db:"assignee"`
+	Reviewer       string                            `db:"reviewer"`
 	CreatedBy      string                            `db:"created_by"`
 	CreatedAt      time.Time                         `db:"created_at"`
 	CancelledAt    *time.Time                        `db:"cancelled_at"`
@@ -23,7 +23,7 @@ type ReviewTaskData struct {
 func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*time.Time, error) {
 	query := `
     INSERT INTO contract_templates_review_task (
-        did, document_number, version, state, assignee, created_by
+        did, document_number, version, state, reviewer, created_by
     ) VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING created_at
 `
@@ -34,7 +34,7 @@ func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*t
 		data.DocumentNumber,
 		data.Version,
 		data.State,
-		data.Assignee,
+		data.Reviewer,
 		data.CreatedBy,
 	)
 	if err != nil {
@@ -46,7 +46,7 @@ func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*t
 
 func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewTaskData, error) {
 	query := `
-        SELECT id, did, document_number, version, state, assignee,
+        SELECT id, did, document_number, version, state, reviewer,
                created_by, created_at
         FROM contract_templates_review_task WHERE did = $1
     `
@@ -59,17 +59,17 @@ func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewT
 	return reviewTasks, nil
 }
 
-func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, assignee string, state review_task_state.ReviewTaskState, reviewComments []string) error {
+func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state review_task_state.ReviewTaskState, reviewComments []string) error {
 	query := `
         UPDATE contract_templates_review_task SET state = $5, review_comments = $6
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND assignee = $4 AND cancelled_at IS NULL
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4 AND cancelled_at IS NULL
     `
 
 	var comments string
 	for _, comment := range reviewComments {
 		comments += comment + ";"
 	}
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, assignee, state, comments)
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, reviewer, state, comments)
 	if err != nil {
 		return err
 	}
