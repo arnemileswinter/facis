@@ -28,9 +28,11 @@ func TestSubmit_ApproveContractTemplateInReviewedState(t *testing.T) {
 	approvedBy := "Test User"
 
 	cmd := command.ApproveTemplateContractCommand{
-		DID:           *did,
-		ApprovedBy:    approvedBy,
-		DecisionNotes: []string{},
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		ApprovedBy:     approvedBy,
+		DecisionNotes:  []string{},
 	}
 	handler := command.ApproveTemplateContractHandler{
 		Ctx: ctx,
@@ -44,8 +46,10 @@ func TestSubmit_ApproveContractTemplateInReviewedState(t *testing.T) {
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
-		DID:         *did,
-		RetrievedBy: retrievedBy,
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -76,9 +80,11 @@ func TestSubmit_ApproveContractTemplateInDraftState(t *testing.T) {
 	approvedBy := "Test User"
 
 	cmd := command.ApproveTemplateContractCommand{
-		DID:           *did,
-		ApprovedBy:    approvedBy,
-		DecisionNotes: []string{},
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		ApprovedBy:     approvedBy,
+		DecisionNotes:  []string{},
 	}
 	handler := command.ApproveTemplateContractHandler{
 		Ctx: ctx,
@@ -106,9 +112,11 @@ func TestSubmit_ApproveContractTemplateInApprovedState(t *testing.T) {
 	approvedBy := "Test User"
 
 	cmd := command.ApproveTemplateContractCommand{
-		DID:           *did,
-		ApprovedBy:    approvedBy,
-		DecisionNotes: []string{},
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		ApprovedBy:     approvedBy,
+		DecisionNotes:  []string{},
 	}
 	handler := command.ApproveTemplateContractHandler{
 		Ctx: ctx,

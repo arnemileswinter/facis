@@ -14,11 +14,13 @@ import (
 )
 
 type UpdateTemplateContractCommand struct {
-	DID         string
-	UpdatedBy   string
-	Name        *string
-	Description *string
-	MetaData    *datatype.JSON
+	DID            string
+	DocumentNumber int
+	Version        int
+	UpdatedBy      string
+	Name           *string
+	Description    *string
+	MetaData       *datatype.JSON
 }
 
 type UpdateTemplateContractHandler struct {
@@ -37,7 +39,7 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	}
 	defer tx.Rollback()
 
-	oldData, err := template_repository.ReadContractTemplateData(ctx, tx, cmd.DID)
+	oldData, err := template_repository.ReadContractTemplateData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return err
 	}
@@ -47,10 +49,12 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	}
 
 	newData := template_repository.ContractTemplateData{
-		DID:         cmd.DID,
-		Name:        cmd.Name,
-		Description: cmd.Description,
-		MetaData:    cmd.MetaData,
+		DID:            cmd.DID,
+		DocumentNumber: cmd.DocumentNumber,
+		Version:        cmd.Version,
+		Name:           cmd.Name,
+		Description:    cmd.Description,
+		MetaData:       cmd.MetaData,
 	}
 	err = template_repository.UpdateTemplateContractData(ctx, tx, newData)
 	if err != nil {
@@ -59,6 +63,8 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 
 	evt := templateevents.ContractTemplateUpdatedEvent{
 		DID:            cmd.DID,
+		DocumentNumber: cmd.DocumentNumber,
+		Version:        cmd.Version,
 		UpdatedBy:      cmd.UpdatedBy,
 		OldName:        oldData.Name,
 		NewName:        cmd.Name,

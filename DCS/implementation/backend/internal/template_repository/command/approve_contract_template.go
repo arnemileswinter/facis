@@ -13,9 +13,11 @@ import (
 )
 
 type ApproveTemplateContractCommand struct {
-	DID           string
-	ApprovedBy    string
-	DecisionNotes []string
+	DID            string
+	DocumentNumber int
+	Version        int
+	ApprovedBy     string
+	DecisionNotes  []string
 }
 
 type ApproveTemplateContractHandler struct {
@@ -34,7 +36,7 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 	}
 	defer tx.Rollback()
 
-	currentTemplateState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID)
+	currentTemplateState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return err
 	}
@@ -43,16 +45,18 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 		return errors.New("invalid contract template state")
 	}
 
-	err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, template_state.Approved)
+	err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, template_state.Approved)
 	if err != nil {
 		return err
 	}
 
 	evt := templateevents.ContractTemplateApprovedEvent{
-		DID:           cmd.DID,
-		ApprovedBy:    cmd.ApprovedBy,
-		DecisionNotes: cmd.DecisionNotes,
-		OccurredAt:    time.Now(),
+		DID:            cmd.DID,
+		DocumentNumber: cmd.DocumentNumber,
+		Version:        cmd.Version,
+		ApprovedBy:     cmd.ApprovedBy,
+		DecisionNotes:  cmd.DecisionNotes,
+		OccurredAt:     time.Now(),
 	}
 	err = event.CreateNewEvent(ctx, tx, evt)
 	if err != nil {

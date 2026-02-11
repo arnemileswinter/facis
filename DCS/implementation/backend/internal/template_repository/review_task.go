@@ -44,6 +44,41 @@ func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*t
 	return &createdAt, nil
 }
 
+func CreateResubmissionTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, createdBy string) error {
+	query := `
+        INSERT INTO contract_templates_review_task (
+            did, document_number, version, state, reviewer, created_by
+        )
+        SELECT 
+            did, 
+            document_number, 
+            version, 
+            'OPEN'::review_task_state,  
+            reviewer,                    
+            $4                                
+        FROM contract_templates_review_task
+        WHERE did = $1 
+          AND document_number = $2 
+          AND version = $3 
+          AND state = 'APPROVED'::review_task_state
+          AND cancelled_at IS NULL
+    `
+
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, createdBy)
+
+	query = `
+        UPDATE contract_templates_review_task SET cancelled_at = $4
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND state <> 'OPEN'
+    `
+
+	_, err = tx.ExecContext(ctx, query, did, documentNumber, version, time.Now())
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
 func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewTaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
@@ -77,7 +112,7 @@ func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumb
 	return err
 }
 
-func CancelReviewTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+func CancelOldReviewTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
 	query := `
         UPDATE contract_templates_review_task SET cancelled_at = $4
         WHERE did = $1 AND document_number = $2 AND version = $3

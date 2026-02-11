@@ -183,7 +183,7 @@ func TestSubmit_CreateReviewTasksAndCancelThem(t *testing.T) {
 		}
 	}
 
-	err = template_repository.CancelReviewTasks(ctx, tx, *did, 1, 1)
+	err = template_repository.CancelOldReviewTasks(ctx, tx, *did, 1, 1)
 	if err != nil {
 		t.Fatalf("Failed to cancel review task: %v", err)
 	}

@@ -74,7 +74,6 @@ func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllCo
 			Approver:       data.Approver,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,
-			CancelledAt:    data.CancelledAt,
 		}
 	}
 

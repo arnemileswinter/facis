@@ -13,8 +13,10 @@ import (
 )
 
 type GetContractTemplateByIdQuery struct {
-	DID         string
-	RetrievedBy string
+	DID            string
+	DocumentNumber int
+	Version        int
+	RetrievedBy    string
 }
 
 type GetContractTemplateByIdResult struct {
@@ -47,7 +49,7 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 	}
 	defer tx.Rollback()
 
-	data, err := template_repository.ReadContractTemplateData(ctx, tx, query.DID)
+	data, err := template_repository.ReadContractTemplateData(ctx, tx, query.DID, query.DocumentNumber, query.Version)
 	if err != nil {
 		return nil, err
 	}

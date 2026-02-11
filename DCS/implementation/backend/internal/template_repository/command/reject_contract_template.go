@@ -13,9 +13,11 @@ import (
 )
 
 type RejectTemplateContractCommand struct {
-	DID        string
-	RejectedBy string
-	Reason     string
+	DID            string
+	DocumentNumber int
+	Version        int
+	RejectedBy     string
+	Reason         string
 }
 
 type RejectTemplateContractHandler struct {
@@ -34,7 +36,7 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 	}
 	defer tx.Rollback()
 
-	currentTemplateState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID)
+	currentTemplateState, err := template_repository.ReadContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return err
 	}
@@ -43,16 +45,18 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return errors.New("invalid contract template state")
 	}
 
-	err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, template_state.Draft)
+	err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, template_state.Draft)
 	if err != nil {
 		return err
 	}
 
 	evt := templateevents.ContractTemplateRejectedEvent{
-		DID:        cmd.DID,
-		RejectedBy: cmd.RejectedBy,
-		Reason:     cmd.Reason,
-		OccurredAt: time.Now(),
+		DID:            cmd.DID,
+		DocumentNumber: cmd.DocumentNumber,
+		Version:        cmd.Version,
+		RejectedBy:     cmd.RejectedBy,
+		Reason:         cmd.Reason,
+		OccurredAt:     time.Now(),
 	}
 	err = event.CreateNewEvent(ctx, tx, evt)
 	if err != nil {

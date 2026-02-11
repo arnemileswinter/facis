@@ -17,7 +17,6 @@ type ApprovalTaskData struct {
 	Approver       string                               `db:"approver"`
 	CreatedBy      string                               `db:"created_by"`
 	CreatedAt      time.Time                            `db:"created_at"`
-	CancelledAt    *time.Time                           `db:"cancelled_at"`
 }
 
 func CreateApprovalTask(ctx context.Context, tx *sqlx.Tx, data ApprovalTaskData) (*time.Time, error) {
@@ -62,7 +61,7 @@ func ReadAllApprovalTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]Appro
 func UpdateApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state aopprovaltaskstate.ApprovalTaskState, comments []string) error {
 	query := `
         UPDATE contract_templates_approval_task SET state = $5, comments = $6
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4 AND state = 'OPEN'
     `
 
 	var commentString string

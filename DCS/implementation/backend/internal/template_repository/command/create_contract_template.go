@@ -51,12 +51,14 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 	}
 
 	evt := templateevents.ContractTemplateCreatedEvent{
-		DID:         cmd.DID,
-		CreatedBy:   cmd.CreatedBy,
-		Name:        cmd.Name,
-		Description: cmd.Description,
-		MetaData:    cmd.MetaData,
-		OccurredAt:  *createdAt,
+		DID:            cmd.DID,
+		DocumentNumber: 1,
+		Version:        1,
+		CreatedBy:      cmd.CreatedBy,
+		Name:           cmd.Name,
+		Description:    cmd.Description,
+		MetaData:       cmd.MetaData,
+		OccurredAt:     *createdAt,
 	}
 	err = event.CreateNewEvent(ctx, tx, evt)
 	if err != nil {

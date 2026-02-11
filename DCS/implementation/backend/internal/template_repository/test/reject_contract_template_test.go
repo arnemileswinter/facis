@@ -28,9 +28,11 @@ func TestSubmit_RejectContractTemplateInReviewedState(t *testing.T) {
 	rejectedBy := "Test User"
 
 	cmd := command.RejectTemplateContractCommand{
-		DID:        *did,
-		RejectedBy: rejectedBy,
-		Reason:     "Test Reason",
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RejectedBy:     rejectedBy,
+		Reason:         "Test Reason",
 	}
 	handler := command.RejectTemplateContractHandler{
 		Ctx: ctx,
@@ -44,8 +46,10 @@ func TestSubmit_RejectContractTemplateInReviewedState(t *testing.T) {
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
-		DID:         *did,
-		RetrievedBy: retrievedBy,
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -76,9 +80,11 @@ func TestSubmit_RejectContractTemplateInDraftState(t *testing.T) {
 	rejectedBy := "Test User"
 
 	cmd := command.RejectTemplateContractCommand{
-		DID:        *did,
-		RejectedBy: rejectedBy,
-		Reason:     "Test Reason",
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RejectedBy:     rejectedBy,
+		Reason:         "Test Reason",
 	}
 	handler := command.RejectTemplateContractHandler{
 		Ctx: ctx,
@@ -106,9 +112,11 @@ func TestSubmit_RejectContractTemplateInApprovedState(t *testing.T) {
 	rejectedBy := "Test User"
 
 	cmd := command.RejectTemplateContractCommand{
-		DID:        *did,
-		RejectedBy: rejectedBy,
-		Reason:     "Test Reason",
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RejectedBy:     rejectedBy,
+		Reason:         "Test Reason",
 	}
 	handler := command.RejectTemplateContractHandler{
 		Ctx: ctx,

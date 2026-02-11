@@ -12,11 +12,20 @@ import (
 )
 
 func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
+	cleanApprovalTasksStatement := `
+	-- noinspection SqlWithoutWhere
+	DELETE FROM contract_templates_approval_task;
+`
+	_, err := db.Exec(cleanApprovalTasksStatement)
+	if err != nil {
+		t.Fatalf("Failed to clean table: %v", err)
+	}
+
 	cleanReviewTasksStatement := `
 	-- noinspection SqlWithoutWhere
 	DELETE FROM contract_templates_review_task;
 `
-	_, err := db.Exec(cleanReviewTasksStatement)
+	_, err = db.Exec(cleanReviewTasksStatement)
 	if err != nil {
 		t.Fatalf("Failed to clean table: %v", err)
 	}
@@ -75,8 +84,10 @@ func createTestContractTemplate(t *testing.T, did *string, state template_state.
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
-		DID:         *did,
-		RetrievedBy: retrievedBy,
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,

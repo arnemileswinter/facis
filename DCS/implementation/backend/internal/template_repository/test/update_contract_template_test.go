@@ -40,11 +40,13 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	description := "Updated Description"
 
 	cmd := command.UpdateTemplateContractCommand{
-		DID:         *did,
-		UpdatedBy:   updateBy,
-		Name:        &name,
-		Description: &description,
-		MetaData:    &jsonMetaData,
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedBy:      updateBy,
+		Name:           &name,
+		Description:    &description,
+		MetaData:       &jsonMetaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: ctx,
@@ -58,8 +60,10 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	retrievedBy := "Test User"
 
 	qry := query.GetContractTemplateByIdQuery{
-		DID:         *did,
-		RetrievedBy: retrievedBy,
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
 	}
 	queryHandler := query.GetContractTemplateByIdHandler{
 		Ctx: ctx,

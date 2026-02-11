@@ -12,8 +12,10 @@ import (
 )
 
 type GetAllContractTemplateReviewTasksForDID struct {
-	DID         string
-	RetrievedBy string
+	DID            string
+	DocumentNumber int
+	Version        int
+	RetrievedBy    string
 }
 
 type GetAllContractTemplateReviewTasksForDIDResult struct {
@@ -50,9 +52,11 @@ func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllCont
 	}
 
 	evt := templateevents.ContractTemplateRetrieveAllReviewTasksEvent{
-		DID:         query.DID,
-		RetrievedBy: query.RetrievedBy,
-		OccurredAt:  time.Now(),
+		DID:            query.DID,
+		DocumentNumber: query.DocumentNumber,
+		Version:        query.Version,
+		RetrievedBy:    query.RetrievedBy,
+		OccurredAt:     time.Now(),
 	}
 	err = event.CreateNewEvent(h.Ctx, tx, evt)
 	if err != nil {

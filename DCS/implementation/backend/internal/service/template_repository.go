@@ -73,13 +73,13 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		actionFlag = &flag
 	}
 
-	cmd := command.SubmitTemplateContractCommand{
+	cmd := command.SubmitContractTemplateCommand{
 		DID:         req.Did,
 		SubmittedBy: "",
 		ActionFlag:  actionFlag,
 		Comments:    req.Comments,
 	}
-	handler := command.SubmitTemplateContractHandler{
+	handler := command.SubmitContractTemplateHandler{
 		DB: s.DB,
 	}
 	err = handler.Handle(cmd)

@@ -1,4 +1,4 @@
-package aopproval_task_state
+package approval_task_state
 
 import (
 	"database/sql/driver"

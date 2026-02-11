@@ -11,12 +11,14 @@ import (
 // ContractTemplateCreatedEvent is emitted when a new contract template is created.
 // This event signals initial template creation with metadata.
 type ContractTemplateCreatedEvent struct {
-	DID         string         `json:"did"`
-	CreatedBy   string         `json:"created_by"`
-	Name        *string        `json:"name"`
-	Description *string        `json:"description"`
-	MetaData    *datatype.JSON `json:"metadata"`
-	OccurredAt  time.Time      `json:"occurred_at"`
+	DID            string         `json:"did"`
+	DocumentNumber int            `json:"document_number"`
+	Version        int            `json:"version"`
+	CreatedBy      string         `json:"created_by"`
+	Name           *string        `json:"name"`
+	Description    *string        `json:"description"`
+	MetaData       *datatype.JSON `json:"metadata"`
+	OccurredAt     time.Time      `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
@@ -32,13 +34,15 @@ func (e ContractTemplateCreatedEvent) GetDID() string {
 // ContractTemplateSubmittedEvent is emitted when a template is submitted for review.
 // This event signals state transition and includes reviewer comments.
 type ContractTemplateSubmittedEvent struct {
-	DID           string                       `json:"did"`
-	PreviousState template_state.TemplateState `json:"previous_state"`
-	NewState      template_state.TemplateState `json:"new_state"`
-	SubmittedBy   string                       `json:"submitted_by"`
-	ActionFlag    *action_flag.ActionFlag      `json:"action_flag"`
-	Comments      []string                     `json:"comments,omitempty"`
-	OccurredAt    time.Time                    `json:"occurred_at"`
+	DID            string                       `json:"did"`
+	DocumentNumber int                          `json:"document_number"`
+	Version        int                          `json:"version"`
+	PreviousState  template_state.TemplateState `json:"previous_state"`
+	NewState       template_state.TemplateState `json:"new_state"`
+	SubmittedBy    string                       `json:"submitted_by"`
+	ActionFlag     *action_flag.ActionFlag      `json:"action_flag"`
+	Comments       []string                     `json:"comments,omitempty"`
+	OccurredAt     time.Time                    `json:"occurred_at"`
 }
 
 // GetDID implements the Event interface.
@@ -54,10 +58,12 @@ func (e ContractTemplateSubmittedEvent) EventType() string {
 // ContractTemplateApprovedEvent is emitted when a template is approved.
 // This event signals successful approval with optional decision notes.
 type ContractTemplateApprovedEvent struct {
-	DID           string    `json:"did"`
-	ApprovedBy    string    `json:"approved_by"`
-	DecisionNotes []string  `json:"decision_notes,omitempty"`
-	OccurredAt    time.Time `json:"occurred_at"`
+	DID            string    `json:"did"`
+	DocumentNumber int       `json:"document_number"`
+	Version        int       `json:"version"`
+	ApprovedBy     string    `json:"approved_by"`
+	DecisionNotes  []string  `json:"decision_notes,omitempty"`
+	OccurredAt     time.Time `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
@@ -73,10 +79,12 @@ func (e ContractTemplateApprovedEvent) GetDID() string {
 // ContractTemplateRejectedEvent is emitted when a template is rejected.
 // This event includes rejection reason and rejector information.
 type ContractTemplateRejectedEvent struct {
-	DID        string    `json:"did"`
-	RejectedBy string    `json:"rejected_by"`
-	Reason     string    `json:"reason"`
-	OccurredAt time.Time `json:"occurred_at"`
+	DID            string    `json:"did"`
+	DocumentNumber int       `json:"document_number"`
+	Version        int       `json:"version"`
+	RejectedBy     string    `json:"rejected_by"`
+	Reason         string    `json:"reason"`
+	OccurredAt     time.Time `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
@@ -93,6 +101,8 @@ func (e ContractTemplateRejectedEvent) GetDID() string {
 // This event is used for audit and synchronization purposes.
 type ContractTemplateUpdatedEvent struct {
 	DID            string         `json:"did"`
+	DocumentNumber int            `json:"document_number"`
+	Version        int            `json:"version"`
 	UpdatedBy      string         `json:"updated_by"`
 	OldName        *string        `json:"old_name,omitempty"`
 	NewName        *string        `json:"new_name,omitempty"`
@@ -133,9 +143,11 @@ func (e ContractTemplateRetrievedAllEvent) GetDID() string {
 // ContractTemplateRetrievedByIdEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type ContractTemplateRetrievedByIdEvent struct {
-	DID         string    `json:"did"`
-	RetrievedBy string    `json:"updated_by"`
-	OccurredAt  time.Time `json:"occurred_at"`
+	DID            string    `json:"did"`
+	DocumentNumber int       `json:"document_number"`
+	Version        int       `json:"version"`
+	RetrievedBy    string    `json:"updated_by"`
+	OccurredAt     time.Time `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
@@ -172,9 +184,11 @@ func (e ContractTemplateCreateReviewTaskEvent) GetDID() string {
 // ContractTemplateCreateReviewTaskEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type ContractTemplateRetrieveAllReviewTasksEvent struct {
-	DID         string    `json:"did"`
-	RetrievedBy string    `json:"retrieved_by"`
-	OccurredAt  time.Time `json:"occurred_at"`
+	DID            string    `json:"did"`
+	DocumentNumber int       `json:"document_number"`
+	Version        int       `json:"version"`
+	RetrievedBy    string    `json:"retrieved_by"`
+	OccurredAt     time.Time `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
