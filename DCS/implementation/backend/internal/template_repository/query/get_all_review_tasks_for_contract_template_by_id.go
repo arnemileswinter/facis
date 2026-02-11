@@ -25,8 +25,7 @@ type GetAllContractTemplateReviewTasksForDIDResult struct {
 	Assignee       string
 	CreatedBy      string
 	CreatedAt      time.Time
-	UpdatedBy      string
-	UpdatedAt      time.Time
+	CancelledAt    *time.Time
 }
 
 type GetAllContractTemplateReviewTasksForDIDHandler struct {
@@ -75,8 +74,7 @@ func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllCont
 			Assignee:       data.Assignee,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,
-			UpdatedBy:      data.UpdatedBy,
-			UpdatedAt:      data.UpdatedAt,
+			CancelledAt:    data.CancelledAt,
 		}
 	}
 

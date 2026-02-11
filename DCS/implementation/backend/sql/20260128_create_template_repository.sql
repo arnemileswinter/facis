@@ -41,7 +41,7 @@ CREATE INDEX idx_contract_templates_updated_by ON contract_templates(updated_by)
 
 ------------------------------------------------------------------------------------------------------------------------
 
-CREATE TYPE review_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'CANCELLED');
+CREATE TYPE review_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED');
 
 CREATE TABLE IF NOT EXISTS contract_templates_review_task
 (
@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
     assignee VARCHAR(255) CHECK (assignee <> '' AND assignee IS NOT NULL),
     created_by      VARCHAR(255) NOT NULL,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_by      VARCHAR(255) NOT NULL,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    cancelled_at       TIMESTAMP,
 
     review_comments TEXT,
 
@@ -64,8 +64,3 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
         FOREIGN KEY (did, document_number, version)
         REFERENCES contract_templates(did, document_number, version)
 );
-
-CREATE TRIGGER contract_templates_review_task_update_updated_at
-    BEFORE UPDATE ON contract_templates_review_task
-    FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();

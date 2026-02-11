@@ -44,7 +44,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 	}
 
 	var nextTemplateState template_state.TemplateState
-	if coreData.State == template_state.Draft {
+	if coreData.State == template_state.Draft || coreData.State == template_state.Rejected {
 
 		for _, assignee := range cmd.Assignees {
 			reviewTask := template_repository.ReviewTaskData{
@@ -68,7 +68,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 				Assignee:       assignee,
 				OccurredAt:     *createdAt,
 			}
-			err = event.CreateNewEvent(h.Ctx, tx, evt)
+			err = event.CreateNewEvent(ctx, tx, evt)
 			if err != nil {
 				return err
 			}
@@ -81,12 +81,12 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Approval {
 
-				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.ReviewComments)
+				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.ReviewComments)
 				if err != nil {
 					return err
 				}
 
-				exist, err := template_repository.ExistReviewTaskInState(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Open)
+				exist, err := template_repository.ExistReviewTaskInState(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, review_task_state.Open)
 				if err != nil {
 					return err
 				}
@@ -97,17 +97,17 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 
 			} else if *cmd.ActionFlag == action_flag.Draft {
 
-				err := template_repository.UpdateReviewTask(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.ReviewComments)
+				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.ReviewComments)
 				if err != nil {
 					return err
 				}
 
-				err = template_repository.CancelReviewTasks(h.Ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy)
+				err = template_repository.CancelReviewTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
 				if err != nil {
 					return err
 				}
 
-				nextTemplateState = template_state.Draft
+				nextTemplateState = template_state.Rejected
 			}
 		} else {
 			return errors.New("action flags is missing")
@@ -115,13 +115,13 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 
 	} else if coreData.State == template_state.Reviewed {
 
-		nextTemplateState = template_state.Submitted
+		nextTemplateState = template_state.Approved
 
 	} else {
 		return errors.New("current template contract state is invalid")
 	}
 
-	if coreData.State != nextTemplateState {
+	if len(nextTemplateState) > 0 && coreData.State != nextTemplateState {
 		err = template_repository.UpdateContractTemplateState(ctx, tx, cmd.DID, nextTemplateState)
 		if err != nil {
 			return err
@@ -136,7 +136,7 @@ func (h *SubmitTemplateContractHandler) Handle(cmd SubmitTemplateContractCommand
 			ReviewComments: cmd.ReviewComments,
 			OccurredAt:     time.Now(),
 		}
-		err = event.CreateNewEvent(h.Ctx, tx, evt)
+		err = event.CreateNewEvent(ctx, tx, evt)
 		if err != nil {
 			return err
 		}

@@ -54,7 +54,7 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		Reason:     cmd.Reason,
 		OccurredAt: time.Now(),
 	}
-	err = event.CreateNewEvent(h.Ctx, tx, evt)
+	err = event.CreateNewEvent(ctx, tx, evt)
 	if err != nil {
 		return err
 	}

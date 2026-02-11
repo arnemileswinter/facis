@@ -54,7 +54,7 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 		DecisionNotes: cmd.DecisionNotes,
 		OccurredAt:    time.Now(),
 	}
-	err = event.CreateNewEvent(h.Ctx, tx, evt)
+	err = event.CreateNewEvent(ctx, tx, evt)
 	if err != nil {
 		return err
 	}
