@@ -2,12 +2,12 @@ package command
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
 	templateevents "digital-contracting-service/internal/template_repository/event"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -27,7 +27,7 @@ type CreateTemplateContractHandler struct {
 
 func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -39,7 +39,6 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 	data := template_repository.ContractTemplateData{
 		DID:         cmd.DID,
 		CreatedBy:   cmd.CreatedBy,
-		UpdatedBy:   cmd.CreatedBy, // Use created_by for updated_by
 		State:       template_state.Draft,
 		Name:        cmd.Name,
 		Description: cmd.Description,

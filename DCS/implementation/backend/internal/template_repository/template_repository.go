@@ -23,17 +23,15 @@ type ContractTemplateData struct {
 	Approver       *string                      `db:"approver"`
 	CreatedBy      string                       `db:"created_by"`
 	CreatedAt      time.Time                    `db:"created_at"`
-	UpdatedBy      string                       `db:"updated_by"`
-	UpdatedAt      time.Time                    `db:"updated_at"`
 	MetaData       *datatype.JSON               `db:"meta_data"`
 }
 
 func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) (*time.Time, error) {
 	query := `
     INSERT INTO contract_templates (
-        did, created_by, updated_by, state, name, 
+        did, created_by, state, name, 
         description, meta_data
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+    ) VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING created_at
 `
 
@@ -41,7 +39,6 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 	err := tx.GetContext(ctx, &createdAt, query,
 		data.DID,
 		data.CreatedBy,
-		data.CreatedBy, // Use created_by for updated_by
 		data.State,
 		data.Name,
 		data.Description,
@@ -56,8 +53,8 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 
 func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateData, error) {
 	query := `
-        SELECT did, document_number, version, state, name, description, approver,
-               created_by, created_at, updated_by, updated_at, meta_data
+        SELECT did, document_number, version, state, name, description,
+               created_by, created_at, meta_data
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
@@ -74,8 +71,8 @@ func ReadContractTemplateData(ctx context.Context, tx *sqlx.Tx, did string, docu
 
 func ReadAllContractTemplateData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateData, error) {
 	query := `
-        SELECT did, document_number, version, state, name, description, approver,
-               created_by, created_at, updated_by, updated_at, meta_data
+        SELECT did, document_number, version, state, name, description,
+               created_by, created_at, meta_data
         FROM contract_templates
     `
 
@@ -92,13 +89,12 @@ type ContractTemplateCoreData struct {
 	DocumentNumber int                          `db:"document_number"`
 	Version        int                          `db:"version"`
 	State          template_state.TemplateState `db:"state"`
-	Approver       *string                      `db:"approver"`
 	CreatedBy      string                       `db:"created_by"`
 }
 
 func ReadContractTemplateCoreData(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateCoreData, error) {
 	query := `
-        SELECT did, document_number, version, state, approver, created_by
+        SELECT did, document_number, version, state, created_by
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
@@ -136,19 +132,6 @@ func UpdateContractTemplateState(ctx context.Context, tx *sqlx.Tx, did string, d
     	WHERE did = $1 AND document_number = $2 AND version = $3	
 `
 	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, state)
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func UpdateContractTemplateApprover(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string) error {
-	query := `UPDATE contract_templates SET
-        	approver = $4
-    	WHERE did = $1 AND document_number = $2 AND version = $3
-`
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, approver)
 	if err != nil {
 		return err
 	}

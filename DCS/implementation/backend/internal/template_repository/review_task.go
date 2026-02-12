@@ -17,10 +17,9 @@ type ReviewTaskData struct {
 	Reviewer       string                            `db:"reviewer"`
 	CreatedBy      string                            `db:"created_by"`
 	CreatedAt      time.Time                         `db:"created_at"`
-	CancelledAt    *time.Time                        `db:"cancelled_at"`
 }
 
-func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*time.Time, error) {
+func CreateReviewTasks(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*time.Time, error) {
 	query := `
     INSERT INTO contract_templates_review_task (
         did, document_number, version, state, reviewer, created_by
@@ -44,34 +43,13 @@ func CreateReviewTask(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*t
 	return &createdAt, nil
 }
 
-func CreateResubmissionTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, createdBy string) error {
+func ReopenReviewTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
 	query := `
-        INSERT INTO contract_templates_review_task (
-            did, document_number, version, state, reviewer, created_by
-        )
-        SELECT 
-            did, 
-            document_number, 
-            version, 
-            'OPEN'::review_task_state,  
-            reviewer,                    
-            $4                                
-        FROM contract_templates_review_task
-        WHERE did = $1 
-          AND document_number = $2 
-          AND version = $3 
-          AND state = 'APPROVED'::review_task_state
-          AND cancelled_at IS NULL
+        UPDATE contract_templates_review_task SET state = 'OPEN'
+        WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, createdBy)
-
-	query = `
-        UPDATE contract_templates_review_task SET cancelled_at = $4
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND state <> 'OPEN'
-    `
-
-	_, err = tx.ExecContext(ctx, query, did, documentNumber, version, time.Now())
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
 	if err != nil {
 		return err
 	}
@@ -94,31 +72,13 @@ func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewT
 	return reviewTasks, nil
 }
 
-func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state review_task_state.ReviewTaskState, reviewComments []string) error {
+func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state review_task_state.ReviewTaskState) error {
 	query := `
-        UPDATE contract_templates_review_task SET state = $5, review_comments = $6
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4 AND cancelled_at IS NULL
+        UPDATE contract_templates_review_task SET state = $5
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
     `
 
-	var comments string
-	for _, comment := range reviewComments {
-		comments += comment + ";"
-	}
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, reviewer, state, comments)
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func CancelOldReviewTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
-	query := `
-        UPDATE contract_templates_review_task SET cancelled_at = $4
-        WHERE did = $1 AND document_number = $2 AND version = $3
-    `
-
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, time.Now())
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, reviewer, state)
 	if err != nil {
 		return err
 	}
@@ -130,7 +90,7 @@ func ExistReviewTaskInState(ctx context.Context, tx *sqlx.Tx, did string, docume
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_review_task 
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND state = $4 AND cancelled_at IS NULL
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND state = $4
     `
 
 	var count int
@@ -138,5 +98,6 @@ func ExistReviewTaskInState(ctx context.Context, tx *sqlx.Tx, did string, docume
 	if err != nil {
 		return false, err
 	}
+
 	return count > 0, nil
 }

@@ -58,17 +58,27 @@ func ReadAllApprovalTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]Appro
 	return approvalTasks, nil
 }
 
-func UpdateApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state aopprovaltaskstate.ApprovalTaskState, comments []string) error {
+func UpdateApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state aopprovaltaskstate.ApprovalTaskState) error {
 	query := `
-        UPDATE contract_templates_approval_task SET state = $5, comments = $6
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4 AND state = 'OPEN'
+        UPDATE contract_templates_approval_task SET state = $5
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
     `
 
-	var commentString string
-	for _, comment := range comments {
-		commentString += comment + ";"
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, approver, state)
+	if err != nil {
+		return err
 	}
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, approver, state, commentString)
+
+	return err
+}
+
+func ReopenApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	query := `
+        UPDATE contract_templates_approval_task SET state = 'OPEN'
+        WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
 	if err != nil {
 		return err
 	}

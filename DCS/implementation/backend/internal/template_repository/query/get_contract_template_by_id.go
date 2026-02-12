@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
@@ -12,14 +13,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetContractTemplateByIdQuery struct {
+type GetContractTemplatesByIdQuery struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	RetrievedBy    string
 }
 
-type GetContractTemplateByIdResult struct {
+type GetContractTemplatesByIdResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -28,8 +29,6 @@ type GetContractTemplateByIdResult struct {
 	Description    *string
 	CreatedBy      string
 	CreatedAt      time.Time
-	UpdatedBy      string
-	UpdatedAt      time.Time
 	MetaData       *datatype.JSON
 }
 
@@ -38,9 +37,9 @@ type GetContractTemplateByIdHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQuery) (*GetContractTemplateByIdResult, error) {
+func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplatesByIdQuery) (*GetContractTemplatesByIdResult, error) {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -69,7 +68,7 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 		return nil, err
 	}
 
-	return &GetContractTemplateByIdResult{
+	return &GetContractTemplatesByIdResult{
 		DID:            query.DID,
 		DocumentNumber: data.DocumentNumber,
 		Version:        data.Version,
@@ -78,8 +77,6 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 		Description:    data.Description,
 		CreatedBy:      data.CreatedBy,
 		CreatedAt:      data.CreatedAt,
-		UpdatedBy:      data.UpdatedBy,
-		UpdatedAt:      data.UpdatedAt,
 		MetaData:       data.MetaData,
 	}, nil
 }

@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/datatype/review_task_state"
@@ -27,7 +28,6 @@ type GetAllContractTemplateReviewTasksForDIDResult struct {
 	Reviewer       string
 	CreatedBy      string
 	CreatedAt      time.Time
-	CancelledAt    *time.Time
 }
 
 type GetAllContractTemplateReviewTasksForDIDHandler struct {
@@ -37,7 +37,7 @@ type GetAllContractTemplateReviewTasksForDIDHandler struct {
 
 func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllContractTemplateReviewTasksForDID) ([]GetAllContractTemplateReviewTasksForDIDResult, error) {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -78,7 +78,6 @@ func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllCont
 			Reviewer:       data.Reviewer,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,
-			CancelledAt:    data.CancelledAt,
 		}
 	}
 

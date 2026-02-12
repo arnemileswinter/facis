@@ -27,7 +27,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	createTestContractTemplate(t, did, currentContractState, db)
 
 	ctx := context.Background()
-	updateBy := "Test User"
 	metaData := map[string]interface{}{
 		"test": "update",
 	}
@@ -43,7 +42,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		UpdatedBy:      updateBy,
 		Name:           &name,
 		Description:    &description,
 		MetaData:       &jsonMetaData,
@@ -59,7 +57,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := query.GetContractTemplateByIdQuery{
+	qry := query.GetContractTemplatesByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -77,7 +75,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, name, *contractTemplate.Name)
 	assert.Equal(t, description, *contractTemplate.Description)
-	assert.Equal(t, updateBy, contractTemplate.UpdatedBy)
 	//assert.Equal(t, jsonMetaData, contractTemplate.MetaData)
 }
 
@@ -95,7 +92,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 	currentContractState := template_state.Submitted
 	createTestContractTemplate(t, did, currentContractState, db)
 
-	updateBy := "Test User"
 	metaData := map[string]interface{}{
 		"test": "update",
 	}
@@ -109,7 +105,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 
 	cmd := command.UpdateTemplateContractCommand{
 		DID:         *did,
-		UpdatedBy:   updateBy,
 		Name:        &name,
 		Description: &description,
 		MetaData:    &jsonMetaData,
@@ -137,7 +132,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T)
 	currentContractState := template_state.Approved
 	createTestContractTemplate(t, did, currentContractState, db)
 
-	updateBy := "Test User"
 	metaData := map[string]interface{}{
 		"test": "update",
 	}
@@ -151,7 +145,6 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T)
 
 	cmd := command.UpdateTemplateContractCommand{
 		DID:         *did,
-		UpdatedBy:   updateBy,
 		Name:        &name,
 		Description: &description,
 		MetaData:    &jsonMetaData,

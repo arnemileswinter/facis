@@ -101,7 +101,6 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 	}
 	cmd := command.UpdateTemplateContractCommand{
 		DID:         req.Did,
-		UpdatedBy:   "",
 		Name:        req.Name,
 		Description: req.Description,
 		MetaData:    &metaData,
@@ -170,7 +169,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templater
 // Retrieve a template by template id.
 func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
 
-	qry := query.GetContractTemplateByIdQuery{
+	qry := query.GetContractTemplatesByIdQuery{
 		DID:         req.Did,
 		RetrievedBy: "",
 	}

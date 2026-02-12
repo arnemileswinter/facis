@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/datatype/template_state"
@@ -27,7 +28,7 @@ type RejectTemplateContractHandler struct {
 
 func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)

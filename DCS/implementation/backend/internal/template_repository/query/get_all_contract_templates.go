@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
@@ -16,7 +17,7 @@ type GetAllContractTemplatesQuery struct {
 	RetrievedBy string
 }
 
-type GetAllContractTemplateResult struct {
+type GetAllContractTemplatesResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -25,8 +26,6 @@ type GetAllContractTemplateResult struct {
 	Description    string
 	CreatedBy      string
 	CreatedAt      time.Time
-	UpdatedBy      string
-	UpdatedAt      time.Time
 	MetaData       datatype.JSON
 }
 
@@ -35,9 +34,9 @@ type GetAllContractTemplateHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuery) ([]GetAllContractTemplateResult, error) {
+func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuery) ([]GetAllContractTemplatesResult, error) {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -65,9 +64,9 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 		return nil, err
 	}
 
-	result := make([]GetAllContractTemplateResult, len(contractTemplates))
+	result := make([]GetAllContractTemplatesResult, len(contractTemplates))
 	for i, data := range contractTemplates {
-		result[i] = GetAllContractTemplateResult{
+		result[i] = GetAllContractTemplatesResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
@@ -76,8 +75,6 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 			Description:    *data.Description,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,
-			UpdatedBy:      data.UpdatedBy,
-			UpdatedAt:      data.UpdatedAt,
 			MetaData:       *data.MetaData,
 		}
 	}

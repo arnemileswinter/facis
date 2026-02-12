@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
 	aopprovaltaskstate "digital-contracting-service/internal/template_repository/datatype/approval_task_state"
@@ -12,8 +13,10 @@ import (
 )
 
 type GetAllContractTemplateApprovalTasksForDID struct {
-	DID         string
-	RetrievedBy string
+	DID            string
+	DocumentNumber int
+	Version        int
+	RetrievedBy    string
 }
 
 type GetAllContractTemplateApprovalTasksForDIDResult struct {
@@ -35,7 +38,7 @@ type GetAllContractTemplateApprovalTasksForDIDHandler struct {
 
 func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllContractTemplateApprovalTasksForDID) ([]GetAllContractTemplateApprovalTasksForDIDResult, error) {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -50,9 +53,11 @@ func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllCo
 	}
 
 	evt := templateevents.ContractTemplateRetrieveAllReviewTasksEvent{
-		DID:         query.DID,
-		RetrievedBy: query.RetrievedBy,
-		OccurredAt:  time.Now(),
+		DID:            query.DID,
+		DocumentNumber: query.DocumentNumber,
+		Version:        query.Version,
+		RetrievedBy:    query.RetrievedBy,
+		OccurredAt:     time.Now(),
 	}
 	err = event.CreateNewEvent(h.Ctx, tx, evt)
 	if err != nil {

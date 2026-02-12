@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
 	"digital-contracting-service/internal/template_repository/datatype/action_flag"
@@ -33,7 +34,7 @@ type SubmitContractTemplateHandler struct {
 
 func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -47,23 +48,15 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 		return err
 	}
 
-	var approver string
-	if cmd.Approver == nil || len(*cmd.Approver) == 0 {
-		if coreData.Approver == nil || len(*coreData.Approver) == 0 {
-			return errors.New("no approver provided")
+	var nextTemplateState template_state.TemplateState
+	if coreData.State == template_state.Draft {
+
+		if cmd.Reviewer == nil || len(cmd.Reviewer) == 0 {
+			return errors.New("no reviewer provided")
 		}
 
-		approver = *coreData.Approver
-	} else {
-		approver = *cmd.Approver
-	}
-
-	var nextTemplateState template_state.TemplateState
-	if coreData.State == template_state.Draft || coreData.State == template_state.Rejected {
-
-		err := template_repository.UpdateContractTemplateApprover(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, approver)
-		if err != nil {
-			return err
+		if cmd.Approver == nil || len(*cmd.Approver) == 0 {
+			return errors.New("no approver provided")
 		}
 
 		for _, reviewer := range cmd.Reviewer {
@@ -75,12 +68,12 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 				State:          review_task_state.Open,
 				CreatedBy:      cmd.SubmittedBy,
 			}
-			createdAt, err := template_repository.CreateReviewTask(ctx, tx, reviewTask)
+			createdAt, err := template_repository.CreateReviewTasks(ctx, tx, reviewTask)
 			if err != nil {
 				return err
 			}
 
-			evt := templateevents.ContractTemplateCreateReviewTaskEvent{
+			createReviewTaskEvent := templateevents.ContractTemplateCreateReviewTaskEvent{
 				DID:            coreData.DID,
 				DocumentNumber: coreData.DocumentNumber,
 				Version:        coreData.Version,
@@ -88,10 +81,50 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 				Reviewer:       reviewer,
 				OccurredAt:     *createdAt,
 			}
-			err = event.CreateNewEvent(ctx, tx, evt)
+			err = event.CreateNewEvent(ctx, tx, createReviewTaskEvent)
 			if err != nil {
 				return err
 			}
+		}
+
+		data := template_repository.ApprovalTaskData{
+			DID:            cmd.DID,
+			DocumentNumber: coreData.DocumentNumber,
+			Version:        coreData.Version,
+			CreatedBy:      coreData.CreatedBy,
+			Approver:       *cmd.Approver,
+			State:          aopprovaltaskstate.Open,
+		}
+		createdAt, err := template_repository.CreateApprovalTask(ctx, tx, data)
+		if err != nil {
+			return err
+		}
+
+		createApprovalTaskEvent := templateevents.ContractTemplateCreateApprovalTaskEvent{
+			DID:            coreData.DID,
+			DocumentNumber: coreData.DocumentNumber,
+			Version:        coreData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			Approver:       *cmd.Approver,
+			OccurredAt:     *createdAt,
+		}
+		err = event.CreateNewEvent(ctx, tx, createApprovalTaskEvent)
+		if err != nil {
+			return err
+		}
+
+		nextTemplateState = template_state.Submitted
+
+	} else if coreData.State == template_state.Rejected {
+
+		err := template_repository.ReopenReviewTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
+		if err != nil {
+			return err
+		}
+
+		err = template_repository.ReopenApprovalTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
+		if err != nil {
+			return err
 		}
 
 		nextTemplateState = template_state.Submitted
@@ -101,7 +134,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == action_flag.Approval {
 
-				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Approved, cmd.Comments)
+				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Approved)
 				if err != nil {
 					return err
 				}
@@ -112,30 +145,12 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 				}
 
 				if !exist {
-					data := template_repository.ApprovalTaskData{
-						DID:            cmd.DID,
-						DocumentNumber: coreData.DocumentNumber,
-						Version:        coreData.Version,
-						CreatedBy:      coreData.CreatedBy,
-						Approver:       *coreData.Approver,
-						State:          aopprovaltaskstate.Open,
-					}
-					_, err = template_repository.CreateApprovalTask(ctx, tx, data)
-					if err != nil {
-						return err
-					}
-
 					nextTemplateState = template_state.Reviewed
 				}
 
 			} else if *cmd.ActionFlag == action_flag.Draft {
 
-				err := template_repository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, review_task_state.Rejected, cmd.Comments)
-				if err != nil {
-					return err
-				}
-
-				err = template_repository.CancelOldReviewTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
+				err := template_repository.ReopenReviewTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
 				if err != nil {
 					return err
 				}
@@ -148,12 +163,12 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 	} else if coreData.State == template_state.Reviewed {
 
-		err := template_repository.UpdateApprovalTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, aopprovaltaskstate.Resubmitted, cmd.Comments)
+		err := template_repository.ReopenReviewTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
 		if err != nil {
 			return err
 		}
 
-		err = template_repository.CreateResubmissionTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy)
+		err = template_repository.ReopenApprovalTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
 		if err != nil {
 			return err
 		}

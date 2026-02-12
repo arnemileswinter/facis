@@ -200,3 +200,24 @@ func (e ContractTemplateRetrieveAllReviewTasksEvent) EventType() string {
 func (e ContractTemplateRetrieveAllReviewTasksEvent) GetDID() string {
 	return e.DID
 }
+
+// ContractTemplateCreateApprovalTaskEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type ContractTemplateCreateApprovalTaskEvent struct {
+	DID            string    `json:"did"`
+	DocumentNumber int       `db:"document_number"`
+	Version        int       `db:"version"`
+	Approver       string    `json:"approver"`
+	CreatedBy      string    `json:"updated_by"`
+	OccurredAt     time.Time `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateCreateApprovalTaskEvent) EventType() string {
+	return event_type.CreateContractTemplateApprovalTask.String()
+}
+
+// GetDID implements the Event interface.
+func (e ContractTemplateCreateApprovalTaskEvent) GetDID() string {
+	return e.DID
+}

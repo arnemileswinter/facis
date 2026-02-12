@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/template_repository"
@@ -17,7 +18,6 @@ type UpdateTemplateContractCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
-	UpdatedBy      string
 	Name           *string
 	Description    *string
 	MetaData       *datatype.JSON
@@ -30,7 +30,7 @@ type UpdateTemplateContractHandler struct {
 
 func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -65,7 +65,6 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
-		UpdatedBy:      cmd.UpdatedBy,
 		OldName:        oldData.Name,
 		NewName:        cmd.Name,
 		OldDescription: oldData.Description,

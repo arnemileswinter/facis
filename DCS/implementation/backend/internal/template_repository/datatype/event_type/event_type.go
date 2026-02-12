@@ -17,17 +17,19 @@ const (
 	RetrieveContractTemplateById           EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
 	CreateContractTemplateReviewTask       EventType = "CREATE_CONTRACT_TEMPLATE_REVIEW_TASK"
 	RetrieveAllContractTemplateReviewTasks EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATE_REVIEW_TASKS"
+	CreateContractTemplateApprovalTask     EventType = "CREATE_CONTRACT_TEMPLATE_APPROVAL_TASK"
 )
 
 var validStates = map[EventType]bool{
-	CreateContractTemplate:           true,
-	SubmitContractTemplate:           true,
-	ApproveContractTemplate:          true,
-	RejectContractTemplate:           true,
-	UpdateContractTemplate:           true,
-	RetrieveAllContractTemplates:     true,
-	RetrieveContractTemplateById:     true,
-	CreateContractTemplateReviewTask: true,
+	CreateContractTemplate:             true,
+	SubmitContractTemplate:             true,
+	ApproveContractTemplate:            true,
+	RejectContractTemplate:             true,
+	UpdateContractTemplate:             true,
+	RetrieveAllContractTemplates:       true,
+	RetrieveContractTemplateById:       true,
+	CreateContractTemplateReviewTask:   true,
+	CreateContractTemplateApprovalTask: true,
 }
 
 func NewEventType(s string) (EventType, error) {

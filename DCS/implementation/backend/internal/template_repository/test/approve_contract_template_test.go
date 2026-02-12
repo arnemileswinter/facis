@@ -45,7 +45,7 @@ func TestSubmit_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := query.GetContractTemplateByIdQuery{
+	qry := query.GetContractTemplatesByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,

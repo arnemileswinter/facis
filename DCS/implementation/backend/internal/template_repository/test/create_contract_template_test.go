@@ -52,7 +52,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 	ctx := context.Background()
 	retrievedBy := "Test User"
 
-	qry := query.GetContractTemplateByIdQuery{
+	qry := query.GetContractTemplatesByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
