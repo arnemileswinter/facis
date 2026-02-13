@@ -59,14 +59,7 @@ func CreateNewEvent(ctx context.Context, tx *sqlx.Tx, evt Event) error {
 	}
 
 	documentNumber := evt.GetDocumentNumber()
-	if documentNumber < 1 {
-		return errors.New("invalid document number")
-	}
-
 	version := evt.GetVersion()
-	if version < 1 {
-		return errors.New("invalid version")
-	}
 
 	// Serialize event to JSON
 	eventJSON, err := json.Marshal(evt)

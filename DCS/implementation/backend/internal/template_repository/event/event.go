@@ -355,6 +355,36 @@ func (e ContractTemplateUpdatedReviewTaskEvent) GetVersion() int {
 	return e.Version
 }
 
+// ContractTemplateDeleteReviewTaskEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type ContractTemplateDeleteReviewTaskEvent struct {
+	DID            string    `json:"did"`
+	DocumentNumber int       `json:"document_number"`
+	Version        int       `json:"version"`
+	DeletedBy      string    `json:"deleted_by"`
+	OccurredAt     time.Time `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateDeleteReviewTaskEvent) EventType() string {
+	return event_type.DeleteContractTemplateReviewTask.String()
+}
+
+// GetDID implements the Event interface.
+func (e ContractTemplateDeleteReviewTaskEvent) GetDID() string {
+	return e.DID
+}
+
+// GetDocumentNumber implements the Event interface.
+func (e ContractTemplateDeleteReviewTaskEvent) GetDocumentNumber() int {
+	return e.DocumentNumber
+}
+
+// GetVersion implements the Event interface.
+func (e ContractTemplateDeleteReviewTaskEvent) GetVersion() int {
+	return e.Version
+}
+
 // ContractTemplateCreateApprovalTaskEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type ContractTemplateCreateApprovalTaskEvent struct {
@@ -473,5 +503,35 @@ func (e ContractTemplateUpdatedApprovalTaskEvent) GetDocumentNumber() int {
 
 // GetVersion implements the Event interface.
 func (e ContractTemplateUpdatedApprovalTaskEvent) GetVersion() int {
+	return e.Version
+}
+
+// ContractTemplateDeleteApprovalTaskEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type ContractTemplateDeleteApprovalTaskEvent struct {
+	DID            string    `json:"did"`
+	DocumentNumber int       `json:"document_number"`
+	Version        int       `json:"version"`
+	DeletedBy      string    `json:"deleted_by"`
+	OccurredAt     time.Time `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateDeleteApprovalTaskEvent) EventType() string {
+	return event_type.DeleteContractTemplateApprovalTask.String()
+}
+
+// GetDID implements the Event interface.
+func (e ContractTemplateDeleteApprovalTaskEvent) GetDID() string {
+	return e.DID
+}
+
+// GetDocumentNumber implements the Event interface.
+func (e ContractTemplateDeleteApprovalTaskEvent) GetDocumentNumber() int {
+	return e.DocumentNumber
+}
+
+// GetVersion implements the Event interface.
+func (e ContractTemplateDeleteApprovalTaskEvent) GetVersion() int {
 	return e.Version
 }

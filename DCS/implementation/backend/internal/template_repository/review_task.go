@@ -101,3 +101,17 @@ func ExistReviewTaskInState(ctx context.Context, tx *sqlx.Tx, did string, docume
 
 	return count > 0, nil
 }
+
+func DeleteReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	query := `
+        DELETE FROM contract_templates_review_task
+        WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
+	if err != nil {
+		return err
+	}
+
+	return err
+}

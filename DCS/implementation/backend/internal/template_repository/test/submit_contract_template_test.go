@@ -835,3 +835,877 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	assert.Equal(t, template_state.Submitted, contractTemplate.State)
 }
+
+func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	/**
+	Create and Submit the Draft
+	*/
+	createTestContractTemplate(t, did, template_state.Draft, db)
+
+	ctx := context.Background()
+	submittedBy := "Test User"
+	approver := "Test User 4"
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		Comments:       nil,
+		Reviewer:       reviewers,
+		Approver:       &approver,
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy := "Test User"
+
+	qry := query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler := query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	queryReviewTasks := query.GetAllContractTemplateReviewTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerReviewTasks := query.GetAllContractTemplateReviewTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	reviewTasks, err := handlerReviewTasks.Handle(queryReviewTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(reviewTasks), 3)
+
+	for _, reviewTask := range reviewTasks {
+		assert.Equal(t, review_task_state.Open, reviewTask.State)
+
+		if !slices.Contains(cmd.Reviewer, reviewTask.Reviewer) {
+			t.Fatalf("Reviewer not found in review tasks: %v", reviewTask)
+		}
+	}
+
+	queryApprovalTasks := query.GetAllContractTemplateApprovalTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerApprovalTasks := query.GetAllContractTemplateApprovalTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	approvalTasks, err := handlerApprovalTasks.Handle(queryApprovalTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(approvalTasks), 1)
+	assert.Equal(t, approval_task_state.Open, approvalTasks[0].State)
+
+	/**
+	First reviewer approves the Contract Template
+	*/
+	actionFlag := action_flag.Approval
+
+	submittedBy = "Test User 1"
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     &actionFlag,
+		Comments:       []string{},
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	queryReviewTasks = query.GetAllContractTemplateReviewTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerReviewTasks = query.GetAllContractTemplateReviewTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	reviewTasks, err = handlerReviewTasks.Handle(queryReviewTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(reviewTasks), 3)
+
+	queryApprovalTasks = query.GetAllContractTemplateApprovalTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerApprovalTasks = query.GetAllContractTemplateApprovalTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	approvalTasks, err = handlerApprovalTasks.Handle(queryApprovalTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(approvalTasks), 1)
+
+	/**
+	Second reviewer declined the Contract Template
+	*/
+	actionFlag = action_flag.Draft
+
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    reviewers[1],
+		ActionFlag:     &actionFlag,
+		Comments:       []string{},
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Rejected, contractTemplate.State)
+
+	/**
+	Contract Template creator submits it again
+	*/
+	approver = "Test User 4"
+	reviewers = []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	submittedBy = "Test User"
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		Comments:       nil,
+		Approver:       &approver,
+		Reviewer:       reviewers,
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	/**
+	All reviewer approve the Contract Template
+	*/
+	actionFlag = action_flag.Approval
+
+	for _, reviewer := range reviewers {
+		cmd := command.SubmitContractTemplateCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			SubmittedBy:    reviewer,
+			ActionFlag:     &actionFlag,
+			Comments:       []string{},
+		}
+		handler := command.SubmitContractTemplateHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = handler.Handle(cmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
+
+	/**
+	Approver resubmits reviewed Contract Template
+	*/
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    approver,
+		ActionFlag:     nil,
+		Comments:       []string{"Test Comment"},
+		Reviewer:       nil,
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	/**
+	All reviewer approve the Contract Template
+	*/
+	actionFlag = action_flag.Approval
+
+	for _, reviewer := range reviewers {
+		cmd := command.SubmitContractTemplateCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			SubmittedBy:    reviewer,
+			ActionFlag:     &actionFlag,
+			Comments:       []string{},
+		}
+		handler := command.SubmitContractTemplateHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = handler.Handle(cmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
+
+	/**
+	Approver approves reviewed Contract Template
+	*/
+	approveCmd := command.ApproveTemplateContractCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		ApprovedBy:     approver,
+		DecisionNotes:  []string{"Test"},
+	}
+	approveHandler := command.ApproveTemplateContractHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = approveHandler.Handle(approveCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Approved, contractTemplate.State)
+}
+
+func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	/**
+	Create and Submit the Draft
+	*/
+	createTestContractTemplate(t, did, template_state.Draft, db)
+
+	ctx := context.Background()
+	submittedBy := "Test User"
+	approver := "Test User 4"
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		Comments:       nil,
+		Reviewer:       reviewers,
+		Approver:       &approver,
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy := "Test User"
+
+	qry := query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler := query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	queryReviewTasks := query.GetAllContractTemplateReviewTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerReviewTasks := query.GetAllContractTemplateReviewTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	reviewTasks, err := handlerReviewTasks.Handle(queryReviewTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(reviewTasks), 3)
+
+	for _, reviewTask := range reviewTasks {
+		assert.Equal(t, review_task_state.Open, reviewTask.State)
+
+		if !slices.Contains(cmd.Reviewer, reviewTask.Reviewer) {
+			t.Fatalf("Reviewer not found in review tasks: %v", reviewTask)
+		}
+	}
+
+	queryApprovalTasks := query.GetAllContractTemplateApprovalTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerApprovalTasks := query.GetAllContractTemplateApprovalTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	approvalTasks, err := handlerApprovalTasks.Handle(queryApprovalTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(approvalTasks), 1)
+	assert.Equal(t, approval_task_state.Open, approvalTasks[0].State)
+
+	/**
+	First reviewer approves the Contract Template
+	*/
+	actionFlag := action_flag.Approval
+
+	submittedBy = "Test User 1"
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     &actionFlag,
+		Comments:       []string{},
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	queryReviewTasks = query.GetAllContractTemplateReviewTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerReviewTasks = query.GetAllContractTemplateReviewTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	reviewTasks, err = handlerReviewTasks.Handle(queryReviewTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(reviewTasks), 3)
+
+	queryApprovalTasks = query.GetAllContractTemplateApprovalTasksForDID{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	handlerApprovalTasks = query.GetAllContractTemplateApprovalTasksForDIDHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	approvalTasks, err = handlerApprovalTasks.Handle(queryApprovalTasks)
+	if err != nil {
+		t.Fatalf("Failed to query template review tasks: %v", err)
+	}
+
+	assert.Equal(t, len(approvalTasks), 1)
+
+	/**
+	Second reviewer declined the Contract Template
+	*/
+	actionFlag = action_flag.Draft
+
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    reviewers[1],
+		ActionFlag:     &actionFlag,
+		Comments:       []string{},
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Rejected, contractTemplate.State)
+
+	/**
+	Contract Template creator submits it again
+	*/
+	approver = "Test User 4"
+	reviewers = []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	submittedBy = "Test User"
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		Comments:       nil,
+		Approver:       &approver,
+		Reviewer:       reviewers,
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	/**
+	All reviewer approve the Contract Template
+	*/
+	actionFlag = action_flag.Approval
+
+	for _, reviewer := range reviewers {
+		cmd := command.SubmitContractTemplateCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			SubmittedBy:    reviewer,
+			ActionFlag:     &actionFlag,
+			Comments:       []string{},
+		}
+		handler := command.SubmitContractTemplateHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = handler.Handle(cmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
+
+	/**
+	Approver resubmits reviewed Contract Template
+	*/
+	cmd = command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		SubmittedBy:    approver,
+		ActionFlag:     nil,
+		Comments:       []string{"Test Comment"},
+		Reviewer:       nil,
+	}
+	handler = command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Submitted, contractTemplate.State)
+
+	/**
+	All reviewer approve the Contract Template
+	*/
+	actionFlag = action_flag.Approval
+
+	for _, reviewer := range reviewers {
+		cmd := command.SubmitContractTemplateCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			SubmittedBy:    reviewer,
+			ActionFlag:     &actionFlag,
+			Comments:       []string{},
+		}
+		handler := command.SubmitContractTemplateHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = handler.Handle(cmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Reviewed, contractTemplate.State)
+
+	/**
+	Approver rejects reviewed Contract Template
+	*/
+	rejectCmd := command.RejectTemplateContractCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RejectedBy:     approver,
+		Reason:         "Test",
+	}
+	rejectHandler := command.RejectTemplateContractHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = rejectHandler.Handle(rejectCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy = "Test User"
+
+	qry = query.GetContractTemplatesByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler = query.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err = queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, template_state.Draft, contractTemplate.State)
+}

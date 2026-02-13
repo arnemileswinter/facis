@@ -64,5 +64,39 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return err
 	}
 
+	err = template_repository.DeleteReviewTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	if err != nil {
+		return err
+	}
+
+	deleteReviewTaskEvt := templateevents.ContractTemplateDeleteReviewTaskEvent{
+		DID:            cmd.DID,
+		DocumentNumber: cmd.DocumentNumber,
+		Version:        cmd.Version,
+		DeletedBy:      cmd.RejectedBy,
+		OccurredAt:     time.Now(),
+	}
+	err = event.CreateNewEvent(ctx, tx, deleteReviewTaskEvt)
+	if err != nil {
+		return err
+	}
+
+	err = template_repository.DeleteApprovalTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	if err != nil {
+		return err
+	}
+
+	deleteApprovalTaskEvt := templateevents.ContractTemplateDeleteApprovalTaskEvent{
+		DID:            cmd.DID,
+		DocumentNumber: cmd.DocumentNumber,
+		Version:        cmd.Version,
+		DeletedBy:      cmd.RejectedBy,
+		OccurredAt:     time.Now(),
+	}
+	err = event.CreateNewEvent(ctx, tx, deleteApprovalTaskEvt)
+	if err != nil {
+		return err
+	}
+
 	return tx.Commit()
 }

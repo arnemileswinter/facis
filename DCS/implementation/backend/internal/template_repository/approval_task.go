@@ -85,3 +85,17 @@ func ReopenApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNu
 
 	return err
 }
+
+func DeleteApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	query := `
+        DELETE FROM contract_templates_approval_task
+        WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
