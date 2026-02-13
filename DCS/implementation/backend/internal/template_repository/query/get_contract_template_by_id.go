@@ -54,9 +54,11 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplatesByIdQu
 	}
 
 	evt := templateevents.ContractTemplateRetrievedByIdEvent{
-		DID:         query.DID,
-		RetrievedBy: query.RetrievedBy,
-		OccurredAt:  time.Now(),
+		DID:            query.DID,
+		DocumentNumber: query.DocumentNumber,
+		Version:        query.Version,
+		RetrievedBy:    query.RetrievedBy,
+		OccurredAt:     time.Now(),
 	}
 	err = event.CreateNewEvent(h.Ctx, tx, evt)
 	if err != nil {

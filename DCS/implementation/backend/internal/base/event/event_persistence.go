@@ -17,6 +17,12 @@ type Event interface {
 
 	// GetDID returns the entity DID for event reference and correlation.
 	GetDID() string
+
+	// GetDocumentNumber returns the entity DocumentNumber for event reference and correlation.
+	GetDocumentNumber() int
+
+	// GetVersion returns the entity Version for event reference and correlation.
+	GetVersion() int
 }
 
 // CreateNewEvent persists an event to the outbox table.
@@ -52,6 +58,16 @@ func CreateNewEvent(ctx context.Context, tx *sqlx.Tx, evt Event) error {
 		return errors.New("template did cannot be empty")
 	}
 
+	documentNumber := evt.GetDocumentNumber()
+	if documentNumber < 1 {
+		return errors.New("invalid document number")
+	}
+
+	version := evt.GetVersion()
+	if version < 1 {
+		return errors.New("invalid version")
+	}
+
 	// Serialize event to JSON
 	eventJSON, err := json.Marshal(evt)
 	if err != nil {
@@ -62,11 +78,13 @@ func CreateNewEvent(ctx context.Context, tx *sqlx.Tx, evt Event) error {
 	// The outbox table ensures events are never lost, even if NATS is down.
 	_, err = tx.ExecContext(ctx,
 		`INSERT INTO outbox_events 
-		 (event_type, event_data, did, processed)
-		 VALUES ($1, $2, $3, FALSE)`,
+		 (event_type, event_data, did, document_number, version, processed)
+		 VALUES ($1, $2, $3, $4, $5, FALSE)`,
 		eventType,
 		eventJSON,
 		did,
+		documentNumber,
+		version,
 	)
 
 	if err != nil {

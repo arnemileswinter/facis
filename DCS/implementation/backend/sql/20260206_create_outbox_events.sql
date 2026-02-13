@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS outbox_events (
     event_data JSONB NOT NULL,
 
     did VARCHAR(255),
+    document_number int,
+    version int,
 
     processed BOOLEAN DEFAULT FALSE,
     processed_at TIMESTAMP,
@@ -105,6 +107,6 @@ SELECT
     COUNT(*) AS total_count,
     MAX(created_at) AS latest_event
 FROM outbox_events
-GROUP BY event_type                                                  document_number INT DEFAULT 1 CHECK (document_number > 0),
+GROUP BY event_type
 
 ORDER BY unprocessed_count DESC;

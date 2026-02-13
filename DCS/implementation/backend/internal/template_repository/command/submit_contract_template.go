@@ -122,7 +122,31 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			return err
 		}
 
+		reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
+			DID:            coreData.DID,
+			DocumentNumber: coreData.DocumentNumber,
+			Version:        coreData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			OccurredAt:     time.Now(),
+		}
+		err = event.CreateNewEvent(ctx, tx, reopenReviewTaskEvent)
+		if err != nil {
+			return err
+		}
+
 		err = template_repository.ReopenApprovalTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
+		if err != nil {
+			return err
+		}
+
+		reopenApprovalTaskEvent := templateevents.ContractTemplateReopenApprovalTaskEvent{
+			DID:            coreData.DID,
+			DocumentNumber: coreData.DocumentNumber,
+			Version:        coreData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			OccurredAt:     time.Now(),
+		}
+		err = event.CreateNewEvent(ctx, tx, reopenApprovalTaskEvent)
 		if err != nil {
 			return err
 		}
@@ -155,6 +179,18 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 					return err
 				}
 
+				reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
+					DID:            coreData.DID,
+					DocumentNumber: coreData.DocumentNumber,
+					Version:        coreData.Version,
+					CreatedBy:      cmd.SubmittedBy,
+					OccurredAt:     time.Now(),
+				}
+				err = event.CreateNewEvent(ctx, tx, reopenReviewTaskEvent)
+				if err != nil {
+					return err
+				}
+
 				nextTemplateState = template_state.Rejected
 			}
 		} else {
@@ -168,7 +204,31 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			return err
 		}
 
+		reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
+			DID:            coreData.DID,
+			DocumentNumber: coreData.DocumentNumber,
+			Version:        coreData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			OccurredAt:     time.Now(),
+		}
+		err = event.CreateNewEvent(ctx, tx, reopenReviewTaskEvent)
+		if err != nil {
+			return err
+		}
+
 		err = template_repository.ReopenApprovalTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
+		if err != nil {
+			return err
+		}
+
+		reopenApprovalTaskEvent := templateevents.ContractTemplateReopenApprovalTaskEvent{
+			DID:            coreData.DID,
+			DocumentNumber: coreData.DocumentNumber,
+			Version:        coreData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			OccurredAt:     time.Now(),
+		}
+		err = event.CreateNewEvent(ctx, tx, reopenApprovalTaskEvent)
 		if err != nil {
 			return err
 		}
