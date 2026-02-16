@@ -10,4 +10,5 @@ export interface ContractTemplate {
     name: string
     description?: string
     meta_data?: any
+    clauses?: []
 }

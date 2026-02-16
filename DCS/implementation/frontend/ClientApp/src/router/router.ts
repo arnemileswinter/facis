@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import TableView from '../views/TableView.vue'
-import ContractTemplateView from '../views/contract-template/ContractTemplateView.vue'
+import ContractTemplateView from '../views/contract-template-list/ContractTemplateListView.vue'
 import NewContractTemplateView from '../views/new-contract-template/NewContractTemplateView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 

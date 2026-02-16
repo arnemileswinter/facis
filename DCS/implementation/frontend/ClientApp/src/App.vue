@@ -7,12 +7,5 @@ import NavBar from './components/NavBar.vue'
     <header>
       <NavBar />
     </header>
-    <main class="md:ml-64 min-h-screen">
-      <div class="p-6 lg:p-10">
-        <div class="max-w-7xl mx-auto">
-          <RouterView />
-        </div>
-      </div>
-    </main>
   </div>
 </template>
