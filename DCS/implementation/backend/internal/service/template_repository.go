@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
+	"encoding/json"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -149,18 +150,21 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context) (res int, err
 }
 
 // perform filtered searches.
-func (s *templateRepositorysrvc) Search(ctx context.Context) (res []any, err error) {
-	log.Printf(ctx, "templateRepository.search")
-	return
-}
+func (s *templateRepositorysrvc) Search(ctx context.Context, req *templaterepository.ContractTemplateSearchRequest) (res []*templaterepository.ContractTemplateSearchResponse, err error) {
+	data, err := json.Marshal(req.Filter)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
 
-// load submitted template and history/provenance summary. fetch reviewed
-// template with metadata, review history, and validation results. fetch all
-// template entries for dashboard view.
-func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templaterepository.ContractTemplateRetrieveResponse, err error) {
+	var filterData map[string]interface{}
+	err = json.Unmarshal(data, &filterData)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
 
-	qry := contracttemplate.GetAllContractTemplatesQuery{
+	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
 		RetrievedBy: "",
+		Filter:      filterData,
 	}
 	queryHandler := contracttemplate.GetAllContractTemplateHandler{
 		Ctx: ctx,
@@ -171,19 +175,17 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templater
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	var contractTemplates []*templaterepository.ContractTemplateRetrieveResponse
+	var contractTemplates []*templaterepository.ContractTemplateSearchResponse
 	for _, item := range result {
-		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateRetrieveResponse{
+		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateSearchResponse{
 			Did:            item.DID,
 			DocumentNumber: item.DocumentNumber,
 			Version:        item.Version,
 			State:          item.State.String(),
 			Name:           &item.Name,
 			Description:    &item.Description,
-			CreatedBy:      item.CreatedBy,
 			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:      item.UpdatedAt.Format(time.RFC3339),
-			MetaData:       item.MetaData,
 		})
 	}
 

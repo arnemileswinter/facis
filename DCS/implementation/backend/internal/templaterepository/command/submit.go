@@ -34,7 +34,7 @@ type SubmitContractTemplateHandler struct {
 	DB  *sqlx.DB
 }
 
-func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, data *templaterepository.ContractTemplateCoreData) error {
+func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, data *templaterepository.ContractTemplateMetaData) error {
 
 	err := templaterepository.ReopenReviewTasks(ctx, tx, data.DID, data.DocumentNumber, data.Version)
 	if err != nil {
@@ -84,17 +84,17 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 	}
 	defer tx.Rollback()
 
-	coreData, err := templaterepository.ReadContractTemplateCoreData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := templaterepository.ReadContractTemplateProcessData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return fmt.Errorf("could not read core data: %w", err)
+		return fmt.Errorf("could not process core data: %w", err)
 	}
 
-	if cmd.UpdatedAt.Before(coreData.UpdatedAt) {
+	if cmd.UpdatedAt.Before(processData.UpdatedAt) {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
 	var nextTemplateState templatestate.TemplateState
-	if coreData.State == templatestate.Draft {
+	if processData.State == templatestate.Draft {
 
 		if cmd.Reviewer == nil || len(cmd.Reviewer) == 0 {
 			return errors.New("no reviewer provided")
@@ -107,8 +107,8 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 		for _, reviewer := range cmd.Reviewer {
 			reviewTask := templaterepository.ReviewTaskData{
 				DID:            cmd.DID,
-				DocumentNumber: coreData.DocumentNumber,
-				Version:        coreData.Version,
+				DocumentNumber: processData.DocumentNumber,
+				Version:        processData.Version,
 				Reviewer:       reviewer,
 				State:          reviewtaskstate.Open,
 				CreatedBy:      cmd.SubmittedBy,
@@ -119,9 +119,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			}
 
 			createReviewTaskEvent := templateevents.ContractTemplateCreateReviewTaskEvent{
-				DID:            coreData.DID,
-				DocumentNumber: coreData.DocumentNumber,
-				Version:        coreData.Version,
+				DID:            processData.DID,
+				DocumentNumber: processData.DocumentNumber,
+				Version:        processData.Version,
 				CreatedBy:      cmd.SubmittedBy,
 				Reviewer:       reviewer,
 				OccurredAt:     *createdAt,
@@ -134,9 +134,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 		data := templaterepository.ApprovalTaskData{
 			DID:            cmd.DID,
-			DocumentNumber: coreData.DocumentNumber,
-			Version:        coreData.Version,
-			CreatedBy:      coreData.CreatedBy,
+			DocumentNumber: processData.DocumentNumber,
+			Version:        processData.Version,
+			CreatedBy:      cmd.SubmittedBy,
 			Approver:       *cmd.Approver,
 			State:          aopprovaltaskstate.Open,
 		}
@@ -146,9 +146,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 		}
 
 		createApprovalTaskEvent := templateevents.ContractTemplateCreateApprovalTaskEvent{
-			DID:            coreData.DID,
-			DocumentNumber: coreData.DocumentNumber,
-			Version:        coreData.Version,
+			DID:            processData.DID,
+			DocumentNumber: processData.DocumentNumber,
+			Version:        processData.Version,
 			CreatedBy:      cmd.SubmittedBy,
 			Approver:       *cmd.Approver,
 			OccurredAt:     *createdAt,
@@ -160,26 +160,26 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 		nextTemplateState = templatestate.Submitted
 
-	} else if coreData.State == templatestate.Rejected {
+	} else if processData.State == templatestate.Rejected {
 
-		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, coreData)
+		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, processData)
 		if err != nil {
 			return fmt.Errorf("could not reopen review tasks: %w", err)
 		}
 
 		nextTemplateState = templatestate.Submitted
 
-	} else if coreData.State == templatestate.Submitted {
+	} else if processData.State == templatestate.Submitted {
 
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == actionflag.Approval {
 
-				err := templaterepository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
+				err := templaterepository.UpdateReviewTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
 				if err != nil {
 					return fmt.Errorf("could not update approval task: %w", err)
 				}
 
-				exist, err := templaterepository.ExistReviewTaskInState(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, reviewtaskstate.Open)
+				exist, err := templaterepository.ExistReviewTaskInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open)
 				if err != nil {
 					return fmt.Errorf("could not check if review task exists: %w", err)
 				}
@@ -190,15 +190,15 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 			} else if *cmd.ActionFlag == actionflag.Draft {
 
-				err := templaterepository.ReopenReviewTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
+				err := templaterepository.ReopenReviewTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
 				if err != nil {
 					return fmt.Errorf("could not reopen review tasks: %w", err)
 				}
 
 				reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
-					DID:            coreData.DID,
-					DocumentNumber: coreData.DocumentNumber,
-					Version:        coreData.Version,
+					DID:            processData.DID,
+					DocumentNumber: processData.DocumentNumber,
+					Version:        processData.Version,
 					CreatedBy:      cmd.SubmittedBy,
 					OccurredAt:     time.Now(),
 				}
@@ -213,9 +213,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			return errors.New("action flags is missing")
 		}
 
-	} else if coreData.State == templatestate.Reviewed {
+	} else if processData.State == templatestate.Reviewed {
 
-		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, coreData)
+		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, processData)
 		if err != nil {
 			return fmt.Errorf("could not reopen review tasks: %w", err)
 		}
@@ -226,7 +226,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 		return errors.New("current template contract state is invalid")
 	}
 
-	if len(nextTemplateState) > 0 && coreData.State != nextTemplateState {
+	if len(nextTemplateState) > 0 && processData.State != nextTemplateState {
 		err = templaterepository.UpdateContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, nextTemplateState)
 		if err != nil {
 			return fmt.Errorf("could not update contract template state: %w", err)
@@ -237,7 +237,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			DocumentNumber: cmd.DocumentNumber,
 			Version:        cmd.DocumentNumber,
 			SubmittedBy:    cmd.SubmittedBy,
-			PreviousState:  coreData.State,
+			PreviousState:  processData.State,
 			NewState:       nextTemplateState,
 			ActionFlag:     cmd.ActionFlag,
 			Comments:       cmd.Comments,

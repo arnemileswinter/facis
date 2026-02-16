@@ -69,7 +69,7 @@ func TestSubmit_RetrieveAllContractTemplate(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetAllContractTemplatesQuery{
+	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
 		RetrievedBy: retrievedBy,
 	}
 	queryHandler := contracttemplate.GetAllContractTemplateHandler{

@@ -73,8 +73,16 @@ var ContractTemplateUpdateResponse = Type("ContractTemplateUpdateResponse", func
 	Required("did", "documentNumber", "version")
 })
 
-var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", func() {
-	Description("Result for retrieving a contract template")
+var ContractTemplateSearchRequest = Type("ContractTemplateSearchRequest", func() {
+	Description("Contract template search request")
+
+	Attribute("filter", Any, "Filter values for searching")
+
+	Required("filter")
+})
+
+var ContractTemplateSearchResponse = Type("ContractTemplateSearchResponse", func() {
+	Description("Result for searching a contract templates by filter")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", Int, "The document number of the contract template")
@@ -85,14 +93,11 @@ var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", 
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
 
-	Attribute("created_by", String, "Identifier of who created the contract template")
 	Attribute("created_at", String, "The timestamp when the contract template was created")
 
 	Attribute("updated_at", String, "The timestamp when the contract template was updated")
 
-	Attribute("meta_data", Any, "The metadata of the contract template")
-
-	Required("did", "document_number", "version", "state", "created_by", "created_at", "updated_at", "meta_data")
+	Required("did", "document_number", "version", "state", "created_at", "updated_at")
 })
 
 var ContractTemplateRetrieveByIdRequest = Type("ContractTemplateRetrieveByIdRequest", func() {
@@ -269,29 +274,14 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:tr:components", "Search Capabilities")
 		Meta("dcs:ui", "Template Builder, Template Management Dashboard")
 
-		HTTP(func() {
-			GET("/template/search")
-			Response(StatusOK)
-		})
-
-		Result(ArrayOf(Any))
-	})
-
-	// GET /template/retrieve
-	Method("retrieve", func() {
-		Description("load submitted template and history/provenance summary. fetch reviewed template with metadata, review history, and validation results. fetch all template entries for dashboard view.")
-		Meta("dcs:requirements", "DCS-IR-TR-02", "DCS-IR-TR-03", "DCS-IR-TR-05", "DCS-IR-TR-08")
-		Meta("dcs:roles", "Template Reviewer", "Template Approver", "Template Manager")
-		Meta("dcs:tr:components", "Template Versioning")
-		Meta("dcs:ui", "Template Builder, Template Approver, Template Management Dashboard")
-
-		Result(ArrayOf(ContractTemplateRetrieveResponse))
+		Payload(ContractTemplateSearchRequest)
+		Result(ArrayOfRequired(ContractTemplateSearchResponse))
 
 		Error("bad_request", ErrorResult, "Bad request")
 		Error("internal_error", ErrorResult, "Internal server error")
 
 		HTTP(func() {
-			GET("/template/retrieve")
+			GET("/template/search")
 			Response(StatusOK)
 			Response("bad_request", StatusBadRequest)
 			Response("internal_error", StatusInternalServerError)

@@ -179,10 +179,11 @@ func (e ContractTemplateUpdatedEvent) GetVersion() int {
 // ContractTemplateRetrievedAllEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type ContractTemplateRetrievedAllEvent struct {
-	RetrievedBy    string    `json:"updated_by"`
-	DocumentNumber int       `json:"document_number"`
-	Version        int       `json:"version"`
-	OccurredAt     time.Time `json:"occurred_at"`
+	RetrievedBy    string                 `json:"updated_by"`
+	DocumentNumber int                    `json:"document_number"`
+	Version        int                    `json:"version"`
+	OccurredAt     time.Time              `json:"occurred_at"`
+	Filter         map[string]interface{} `json:"filter"`
 }
 
 // EventType implements the Event interface.

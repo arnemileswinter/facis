@@ -14,18 +14,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplatesQuery struct {
+type GetAllContractTemplatesMetaDataByFilterQuery struct {
 	RetrievedBy string
+	Filter      map[string]interface{}
 }
 
-type GetAllContractTemplatesResult struct {
+type GetAllContractTemplatesMetaDataResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	State          templatestate.TemplateState
 	Name           string
 	Description    string
-	CreatedBy      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	MetaData       datatype.JSON
@@ -36,7 +36,7 @@ type GetAllContractTemplateHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuery) ([]GetAllContractTemplatesResult, error) {
+func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesMetaDataByFilterQuery) ([]GetAllContractTemplatesMetaDataResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -47,13 +47,14 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 	}
 	defer tx.Rollback()
 
-	contractTemplates, err := templaterepository.ReadAllContractTemplateData(ctx, tx)
+	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaDataByFilter(ctx, tx, query.Filter)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
 	evt := templateevents.ContractTemplateRetrievedAllEvent{
 		RetrievedBy: query.RetrievedBy,
+		Filter:      query.Filter,
 		OccurredAt:  time.Now(),
 	}
 	err = event.Create(h.Ctx, tx, evt)
@@ -66,18 +67,17 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesQuer
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllContractTemplatesResult, len(contractTemplates))
+	result := make([]GetAllContractTemplatesMetaDataResult, len(contractTemplates))
 	for i, data := range contractTemplates {
-		result[i] = GetAllContractTemplatesResult{
+		result[i] = GetAllContractTemplatesMetaDataResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
 			State:          data.State,
 			Name:           *data.Name,
 			Description:    *data.Description,
-			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,
-			MetaData:       *data.MetaData,
+			UpdatedAt:      data.UpdatedAt,
 		}
 	}
 

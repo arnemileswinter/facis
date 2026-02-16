@@ -41,7 +41,7 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	}
 	defer tx.Rollback()
 
-	oldData, err := templaterepository.ReadContractTemplateData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	oldData, err := templaterepository.ReadContractTemplateDataById(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
