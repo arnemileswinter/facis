@@ -5,9 +5,9 @@ import (
 	templaterepository "digital-contracting-service/gen/template_repository"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
-	"digital-contracting-service/internal/template_repository/command"
-	"digital-contracting-service/internal/template_repository/datatype/action_flag"
-	"digital-contracting-service/internal/template_repository/query"
+	"digital-contracting-service/internal/templaterepository/command"
+	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
+	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 
 	"github.com/jmoiron/sqlx"
 	"goa.design/clue/log"
@@ -64,9 +64,9 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 // reviewComments. allow resubmission path with approver comments.
 func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templaterepository.ContractTemplateSubmitRequest) (res *templaterepository.ContractTemplateSubmitResponse, err error) {
 
-	var actionFlag *action_flag.ActionFlag
+	var actionFlag *actionflag.ActionFlag
 	if req.ForwardTo != nil {
-		flag, err := action_flag.NewActionFlag(*req.ForwardTo)
+		flag, err := actionflag.NewActionFlag(*req.ForwardTo)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
@@ -136,10 +136,10 @@ func (s *templateRepositorysrvc) Search(ctx context.Context) (res []any, err err
 // template entries for dashboard view.
 func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templaterepository.ContractTemplateRetrieveResponse, err error) {
 
-	qry := query.GetAllContractTemplatesQuery{
+	qry := contracttemplate.GetAllContractTemplatesQuery{
 		RetrievedBy: "",
 	}
-	queryHandler := query.GetAllContractTemplateHandler{
+	queryHandler := contracttemplate.GetAllContractTemplateHandler{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -169,11 +169,11 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context) (res []*templater
 // Retrieve a template by template id.
 func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
 
-	qry := query.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplatesByIdQuery{
 		DID:         req.Did,
 		RetrievedBy: "",
 	}
-	queryHandler := query.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
