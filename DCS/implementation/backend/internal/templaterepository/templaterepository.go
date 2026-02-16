@@ -23,14 +23,14 @@ type ContractTemplateData struct {
 	CreatedBy      string                      `db:"created_by"`
 	CreatedAt      time.Time                   `db:"created_at"`
 	UpdatedAt      time.Time                   `db:"updated_at"`
-	MetaData       *datatype.JSON              `db:"meta_data"`
+	TemplateData   *datatype.JSON              `db:"template_data"`
 }
 
 func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) (*time.Time, error) {
 	query := `
     INSERT INTO contract_templates (
         did, created_by, state, name, 
-        description, meta_data
+        description, template_data
     ) VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING created_at
 `
@@ -42,7 +42,7 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 		data.State,
 		data.Name,
 		data.Description,
-		data.MetaData,
+		data.TemplateData,
 	)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 func ReadContractTemplateDataById(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateData, error) {
 	query := `
         SELECT did, document_number, version, state, name, description,
-               created_by, created_at, updated_at, meta_data
+               created_by, created_at, updated_at, template_data
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
@@ -167,9 +167,9 @@ func createQuery(data ContractTemplateData) (*string, []interface{}, error) {
 		paramIndex++
 	}
 
-	if data.MetaData != nil && data.MetaData.IsNotNullValue() {
-		query += ` meta_data = $` + strconv.Itoa(paramIndex) + `,`
-		params = append(params, data.MetaData)
+	if data.TemplateData != nil && data.TemplateData.IsNotNullValue() {
+		query += ` template_data = $` + strconv.Itoa(paramIndex) + `,`
+		params = append(params, data.TemplateData)
 		paramIndex++
 	}
 

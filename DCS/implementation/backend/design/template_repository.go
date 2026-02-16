@@ -9,7 +9,7 @@ var ContractTemplateCreateRequest = Type("ContractTemplateCreateRequest", func()
 
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
-	Attribute("meta_data", Any, "The metadata of the contract template")
+	Attribute("template_data", Any, "The template data of the contract template")
 })
 
 var ContractTemplateCreateResponse = Type("ContractTemplateCreateResponse", func() {
@@ -58,7 +58,7 @@ var ContractTemplateUpdateRequest = Type("ContractTemplateUpdateRequest", func()
 
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
-	Attribute("meta_data", Any, "The metadata of the contract template")
+	Attribute("template_data", Any, "The template data of the contract template")
 
 	Required("did", "documentNumber", "version", "updated_at")
 })
@@ -127,9 +127,9 @@ var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdRes
 
 	Attribute("updated_at", String, "The timestamp when the contract template was updated")
 
-	Attribute("meta_data", Any, "The metadata of the contract template")
+	Attribute("template_data", Any, "The template data of the contract template")
 
-	Required("did", "document_number", "version", "state", "created_by", "created_at", "updated_at", "meta_data")
+	Required("did", "document_number", "version", "state", "created_by", "created_at", "updated_at", "template_data")
 })
 
 var ContractTemplateApproveRequest = Type("ContractTemplateApproveRequest", func() {
@@ -230,7 +230,7 @@ var _ = Service("TemplateRepository", func() {
 
 	// PUT /template/update
 	Method("update", func() {
-		Description("persist reviewer edits (metadata/clauses/semantics).")
+		Description("persist reviewer edits (template data/clauses/semantics).")
 		Meta("dcs:requirements", "DCS-IR-TR-03")
 		Meta("dcs:roles", "Template Creator", "Template Reviewer")
 		Meta("dcs:tr:components", "Template Versioning")
@@ -252,7 +252,7 @@ var _ = Service("TemplateRepository", func() {
 
 	// POST /template/update
 	Method("update_manage", func() {
-		Description("update metadata or status.")
+		Description("update template data or status.")
 		Meta("dcs:requirements", "DCS-IR-TR-07")
 		Meta("dcs:roles", "Template Manager")
 		Meta("dcs:tr:components", "Template Versioning")

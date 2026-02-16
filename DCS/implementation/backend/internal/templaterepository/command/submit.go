@@ -34,17 +34,17 @@ type SubmitContractTemplateHandler struct {
 	DB  *sqlx.DB
 }
 
-func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, data *templaterepository.ContractTemplateMetaData) error {
+func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, processData *templaterepository.ContractTemplateMetaData) error {
 
-	err := templaterepository.ReopenReviewTasks(ctx, tx, data.DID, data.DocumentNumber, data.Version)
+	err := templaterepository.ReopenReviewTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
 	if err != nil {
 		return fmt.Errorf("could not reopen review tasks: %w", err)
 	}
 
 	reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
-		DID:            data.DID,
-		DocumentNumber: data.DocumentNumber,
-		Version:        data.Version,
+		DID:            processData.DID,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
 		CreatedBy:      submittedBy,
 		OccurredAt:     time.Now(),
 	}
@@ -53,15 +53,15 @@ func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, dat
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = templaterepository.ReopenApprovalTask(ctx, tx, data.DID, data.DocumentNumber, data.Version)
+	err = templaterepository.ReopenApprovalTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
 	if err != nil {
 		return fmt.Errorf("could not reopen approval tasks: %w", err)
 	}
 
 	reopenApprovalTaskEvent := templateevents.ContractTemplateReopenApprovalTaskEvent{
-		DID:            data.DID,
-		DocumentNumber: data.DocumentNumber,
-		Version:        data.Version,
+		DID:            processData.DID,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
 		CreatedBy:      submittedBy,
 		OccurredAt:     time.Now(),
 	}

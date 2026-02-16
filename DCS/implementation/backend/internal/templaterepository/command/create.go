@@ -15,12 +15,12 @@ import (
 )
 
 type CreateTemplateContractCommand struct {
-	DID         string
-	CreatedBy   string
-	UpdatedAt   time.Time
-	Name        *string
-	Description *string
-	MetaData    *datatype.JSON
+	DID          string
+	CreatedBy    string
+	UpdatedAt    time.Time
+	Name         *string
+	Description  *string
+	TemplateData *datatype.JSON
 }
 
 type CreateTemplateContractHandler struct {
@@ -40,12 +40,12 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 	defer tx.Rollback()
 
 	data := templaterepository.ContractTemplateData{
-		DID:         cmd.DID,
-		CreatedBy:   cmd.CreatedBy,
-		State:       templatestate.Draft,
-		Name:        cmd.Name,
-		Description: cmd.Description,
-		MetaData:    cmd.MetaData,
+		DID:          cmd.DID,
+		CreatedBy:    cmd.CreatedBy,
+		State:        templatestate.Draft,
+		Name:         cmd.Name,
+		Description:  cmd.Description,
+		TemplateData: cmd.TemplateData,
 	}
 	createdAt, err := templaterepository.CreateContractTemplate(ctx, tx, data)
 	if err != nil {
@@ -59,7 +59,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 		CreatedBy:      cmd.CreatedBy,
 		Name:           cmd.Name,
 		Description:    cmd.Description,
-		MetaData:       cmd.MetaData,
+		TemplateData:   cmd.TemplateData,
 		OccurredAt:     *createdAt,
 	}
 	err = event.Create(ctx, tx, evt)

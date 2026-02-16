@@ -31,7 +31,7 @@ func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository
 // Create a new template.
 func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.ContractTemplateCreateRequest) (*templaterepository.ContractTemplateCreateResponse, error) {
 
-	jsonMetaData, err := datatype.NewJSON(req.MetaData)
+	jsonMetaData, err := datatype.NewJSON(req.TemplateData)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
@@ -42,11 +42,11 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 	}
 
 	cmd := command.CreateTemplateContractCommand{
-		DID:         *did,
-		CreatedBy:   "",
-		Name:        req.Name,
-		Description: req.Description,
-		MetaData:    &jsonMetaData,
+		DID:          *did,
+		CreatedBy:    "",
+		Name:         req.Name,
+		Description:  req.Description,
+		TemplateData: &jsonMetaData,
 	}
 	createHandler := command.CreateTemplateContractHandler{
 		Ctx: ctx,
@@ -114,7 +114,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	metaData, err := datatype.NewJSON(req.MetaData)
+	metaData, err := datatype.NewJSON(req.TemplateData)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
@@ -125,7 +125,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		UpdatedAt:      updatedAt,
 		Name:           req.Name,
 		Description:    req.Description,
-		MetaData:       &metaData,
+		TemplateData:   &metaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: ctx,
@@ -220,7 +220,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 		CreatedBy:      contractTemplate.CreatedBy,
 		CreatedAt:      contractTemplate.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:      contractTemplate.UpdatedAt.Format(time.RFC3339),
-		MetaData:       contractTemplate.MetaData,
+		TemplateData:   contractTemplate.TemplateData,
 	}, nil
 }
 

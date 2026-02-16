@@ -55,11 +55,11 @@ func createTestContractTemplate(t *testing.T, did *string, state templatestate.T
 	createBy := "Test User"
 
 	cmd := command.CreateTemplateContractCommand{
-		DID:         *did,
-		CreatedBy:   createBy,
-		Name:        &name,
-		Description: &description,
-		MetaData:    &jsonMetaData,
+		DID:          *did,
+		CreatedBy:    createBy,
+		Name:         &name,
+		Description:  &description,
+		TemplateData: &jsonMetaData,
 	}
 	createHandler := command.CreateTemplateContractHandler{
 		Ctx: context.Background(),

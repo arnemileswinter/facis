@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
+func TestSubmit_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -28,12 +28,12 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	createTestContractTemplate(t, did, currentContractState, db)
 
 	ctx := context.Background()
-	metaData := map[string]interface{}{
+	templateData := map[string]interface{}{
 		"test": "update",
 	}
-	jsonMetaData, err := datatype.NewJSON(metaData)
+	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
-		t.Fatalf("Failed to create JSON metadata: %v", err)
+		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
 	name := "Updated Contract Template"
@@ -46,7 +46,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 		Name:           &name,
 		Description:    &description,
-		MetaData:       &jsonMetaData,
+		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: ctx,
@@ -77,10 +77,10 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, name, *contractTemplate.Name)
 	assert.Equal(t, description, *contractTemplate.Description)
-	//assert.Equal(t, jsonMetaData, contractTemplate.MetaData)
+	//assert.Equal(t, jsonTemplateData, contractTemplate.TemplateData)
 }
 
-func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T) {
+func TestSubmit_UpdateContractTemplateDataInDraftSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -94,12 +94,12 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 	currentContractState := templatestate.Submitted
 	createTestContractTemplate(t, did, currentContractState, db)
 
-	metaData := map[string]interface{}{
+	templateData := map[string]interface{}{
 		"test": "update",
 	}
-	jsonMetaData, err := datatype.NewJSON(metaData)
+	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
-		t.Fatalf("Failed to create JSON metadata: %v", err)
+		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
 	name := "Updated Contract Template"
@@ -112,7 +112,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 		UpdatedAt:      time.Now(),
 		Name:           &name,
 		Description:    &description,
-		MetaData:       &jsonMetaData,
+		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: context.Background(),
@@ -123,7 +123,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 	assert.NotNil(t, err)
 }
 
-func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T) {
+func TestSubmit_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -137,12 +137,12 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T)
 	currentContractState := templatestate.Approved
 	createTestContractTemplate(t, did, currentContractState, db)
 
-	metaData := map[string]interface{}{
+	templateData := map[string]interface{}{
 		"test": "update",
 	}
-	jsonMetaData, err := datatype.NewJSON(metaData)
+	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
-		t.Fatalf("Failed to create JSON metadata: %v", err)
+		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
 	name := "Updated Contract Template"
@@ -155,7 +155,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T)
 		UpdatedAt:      time.Now(),
 		Name:           &name,
 		Description:    &description,
-		MetaData:       &jsonMetaData,
+		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: context.Background(),
@@ -181,12 +181,12 @@ func TestSubmit_UpdateContractTemplateAfterUpdate(t *testing.T) {
 	createTestContractTemplate(t, did, currentContractState, db)
 
 	ctx := context.Background()
-	metaData := map[string]interface{}{
+	templateData := map[string]interface{}{
 		"test": "update",
 	}
-	jsonMetaData, err := datatype.NewJSON(metaData)
+	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
-		t.Fatalf("Failed to create JSON metadata: %v", err)
+		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
 	name := "Updated Contract Template"
@@ -199,7 +199,7 @@ func TestSubmit_UpdateContractTemplateAfterUpdate(t *testing.T) {
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
 		Name:           &name,
 		Description:    &description,
-		MetaData:       &jsonMetaData,
+		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: ctx,

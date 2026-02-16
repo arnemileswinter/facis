@@ -22,7 +22,7 @@ type UpdateTemplateContractCommand struct {
 	UpdatedAt      time.Time
 	Name           *string
 	Description    *string
-	MetaData       *datatype.JSON
+	TemplateData   *datatype.JSON
 }
 
 type UpdateTemplateContractHandler struct {
@@ -60,7 +60,7 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 		Version:        cmd.Version,
 		Name:           cmd.Name,
 		Description:    cmd.Description,
-		MetaData:       cmd.MetaData,
+		TemplateData:   cmd.TemplateData,
 	}
 	err = templaterepository.UpdateTemplateContractData(ctx, tx, newData)
 	if err != nil {
@@ -68,16 +68,16 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	}
 
 	evt := templateevents.ContractTemplateUpdatedEvent{
-		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
-		OldName:        oldData.Name,
-		NewName:        cmd.Name,
-		OldDescription: oldData.Description,
-		NewDescription: cmd.Description,
-		OldMetaData:    oldData.MetaData,
-		NewMetaData:    cmd.MetaData,
-		OccurredAt:     time.Now(),
+		DID:             cmd.DID,
+		DocumentNumber:  cmd.DocumentNumber,
+		Version:         cmd.Version,
+		OldName:         oldData.Name,
+		NewName:         cmd.Name,
+		OldDescription:  oldData.Description,
+		NewDescription:  cmd.Description,
+		OldTemplateData: oldData.TemplateData,
+		NewTemplateData: cmd.TemplateData,
+		OccurredAt:      time.Now(),
 	}
 	err = event.Create(ctx, tx, evt)
 	if err != nil {

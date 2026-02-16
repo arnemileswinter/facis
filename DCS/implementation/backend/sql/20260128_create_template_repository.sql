@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS contract_templates (
     name VARCHAR(255) NOT NULL,
     description TEXT,
 
-    meta_data JSONB DEFAULT '{}'::jsonb,
+    template_data JSONB DEFAULT '{}'::jsonb,
 
     CONSTRAINT pk_contract_templates PRIMARY KEY (did, document_number, version),
     CONSTRAINT chk_did_not_empty CHECK (did <> ''),

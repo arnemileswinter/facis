@@ -101,7 +101,7 @@ var _ = Service("ContractWorkflowEngine", func() {
 	})
 
 	Method("search", func() {
-		Description("locate contracts by metadata or state. filter/search across lifecycle states.")
+		Description("locate contracts by template data or state. filter/search across lifecycle states.")
 		Meta("dcs:requirements", "DCS-IR-CWE-07", "DCS-IR-CWE-11")
 		Meta("dcs:roles", "Contract Reviewer", "Sys. Contract Reviewer", "Contract Manager", "Sys. Contract Manager")
 		Meta("dcs:cwe:components", "")

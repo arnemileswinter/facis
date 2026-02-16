@@ -34,11 +34,11 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 	createBy := "Test User"
 
 	cmd := command.CreateTemplateContractCommand{
-		DID:         *did,
-		CreatedBy:   createBy,
-		Name:        &name,
-		Description: &description,
-		MetaData:    &jsonMetaData,
+		DID:          *did,
+		CreatedBy:    createBy,
+		Name:         &name,
+		Description:  &description,
+		TemplateData: &jsonMetaData,
 	}
 	createHandler := command.CreateTemplateContractHandler{
 		Ctx: context.Background(),
@@ -70,5 +70,5 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 	assert.Equal(t, *did, contractTemplate.DID)
 	assert.Equal(t, name, *contractTemplate.Name)
 	assert.Equal(t, description, *contractTemplate.Description)
-	assert.Equal(t, jsonMetaData, *contractTemplate.MetaData)
+	assert.Equal(t, jsonMetaData, *contractTemplate.TemplateData)
 }

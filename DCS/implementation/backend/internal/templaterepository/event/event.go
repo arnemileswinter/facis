@@ -18,7 +18,7 @@ type ContractTemplateCreatedEvent struct {
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Name           *string        `json:"name"`
 	Description    *string        `json:"description"`
-	MetaData       *datatype.JSON `json:"metadata"`
+	TemplateData   *datatype.JSON `json:"templatedata"`
 	OccurredAt     time.Time      `json:"occurred_at"`
 }
 
@@ -143,17 +143,17 @@ func (e ContractTemplateRejectedEvent) GetVersion() int {
 // ContractTemplateUpdatedEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type ContractTemplateUpdatedEvent struct {
-	DID            string         `json:"did"`
-	DocumentNumber int            `json:"document_number"`
-	Version        int            `json:"version"`
-	UpdatedBy      string         `json:"updated_by"`
-	OldName        *string        `json:"old_name,omitempty"`
-	NewName        *string        `json:"new_name,omitempty"`
-	OldDescription *string        `json:"old_description,omitempty"`
-	NewDescription *string        `json:"new_description,omitempty"`
-	OldMetaData    *datatype.JSON `json:"old_meta_data,omitempty"`
-	NewMetaData    *datatype.JSON `json:"new_metadata,omitempty"`
-	OccurredAt     time.Time      `json:"occurred_at"`
+	DID             string         `json:"did"`
+	DocumentNumber  int            `json:"document_number"`
+	Version         int            `json:"version"`
+	UpdatedBy       string         `json:"updated_by"`
+	OldName         *string        `json:"old_name,omitempty"`
+	NewName         *string        `json:"new_name,omitempty"`
+	OldDescription  *string        `json:"old_description,omitempty"`
+	NewDescription  *string        `json:"new_description,omitempty"`
+	OldTemplateData *datatype.JSON `json:"old_template_data,omitempty"`
+	NewTemplateData *datatype.JSON `json:"new_metadata,omitempty"`
+	OccurredAt      time.Time      `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
