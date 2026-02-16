@@ -16,53 +16,67 @@ var ContractTemplateCreateResponse = Type("ContractTemplateCreateResponse", func
 	Description("Result for creating a contract template")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
 
-	Required("did")
+	Required("did", "documentNumber", "version")
 })
 
 var ContractTemplateSubmitRequest = Type("ContractTemplateSubmitRequest", func() {
 	Description("Contract template submit request")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
 	Attribute("forward_to", String, "Action flag: approval | draft")
 	Attribute("comments", ArrayOf(String), "Optional comments")
 
-	Required("did")
+	Required("did", "documentNumber", "version", "updated_at")
 })
 
 var ContractTemplateSubmitResponse = Type("ContractTemplateSubmitResponse", func() {
 	Description("Result for submitting a contract template")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
 
-	Required("did")
+	Required("did", "documentNumber", "version")
 })
 
 var ContractTemplateUpdateRequest = Type("ContractTemplateUpdateRequest", func() {
 	Description("Contract template update request")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
 
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
 	Attribute("meta_data", Any, "The metadata of the contract template")
 
-	Required("did")
+	Required("did", "documentNumber", "version", "updated_at")
 })
 
 var ContractTemplateUpdateResponse = Type("ContractTemplateUpdateResponse", func() {
 	Description("Result for updating a contract template")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
 
-	Required("did")
+	Required("did", "documentNumber", "version")
 })
 
 var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", func() {
 	Description("Result for retrieving a contract template")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
-
 	Attribute("document_number", Int, "The document number of the contract template")
 	Attribute("version", Int, "The version number of the contract template")
 
@@ -74,24 +88,27 @@ var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", 
 	Attribute("created_by", String, "Identifier of who created the contract template")
 	Attribute("created_at", String, "The timestamp when the contract template was created")
 
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
 	Attribute("meta_data", Any, "The metadata of the contract template")
 
-	Required("did", "document_number", "version", "state", "created_by", "created_at", "meta_data")
+	Required("did", "document_number", "version", "state", "created_by", "created_at", "updated_at", "meta_data")
 })
 
 var ContractTemplateRetrieveByIdRequest = Type("ContractTemplateRetrieveByIdRequest", func() {
 	Description("Contract template retrieve by id request")
 
 	Attribute("did", String, "DID of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
 
-	Required("did")
+	Required("did", "documentNumber", "version")
 })
 
 var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdResponse", func() {
 	Description("Result for retrieving a contract template by id")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
-
 	Attribute("document_number", Int, "The document number of the contract template")
 	Attribute("version", Int, "The version number of the contract template")
 
@@ -103,43 +120,59 @@ var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdRes
 	Attribute("created_by", String, "Identifier of who created the contract template")
 	Attribute("created_at", String, "The timestamp when the contract template was created")
 
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
 	Attribute("meta_data", Any, "The metadata of the contract template")
 
-	Required("did", "document_number", "version", "state", "created_by", "created_at", "meta_data")
+	Required("did", "document_number", "version", "state", "created_by", "created_at", "updated_at", "meta_data")
 })
 
 var ContractTemplateApproveRequest = Type("ContractTemplateApproveRequest", func() {
 	Description("Contract template approve request")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
 	Attribute("decision_notes", ArrayOf(String), "A list of decision notes")
 
-	Required("did")
+	Required("did", "documentNumber", "version", "updated_at")
 })
 
 var ContractTemplateApproveResponse = Type("ContractTemplateApproveResponse", func() {
 	Description("Result for retrieving a contract template by id")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
 
-	Required("did")
+	Required("did", "documentNumber", "version")
 })
 
 var ContractTemplateRejectRequest = Type("ContractTemplateRejectRequest", func() {
 	Description("Contract template retrieve by id request")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
 	Attribute("reason", String, "Reason for rejecting the contract template")
 
-	Required("did", "reason")
+	Required("did", "documentNumber", "version", "updated_at", "reason")
 })
 
 var ContractTemplateRejectResponse = Type("ContractTemplateRejectResponse", func() {
 	Description("Result for retrieving a contract template by id")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
 
-	Required("did")
+	Required("did", "documentNumber", "version")
 })
 
 // Template Repository Service  (/template/...)

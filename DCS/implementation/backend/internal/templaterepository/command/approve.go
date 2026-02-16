@@ -18,6 +18,7 @@ type ApproveTemplateContractCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
+	UpdatedAt      time.Time
 	ApprovedBy     string
 	DecisionNotes  []string
 }
@@ -38,12 +39,16 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 	}
 	defer tx.Rollback()
 
-	currentTemplateState, err := templaterepository.ReadContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	coreData, err := templaterepository.ReadContractTemplateCoreData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return fmt.Errorf("could not read current template state: %w", err)
+		return fmt.Errorf("could not read core data: %w", err)
 	}
 
-	if *currentTemplateState != templatestate.Reviewed {
+	if cmd.UpdatedAt.Before(coreData.UpdatedAt) {
+		return errors.New("contract template was updated elsewhere, please reload")
+	}
+
+	if coreData.State != templatestate.Reviewed {
 		return errors.New("invalid contract template state")
 	}
 

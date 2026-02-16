@@ -15,6 +15,7 @@ type ContractTemplateCreatedEvent struct {
 	DocumentNumber int            `json:"document_number"`
 	Version        int            `json:"version"`
 	CreatedBy      string         `json:"created_by"`
+	UpdatedAt      time.Time      `json:"updated_at"`
 	Name           *string        `json:"name"`
 	Description    *string        `json:"description"`
 	MetaData       *datatype.JSON `json:"metadata"`
@@ -80,6 +81,7 @@ func (e ContractTemplateSubmittedEvent) GetVersion() int {
 type ContractTemplateApprovedEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
+	UpdatedAt      time.Time `json:"updated_at"`
 	Version        int       `json:"version"`
 	ApprovedBy     string    `json:"approved_by"`
 	DecisionNotes  []string  `json:"decision_notes,omitempty"`
@@ -112,6 +114,7 @@ type ContractTemplateRejectedEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
 	Version        int       `json:"version"`
+	UpdatedAt      time.Time `json:"updated_at"`
 	RejectedBy     string    `json:"rejected_by"`
 	Reason         string    `json:"reason"`
 	OccurredAt     time.Time `json:"occurred_at"`

@@ -19,6 +19,7 @@ type UpdateTemplateContractCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
+	UpdatedAt      time.Time
 	Name           *string
 	Description    *string
 	MetaData       *datatype.JSON
@@ -43,6 +44,10 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	oldData, err := templaterepository.ReadContractTemplateData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
+	}
+
+	if cmd.UpdatedAt.Before(oldData.UpdatedAt) {
+		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
 	if oldData.State != templatestate.Draft {

@@ -21,6 +21,7 @@ type SubmitContractTemplateCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
+	UpdatedAt      time.Time
 	SubmittedBy    string
 	ActionFlag     *actionflag.ActionFlag
 	Comments       []string
@@ -86,6 +87,10 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 	coreData, err := templaterepository.ReadContractTemplateCoreData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read core data: %w", err)
+	}
+
+	if cmd.UpdatedAt.Before(coreData.UpdatedAt) {
+		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
 	var nextTemplateState templatestate.TemplateState

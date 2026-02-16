@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -42,6 +43,7 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftState(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		Name:           &name,
 		Description:    &description,
 		MetaData:       &jsonMetaData,
@@ -104,10 +106,13 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftSubmittedState(t *testing.T
 	description := "Updated Description"
 
 	cmd := command.UpdateTemplateContractCommand{
-		DID:         *did,
-		Name:        &name,
-		Description: &description,
-		MetaData:    &jsonMetaData,
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		Name:           &name,
+		Description:    &description,
+		MetaData:       &jsonMetaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: context.Background(),
@@ -144,13 +149,60 @@ func TestSubmit_UpdateContractTemplateMetaDataInDraftApprovedState(t *testing.T)
 	description := "Updated Description"
 
 	cmd := command.UpdateTemplateContractCommand{
-		DID:         *did,
-		Name:        &name,
-		Description: &description,
-		MetaData:    &jsonMetaData,
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		Name:           &name,
+		Description:    &description,
+		MetaData:       &jsonMetaData,
 	}
 	handler := command.UpdateTemplateContractHandler{
 		Ctx: context.Background(),
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestSubmit_UpdateContractTemplateAfterUpdate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	currentContractState := templatestate.Draft
+	createTestContractTemplate(t, did, currentContractState, db)
+
+	ctx := context.Background()
+	metaData := map[string]interface{}{
+		"test": "update",
+	}
+	jsonMetaData, err := datatype.NewJSON(metaData)
+	if err != nil {
+		t.Fatalf("Failed to create JSON metadata: %v", err)
+	}
+
+	name := "Updated Contract Template"
+	description := "Updated Description"
+
+	cmd := command.UpdateTemplateContractCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now().Add(-5 * time.Second),
+		Name:           &name,
+		Description:    &description,
+		MetaData:       &jsonMetaData,
+	}
+	handler := command.UpdateTemplateContractHandler{
+		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)

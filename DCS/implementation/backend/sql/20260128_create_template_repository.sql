@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS contract_templates (
     created_by VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     state template_state NOT NULL,
 
     name VARCHAR(255) NOT NULL,
@@ -20,6 +22,20 @@ CREATE TABLE IF NOT EXISTS contract_templates (
     CONSTRAINT chk_document_number_positive CHECK (document_number > 0),
     CONSTRAINT chk_version_positive CHECK (version > 0)
 );
+
+-- Trigger for updating updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+    RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER contract_templates_update_updated_at
+    BEFORE UPDATE ON contract_templates
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
 
 ------------------------------------------------------------------------------------------------------------------------
 

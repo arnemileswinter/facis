@@ -13,6 +13,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
@@ -38,6 +39,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       nil,
@@ -171,6 +173,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -251,6 +254,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
+			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
@@ -332,6 +336,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[1],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -385,6 +390,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       []string{},
@@ -427,6 +433,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       nil,
@@ -514,6 +521,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -589,6 +597,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[1],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -636,6 +645,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       nil,
@@ -680,6 +690,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
+			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
@@ -720,6 +731,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
 		ActionFlag:     nil,
 		Comments:       []string{"Test Comment"},
@@ -763,6 +775,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
+			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
@@ -803,6 +816,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
 		ActionFlag:     nil,
 		Comments:       []string{"Test Comment"},
@@ -866,6 +880,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       nil,
@@ -953,6 +968,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -1028,6 +1044,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[1],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -1075,6 +1092,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       nil,
@@ -1119,6 +1137,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
+			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
@@ -1159,6 +1178,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
 		ActionFlag:     nil,
 		Comments:       []string{"Test Comment"},
@@ -1202,6 +1222,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
+			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
@@ -1242,6 +1263,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		ApprovedBy:     approver,
 		DecisionNotes:  []string{"Test"},
 	}
@@ -1303,6 +1325,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       nil,
@@ -1390,6 +1413,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -1465,6 +1489,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[1],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
@@ -1512,6 +1537,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
 		ActionFlag:     nil,
 		Comments:       nil,
@@ -1556,6 +1582,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
+			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
@@ -1596,6 +1623,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
 		ActionFlag:     nil,
 		Comments:       []string{"Test Comment"},
@@ -1639,6 +1667,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
+			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
@@ -1679,6 +1708,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		UpdatedAt:      time.Now(),
 		RejectedBy:     approver,
 		Reason:         "Test",
 	}
@@ -1709,4 +1739,44 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)
+}
+
+func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	createTestContractTemplate(t, did, templatestate.Draft, db)
+
+	ctx := context.Background()
+	submittedBy := "Test User"
+	approver := "Test User 5"
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now().Add(-5 * time.Minute),
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		Comments:       nil,
+		Reviewer: []string{
+			"Test User 2",
+			"Test User 3",
+			"Test User 4",
+		},
+		Approver: &approver,
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
 }

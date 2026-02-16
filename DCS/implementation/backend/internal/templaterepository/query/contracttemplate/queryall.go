@@ -27,6 +27,7 @@ type GetAllContractTemplatesResult struct {
 	Description    string
 	CreatedBy      string
 	CreatedAt      time.Time
+	UpdatedAt      time.Time
 	MetaData       datatype.JSON
 }
 

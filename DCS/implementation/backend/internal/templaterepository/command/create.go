@@ -9,6 +9,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -16,6 +17,7 @@ import (
 type CreateTemplateContractCommand struct {
 	DID         string
 	CreatedBy   string
+	UpdatedAt   time.Time
 	Name        *string
 	Description *string
 	MetaData    *datatype.JSON

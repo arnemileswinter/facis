@@ -30,6 +30,7 @@ type GetContractTemplatesByIdResult struct {
 	Description    *string
 	CreatedBy      string
 	CreatedAt      time.Time
+	UpdatedAt      time.Time
 	MetaData       *datatype.JSON
 }
 
@@ -80,6 +81,7 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplatesByIdQu
 		Description:    data.Description,
 		CreatedBy:      data.CreatedBy,
 		CreatedAt:      data.CreatedAt,
+		UpdatedAt:      data.UpdatedAt,
 		MetaData:       data.MetaData,
 	}, nil
 }
