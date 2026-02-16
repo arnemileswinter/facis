@@ -25,7 +25,7 @@ type Event interface {
 	GetVersion() int
 }
 
-// CreateNewEvent persists an event to the outbox table.
+// Create persists an event to the outbox table.
 // This function is called by command handlers to store events durably
 // before they are published to NATS.
 //
@@ -40,10 +40,10 @@ type Event interface {
 //	    CreatedBy:  "user@example.com",
 //	    OccurredAt: time.Now(),
 //	}
-//	if err := event.CreateNewEvent(ctx, tx, evt); err != nil {
+//	if err := event.Create(ctx, tx, evt); err != nil {
 //	    return err
 //	}
-func CreateNewEvent(ctx context.Context, tx *sqlx.Tx, evt Event) error {
+func Create(ctx context.Context, tx *sqlx.Tx, evt Event) error {
 	if evt == nil {
 		return errors.New("event cannot be nil")
 	}
@@ -108,7 +108,7 @@ func CreateNewEvents(ctx context.Context, tx *sqlx.Tx, events ...Event) error {
 	}
 
 	for _, evt := range events {
-		if err := CreateNewEvent(ctx, tx, evt); err != nil {
+		if err := Create(ctx, tx, evt); err != nil {
 			return err
 		}
 	}

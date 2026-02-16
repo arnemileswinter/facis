@@ -2,6 +2,6 @@ package base
 
 import "time"
 
-func GetTransactionTimeout() time.Duration {
+func TransactionTimeout() time.Duration {
 	return 5 * time.Minute
 }

@@ -146,7 +146,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		"Test User 3",
 	}
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.GetTransactionTimeout())
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
 	defer cancel()
 	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
 	if err != nil {
@@ -226,7 +226,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		"Test User 3",
 	}
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.GetTransactionTimeout())
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
 	defer cancel()
 	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
 	if err != nil {
@@ -308,7 +308,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		"Test User 3",
 	}
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.GetTransactionTimeout())
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
 	defer cancel()
 	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -28,18 +29,18 @@ type ApproveTemplateContractHandler struct {
 
 func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractCommand) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not start transaction: %w", err)
 	}
 	defer tx.Rollback()
 
 	currentTemplateState, err := templaterepository.ReadContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not read current template state: %w", err)
 	}
 
 	if *currentTemplateState != templatestate.Reviewed {
@@ -48,7 +49,7 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 
 	err = templaterepository.UpdateContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Approved)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not update current template state: %w", err)
 	}
 
 	evt := templateevents.ContractTemplateApprovedEvent{
@@ -59,14 +60,14 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 		DecisionNotes:  cmd.DecisionNotes,
 		OccurredAt:     time.Now(),
 	}
-	err = event.CreateNewEvent(ctx, tx, evt)
+	err = event.Create(ctx, tx, evt)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create event: %w", err)
 	}
 
 	err = templaterepository.DeleteReviewTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not delete review task: %w", err)
 	}
 
 	deleteReviewTaskEvt := templateevents.ContractTemplateDeleteReviewTaskEvent{
@@ -76,14 +77,14 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 		DeletedBy:      cmd.ApprovedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.CreateNewEvent(ctx, tx, deleteReviewTaskEvt)
+	err = event.Create(ctx, tx, deleteReviewTaskEvt)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create event: %w", err)
 	}
 
 	err = templaterepository.DeleteApprovalTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not delete approval task: %w", err)
 	}
 
 	deleteApprovalTaskEvt := templateevents.ContractTemplateDeleteApprovalTaskEvent{
@@ -93,9 +94,9 @@ func (h *ApproveTemplateContractHandler) Handle(cmd ApproveTemplateContractComma
 		DeletedBy:      cmd.ApprovedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.CreateNewEvent(ctx, tx, deleteApprovalTaskEvt)
+	err = event.Create(ctx, tx, deleteApprovalTaskEvt)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create event: %w", err)
 	}
 
 	return tx.Commit()

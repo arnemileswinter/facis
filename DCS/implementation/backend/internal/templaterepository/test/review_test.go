@@ -27,7 +27,7 @@ func TestSubmit_CreateReviewTasks(t *testing.T) {
 	ctx := context.Background()
 	submittedBy := "Test User"
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.GetTransactionTimeout())
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
 	defer cancel()
 
 	assignees := []string{
@@ -86,7 +86,7 @@ func TestSubmit_CreateReviewTasksAndApproveThem(t *testing.T) {
 	ctx := context.Background()
 	submittedBy := "Test User"
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.GetTransactionTimeout())
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
 	defer cancel()
 
 	assignees := []string{

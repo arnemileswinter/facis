@@ -11,6 +11,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -33,9 +34,10 @@ type SubmitContractTemplateHandler struct {
 }
 
 func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, data *templaterepository.ContractTemplateCoreData) error {
+
 	err := templaterepository.ReopenReviewTasks(ctx, tx, data.DID, data.DocumentNumber, data.Version)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not reopen review tasks: %w", err)
 	}
 
 	reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
@@ -45,14 +47,14 @@ func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, dat
 		CreatedBy:      submittedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.CreateNewEvent(ctx, tx, reopenReviewTaskEvent)
+	err = event.Create(ctx, tx, reopenReviewTaskEvent)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create event: %w", err)
 	}
 
 	err = templaterepository.ReopenApprovalTask(ctx, tx, data.DID, data.DocumentNumber, data.Version)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not reopen approval tasks: %w", err)
 	}
 
 	reopenApprovalTaskEvent := templateevents.ContractTemplateReopenApprovalTaskEvent{
@@ -62,9 +64,9 @@ func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, dat
 		CreatedBy:      submittedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.CreateNewEvent(ctx, tx, reopenApprovalTaskEvent)
+	err = event.Create(ctx, tx, reopenApprovalTaskEvent)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create event: %w", err)
 	}
 
 	return nil
@@ -72,18 +74,18 @@ func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, dat
 
 func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not start transaction: %w", err)
 	}
 	defer tx.Rollback()
 
 	coreData, err := templaterepository.ReadContractTemplateCoreData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not read core data: %w", err)
 	}
 
 	var nextTemplateState templatestate.TemplateState
@@ -108,7 +110,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			}
 			createdAt, err := templaterepository.CreateReviewTasks(ctx, tx, reviewTask)
 			if err != nil {
-				return err
+				return fmt.Errorf("could not create review tasks: %w", err)
 			}
 
 			createReviewTaskEvent := templateevents.ContractTemplateCreateReviewTaskEvent{
@@ -119,9 +121,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 				Reviewer:       reviewer,
 				OccurredAt:     *createdAt,
 			}
-			err = event.CreateNewEvent(ctx, tx, createReviewTaskEvent)
+			err = event.Create(ctx, tx, createReviewTaskEvent)
 			if err != nil {
-				return err
+				return fmt.Errorf("could not create event: %w", err)
 			}
 		}
 
@@ -135,7 +137,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 		}
 		createdAt, err := templaterepository.CreateApprovalTask(ctx, tx, data)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not create approval task: %w", err)
 		}
 
 		createApprovalTaskEvent := templateevents.ContractTemplateCreateApprovalTaskEvent{
@@ -146,9 +148,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			Approver:       *cmd.Approver,
 			OccurredAt:     *createdAt,
 		}
-		err = event.CreateNewEvent(ctx, tx, createApprovalTaskEvent)
+		err = event.Create(ctx, tx, createApprovalTaskEvent)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not create event: %w", err)
 		}
 
 		nextTemplateState = templatestate.Submitted
@@ -157,7 +159,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, coreData)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not reopen review tasks: %w", err)
 		}
 
 		nextTemplateState = templatestate.Submitted
@@ -169,12 +171,12 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 				err := templaterepository.UpdateReviewTask(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
 				if err != nil {
-					return err
+					return fmt.Errorf("could not update approval task: %w", err)
 				}
 
 				exist, err := templaterepository.ExistReviewTaskInState(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version, reviewtaskstate.Open)
 				if err != nil {
-					return err
+					return fmt.Errorf("could not check if review task exists: %w", err)
 				}
 
 				if !exist {
@@ -185,7 +187,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 				err := templaterepository.ReopenReviewTasks(ctx, tx, coreData.DID, coreData.DocumentNumber, coreData.Version)
 				if err != nil {
-					return err
+					return fmt.Errorf("could not reopen review tasks: %w", err)
 				}
 
 				reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
@@ -195,9 +197,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 					CreatedBy:      cmd.SubmittedBy,
 					OccurredAt:     time.Now(),
 				}
-				err = event.CreateNewEvent(ctx, tx, reopenReviewTaskEvent)
+				err = event.Create(ctx, tx, reopenReviewTaskEvent)
 				if err != nil {
-					return err
+					return fmt.Errorf("could not create event: %w", err)
 				}
 
 				nextTemplateState = templatestate.Rejected
@@ -210,7 +212,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, coreData)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not reopen review tasks: %w", err)
 		}
 
 		nextTemplateState = templatestate.Submitted
@@ -222,7 +224,7 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 	if len(nextTemplateState) > 0 && coreData.State != nextTemplateState {
 		err = templaterepository.UpdateContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, nextTemplateState)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not update contract template state: %w", err)
 		}
 
 		evt := templateevents.ContractTemplateSubmittedEvent{
@@ -236,9 +238,9 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 			Comments:       cmd.Comments,
 			OccurredAt:     time.Now(),
 		}
-		err = event.CreateNewEvent(ctx, tx, evt)
+		err = event.Create(ctx, tx, evt)
 		if err != nil {
-			return err
+			return fmt.Errorf("could not create event: %w", err)
 		}
 	}
 

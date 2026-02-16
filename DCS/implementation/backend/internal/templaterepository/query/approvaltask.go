@@ -7,6 +7,7 @@ import (
 	"digital-contracting-service/internal/templaterepository"
 	aopprovaltaskstate "digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -38,18 +39,18 @@ type GetAllContractTemplateApprovalTasksForDIDHandler struct {
 
 func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllContractTemplateApprovalTasksForDID) ([]GetAllContractTemplateApprovalTasksForDIDResult, error) {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not start transaction: %w", err)
 	}
 	defer tx.Rollback()
 
 	reviewTasks, err := templaterepository.ReadAllApprovalTasks(ctx, tx, query.DID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}
 
 	evt := templateevents.ContractTemplateRetrieveAllReviewTasksEvent{
@@ -59,14 +60,14 @@ func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllCo
 		RetrievedBy:    query.RetrievedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.CreateNewEvent(h.Ctx, tx, evt)
+	err = event.Create(h.Ctx, tx, evt)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not create event: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
 	result := make([]GetAllContractTemplateApprovalTasksForDIDResult, len(reviewTasks))

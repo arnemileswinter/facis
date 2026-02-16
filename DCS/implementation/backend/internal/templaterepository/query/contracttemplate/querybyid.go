@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -39,18 +40,18 @@ type GetContractTemplateByIdHandler struct {
 
 func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplatesByIdQuery) (*GetContractTemplatesByIdResult, error) {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.GetTransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not start transaction: %w", err)
 	}
 	defer tx.Rollback()
 
 	data, err := templaterepository.ReadContractTemplateData(ctx, tx, query.DID, query.DocumentNumber, query.Version)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
 
 	evt := templateevents.ContractTemplateRetrievedByIdEvent{
@@ -60,14 +61,14 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplatesByIdQu
 		RetrievedBy:    query.RetrievedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.CreateNewEvent(h.Ctx, tx, evt)
+	err = event.Create(h.Ctx, tx, evt)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not create event: %w", err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
 	return &GetContractTemplatesByIdResult{
