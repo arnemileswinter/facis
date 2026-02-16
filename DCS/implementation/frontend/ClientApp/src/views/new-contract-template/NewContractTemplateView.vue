@@ -12,13 +12,13 @@
                 Details
             </a>
 
-            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'clauses' }" @click="activeTab = 'clauses'">
-                Clauses
-            </a>
-
             <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'semantic' }"
                 @click="activeTab = 'semantic'">
                 Semantic Rules
+            </a>
+
+            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'clauses' }" @click="activeTab = 'clauses'">
+                Clauses
             </a>
 
             <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'builder' }" @click="activeTab = 'builder'">
@@ -57,57 +57,12 @@
                 </div>
             </div>
 
-            <!-- CLAUSES TAB -->
-            <div v-show="activeTab === 'clauses'">
-                <div class="border border-base-300 bg-base-100 shadow-sm rounded-box p-6 space-y-6">
-                    <div class="flex items-center gap-2 font-bold text-lg">
-                        <span class="text-primary">02</span> Clauses
-                    </div>
-
-                    <div class="flex flex-col gap-3 p-4 bg-base-200/50 rounded-xl border border-dashed border-base-300">
-                        <input v-model="newClause.title" class="input input-sm input-bordered w-full font-bold"
-                            placeholder="Clause Title " />
-                        <textarea v-model="newClause.content" class="textarea textarea-sm textarea-bordered w-full"
-                            placeholder="Legal text content "></textarea>
-                        <button @click="addClause" type="button" class="btn btn-primary btn-sm self-end px-8"
-                            :disabled="!newClause.title || !newClause.content">
-                            Add Clause
-                        </button>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div v-for="(clause, index) in form.clauses" :key="index"
-                            class="flex flex-col p-4 border border-base-300 rounded-xl bg-base-50 relative group transition-all hover:border-primary/50">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-black text-sm uppercase tracking-tight text-primary">
-                                        {{ clause.title }}
-                                    </h4>
-                                    <p class="text-xs opacity-80 mt-2 leading-relaxed whitespace-pre-wrap">
-                                        {{ clause.content }}
-                                    </p>
-                                </div>
-                                <button @click="removeClause(index)"
-                                    class="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100 transition-opacity">
-                                    ✕
-                                </button>
-                            </div>
-                        </div>
-
-                        <div v-if="!form.clauses?.length"
-                            class="text-center py-8 border-2 border-dashed border-base-200 rounded-xl text-xs opacity-40 italic">
-                            No clauses defined yet.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- SEMANTIC RULES TAB -->
             <div v-show="activeTab === 'semantic'">
                 <div
                     class="border border-secondary/30 bg-base-100 shadow-sm rounded-box p-6 space-y-6 overflow-visible">
                     <div class="flex items-center gap-2 font-bold text-lg">
-                        <span class="text-secondary">03</span> Semantic Rules
+                        <span class="text-secondary">02</span> Semantic Rules
                     </div>
 
                     <div v-if="suggestions.length">
@@ -115,9 +70,9 @@
                             Suggested by Semantic Hub
                         </label>
                         <div class="flex flex-wrap gap-2">
-                            <button v-for="sug in suggestions" :key="sug.attr" @click="addRuleFromSuggestion(sug)"
+                            <button v-for="sug in suggestions" :key="sug.label" @click="addRuleFromSuggestion(sug)"
                                 class="btn btn-outline btn-secondary btn-xs normal-case hover:bg-secondary hover:text-white transition-all">
-                                + {{ sug.attr }}
+                                + {{ sug.label }}
                             </button>
                         </div>
                     </div>
@@ -126,22 +81,13 @@
                         class="grid grid-cols-1 md:grid-cols-12 gap-2 p-4 bg-secondary/5 rounded-xl border border-secondary/20 items-end">
                         <div class="md:col-span-4">
                             <label class="label-text text-[10px] uppercase font-bold ml-1 opacity-60">Label</label>
-                            <input v-model="newRule.attr" type="text"
+                            <input v-model="newRule.label" type="text"
                                 class="input input-bordered input-sm w-full mt-1" />
                         </div>
 
                         <div class="md:col-span-3">
                             <label class="label-text text-[10px] uppercase font-bold ml-1 opacity-60">Type</label>
-                            <select v-model="newRule.op" class="select select-bordered select-sm w-full mt-1">
-                                <option value="MIN">Date</option>
-                                <option value="MAX">Text</option>
-                                <option value="EQUALS">Decimal</option>
-                            </select>
-                        </div>
-
-                        <!-- Das sah in deinem Code doppelt aus; ich hab’s gelassen, weil es evtl. absichtlich ist -->
-                        <div class="md:col-span-3">
-                            <select v-model="newRule.op" class="select select-bordered select-sm w-full mt-1">
+                            <select v-model="newRule.type" class="select select-bordered select-sm w-full mt-1">
                                 <option value="MIN">Date</option>
                                 <option value="MAX">Text</option>
                                 <option value="EQUALS">Decimal</option>
@@ -149,15 +95,15 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <select v-model="form.semantic_rules" class="select select-bordered select-sm w-full mt-1">
-                                <option value="MIN">required</option>
-                                <option value="MAX">optional</option>
+                            <select  class="select select-bordered select-sm w-full mt-1">
+                                <option value="true">required</option>
+                                <option value="false">optional</option>
                             </select>
                         </div>
 
                         <div class="md:col-span-2">
                             <button @click="addNewCustomRule" class="btn btn-secondary btn-sm w-full mt-1"
-                                :disabled="!newRule.attr">
+                                :disabled="!newRule.label">
                                 Add
                             </button>
                         </div>
@@ -175,15 +121,60 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm font-black font-mono uppercase">{{ rule.attr }}</span>
-                                    <span class="badge badge-ghost badge-xs">{{ rule.op }}</span>
+                                    <span class="text-sm font-black font-mono uppercase">{{ rule.label }}</span>
+                                    <span class="badge badge-ghost badge-xs">{{ rule.type }}</span>
                                 </div>
-                                <p class="text-[10px] font-bold opacity-50">Target: {{ rule.val }}</p>
+                                <p class="text-[10px] font-bold opacity-50">required: {{ rule.required }}</p>
                             </div>
                             <button @click="removeRule(index)"
                                 class="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100 transition-opacity">
                                 ✕
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLAUSES TAB -->
+            <div v-show="activeTab === 'clauses'">
+                <div class="border border-base-300 bg-base-100 shadow-sm rounded-box p-6 space-y-6">
+                    <div class="flex items-center gap-2 font-bold text-lg">
+                        <span class="text-primary">03</span> Clauses
+                    </div>
+
+                    <div class="flex flex-col gap-3 p-4 bg-base-200/50 rounded-xl border border-dashed border-base-300">
+                        <input v-model="newClause.title" class="input input-sm input-bordered w-full font-bold"
+                            placeholder="Clause Title " />
+                        <textarea v-model="newClause.description" class="textarea textarea-sm textarea-bordered w-full"
+                            placeholder="Legal text content "></textarea>
+                        <button @click="addClause" type="button" class="btn btn-primary btn-sm self-end px-8"
+                            :disabled="!newClause.title || !newClause.description">
+                            Add Clause
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div v-for="(clause, index) in form.clauses" :key="index"
+                            class="flex flex-col p-4 border border-base-300 rounded-xl bg-base-50 relative group transition-all hover:border-primary/50">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-black text-sm uppercase tracking-tight text-primary">
+                                        {{ clause.title }}
+                                    </h4>
+                                    <p class="text-xs opacity-80 mt-2 leading-relaxed whitespace-pre-wrap">
+                                        {{ clause.description }}
+                                    </p>
+                                </div>
+                                <button @click="removeClause(index)"
+                                    class="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100 transition-opacity">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+
+                        <div v-if="!form.clauses?.length"
+                            class="text-center py-8 border-2 border-dashed border-base-200 rounded-xl text-xs opacity-40 italic">
+                            No clauses defined yet.
                         </div>
                     </div>
                 </div>
