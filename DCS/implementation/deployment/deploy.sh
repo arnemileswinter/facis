@@ -1,68 +1,75 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#----------------------------------------
-# Functions
-#----------------------------------------
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
 usage() {
-  echo "Usage: $0 <kubeconfig> <private_key_path> <crt_path> <domain> <path> <realm> <oidc_client_id>"
+  echo "Usage: $0 <kubeconfig> <private_key_path> <crt_path> <domain> <path> <oidc_issuer_url> <oidc_client_id>"
+  echo "Example: $0 ~/.kube/config ./certs/dev.key ./certs/dev.crt xfsc.local dcs https://keycloak.xfsc.local/realms/dcs digital-contracting-service"
   exit 1
 }
 
-#----------------------------------------
 # Input validation
-#----------------------------------------
 [ "$#" -ne 7 ] && usage
 export KUBECONFIG="$1"
 KEY_FILE="$2"
 CRT_FILE="$3"
 DOMAIN="$4"
 URL_PATH="$5"
-REALM="$6"
+OIDC_ISSUER_URL="$6"
 OIDC_CLIENT_ID="$7"
 
-#----------------------------------------
-# Image Registry (from environment)
-#----------------------------------------
+# Image Registry Configuration
 DOCKER_REGISTRY="${DOCKER_REGISTRY:-}"
 DOCKER_REPO="${DOCKER_REPO:-}"
+DOCKER_TAG="${DOCKER_TAG:-latest}"
 
 IMAGE_NAME="digital-contracting-service"
 if [[ -n "$DOCKER_REGISTRY" && -n "$DOCKER_REPO" ]]; then
   IMAGE_NAME="$DOCKER_REGISTRY/$DOCKER_REPO/digital-contracting-service"
 fi
-log "ℹ️ Image name: $IMAGE_NAME"
+log "ℹ️ Image: $IMAGE_NAME:$DOCKER_TAG"
 
 #----------------------------------------
-# OIDC Configuration
+# Custom CA Configuration
 #----------------------------------------
-# Use in-cluster Keycloak URL for the backend (if OIDC_ISSUER_URL not set)
-# This allows the backend to reach Keycloak from inside the cluster
-if [[ -z "${OIDC_ISSUER_URL:-}" ]]; then
-  # Default to in-cluster service URL
-  OIDC_ISSUER_URL="http://keycloak.default.svc.cluster.local:8080/auth/realms/${REALM}"
-  log "ℹ️ Using in-cluster OIDC issuer URL (override with OIDC_ISSUER_URL env var)"
+CUSTOM_CA_ENABLED="${CUSTOM_CA_ENABLED:-false}"
+CUSTOM_CA_CONFIGMAP="${CUSTOM_CA_CONFIGMAP:-dev-ca-cert}"
+CUSTOM_CA_CERT_FILE="${CUSTOM_CA_CERT_FILE:-}"
+
+# Host Aliases Configuration for local Keycloak access
+# Extract hostname from OIDC_ISSUER_URL if it uses HTTPS
+KEYCLOAK_HOSTNAME=""
+if [[ "${OIDC_ISSUER_URL:-}" =~ ^https://([^/]+) ]]; then
+  KEYCLOAK_HOSTNAME="${BASH_REMATCH[1]}"
+  log "ℹ️ Detected HTTPS OIDC issuer, will configure host alias for: $KEYCLOAK_HOSTNAME"
+  
+  # Get Traefik ClusterIP for in-cluster resolution
+  TRAEFIK_CLUSTER_IP=$(kubectl get svc -n kube-system traefik -o jsonpath='{.spec.clusterIP}' --kubeconfig "$KUBECONFIG" 2>/dev/null || echo "")
+  if [[ -n "$TRAEFIK_CLUSTER_IP" ]]; then
+    log "ℹ️ Traefik ClusterIP: $TRAEFIK_CLUSTER_IP"
+    HOST_ALIAS_ENABLED="true"
+  else
+    log "⚠️ Could not detect Traefik ClusterIP, skipping host alias configuration"
+    HOST_ALIAS_ENABLED="false"
+  fi
+else
+  HOST_ALIAS_ENABLED="false"
 fi
 
 log "ℹ️ OIDC Configuration:"
 log "  - Issuer URL (for backend): $OIDC_ISSUER_URL"
 log "  - Client ID: $OIDC_CLIENT_ID"
-log "  - Keycloak API URL (for deploy script): $KEYCLOAK_URL"
 
-# Check if kubeconfig file exists
 if [[ ! -f "$KUBECONFIG" ]]; then
   log "❌ Kubeconfig file not found: $KUBECONFIG"
   exit 1
 fi
 
 
-#----------------------------------------
 # Cleanup local helm artifacts
-#----------------------------------------
 if [ -f Chart.lock ]; then
   rm Chart.lock
   log "✅ Removed Chart.lock"
@@ -73,9 +80,7 @@ if [ -d charts ]; then
   log "✅ Removed charts/ directory"
 fi
 
-#----------------------------------------
 # Check dependencies
-#----------------------------------------
 for cmd in kubectl helm jq curl sed trap; do
   if ! command -v "$cmd" &>/dev/null; then
     log "❌ '$cmd' is not installed. Please install it and retry."
@@ -85,9 +90,7 @@ for cmd in kubectl helm jq curl sed trap; do
   fi
 done
 
-#----------------------------------------
 # Verify ingress class traefik is installed
-#----------------------------------------
 log "ℹ Checking for ingressClass traefik..."
 if ! kubectl get ingressclass traefik &>/dev/null; then
   log "❌ Ingress class traefik not found"
@@ -96,14 +99,7 @@ else
     log "✅ Ingress class traefik found"
 fi
 
-#----------------------------------------
-# Continue with deployment
-#----------------------------------------
-log "ℹ️ Continuing with deployment..."
-
-#----------------------------------------
 # Generate and validate namespace from path
-#----------------------------------------
 NAMESPACE="digital-contracting-service-${URL_PATH}"
 log "ℹ️ Using namespace: $NAMESPACE"
 
@@ -112,8 +108,27 @@ kubectl create namespace "$NAMESPACE" --kubeconfig "$KUBECONFIG" 2>/dev/null || 
 log "✅ Namespace created or already exists"
 
 #----------------------------------------
-# Prepare temporary values file
+# Create Custom CA ConfigMap if enabled
 #----------------------------------------
+if [[ "$CUSTOM_CA_ENABLED" == "true" ]]; then
+  if [[ -z "$CUSTOM_CA_CERT_FILE" ]]; then
+    log "❌ CUSTOM_CA_ENABLED is true but CUSTOM_CA_CERT_FILE is not set"
+    exit 1
+  fi
+  if [[ ! -f "$CUSTOM_CA_CERT_FILE" ]]; then
+    log "❌ CA certificate file not found: $CUSTOM_CA_CERT_FILE"
+    exit 1
+  fi
+  log "ℹ️ Creating ConfigMap '$CUSTOM_CA_CONFIGMAP' with CA certificate"
+  kubectl create configmap "$CUSTOM_CA_CONFIGMAP" \
+    --from-file=dev-ca.crt="$CUSTOM_CA_CERT_FILE" \
+    -n "$NAMESPACE" \
+    --kubeconfig "$KUBECONFIG" \
+    --dry-run=client -o yaml | kubectl apply -f - --kubeconfig "$KUBECONFIG"
+  log "✅ ConfigMap created or updated"
+fi
+
+# Prepare temporary values file
 TMP_VALUES="$(mktemp -t values.XXXXXX.yaml)" || TMP_VALUES="/tmp/values-$$.yaml"
 cp values.yaml "$TMP_VALUES"
 log "ℹ️ Replacing placeholders in $TMP_VALUES"
@@ -121,18 +136,30 @@ sed -i \
   -e "s|\[domain-name\]|${DOMAIN}|g" \
   -e "s|\[path\]|${URL_PATH}|g" \
   -e "s|\[namespace\]|${NAMESPACE}|g" \
-  -e "s|\[Admin_Username\]|${ADMIN_USER}|g" \
-  -e "s|\[Admin_Password\]|${ADMIN_PASS}|g" \
   -e "s|\[oidc-issuer-url\]|${OIDC_ISSUER_URL}|g" \
   -e "s|\[oidc-client-id\]|${OIDC_CLIENT_ID}|g" \
   -e "s|\[registry\]|${IMAGE_NAME}|g" \
+  -e "s|tag: \"latest\"|tag: \"${DOCKER_TAG}\"|g" \
+  -e "s|enabled: false|enabled: ${CUSTOM_CA_ENABLED}|g" \
+  -e "s|configMapName: \"\"|configMapName: \"${CUSTOM_CA_CONFIGMAP}\"|g" \
   "$TMP_VALUES"
+
+# Add hostAliases if HTTPS OIDC is configured
+if [[ "$HOST_ALIAS_ENABLED" == "true" ]]; then
+  log "ℹ️ Adding hostAlias: $KEYCLOAK_HOSTNAME -> $TRAEFIK_CLUSTER_IP"
+  cat >> "$TMP_VALUES" <<EOF
+
+# Auto-configured host alias for in-cluster OIDC access
+hostAliases:
+  - ip: "${TRAEFIK_CLUSTER_IP}"
+    hostnames:
+      - "${KEYCLOAK_HOSTNAME}"
+EOF
+fi
+
 log "✅ Placeholders replaced in $TMP_VALUES"
 
-#----------------------------------------
 # Helm dependency build & install
-#----------------------------------------
-
 log "ℹ️ Running: helm dependency build"
 helm dependency build . --kubeconfig "$KUBECONFIG"
 
@@ -144,9 +171,7 @@ helm install digital-contracting-service . \
   -f "$TMP_VALUES"
 log "✅ digital-contracting-service Helm release deployed"
 
-#----------------------------------------
 # Create TLS secret
-#----------------------------------------
 log "ℹ️ Creating TLS secret 'certificates'"
 kubectl create secret tls certificates \
   --namespace "$NAMESPACE" \
@@ -155,9 +180,17 @@ kubectl create secret tls certificates \
   --kubeconfig "$KUBECONFIG"
 log "✅ TLS secret created"
 
-#----------------------------------------
+# Create shared TLS secret for ingress (dev-wildcard-tls)
+log "ℹ️ Creating shared TLS secret 'dev-wildcard-tls' for ingress"
+kubectl create secret tls dev-wildcard-tls \
+  --cert="$CRT_FILE" \
+  --key="$KEY_FILE" \
+  -n "$NAMESPACE" \
+  --kubeconfig "$KUBECONFIG" \
+  --dry-run=client -o yaml | kubectl apply -f - --kubeconfig "$KUBECONFIG"
+log "✅ Shared TLS secret created or updated"
+
 # Wait for Deployment to be ready
-#----------------------------------------
 log "ℹ️ Waiting for digital-contracting-service deployment to be ready (max 2m)..."
 if ! kubectl rollout status deployment/digital-contracting-service \
      -n "$NAMESPACE" \
@@ -169,17 +202,14 @@ if ! kubectl rollout status deployment/digital-contracting-service \
 fi
 log "✅ digital-contracting-service deployment is ready"
 
-#----------------------------------------
 # Final output
-#----------------------------------------
 log "🎉 All operations completed successfully!"
 echo
 echo "🔹 DCS URL: https://${DOMAIN}/${URL_PATH}"
 echo ""
 log "ℹ️ Before accessing the service, ensure Keycloak is configured:"
-log "   1. Create realm: ${REALM}"
-log "   2. Create client: ${OIDC_CLIENT_ID}"
-log "   3. Configure admin-cli client with realm-admin role"
-log "   4. Create users and assign roles in Keycloak admin console"
+log "   1. OIDC Issuer: ${OIDC_ISSUER_URL}"
+log "   2. Client ID: ${OIDC_CLIENT_ID}"
+log "   3. Create users and assign roles in Keycloak admin console"
 log ""
 log "ℹ️ See README.md for detailed Keycloak setup instructions"
