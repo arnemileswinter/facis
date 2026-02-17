@@ -321,11 +321,6 @@ sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/so
 ```
 
 **Tip**: Create a shell script to automate this or use a systemd service.
-WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
-sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
-```
-
-**Tip**: Create a shell script to automate this or use a systemd service.
 
 ---
 
