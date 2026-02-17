@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSubmit_RetrieveContractTemplateById(t *testing.T) {
+func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -48,7 +48,7 @@ func TestSubmit_RetrieveContractTemplateById(t *testing.T) {
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)
 }
 
-func TestSubmit_RetrieveAllContractTemplate(t *testing.T) {
+func TestRetrieve_RetrieveAllContractTemplate(t *testing.T) {
 
 	db := setupTestDB(t)
 
