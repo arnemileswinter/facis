@@ -30,8 +30,8 @@ export function useContractTemplateController() {
         version: 1
     })
 
-    const newClause = ref<Clause>({ title: '', description: '' })
-    const newRule = ref<SemanticRule>({ label: '', type: '', required: false })
+    const newClause = ref<Clause>({ title: '', description: '', rules: [] })
+    const newRule = ref<SemanticRule>({ label: '', type: '', required: false, })
 
     const suggestions = ref<SemanticRule[]>([])
 
@@ -53,12 +53,27 @@ export function useContractTemplateController() {
 
     const addClause = () => {
         if (!newClause.value.title || !newClause.value.description) return
-        form.value.clauses.push({ ...newClause.value })
-        newClause.value = { title: '', description: '' }
+
+        form.value.clauses.push({
+            ...newClause.value,
+            rules: [...(newClause.value.rules || [])],
+        })
+
+        newClause.value = { title: '', description: '', rules: [] }
     }
 
     const removeClause = (index: number) => {
         form.value.clauses.splice(index, 1)
+    }
+
+    const addRuleToNewClause = (rule: { label: string; type: string; required: boolean }) => {
+        newClause.value.rules ||= []
+        const exists = newClause.value.rules.some(r => r.label === rule.label)
+        if (!exists) newClause.value.rules.push({ ...rule })
+    }
+
+    const removeRuleFromNewClause = (idx: number) => {
+        newClause.value.rules?.splice(idx, 1)
     }
 
     const addRuleFromSuggestion = (rule: SemanticRule) => {
@@ -69,10 +84,22 @@ export function useContractTemplateController() {
     }
 
     const addNewCustomRule = () => {
-        if (!newRule.value.label || !newRule.value.type || !newRule.value.required) return
-        form.value.semantic_rules.push({ ...newRule.value })
-        newRule.value = { label: '', type: '', required: false }
+        if (!newRule.value.label) return
+
+        form.value.semantic_rules = form.value.semantic_rules || []
+        form.value.semantic_rules.push({
+            label: newRule.value.label,
+            type: newRule.value.type,
+            required: newRule.value.required ?? true,
+        })
+
+        newRule.value.label = ''
+        newRule.value.type = 'Text'
+        newRule.value.required = false
     }
+
+
+
 
     const removeRule = (index: number) => {
         form.value.semantic_rules.splice(index, 1)
@@ -105,7 +132,8 @@ export function useContractTemplateController() {
         newClause,
         newRule,
         suggestions,
-
+        addRuleToNewClause,
+        removeRuleFromNewClause, 
         addClause,
         removeClause,
         addRuleFromSuggestion,

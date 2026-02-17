@@ -87,15 +87,16 @@
 
                         <div class="md:col-span-3">
                             <label class="label-text text-[10px] uppercase font-bold ml-1 opacity-60">Type</label>
-                            <select v-model="newRule.type" class="select select-bordered select-sm w-full mt-1">
-                                <option value="MIN">Date</option>
-                                <option value="MAX">Text</option>
-                                <option value="EQUALS">Decimal</option>
+                            <select v-model="newRule.type" class="select select-bordered select-sm w-full mt-1"
+                                required="">
+                                <option value="Date">Date</option>
+                                <option value="Text">Text</option>
+                                <option value="Decimal">Decimal</option>
                             </select>
                         </div>
 
                         <div class="md:col-span-2">
-                            <select  class="select select-bordered select-sm w-full mt-1">
+                            <select class="select select-bordered select-sm w-full mt-1">
                                 <option value="true">required</option>
                                 <option value="false">optional</option>
                             </select>
@@ -103,7 +104,7 @@
 
                         <div class="md:col-span-2">
                             <button @click="addNewCustomRule" class="btn btn-secondary btn-sm w-full mt-1"
-                                :disabled="!newRule.label">
+                                :disabled="!newRule.label || !newRule.type">
                                 Add
                             </button>
                         </div>
@@ -151,6 +152,31 @@
                             :disabled="!newClause.title || !newClause.description">
                             Add Clause
                         </button>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase font-black tracking-widest opacity-50 block">
+                            Semantic Rules for this Clause
+                        </label>
+
+                        <div class="flex flex-wrap gap-2">
+                            <button v-for="(rule, idx) in form.semantic_rules" :key="idx" type="button"
+                                class="btn btn-outline btn-secondary btn-xs normal-case"
+                                @click="addRuleToNewClause(rule)">
+                                + {{ rule.label }}
+                            </button>
+
+                            <div v-if="!form.semantic_rules?.length" class="text-xs opacity-50 italic">
+                                No semantic rules yet.
+                            </div>
+                        </div>
+
+                        <div v-if="newClause.rules?.length" class="flex flex-wrap gap-2">
+                            <span v-for="(r, rIdx) in newClause.rules" :key="rIdx" class="badge badge-secondary gap-2">
+                                {{ r.label }}
+                                <button type="button" class="btn btn-ghost btn-xs"
+                                    @click="removeRuleFromNewClause(rIdx)">✕</button>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="space-y-3">
@@ -228,6 +254,8 @@ const {
     suggestions,
     addRuleFromSuggestion,
     addNewCustomRule,
-    removeRule
+    removeRule,
+    removeRuleFromNewClause,
+    addRuleToNewClause
 } = useContractTemplateController()
 </script>

@@ -10,9 +10,9 @@ var _ = API("dcs", func() {
 	Version("0.0.1")
 
 	cors.Origin("*", func() {
-		cors.Headers("X-Shared-Secret", "X-Api-Version")
+		cors.Headers("Content-Type", "Authorization", "X-Shared-Secret", "X-Api-Version")
+		cors.Methods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
 		cors.MaxAge(100)
-		cors.Credentials()
 	})
 	Server("dcs", func() {
 		Host("local", func() {
