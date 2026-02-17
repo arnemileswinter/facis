@@ -58,21 +58,21 @@
             "schemaVersion": "v2",
             "parameters": [
                 {
-                    "parameterName": "startDate",
+                    "parameterName": "start date",
                     "type": "date",
                     "isRequired": true,
                     "operators": [],
                     "value": null
                 },
                 {
-                    "parameterName": "endDate",
+                    "parameterName": "end date",
                     "type": "date",
                     "isRequired": false,
                     "operators": [
                         {
                             "operate": "lessThanOrEqual",
                             "targets": [
-                                "startDate"
+                                "{{start date}}"
                             ]
                         }
                     ],
@@ -151,7 +151,7 @@
             "blockId": "sn-validity",
             "type": "CLAUSE",
             "conditionId": "sc-001",
-            "text": "The term runs from {{startDate}} to {{endDate}}"
+            "text": "The term runs from {{start date}} to {{end date}}"
         },
         {
             "blockId": "sec-1-2",
