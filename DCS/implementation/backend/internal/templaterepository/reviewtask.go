@@ -72,6 +72,21 @@ func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewT
 	return reviewTasks, nil
 }
 
+func ReadAllReviewTasksByReviewer(ctx context.Context, tx *sqlx.Tx, reviewer string) ([]ReviewTaskData, error) {
+	query := `
+        SELECT id, did, document_number, version, state, reviewer,
+               created_by, created_at
+        FROM contract_templates_review_task WHERE reviewer = $1
+    `
+
+	var reviewTasks []ReviewTaskData
+	err := tx.SelectContext(ctx, &reviewTasks, query, reviewer)
+	if err != nil {
+		return nil, err
+	}
+	return reviewTasks, nil
+}
+
 func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) error {
 	query := `
         UPDATE contract_templates_review_task SET state = $5
