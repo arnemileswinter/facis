@@ -30,12 +30,12 @@ type GetAllContractTemplatesMetaDataResult struct {
 	MetaData       datatype.JSON
 }
 
-type GetAllContractTemplateMetasDataHandler struct {
+type GetAllContractTemplateMetaDataHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateMetasDataHandler) Handle(query GetAllContractTemplatesMetaData) ([]GetAllContractTemplatesMetaDataResult, error) {
+func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTemplatesMetaData) ([]GetAllContractTemplatesMetaDataResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()

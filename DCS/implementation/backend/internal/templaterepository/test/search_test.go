@@ -54,7 +54,7 @@ func TestSearch_SearchContractTemplatesByFilter(t *testing.T) {
 	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
 		RetrievedBy: retrievedBy,
 	}
-	queryHandler := contracttemplate.GetAllContractTemplateHandler{
+	queryHandler := contracttemplate.GetAllContractTemplatesMetaDataByFilterHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
