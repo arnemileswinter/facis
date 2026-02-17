@@ -192,10 +192,42 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 	return contractTemplates, nil
 }
 
+// retrieve templates
+func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.ContractTemplateRetrieveRequest) (res []*templaterepository.ContractTemplateRetrieveResponse, err error) {
+
+	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
+		RetrievedBy: "",
+	}
+	queryHandler := contracttemplate.GetAllContractTemplateHandler{
+		Ctx: ctx,
+		DB:  s.DB,
+	}
+	result, err := queryHandler.Handle(qry)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	var contractTemplates []*templaterepository.ContractTemplateRetrieveResponse
+	for _, item := range result {
+		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateRetrieveResponse{
+			Did:            item.DID,
+			DocumentNumber: item.DocumentNumber,
+			Version:        item.Version,
+			State:          item.State.String(),
+			Name:           &item.Name,
+			Description:    &item.Description,
+			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:      item.UpdatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return contractTemplates, nil
+}
+
 // Retrieve a template by template id.
 func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,

@@ -100,6 +100,35 @@ var ContractTemplateSearchResponse = Type("ContractTemplateSearchResponse", func
 	Required("did", "document_number", "version", "state", "created_at", "updated_at")
 })
 
+var ContractTemplateRetrieveRequest = Type("ContractTemplateRetrieveRequest", func() {
+	Description("Contract template retrieve request")
+
+	Attribute("did", String, "DID of the contract template")
+	Attribute("documentNumber", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Required("did", "documentNumber", "version")
+})
+
+var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", func() {
+	Description("Result for retrieving a contract template by id")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The document number of the contract template")
+	Attribute("version", Int, "The version number of the contract template")
+
+	Attribute("state", String, "The state of the contract template")
+
+	Attribute("name", String, "The name of the contract template")
+	Attribute("description", String, "A description for that template")
+
+	Attribute("created_at", String, "The timestamp when the contract template was created")
+
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
+	Required("did", "document_number", "version", "state", "created_at", "updated_at")
+})
+
 var ContractTemplateRetrieveByIdRequest = Type("ContractTemplateRetrieveByIdRequest", func() {
 	Description("Contract template retrieve by id request")
 
@@ -282,6 +311,28 @@ var _ = Service("TemplateRepository", func() {
 
 		HTTP(func() {
 			GET("/template/search")
+			Response(StatusOK)
+			Response("bad_request", StatusBadRequest)
+			Response("internal_error", StatusInternalServerError)
+		})
+	})
+
+	// GET /template/retrieve
+	Method("retrieve", func() {
+		Description("load submitted template and history/provenance summary. fetch reviewed template with metadata, review history, and validation results. fetch all template entries for dashboard view.")
+		Meta("dcs:requirements", "DCS-IR-TR-02", "DCS-IR-TR-03", "DCS-IR-TR-05", "DCS-IR-TR-08")
+		Meta("dcs:roles", "Template Reviewer", "Template Approver", "Template Manager")
+		Meta("dcs:tr:components", "Template Versioning")
+		Meta("dcs:ui", "Template Builder, Template Approver, Template Management Dashboard")
+
+		Payload(ContractTemplateRetrieveRequest)
+		Result(ArrayOf(ContractTemplateRetrieveResponse))
+
+		Error("bad_request", ErrorResult, "Bad request")
+		Error("internal_error", ErrorResult, "Internal server error")
+
+		HTTP(func() {
+			GET("/template/retrieve")
 			Response(StatusOK)
 			Response("bad_request", StatusBadRequest)
 			Response("internal_error", StatusInternalServerError)

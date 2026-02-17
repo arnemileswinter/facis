@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSubmit_CreateReviewTasks(t *testing.T) {
+func TestReview_CreateReviewTasks(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -70,7 +70,7 @@ func TestSubmit_CreateReviewTasks(t *testing.T) {
 	assert.True(t, exists)
 }
 
-func TestSubmit_CreateReviewTasksAndApproveThem(t *testing.T) {
+func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 
 	db := setupTestDB(t)
 

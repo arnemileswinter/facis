@@ -14,14 +14,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetContractTemplatesByIdQuery struct {
+type GetContractTemplateByIdQuery struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	RetrievedBy    string
 }
 
-type GetContractTemplatesByIdResult struct {
+type GetContractTemplateByIdResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -39,7 +39,7 @@ type GetContractTemplateByIdHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplatesByIdQuery) (*GetContractTemplatesByIdResult, error) {
+func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQuery) (*GetContractTemplateByIdResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -72,7 +72,7 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplatesByIdQu
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	return &GetContractTemplatesByIdResult{
+	return &GetContractTemplateByIdResult{
 		DID:            query.DID,
 		DocumentNumber: data.DocumentNumber,
 		Version:        data.Version,
