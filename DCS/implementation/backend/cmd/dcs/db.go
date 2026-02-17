@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"errors"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func NewDatabaseConnection(ctx context.Context) (*sqlx.DB, error) {
+func NewDatabaseConnection() (*sqlx.DB, error) {
 	databaseUrl := os.Getenv("DATABASE_URL")
 	if databaseUrl == "" {
 		return nil, errors.New("DATABASE_URL isn't set")
@@ -22,6 +22,9 @@ func NewDatabaseConnection(ctx context.Context) (*sqlx.DB, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
 
 	return db, nil
 }

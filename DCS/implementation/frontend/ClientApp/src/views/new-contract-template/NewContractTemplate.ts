@@ -3,13 +3,14 @@ import { useRoute, useRouter } from 'vue-router'
 
 interface Clause {
     title: string;
-    content: string;
+    description: string;
+    rules?: SemanticRule[]
 }
 
 interface SemanticRule {
-    attr: string;
-    op: string;
-    val: string;
+    label: string;
+    type: string;
+    required: boolean;
 }
 
 export function useContractTemplateController() {
@@ -29,21 +30,21 @@ export function useContractTemplateController() {
         version: 1
     })
 
-    const newClause = ref<Clause>({ title: '', content: '' })
-    const newRule = ref<SemanticRule>({ attr: '', op: 'MIN', val: '' })
-    
+    const newClause = ref<Clause>({ title: '', description: '' })
+    const newRule = ref<SemanticRule>({ label: '', type: '', required: false })
+
     const suggestions = ref<SemanticRule[]>([])
 
     const fetchSuggestions = async () => {
         isLoadingSuggestions.value = true
         try {
             await new Promise(resolve => setTimeout(resolve, 1000))
-            
+
             suggestions.value = [
-                { attr: 'Availability_SLA', op: 'MIN', val: '99.9%' },
-                { attr: 'Liability_Limit', op: 'MAX', val: '1.000.000€' },
-                { attr: 'Data_Location', op: 'EQUALS', val: 'EU-Only' },
-                { attr: 'Support_Response', op: 'MAX', val: '2h' }
+                { label: 'Availability_SLA', type: 'text', required: true },
+                { label: 'startDate', type: 'date', required: true },
+                { label: 'endDate', type: 'date', required: true },
+                { label: 'payment_fee', type: 'decimal', required: false },
             ]
         } finally {
             isLoadingSuggestions.value = false
@@ -51,9 +52,9 @@ export function useContractTemplateController() {
     }
 
     const addClause = () => {
-        if (!newClause.value.title || !newClause.value.content) return
+        if (!newClause.value.title || !newClause.value.description) return
         form.value.clauses.push({ ...newClause.value })
-        newClause.value = { title: '', content: '' }
+        newClause.value = { title: '', description: '' }
     }
 
     const removeClause = (index: number) => {
@@ -61,16 +62,16 @@ export function useContractTemplateController() {
     }
 
     const addRuleFromSuggestion = (rule: SemanticRule) => {
-        const exists = form.value.semantic_rules.some(r => r.attr === rule.attr)
+        const exists = form.value.semantic_rules.some(r => r.label === rule.label)
         if (!exists) {
             form.value.semantic_rules.push({ ...rule })
         }
     }
 
     const addNewCustomRule = () => {
-        if (!newRule.value.attr || !newRule.value.val) return
+        if (!newRule.value.label || !newRule.value.type || !newRule.value.required) return
         form.value.semantic_rules.push({ ...newRule.value })
-        newRule.value = { attr: '', op: 'MIN', val: '' }
+        newRule.value = { label: '', type: '', required: false }
     }
 
     const removeRule = (index: number) => {
@@ -104,7 +105,7 @@ export function useContractTemplateController() {
         newClause,
         newRule,
         suggestions,
-        
+
         addClause,
         removeClause,
         addRuleFromSuggestion,
