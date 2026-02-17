@@ -31,12 +31,12 @@ type GetAllContractTemplatesMetaDataByFilterResult struct {
 	MetaData       datatype.JSON
 }
 
-type GetAllContractTemplateHandler struct {
+type GetAllContractTemplatesMetaDataByFilterHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesMetaDataByFilterQuery) ([]GetAllContractTemplatesMetaDataByFilterResult, error) {
+func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllContractTemplatesMetaDataByFilterQuery) ([]GetAllContractTemplatesMetaDataByFilterResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -47,7 +47,7 @@ func (h *GetAllContractTemplateHandler) Handle(query GetAllContractTemplatesMeta
 	}
 	defer tx.Rollback()
 
-	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaDataByFilter(ctx, tx, query.Filter)
+	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaData(ctx, tx)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}

@@ -166,7 +166,7 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 		RetrievedBy: "",
 		Filter:      filterData,
 	}
-	queryHandler := contracttemplate.GetAllContractTemplateHandler{
+	queryHandler := contracttemplate.GetAllContractTemplatesMetaDataByFilterHandler{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -195,10 +195,10 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 // retrieve templates
 func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.ContractTemplateRetrieveRequest) (res []*templaterepository.ContractTemplateRetrieveResponse, err error) {
 
-	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllContractTemplatesMetaData{
 		RetrievedBy: "",
 	}
-	queryHandler := contracttemplate.GetAllContractTemplateHandler{
+	queryHandler := contracttemplate.GetAllContractTemplateMetasDataHandler{
 		Ctx: ctx,
 		DB:  s.DB,
 	}

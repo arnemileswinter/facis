@@ -30,12 +30,12 @@ type GetAllContractTemplatesMetaDataResult struct {
 	MetaData       datatype.JSON
 }
 
-type GetAllContractTemplateMetaDataHandler struct {
+type GetAllContractTemplateMetasDataHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTemplatesMetaDataByFilterQuery) ([]GetAllContractTemplatesMetaDataResult, error) {
+func (h *GetAllContractTemplateMetasDataHandler) Handle(query GetAllContractTemplatesMetaData) ([]GetAllContractTemplatesMetaDataResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -53,7 +53,6 @@ func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTempl
 
 	evt := templateevents.ContractTemplateRetrievedAllEvent{
 		RetrievedBy: query.RetrievedBy,
-		Filter:      query.Filter,
 		OccurredAt:  time.Now(),
 	}
 	err = event.Create(h.Ctx, tx, evt)

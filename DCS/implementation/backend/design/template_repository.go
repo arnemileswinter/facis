@@ -102,12 +102,6 @@ var ContractTemplateSearchResponse = Type("ContractTemplateSearchResponse", func
 
 var ContractTemplateRetrieveRequest = Type("ContractTemplateRetrieveRequest", func() {
 	Description("Contract template retrieve request")
-
-	Attribute("did", String, "DID of the contract template")
-	Attribute("documentNumber", Int, "The number of the contract template")
-	Attribute("version", Int, "The version of the contract template")
-
-	Required("did", "documentNumber", "version")
 })
 
 var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", func() {
