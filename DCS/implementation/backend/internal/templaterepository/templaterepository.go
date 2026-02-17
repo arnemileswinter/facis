@@ -82,8 +82,7 @@ type ContractTemplateMetaData struct {
 
 func ReadAllContractTemplateMetaData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateMetaData, error) {
 	query := `
-        SELECT did, document_number, version, state, name, description,
-               created_by, created_at, updated_at
+        SELECT did, document_number, version, state, name, description, created_at, updated_at
         FROM contract_templates
     `
 

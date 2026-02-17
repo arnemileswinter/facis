@@ -198,7 +198,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 	qry := contracttemplate.GetAllContractTemplatesMetaData{
 		RetrievedBy: "",
 	}
-	queryHandler := contracttemplate.GetAllContractTemplateMetasDataHandler{
+	queryHandler := contracttemplate.GetAllContractTemplateMetaDataHandler{
 		Ctx: ctx,
 		DB:  s.DB,
 	}

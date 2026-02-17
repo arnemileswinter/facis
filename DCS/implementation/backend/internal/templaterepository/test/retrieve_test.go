@@ -48,7 +48,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)
 }
 
-func TestRetrieve_RetrieveAllContractTemplate(t *testing.T) {
+func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -69,10 +69,10 @@ func TestRetrieve_RetrieveAllContractTemplate(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllContractTemplatesMetaData{
 		RetrievedBy: retrievedBy,
 	}
-	queryHandler := contracttemplate.GetAllContractTemplateHandler{
+	queryHandler := contracttemplate.GetAllContractTemplateMetaDataHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
