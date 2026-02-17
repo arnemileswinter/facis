@@ -69,21 +69,6 @@ func ReadContractTemplateDataById(ctx context.Context, tx *sqlx.Tx, did string, 
 	return &ct, nil
 }
 
-//func ReadAllContractTemplateData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateData, error) {
-//	query := `
-//        SELECT did, document_number, version, state, name, description,
-//               created_by, created_at, updated_at, meta_data
-//        FROM contract_templates
-//    `
-//
-//	var cts []ContractTemplateData
-//	err := tx.SelectContext(ctx, &cts, query)
-//	if err != nil {
-//		return []ContractTemplateData{}, err
-//	}
-//	return cts, nil
-//}
-
 type ContractTemplateMetaData struct {
 	DID            string                      `db:"did"`
 	DocumentNumber int                         `db:"document_number"`
@@ -93,6 +78,20 @@ type ContractTemplateMetaData struct {
 	Description    *string                     `db:"description"`
 	CreatedAt      time.Time                   `db:"created_at"`
 	UpdatedAt      time.Time                   `db:"updated_at"`
+}
+
+func ReadAllContractTemplateMetaData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateMetaData, error) {
+	query := `
+        SELECT did, document_number, version, state, name, description, created_at, updated_at
+        FROM contract_templates
+    `
+
+	var cts []ContractTemplateMetaData
+	err := tx.SelectContext(ctx, &cts, query)
+	if err != nil {
+		return []ContractTemplateMetaData{}, err
+	}
+	return cts, nil
 }
 
 func ReadAllContractTemplateMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, filter map[string]interface{}) ([]ContractTemplateMetaData, error) {

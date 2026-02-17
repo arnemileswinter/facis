@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSubmit_RejectContractTemplateInReviewedState(t *testing.T) {
+func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -47,7 +47,7 @@ func TestSubmit_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -65,7 +65,7 @@ func TestSubmit_RejectContractTemplateInReviewedState(t *testing.T) {
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)
 }
 
-func TestSubmit_RejectContractTemplateInDraftState(t *testing.T) {
+func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -98,7 +98,7 @@ func TestSubmit_RejectContractTemplateInDraftState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestSubmit_RejectContractTemplateInApprovedState(t *testing.T) {
+func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -131,7 +131,7 @@ func TestSubmit_RejectContractTemplateInApprovedState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestSubmit_RejectContractTemplateAfterUpdate(t *testing.T) {
+func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 
 	db := setupTestDB(t)
 

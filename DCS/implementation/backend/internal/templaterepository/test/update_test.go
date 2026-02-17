@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSubmit_UpdateContractTemplateDataInDraftState(t *testing.T) {
+func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -59,7 +59,7 @@ func TestSubmit_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -80,7 +80,7 @@ func TestSubmit_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	//assert.Equal(t, jsonTemplateData, contractTemplate.TemplateData)
 }
 
-func TestSubmit_UpdateContractTemplateDataInDraftSubmittedState(t *testing.T) {
+func TestUpdate_UpdateContractTemplateDataInDraftSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -123,7 +123,7 @@ func TestSubmit_UpdateContractTemplateDataInDraftSubmittedState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestSubmit_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
+func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -166,7 +166,7 @@ func TestSubmit_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestSubmit_UpdateContractTemplateAfterUpdate(t *testing.T) {
+func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 
 	db := setupTestDB(t)
 

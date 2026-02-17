@@ -61,7 +61,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -189,7 +189,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -271,7 +271,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -352,7 +352,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -451,7 +451,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -537,7 +537,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -613,7 +613,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -663,7 +663,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -707,7 +707,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -748,7 +748,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -792,7 +792,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -833,7 +833,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -898,7 +898,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -984,7 +984,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1060,7 +1060,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1110,7 +1110,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1154,7 +1154,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1195,7 +1195,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1239,7 +1239,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1278,7 +1278,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1343,7 +1343,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplatesByIdQuery{
+	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1429,7 +1429,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1505,7 +1505,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1555,7 +1555,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1599,7 +1599,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1640,7 +1640,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1684,7 +1684,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1723,7 +1723,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetContractTemplatesByIdQuery{
+	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
