@@ -73,6 +73,25 @@ func ReadAllApprovalTasksByApprover(ctx context.Context, tx *sqlx.Tx, approver s
 	return approvalTasks, nil
 }
 
+func IsValidUserForApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string) (bool, error) {
+	selectQuery := `
+        SELECT COUNT(*) FROM contract_templates_approval_task
+		WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
+`
+
+	var count int
+	err := tx.GetContext(ctx, &count, selectQuery, did, documentNumber, version, approver)
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func UpdateApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state aopprovaltaskstate.ApprovalTaskState) error {
 	query := `
         UPDATE contract_templates_approval_task SET state = $5
@@ -80,20 +99,6 @@ func UpdateApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNu
     `
 
 	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, approver, state)
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func ReopenApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
-	query := `
-        UPDATE contract_templates_approval_task SET state = 'OPEN'
-        WHERE did = $1 AND document_number = $2 AND version = $3
-    `
-
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
 	if err != nil {
 		return err
 	}
