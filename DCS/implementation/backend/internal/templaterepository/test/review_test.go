@@ -22,10 +22,11 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
 
 	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
 	defer cancel()
@@ -49,7 +50,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 			Version:        1,
 			Reviewer:       assignee,
 			State:          reviewtaskstate.Open,
-			CreatedBy:      submittedBy,
+			CreatedBy:      creator,
 		}
 		_, err = templaterepository.CreateReviewTasks(ctx, tx, reviewTask)
 		if err != nil {
@@ -81,10 +82,11 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
 
 	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
 	defer cancel()
@@ -108,7 +110,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 			Version:        1,
 			Reviewer:       assignee,
 			State:          reviewtaskstate.Open,
-			CreatedBy:      submittedBy,
+			CreatedBy:      creator,
 		}
 		_, err = templaterepository.CreateReviewTasks(ctx, tx, reviewTask)
 		if err != nil {
