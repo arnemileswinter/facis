@@ -22,7 +22,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -81,7 +81,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"

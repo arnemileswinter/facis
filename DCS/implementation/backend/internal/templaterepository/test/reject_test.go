@@ -23,7 +23,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Reviewed, db)
+	createTestContractTemplate(t, db, did, templatestate.Reviewed, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
@@ -76,7 +76,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
@@ -109,7 +109,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Approved, db)
+	createTestContractTemplate(t, db, did, templatestate.Approved, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
@@ -142,7 +142,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Reviewed, db)
+	createTestContractTemplate(t, db, did, templatestate.Reviewed, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"

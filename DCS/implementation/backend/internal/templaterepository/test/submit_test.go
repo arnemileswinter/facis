@@ -30,7 +30,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -137,7 +137,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -218,7 +218,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -300,7 +300,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
 
 	ctx := context.Background()
 
@@ -381,7 +381,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -418,7 +418,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	/**
 	Create and Submit the Draft
 	*/
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -865,7 +865,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	Create and Submit the Draft
 	*/
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -1310,7 +1310,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	/**
 	Create and Submit the Draft
 	*/
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -1752,7 +1752,7 @@ func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"

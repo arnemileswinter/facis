@@ -24,8 +24,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := templatestate.Draft
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	templateData := map[string]interface{}{
@@ -91,8 +90,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftSubmittedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := templatestate.Submitted
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, db, did, templatestate.Submitted, "Test User")
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -134,8 +132,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := templatestate.Approved
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, db, did, templatestate.Approved, "Test User")
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -177,8 +174,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	currentContractState := templatestate.Draft
-	createTestContractTemplate(t, did, currentContractState, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	templateData := map[string]interface{}{

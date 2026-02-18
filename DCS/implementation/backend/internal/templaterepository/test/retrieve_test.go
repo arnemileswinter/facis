@@ -23,7 +23,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 
@@ -61,7 +61,7 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 			t.Fatalf("Failed to connect get new DID: %v", err)
 		}
 		dids = append(dids, *did)
-		createTestContractTemplate(t, did, templatestate.Draft, db)
+		createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 	}
 	sort.Strings(dids)
 
@@ -76,12 +76,12 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 		Ctx: ctx,
 		DB:  db,
 	}
-	contractTemplate, err := queryHandler.Handle(qry)
+	result, err := queryHandler.Handle(qry)
 	if err != nil {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	for _, ct := range contractTemplate {
+	for _, ct := range result.ContractTemplates {
 		assert.Equal(t, templatestate.Draft, ct.State)
 
 		if !slices.Contains(dids, ct.DID) {

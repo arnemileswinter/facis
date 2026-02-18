@@ -5,10 +5,11 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
-	"fmt"
 	"sort"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSearch_SearchContractTemplatesByFilter(t *testing.T) {
@@ -41,7 +42,7 @@ func TestSearch_SearchContractTemplatesByFilter(t *testing.T) {
 		}
 
 		stateId := i % len(states)
-		createTestContractTemplateWithTemplateData(t, did, states[stateId], db, templateData)
+		createTestContractTemplateWithTemplateData(t, db, did, states[stateId], "Test User", templateData)
 	}
 	sort.Strings(dids)
 
@@ -63,5 +64,5 @@ func TestSearch_SearchContractTemplatesByFilter(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	fmt.Println(len(contractTemplate))
+	assert.Equal(t, 10, len(contractTemplate))
 }
