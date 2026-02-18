@@ -102,6 +102,46 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	}
 }
 
+func TestSubmit_SubmitContractTemplateInDraftStateWithInvalidUser(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
+
+	ctx := context.Background()
+	submittedBy := "Invalid Test User"
+	approver := "Test User 5"
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    submittedBy,
+		ActionFlag:     nil,
+		Comments:       nil,
+		Reviewer: []string{
+			"Test User 2",
+			"Test User 3",
+			"Test User 4",
+		},
+		Approver: &approver,
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did string, submittedBy string, reviewers []string) error {
 	tx, err := db.BeginTxx(ctx, nil)
 	defer tx.Rollback()

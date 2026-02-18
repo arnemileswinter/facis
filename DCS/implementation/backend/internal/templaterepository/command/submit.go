@@ -34,7 +34,7 @@ type SubmitContractTemplateHandler struct {
 	DB  *sqlx.DB
 }
 
-func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, processData *templaterepository.ContractTemplateMetaData) error {
+func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, processData *templaterepository.ContractTemplateProcessData) error {
 
 	err := templaterepository.ReopenReviewTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
 	if err != nil {
@@ -95,6 +95,10 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 	var nextTemplateState templatestate.TemplateState
 	if processData.State == templatestate.Draft {
+
+		if cmd.SubmittedBy != processData.CreatedBy {
+			return errors.New("invalid user")
+		}
 
 		if cmd.Reviewer == nil || len(cmd.Reviewer) == 0 {
 			return errors.New("no reviewer provided")

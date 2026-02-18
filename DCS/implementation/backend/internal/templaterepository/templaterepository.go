@@ -76,13 +76,14 @@ type ContractTemplateMetaData struct {
 	State          templatestate.TemplateState `db:"state"`
 	Name           *string                     `db:"name"`
 	Description    *string                     `db:"description"`
+	CreatedBy      string                      `db:"created_by"`
 	CreatedAt      time.Time                   `db:"created_at"`
 	UpdatedAt      time.Time                   `db:"updated_at"`
 }
 
 func ReadAllContractTemplateMetaData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateMetaData, error) {
 	query := `
-        SELECT did, document_number, version, state, name, description, created_at, updated_at
+        SELECT did, document_number, version, state, name, description, created_by, created_at, updated_at
         FROM contract_templates
     `
 
@@ -115,16 +116,17 @@ type ContractTemplateProcessData struct {
 	DocumentNumber int                         `db:"document_number"`
 	Version        int                         `db:"version"`
 	State          templatestate.TemplateState `db:"state"`
+	CreatedBy      string                      `db:"created_by"`
 	UpdatedAt      time.Time                   `db:"updated_at"`
 }
 
-func ReadContractTemplateProcessData(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateMetaData, error) {
+func ReadContractTemplateProcessData(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateProcessData, error) {
 	query := `
-        SELECT did, document_number, version, state, updated_at
+        SELECT did, document_number, version, state, updated_at, created_by
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	var processData ContractTemplateMetaData
+	var processData ContractTemplateProcessData
 	err := tx.GetContext(ctx, &processData, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
