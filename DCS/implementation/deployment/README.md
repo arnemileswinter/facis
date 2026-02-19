@@ -451,6 +451,12 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
   - The JWT token's `iss` claim must exactly match this URL
   - **Do not use in-cluster URLs** (like `keycloak.default.svc.cluster.local`) - they only work inside the cluster and will cause token validation to fail
 
+- **`OIDC_CLIENT_ID`** - OIDC client ID registered in Keycloak
+  - **No default - must be set explicitly**
+  - Example: `digital-contracting-service`
+  - Must match the client you created in the Keycloak realm
+  - Used by the backend to validate JWT tokens
+
 **Example:**
 ```bash
 # Development deployment with shared hostname
