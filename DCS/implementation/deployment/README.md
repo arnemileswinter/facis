@@ -204,7 +204,7 @@ You should see the Keycloak login page. Default admin credentials: `admin/admin`
 ### Step 7: Configure Keycloak
 
 #### 7.1 Create a Realm
-1. Log in to Keycloak at [https://keycloak.xfsc.local](https://keycloak.xfsc.local)
+1. Log in to Keycloak at [https://keycloak.xfsc.local](https://keycloak.xfsc.local) - default `admin:admin` credentials.
 2. Click the realm dropdown (top-left, says "master")
 3. Click **"Create Realm"**
 4. Enter realm name: `dcs`
@@ -225,13 +225,11 @@ For the OAuth authorization code flow to work, you must configure valid redirect
 1. In your client settings, scroll to **Valid redirect URIs**
 2. Add your application's callback URL(s):
    ```
-   https://dcs.yourdomain.com/dcs/callback
-   https://dcs.yourdomain.com/*
+   https://xfsc.local/dcs/*
    ```
-   **For local development**: Use `http://localhost:3000/*` or your local dev URL
 3. Add **Valid post logout redirect URIs** (optional but recommended):
    ```
-   https://dcs.yourdomain.com/dcs/
+   https://xfsc.local/dcs/*
    ```
 4. Click **"Save"**
 
