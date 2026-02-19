@@ -127,7 +127,7 @@ Copy the certificate into the ca-certificates custom folder.
 
 ```bash
 sudo mkdir -p /usr/local/share/ca-certificates/custom/ # create custom folder, -p skips if already there
-sudo cp dev.crt /usr/local/share/ca-certificates/custom/ # copy cert into that custom folder
+sudo cp ./certs/dev.crt /usr/local/share/ca-certificates/custom/ # copy cert into that custom folder
 sudo update-ca-certificates # update certificate store
 ```
 
