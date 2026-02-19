@@ -95,22 +95,76 @@ func ReadAllContractTemplateMetaData(ctx context.Context, tx *sqlx.Tx) ([]Contra
 	return cts, nil
 }
 
-func ReadAllContractTemplateMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, filter map[string]interface{}) ([]ContractTemplateMetaData, error) {
-	//query := `
-	//    SELECT did, document_number, version, state, name, description, created_at, updated_at, meta_data
-	//    FROM contract_templates
-	//    WHERE state = $1
-	// `
+/*
+	func createSearchQuery(sortedKey []string, filter map[string]interface{}) (*string, []interface{}, error) {
+		query := `
 
-	var cts []ContractTemplateMetaData
-	_ = cts
-	//err := tx.SelectContext(ctx, &cts, query, state)
-	//if err != nil {
-	//	return []ContractTemplateMetaData{}, err
-	//}
-	return cts, nil
-}
+SELECT did, document_number, version, state, name, description, created_by, created_at, updated_at
+FROM contract_templates
+WHERE
+`
 
+		var params []interface{}
+		paramIndex := 1
+
+		for i, k := range sortedKey {
+
+		}
+
+		if data.Name != nil {
+			query += ` name = $` + strconv.Itoa(paramIndex) + `,`
+			params = append(params, data.Name)
+			paramIndex++
+		}
+
+		if data.Description != nil {
+			query += ` description = $` + strconv.Itoa(paramIndex) + `,`
+			params = append(params, data.Description)
+			paramIndex++
+		}
+
+		if data.TemplateData != nil && data.TemplateData.IsNotNullValue() {
+			query += ` template_data = $` + strconv.Itoa(paramIndex) + `,`
+			params = append(params, data.TemplateData)
+			paramIndex++
+		}
+
+		if len(params) == 0 {
+			return nil, nil, errors.New("no parameters found")
+		}
+
+		// Remove last comma
+		query = query[:len(query)-1]
+
+		query += ` WHERE did = $` + strconv.Itoa(paramIndex) + ` AND document_number = $` + strconv.Itoa(paramIndex+1) + ` AND version = $` + strconv.Itoa(paramIndex+2) + `;`
+		params = append(params, data.DID, data.DocumentNumber, data.Version)
+
+		return &query, params, nil
+	}
+
+	func ReadAllContractTemplateMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, filter map[string]interface{}) ([]ContractTemplateMetaData, error) {
+		query := `
+		    SELECT did, document_number, version, state, name, description, created_at, updated_at, meta_data
+		    FROM contract_templates
+		    WHERE state = $1
+		 `
+
+		keys := make([]string, 0, len(filter))
+		for k := range filter {
+			keys = append(keys, k)
+		}
+
+		sort.Strings(keys)
+
+		var cts []ContractTemplateMetaData
+		_ = cts
+		err := tx.SelectContext(ctx, &cts, query, state)
+		if err != nil {
+			return []ContractTemplateMetaData{}, err
+		}
+		return cts, nil
+	}
+*/
 type ContractTemplateProcessData struct {
 	DID            string                      `db:"did"`
 	DocumentNumber int                         `db:"document_number"`
