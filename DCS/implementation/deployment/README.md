@@ -101,11 +101,14 @@ openssl req -new -x509 -key ./certs/dev.key -out ./certs/dev.crt -days 365 \
   -addext "subjectAltName=DNS:*.xfsc.local,DNS:xfsc.local,DNS:keycloak.xfsc.local,DNS:dcs.xfsc.local"
 ```
 
-### Step 2: Trust the Certificate in Windows
+### Step 2: Trust the Certificate
 
-Trust the certificate so your browser won't show security warnings:
+#### Browser
+On edge, this is under Settings -> Privacy,search and services -> Security -> Manage certificates -> Custom -> Import
 
-1. Copy the certificate to Windows:
+#### Windows
+
+1. Copy the certificate out of the WSL into the Windows host:
    ```bash
    cp ./certs/dev.crt /mnt/c/Users/$USER/Downloads/
    ```
@@ -118,10 +121,15 @@ Trust the certificate so your browser won't show security warnings:
      ```
    - Or double-click `dev.crt` → Install Certificate → Local Machine → Place in "Trusted Root Certification Authorities"
 
-3. Restart your browser for changes to take effect
+#### Ubuntu
 
-> Note: Depending on your browser you may need to import the self-signed certificate to its browser-level security tab as well.
-On edge, this is under Settings -> Privacy,search and services -> Security -> Manage certificates -> Custom -> Import
+Copy the certificate into the ca-certificates custom folder.
+
+```bash
+sudo mkdir -p /usr/local/share/ca-certificates/custom/ # create custom folder, -p skips if already there
+sudo cp dev.crt /usr/local/share/ca-certificates/custom/ # copy cert into that custom folder
+sudo update-ca-certificates # update certificate store
+```
 
 ### Step 3: Deploy Keycloak with HTTPS
 
@@ -147,7 +155,7 @@ The script uses these environment variables (with defaults):
 
 ### Step 4: Set Up WSL Port Forwarding for HTTPS
 
-Because WSL cannot directly reach the Traefik LoadBalancer network, you need to set up port forwarding:
+To avoid requiring `sudo` for kubectl port-forward, we bind to unprivileged port 8443, then use `sudo socat` to redirect privileged port 443 to 8443.
 
 ```bash
 # 1. Start kubectl port-forward for HTTPS (tunnels WSL → Traefik)
@@ -164,29 +172,24 @@ echo "WSL IP: $WSL_IP"
 # 4. Forward port 443 → 8443 using socat
 sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
 echo $! | sudo tee /tmp/socat-443.pid
-
-# 5. Update /etc/hosts in WSL
-echo "$WSL_IP keycloak.xfsc.local xfsc.local" | sudo tee -a /etc/hosts
 ```
 
-### Step 5: Update Windows Hosts File
+### Step 5: Hosts File Changes
 
-Add the WSL IP to your Windows hosts file so your browser can reach Keycloak and DCS:
+You must manually map the shared hostnames to your WSL IP so both WSL and Windows can resolve Keycloak and DCS.
 
-1. Open **PowerShell as Administrator**
-2. Get your WSL IP:
-   ```powershell
-   wsl hostname -I
+#### WSL (/etc/hosts)
+1. Open the hosts file with sudo (use your editor of choice):
+   ```bash
+   sudo nano /etc/hosts
    ```
-3. Edit hosts file:
-   ```powershell
-   notepad C:\Windows\System32\drivers\etc\hosts
-   ```
-4. Add this line (replace with your actual WSL IP):
+2. Add or update a single line (replace with actual IP that your development host can be reached by):
    ```
    172.29.35.79 keycloak.xfsc.local xfsc.local
    ```
-5. Save and close
+3. Save and close.
+
+4. Same steps apply to Windows (C:\Windows\System32\drivers\etc\hosts)
 
 ### Step 6: Verify Keycloak Access
 
@@ -227,6 +230,7 @@ For the OAuth authorization code flow to work, you must configure valid redirect
    ```
    https://xfsc.local/dcs/*
    ```
+   > Note: if the DCS runs outside of the cluster on bare metal in development, you may put the redirect to your localhost-bound DCS here.
 3. Add **Valid post logout redirect URIs** (optional but recommended):
    ```
    https://xfsc.local/dcs/*
@@ -259,15 +263,15 @@ DCS API ← Frontend (calls API with token)
 8. Toggle OFF: **Temporary** (so you don't need to reset on first login)
 9. Click **"Save"**
 
-### Step 8: Deploy DCS
+### Step 8: Deploy DCS image in the cluster
 
 Deploy the DCS service with automated HTTPS, CA trust, and in-cluster DNS configuration:
 
 ```bash
 # Set environment variables for custom registry (optional - defaults to upstream)
-export DOCKER_REGISTRY="your-custom-registry.example.com"
+export DOCKER_REGISTRY="h6s71ks6.c1.de1.container-registry.ovh.net"
 export DOCKER_REPO="facis"
-export DOCKER_TAG="latest"
+export DOCKER_TAG="oidc"
 
 # Enable custom CA certificate trust
 export CUSTOM_CA_ENABLED="true"
@@ -302,8 +306,6 @@ This ensures the JWT token's `iss` claim matches what the backend expects.
 Once deployed, you can access:
 - Keycloak: [https://keycloak.xfsc.local](https://keycloak.xfsc.local)
 - DCS API: [https://xfsc.local/dcs/digital-contracting-service/](https://xfsc.local/dcs/digital-contracting-service/)
-
-The DCS API will require valid JWT tokens from Keycloak. Requests without authentication will receive a **401 Unauthorized** response.
 
 The DCS API will require valid JWT tokens from Keycloak. Requests without authentication will receive a **401 Unauthorized** response.
 
@@ -590,76 +592,7 @@ Before running:
 
 ### WSL2 Port Forwarding for Rancher Desktop (Windows + WSL Development)
 
-If you're running Rancher Desktop on Windows and developing from WSL2, you'll encounter network isolation issues where WSL cannot reach the Traefik LoadBalancer IP (`192.168.127.x`). This affects accessing services like Keycloak via shared domain names.
-
-**Problem**: WSL2 cannot route to the Kubernetes LoadBalancer network that Rancher Desktop creates. Windows can access it through special network bridging, but WSL cannot.
-
-**Solution**: Set up port forwarding from WSL to the cluster using `kubectl` and `socat`.
-
-#### Setup Steps
-
-1. **Start kubectl port-forward for HTTPS** (to tunnel from WSL to Traefik):
-   ```bash
-   kubectl port-forward -n kube-system svc/traefik 8443:443 --address=0.0.0.0 > /tmp/traefik-forward-https.log 2>&1 &
-   echo $! > /tmp/traefik-forward-https.pid
-   ```
-
-2. **Install socat** (if not already installed):
-   ```bash
-   sudo apt-get update && sudo apt-get install -y socat
-   ```
-
-3. **Forward port 443 to 8443** using socat:
-   ```bash
-   WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
-   sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
-   echo $! | sudo tee /tmp/socat-443.pid
-   ```
-
-4. **Update /etc/hosts** to use your WSL IP:
-   ```bash
-   WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
-   echo "$WSL_IP keycloak.xfsc.local xfsc.local" | sudo tee -a /etc/hosts
-   ```
-
-5. **Update Windows hosts file** (in PowerShell as Administrator):
-   ```powershell
-   # Get WSL IP
-   wsl hostname -I
-   # Add to C:\Windows\System32\drivers\etc\hosts:
-   # <WSL_IP> keycloak.xfsc.local xfsc.local
-   ```
-
-#### How It Works
-
-```
-Browser/WSL → keycloak.xfsc.local:443 (resolves to WSL_IP)
-              ↓
-              socat (port 443 → 8443)
-              ↓
-              kubectl port-forward (WSL:8443 → Traefik:443 in cluster)
-              ↓
-              Traefik Ingress (TLS termination, routes to Keycloak/DCS services)
-              ↓
-              Service pods
-```
-
-#### Keeping Port Forwards Alive
-
-The port forwards will stop if:
-- WSL restarts (after `wsl --shutdown`)
-- Terminal session closes
-- Process is killed
-
-To restart after WSL shutdown:
-```bash
-# Restart port forwards for HTTPS
-kubectl port-forward -n kube-system svc/traefik 8443:443 --address=0.0.0.0 > /tmp/traefik-forward-https.log 2>&1 &
-WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
-sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
-```
-
-**Alternative**: Use a systemd service or startup script to automatically restart the port forwards.
+The port-forwarding steps and restart instructions are covered in **Dev Setup: Windows + Rancher Desktop + WSL** (see Step 4 and "Restarting After WSL Shutdown"). Use those steps if WSL cannot reach the Traefik LoadBalancer IP.
 
 ---
 
