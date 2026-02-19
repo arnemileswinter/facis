@@ -98,11 +98,26 @@ func handleHTTPServer(ctx context.Context, u *url.URL, contractStorageArchiveEnd
 	templatecatalogueintegrationsvr.Mount(mux, templateCatalogueIntegrationServer)
 	templaterepositorysvr.Mount(mux, templateRepositoryServer)
 
+	// Mount login page handler
+	loginHandler, err := auth.NewLoginHandler("web/templates")
+	if err != nil {
+		log.Fatalf(ctx, err, "failed to create login handler")
+	}
+	mux.Handle("GET", "/auth/login", loginHandler.ServeHTTP)
+
+	// Mount callback handler for OIDC token exchange
+	callbackHandler, err := auth.NewCallbackHandler("web/templates")
+	if err != nil {
+		log.Fatalf(ctx, err, "failed to create callback handler")
+	}
+	mux.Handle("GET", "/auth/callback", callbackHandler.ServeHTTP)
+
 	// Validate OIDC configuration
 	oidcIssuerURL := os.Getenv("OIDC_ISSUER_URL")
 	oidcClientID := os.Getenv("OIDC_CLIENT_ID")
-	if oidcIssuerURL == "" || oidcClientID == "" {
-		log.Fatalf(ctx, nil, "OIDC configuration missing: OIDC_ISSUER_URL and OIDC_CLIENT_ID environment variables must be specified")
+	oidcRedirectURI := os.Getenv("OIDC_REDIRECT_URI")
+	if oidcIssuerURL == "" || oidcClientID == "" || oidcRedirectURI == "" {
+		log.Fatalf(ctx, nil, "OIDC configuration missing: OIDC_ISSUER_URL, OIDC_CLIENT_ID, and OIDC_REDIRECT_URI environment variables must be specified")
 	}
 
 	// Initialize OIDC validator

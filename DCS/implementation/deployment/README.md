@@ -223,34 +223,48 @@ You should see the Keycloak login page. Default admin credentials: `admin/admin`
 
 #### 7.3 Configure Redirect URIs (Required for OAuth)
 
-For the OAuth authorization code flow to work, you must configure valid redirect URIs:
+For the OAuth authorization code flow to work, you must configure valid redirect URIs in your OIDC client:
 
 1. In your client settings, scroll to **Valid redirect URIs**
-2. Add your application's callback URL(s):
+2. Add your application's callback URL based on your environment:
+
+   **Development (localhost):**
    ```
-   https://xfsc.local/dcs/*
+   http://localhost:8991/auth/callback
    ```
-   > Note: if the DCS runs outside of the cluster on bare metal in development, you may put the redirect to your localhost-bound DCS here.
+
+   **Production (domain-based):**
+   ```
+   https://<domain>/<path>/auth/callback
+   ```
+   Example: `https://xfsc.local/dcs/auth/callback`
+
 3. Add **Valid post logout redirect URIs** (optional but recommended):
    ```
-   https://xfsc.local/dcs/*
+   https://<domain>/<path>/*
    ```
+   Example: `https://xfsc.local/dcs/*`
+
 4. Click **"Save"**
+
+> **Important**: The redirect URI must match exactly what's configured via `OIDC_REDIRECT_URI` environment variable with `/callback` appended. If you get "Incorrect redirect_uri" error, verify the callback URL matches what's registered in Keycloak.
 
 **OAuth Flow Overview:**
 ```
-User → Frontend → Keycloak login
-                      ↓ (user authenticates)
-Frontend ← Keycloak (redirects with auth code)
+User → Frontend (/auth/login) → Keycloak login
+                                   ↓ (user authenticates)
+Frontend ← Keycloak (redirects with auth code to /auth/callback)
     ↓
-    ↓ (exchange code for token)
+    ↓ (exchange code for token at /auth/callback endpoint)
     ↓
-Keycloak → Frontend (returns access token)
+Keycloak → /auth/callback endpoint (returns access token)
     ↓
-DCS API ← Frontend (calls API with token)
+Frontend displays tokens on /auth/callback page
+    ↓
+DCS API ← Frontend (calls API with access token)
 ```
 
-**Note**: If you skip this step, the OAuth authorization code flow will fail. Only the direct grant (password) flow works without redirect URIs, but that's not recommended for production apps.
+**Note**: If you skip this step, the OAuth authorization code flow will fail with "Incorrect redirect_uri" error. Only the direct grant (password) flow works without redirect URIs, but that's not recommended for production apps.
 
 #### 7.4 Create a Test User
 1. Go to **Users** (left sidebar)
@@ -457,10 +471,17 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
   - Must match the client you created in the Keycloak realm
   - Used by the backend to validate JWT tokens
 
+- **`OIDC_REDIRECT_URI`** - The redirect URI for OIDC authentication flow
+  - Default: `http://localhost:8991`
+  - Example: `https://xfsc.local/dcs` or `http://localhost:8991`
+  - Must be registered as a valid redirect URI in your Keycloak client configuration
+  - Used by the frontend login page to build the authorization URL
+
 **Example:**
 ```bash
 # Development deployment with shared hostname
 export OIDC_ISSUER_URL="https://keycloak.xfsc.local/realms/dcs"
+export OIDC_REDIRECT_URI="http://localhost:8991"
 ./deploy.sh \
   ~/.kube/config \
   ./certs/server.key \
@@ -472,6 +493,7 @@ export OIDC_ISSUER_URL="https://keycloak.xfsc.local/realms/dcs"
 
 # Production deployment with external Keycloak
 export OIDC_ISSUER_URL="https://keycloak.example.com/realms/dcs"
+export OIDC_REDIRECT_URI="https://example.com/dcs"
 ./deploy.sh \
   ~/.kube/config \
   ./certs/server.key \
