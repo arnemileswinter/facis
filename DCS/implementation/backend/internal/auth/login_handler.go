@@ -28,10 +28,6 @@ func NewLoginHandler(templatesDir string) (*LoginHandler, error) {
 	oidcClientID := os.Getenv("OIDC_CLIENT_ID")
 	redirectURI := os.Getenv("OIDC_REDIRECT_URI")
 
-	if redirectURI == "" {
-		redirectURI = "http://localhost:8991"
-	}
-
 	return &LoginHandler{
 		template:      tmpl,
 		oidcIssuerURL: oidcIssuerURL,

@@ -247,7 +247,7 @@ For the OAuth authorization code flow to work, you must configure valid redirect
 
 4. Click **"Save"**
 
-> **Important**: The redirect URI must match exactly what's configured via `OIDC_REDIRECT_URI` environment variable with `/callback` appended. If you get "Incorrect redirect_uri" error, verify the callback URL matches what's registered in Keycloak.
+> **Important**: The redirect URI must match exactly what's configured via `OIDC_REDIRECT_URI` environment variable with `/auth/callback` appended. If you get "Incorrect redirect_uri" error, verify the callback URL matches what's registered in Keycloak.
 
 **OAuth Flow Overview:**
 ```
@@ -255,13 +255,19 @@ User → Frontend (/auth/login) → Keycloak login
                                    ↓ (user authenticates)
 Frontend ← Keycloak (redirects with auth code to /auth/callback)
     ↓
-    ↓ (exchange code for token at /auth/callback endpoint)
+    ↓ (exchange code for tokens at /auth/callback endpoint)
     ↓
-Keycloak → /auth/callback endpoint (returns access token)
+Keycloak → /auth/callback endpoint (returns access + refresh tokens)
     ↓
-Frontend displays tokens on /auth/callback page
+/auth/callback sets refresh token as HttpOnly cookie,
+displays access token to the frontend
     ↓
 DCS API ← Frontend (calls API with access token)
+    ↓
+When access token expires:
+Frontend → POST /auth/refresh (cookie sent automatically)
+    ↓
+/auth/refresh exchanges refresh token at Keycloak → new access token
 ```
 
 **Note**: If you skip this step, the OAuth authorization code flow will fail with "Incorrect redirect_uri" error. Only the direct grant (password) flow works without redirect URIs, but that's not recommended for production apps.
@@ -471,11 +477,12 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
   - Must match the client you created in the Keycloak realm
   - Used by the backend to validate JWT tokens
 
-- **`OIDC_REDIRECT_URI`** - The redirect URI for OIDC authentication flow
-  - Default: `http://localhost:8991`
+- **`OIDC_REDIRECT_URI`** - The base URI for OIDC authentication flow (**required**)
   - Example: `https://xfsc.local/dcs` or `http://localhost:8991`
-  - Must be registered as a valid redirect URI in your Keycloak client configuration
-  - Used by the frontend login page to build the authorization URL
+  - The backend appends `/auth/callback` to form the full redirect URI
+  - Must be registered as a valid redirect URI in your Keycloak client configuration (with `/auth/callback` suffix)
+  - Used by the login and callback handlers to build the authorization and token exchange URLs
+  - Note: `deploy.sh` defaults to `http://localhost:8991` if unset, but the backend requires it explicitly
 
 **Example:**
 ```bash
