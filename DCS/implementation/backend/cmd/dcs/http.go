@@ -112,6 +112,10 @@ func handleHTTPServer(ctx context.Context, u *url.URL, contractStorageArchiveEnd
 	}
 	mux.Handle("GET", "/auth/callback", callbackHandler.ServeHTTP)
 
+	// Mount refresh token handler
+	refreshHandler := auth.NewRefreshHandler()
+	mux.Handle("POST", "/auth/refresh", refreshHandler.ServeHTTP)
+
 	// Validate OIDC configuration
 	oidcIssuerURL := os.Getenv("OIDC_ISSUER_URL")
 	oidcClientID := os.Getenv("OIDC_CLIENT_ID")

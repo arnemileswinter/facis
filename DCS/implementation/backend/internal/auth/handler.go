@@ -13,7 +13,7 @@ func OIDCMiddleware(validator *middleware.OIDCValidator) func(http.Handler) http
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Skip authentication for public paths
-			publicPaths := []string{"/auth/login", "/auth/callback"}
+			publicPaths := []string{"/auth/login", "/auth/callback", "/auth/refresh", "/health"}
 			for _, path := range publicPaths {
 				if r.URL.Path == path {
 					next.ServeHTTP(w, r)

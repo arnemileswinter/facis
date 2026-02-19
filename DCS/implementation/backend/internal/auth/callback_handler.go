@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html"
 	"html/template"
 	"io"
 	"net/http"
@@ -61,11 +62,22 @@ func (h *CallbackHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "<h1>Error</h1><p>%s</p>", err.Error())
+		fmt.Fprintf(w, "<h1>Error</h1><p>%s</p>", html.EscapeString(err.Error()))
 		return
 	}
 
-	// Render the template with token data
+	// Set refresh token as secure HttpOnly cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokenResp.RefreshToken,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSite(http.SameSiteLaxMode),
+		Path:     "/auth/refresh",
+		MaxAge:   7 * 24 * 60 * 60, // 7 days
+	})
+
+	// Render the template with token data (excluding refresh token)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := h.template.Execute(w, tokenResp); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
