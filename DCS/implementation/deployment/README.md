@@ -31,6 +31,316 @@ Thanks to ORCE’s orchestration features, deploying a Digital Contracting Servi
 ## ⚡️ Click-to-Deploy
 
 ---
+## Prerequisites
+
+Before running the deploy script, ensure you have the following:
+
+### System Tools
+The following CLI tools must be installed and accessible in your PATH:
+- **kubectl** - Kubernetes command-line tool
+- **helm** - Package manager for Kubernetes
+- **jq** - Command-line JSON processor
+- **curl** - Data transfer tool
+- **sed** - Stream editor
+- **openssl** - For generating TLS certificates and private keys
+- **ssh-keygen** - For SSH key generation
+
+### Kubernetes Cluster
+- A working Kubernetes cluster
+- **Traefik ingress controller** installed in the cluster (`kube-system` namespace)
+  ```bash
+  # Install Traefik (if not already installed)
+  kubectl apply -f https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/templates/deployment.yaml
+  ```
+
+### Files & Credentials
+- **Kubeconfig file**: Path to your Kubernetes cluster configuration (e.g., `~/.kube/config`)
+- **TLS Private Key**: Path to your TLS certificate private key (PEM format)
+- **TLS Certificate**: Path to your TLS certificate (PEM format, must match your domain)
+- **Domain**: A domain name where the DCS service will be accessible
+- **URL Path**: A unique path identifier for this DCS instance
+
+**Note**: See the **"Dev Setup"** section below for instructions on generating self-signed certificates for development.
+
+### Keycloak Setup
+- **Running Keycloak instance** accessible to both:
+  - Your Kubernetes cluster (for backend validation)
+  - End-user browsers (for authentication flow)
+- A configured realm with an OIDC client
+- The Keycloak issuer URL must be reachable from both contexts
+
+**For development setup**, see the **"Dev Setup: Windows + Rancher Desktop + WSL"** section below for detailed Keycloak deployment and configuration steps.
+
+**For production**, use a properly secured external Keycloak instance with TLS and valid DNS.
+
+---
+
+## 🖥️ Dev Setup: Windows + Rancher Desktop + WSL
+
+This guide walks through setting up DCS for local development on Windows with Rancher Desktop and WSL2.
+
+### Prerequisites
+- **Windows 10/11** with WSL2 enabled
+- **Rancher Desktop** installed and running (with Kubernetes enabled)
+- **WSL2 distro** (Ubuntu recommended) with kubectl, helm, jq, curl installed
+
+### Step 1: Generate Self-Signed Certificates
+
+First, generate the TLS certificates that will be used for both Keycloak and DCS:
+
+```bash
+# Create certs directory
+mkdir -p ./certs
+
+# Generate private key
+openssl genrsa -out ./certs/dev.key 2048
+
+# Generate self-signed certificate (valid for 365 days)
+openssl req -new -x509 -key ./certs/dev.key -out ./certs/dev.crt -days 365 \
+  -subj "/CN=*.xfsc.local/O=Dev/C=US" \
+  -addext "subjectAltName=DNS:*.xfsc.local,DNS:xfsc.local,DNS:keycloak.xfsc.local,DNS:dcs.xfsc.local"
+```
+
+### Step 2: Trust the Certificate in Windows
+
+Trust the certificate so your browser won't show security warnings:
+
+1. Copy the certificate to Windows:
+   ```bash
+   cp ./certs/dev.crt /mnt/c/Users/$USER/Downloads/
+   ```
+
+2. In Windows:
+   - Open **PowerShell as Administrator**
+   - Import the certificate:
+     ```powershell
+     Import-Certificate -FilePath "$env:USERPROFILE\Downloads\dev.crt" -CertStoreLocation Cert:\LocalMachine\Root
+     ```
+   - Or double-click `dev.crt` → Install Certificate → Local Machine → Place in "Trusted Root Certification Authorities"
+
+3. Restart your browser for changes to take effect
+
+> Note: Depending on your browser you may need to import the self-signed certificate to its browser-level security tab as well.
+On edge, this is under Settings -> Privacy,search and services -> Security -> Manage certificates -> Custom -> Import
+
+### Step 3: Deploy Keycloak with HTTPS
+
+Deploy Keycloak using the provided script which automatically handles TLS configuration:
+
+```bash
+cd /path/to/DCS/implementation/deployment
+./deploy-dev-keycloak.sh
+```
+
+**What this script does:**
+- Creates the `keycloak` namespace
+- Deploys Keycloak from keycloak-quickstarts
+- Creates TLS secret `dev-wildcard-tls` with your certificate
+- Creates Traefik ingress with HTTPS (websecure entrypoint)
+- Configures TLS termination for `keycloak.xfsc.local`
+
+The script uses these environment variables (with defaults):
+- `KEYCLOAK_HOST` (default: `keycloak.xfsc.local`)
+- `KEYCLOAK_NAMESPACE` (default: `keycloak`)
+- `TLS_CERT_FILE` (default: `./certs/dev.crt`)
+- `TLS_KEY_FILE` (default: `./certs/dev.key`)
+
+### Step 4: Set Up WSL Port Forwarding for HTTPS
+
+Because WSL cannot directly reach the Traefik LoadBalancer network, you need to set up port forwarding:
+
+```bash
+# 1. Start kubectl port-forward for HTTPS (tunnels WSL → Traefik)
+kubectl port-forward -n kube-system svc/traefik 8443:443 --address=0.0.0.0 > /tmp/traefik-forward-https.log 2>&1 &
+echo $! > /tmp/traefik-forward-https.pid
+
+# 2. Install socat (if needed)
+sudo apt-get update && sudo apt-get install -y socat
+
+# 3. Get your WSL IP
+WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+echo "WSL IP: $WSL_IP"
+
+# 4. Forward port 443 → 8443 using socat
+sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
+echo $! | sudo tee /tmp/socat-443.pid
+
+# 5. Update /etc/hosts in WSL
+echo "$WSL_IP keycloak.xfsc.local xfsc.local" | sudo tee -a /etc/hosts
+```
+
+### Step 5: Update Windows Hosts File
+
+Add the WSL IP to your Windows hosts file so your browser can reach Keycloak and DCS:
+
+1. Open **PowerShell as Administrator**
+2. Get your WSL IP:
+   ```powershell
+   wsl hostname -I
+   ```
+3. Edit hosts file:
+   ```powershell
+   notepad C:\Windows\System32\drivers\etc\hosts
+   ```
+4. Add this line (replace with your actual WSL IP):
+   ```
+   172.29.35.79 keycloak.xfsc.local xfsc.local
+   ```
+5. Save and close
+
+### Step 6: Verify Keycloak Access
+
+Test from both WSL and Windows:
+
+```bash
+# From WSL
+curl -Ik https://keycloak.xfsc.local/
+```
+
+From Windows browser: Open [https://keycloak.xfsc.local](https://keycloak.xfsc.local)
+
+You should see the Keycloak login page. Default admin credentials: `admin/admin`
+
+### Step 7: Configure Keycloak
+
+#### 7.1 Create a Realm
+1. Log in to Keycloak at [https://keycloak.xfsc.local](https://keycloak.xfsc.local) - default `admin:admin` credentials.
+2. Click the realm dropdown (top-left, says "master")
+3. Click **"Create Realm"**
+4. Enter realm name: `dcs`
+5. Click **"Create"**
+
+#### 7.2 Create the OIDC Client
+1. In the `dcs` realm, go to **Clients** (left sidebar)
+2. Click **"Create client"**
+3. **Client ID**: `digital-contracting-service`
+4. **Client type**: OpenID Connect
+5. Click **"Next"**
+6. Click **"Save"**
+
+#### 7.3 Configure Redirect URIs (Required for OAuth)
+
+For the OAuth authorization code flow to work, you must configure valid redirect URIs:
+
+1. In your client settings, scroll to **Valid redirect URIs**
+2. Add your application's callback URL(s):
+   ```
+   https://xfsc.local/dcs/*
+   ```
+3. Add **Valid post logout redirect URIs** (optional but recommended):
+   ```
+   https://xfsc.local/dcs/*
+   ```
+4. Click **"Save"**
+
+**OAuth Flow Overview:**
+```
+User → Frontend → Keycloak login
+                      ↓ (user authenticates)
+Frontend ← Keycloak (redirects with auth code)
+    ↓
+    ↓ (exchange code for token)
+    ↓
+Keycloak → Frontend (returns access token)
+    ↓
+DCS API ← Frontend (calls API with token)
+```
+
+**Note**: If you skip this step, the OAuth authorization code flow will fail. Only the direct grant (password) flow works without redirect URIs, but that's not recommended for production apps.
+
+#### 7.4 Create a Test User
+1. Go to **Users** (left sidebar)
+2. Click **"Create new user"**
+3. **Username**: `test`
+4. Click **"Create"**
+5. Go to the **Credentials** tab
+6. Click **"Set password"**
+7. Enter password: `test`
+8. Toggle OFF: **Temporary** (so you don't need to reset on first login)
+9. Click **"Save"**
+
+### Step 8: Deploy DCS
+
+Deploy the DCS service with automated HTTPS, CA trust, and in-cluster DNS configuration:
+
+```bash
+# Set environment variables for custom registry (optional - defaults to upstream)
+export DOCKER_REGISTRY="your-custom-registry.example.com"
+export DOCKER_REPO="facis"
+export DOCKER_TAG="latest"
+
+# Enable custom CA certificate trust
+export CUSTOM_CA_ENABLED="true"
+export CUSTOM_CA_CONFIGMAP="dev-ca-cert"
+export CUSTOM_CA_CERT_FILE="./certs/dev.crt"
+
+# Run the deployment script
+./deploy.sh \
+  ~/.kube/config \
+  ./certs/dev.key \
+  ./certs/dev.crt \
+  xfsc.local \
+  dcs \
+  https://keycloak.xfsc.local/realms/dcs \
+  digital-contracting-service
+```
+
+**What this script does:**
+- Creates the DCS namespace
+- Creates CA ConfigMap (if `CUSTOM_CA_ENABLED=true`)
+- Detects Traefik ClusterIP and configures hostAliases for in-cluster DNS resolution
+- Deploys DCS via Helm with HTTPS ingress (websecure entrypoint + TLS)
+- Creates TLS secrets for both the application and ingress
+- Waits for deployment to be ready
+
+**Important**: The OIDC issuer URL must use the shared hostname (`keycloak.xfsc.local`) so that both:
+- The DCS backend running in Kubernetes can reach it (via hostAlias → Traefik ClusterIP)
+- Your browser/frontend can reach it (via hosts file → WSL IP)
+
+This ensures the JWT token's `iss` claim matches what the backend expects.
+
+Once deployed, you can access:
+- Keycloak: [https://keycloak.xfsc.local](https://keycloak.xfsc.local)
+- DCS API: [https://xfsc.local/dcs/digital-contracting-service/](https://xfsc.local/dcs/digital-contracting-service/)
+
+The DCS API will require valid JWT tokens from Keycloak. Requests without authentication will receive a **401 Unauthorized** response.
+
+The DCS API will require valid JWT tokens from Keycloak. Requests without authentication will receive a **401 Unauthorized** response.
+
+### Restarting After WSL Shutdown
+
+The port forwards will stop when WSL restarts. To restart them:
+
+```bash
+# Forward HTTPS (443)
+kubectl port-forward -n kube-system svc/traefik 8443:443 --address=0.0.0.0 > /tmp/traefik-forward-https.log 2>&1 &
+WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
+```
+
+**Tip**: Create a shell script to automate this or use a systemd service.
+
+---
+
+## ⚙️ Advanced: Production Setup
+
+For production deployments:
+
+### Keycloak Configuration
+- Use a properly secured external Keycloak instance (not the quickstart)
+- Configure valid redirect URIs in your client settings:
+  - Add: `https://<your-domain>/<path>/*`
+  - Example: `https://example.com/dcs/*`
+- Enable **Client authentication**, **Authorization**, **Standard flow enabled**
+- Consider using a service account with proper RBAC for automation
+
+### TLS Certificates
+- Use certificates from a trusted Certificate Authority (not self-signed)
+- Ensure certificates match your domain name
+- Set up automatic certificate renewal (e.g., with cert-manager)
+
+---
+
 ## 🛠️ How to Use
 
 ### 1. Prepare the environment and prerequisites
@@ -62,18 +372,132 @@ Click on "New Node" in the sidebar.
 Upload `node-red-contrib-digital-contracting-service-0.0.1.tgz` from this repository and install. Refresh to activate the node.
 
 
-### 2. Install your node
-click on the "Install" tab. Then on the upload icon.The node will be successfully installed.
+### 2. Run the Deploy Script
+
+Once all prerequisites are in place, you can deploy the Digital Contracting Service using the deploy script:
+
+```bash
+./deploy.sh \
+  <kubeconfig> \
+  <private_key_path> \
+  <crt_path> \
+  <domain> \
+  <path> \
+  <realm> \
+  <oidc_client_id>
+```
+
+**Parameters:**
+
+1. **`<kubeconfig>`** - Path to your Kubernetes configuration file
+   - Example: `~/.kube/config`
+   - This file contains cluster credentials and connection details
+   - The script will use this to deploy resources to your cluster
+
+2. **`<private_key_path>`** - Path to your TLS private key file (PEM format)
+   - Example: `./certs/server.key`
+   - Used to create the TLS secret for HTTPS ingress
+   - Must match the certificate in the next parameter
+
+3. **`<crt_path>`** - Path to your TLS certificate file (PEM format)
+   - Example: `./certs/server.crt`
+   - Used to create the TLS secret for HTTPS ingress
+   - Must be valid for the domain specified in parameter 4
+
+4. **`<domain>`** - The base domain where your DCS will be accessible
+   - Example: `example.com` or `xfsc.local`
+   - The full URL will be: `https://<domain>/<path>/`
+   - Must have DNS pointing to your ingress controller's external IP
+
+5. **`<path>`** - URL path prefix for this DCS instance
+   - Example: `dcs` (creates `https://example.com/dcs/`)
+   - Allows multiple DCS instances on the same domain
+   - Used as namespace identifier: `digital-contracting-service-<path>`
+
+6. **`<realm>`** - Keycloak realm name for authentication
+   - Example: `dcs`
+   - Must match the realm you created in Keycloak
+   - Used to construct the OIDC issuer URL
+
+7. **`<oidc_client_id>`** - OIDC client ID registered in Keycloak
+   - Example: `digital-contracting-service`
+   - Must match the client you created in the Keycloak realm
+   - Used by the backend to validate JWT tokens
+
+**Environment Variables (optional):**
+
+- **`DOCKER_REGISTRY`** - Docker registry URL
+  - Default: Docker Hub
+  - Use if your image is in a private registry
+
+- **`DOCKER_REPO`** - Docker repository namespace
+  - Default: `facis`
+  - Example: `myorg`
+  - Combined with registry to form: `<registry>/<repo>/digital-contracting-service`
+
+- **`DOCKER_TAG`** - Image tag to deploy
+  - Default: `latest`
+  - Example: `v1.2.3` or `oidc`
+  - Use specific tags for version control
+
+- **`OIDC_ISSUER_URL`** - Full OIDC issuer URL
+  - **No default - must be set explicitly**
+  - Example: `https://keycloak.example.com/realms/dcs` or `https://keycloak.xfsc.local/realms/dcs`
+  - **Critical**: Must be a URL reachable by both:
+    - The backend pods running in Kubernetes
+    - End-user browsers accessing your application
+  - The JWT token's `iss` claim must exactly match this URL
+  - **Do not use in-cluster URLs** (like `keycloak.default.svc.cluster.local`) - they only work inside the cluster and will cause token validation to fail
+
+**Example:**
+```bash
+# Development deployment with shared hostname
+export OIDC_ISSUER_URL="https://keycloak.xfsc.local/realms/dcs"
+./deploy.sh \
+  ~/.kube/config \
+  ./certs/server.key \
+  ./certs/server.crt \
+  xfsc.local \
+  dcs \
+  dcs \
+  digital-contracting-service
+
+# Production deployment with external Keycloak
+export OIDC_ISSUER_URL="https://keycloak.example.com/realms/dcs"
+./deploy.sh \
+  ~/.kube/config \
+  ./certs/server.key \
+  ./certs/server.crt \
+  example.com \
+  dcs \
+  dcs \
+  digital-contracting-service
+```
+
+**What the script does:**
+1. Verifies all required CLI tools are installed
+2. Validates the kubeconfig file and cluster connectivity
+3. Checks for Traefik ingress controller in the cluster
+4. Creates the deployment namespace: `digital-contracting-service-<path>`
+5. Replaces placeholders in Helm chart values
+6. Creates TLS secrets from your certificate files
+7. Deploys the Helm chart with all configurations
+8. Waits for pods to be ready and reports the service URL
+
+---
+
+### 3. Install your node
+Click on the "Install" tab. Then on the upload icon. The node will be successfully installed.
 ![step two (flow)](./docImage/newstep.png?raw=true)
 
 
-### 3. Create your flow
+### 4. Create your flow
 Drag in an Inject node, the **Digital Contracting Service** node, and a Debug node. Connect them:
 
 ![step three (flow)](./docImage/create-your-flow.png?raw=true)
 
 
-### 4. Name your instance and configure the node
+### 5. Name your instance and configure the node
 Double-click on the Digital Contracting Service node to open the edit dialog.
 In this step, you must choose a **Digital Contracting Service Name**. This will become your instance’s unique identifier, so it must be:
 - Unique (not used by any other instance)
@@ -82,13 +506,13 @@ For example, if you name it `mydcs`, it will be used internally for instance ref
 ![step four (flow)](./docImage/step2.png?raw=true)
 
 
-### 5. Provide your kubeconfig file
+### 6. Provide your kubeconfig file
 In this tab, you need to provide the **kubeconfig** file of your target Kubernetes cluster.
 This file allows the DCS node to access your Kubernetes environment and deploy the DCS instance correctly.
 ![step five (flow)](./docImage/step3.png?raw=true)
 
 
-### 6. Provide domain address and TLS credentials
+### 7. Provide domain address and TLS credentials
 In this tab, you must enter the **domain address** where the DCS will be accessible. You’ll also need to upload your **TLS certificate** and **private key**.
 
 The final accessible URL is formed by combining this domain with the DCS instance name you set earlier. For example:
@@ -162,6 +586,97 @@ Before running:
 
 ---
 
-## 📝 License
+## 🔧 Troubleshooting
+
+### WSL2 Port Forwarding for Rancher Desktop (Windows + WSL Development)
+
+If you're running Rancher Desktop on Windows and developing from WSL2, you'll encounter network isolation issues where WSL cannot reach the Traefik LoadBalancer IP (`192.168.127.x`). This affects accessing services like Keycloak via shared domain names.
+
+**Problem**: WSL2 cannot route to the Kubernetes LoadBalancer network that Rancher Desktop creates. Windows can access it through special network bridging, but WSL cannot.
+
+**Solution**: Set up port forwarding from WSL to the cluster using `kubectl` and `socat`.
+
+#### Setup Steps
+
+1. **Start kubectl port-forward for HTTPS** (to tunnel from WSL to Traefik):
+   ```bash
+   kubectl port-forward -n kube-system svc/traefik 8443:443 --address=0.0.0.0 > /tmp/traefik-forward-https.log 2>&1 &
+   echo $! > /tmp/traefik-forward-https.pid
+   ```
+
+2. **Install socat** (if not already installed):
+   ```bash
+   sudo apt-get update && sudo apt-get install -y socat
+   ```
+
+3. **Forward port 443 to 8443** using socat:
+   ```bash
+   WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+   sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
+   echo $! | sudo tee /tmp/socat-443.pid
+   ```
+
+4. **Update /etc/hosts** to use your WSL IP:
+   ```bash
+   WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+   echo "$WSL_IP keycloak.xfsc.local xfsc.local" | sudo tee -a /etc/hosts
+   ```
+
+5. **Update Windows hosts file** (in PowerShell as Administrator):
+   ```powershell
+   # Get WSL IP
+   wsl hostname -I
+   # Add to C:\Windows\System32\drivers\etc\hosts:
+   # <WSL_IP> keycloak.xfsc.local xfsc.local
+   ```
+
+#### How It Works
+
+```
+Browser/WSL → keycloak.xfsc.local:443 (resolves to WSL_IP)
+              ↓
+              socat (port 443 → 8443)
+              ↓
+              kubectl port-forward (WSL:8443 → Traefik:443 in cluster)
+              ↓
+              Traefik Ingress (TLS termination, routes to Keycloak/DCS services)
+              ↓
+              Service pods
+```
+
+#### Keeping Port Forwards Alive
+
+The port forwards will stop if:
+- WSL restarts (after `wsl --shutdown`)
+- Terminal session closes
+- Process is killed
+
+To restart after WSL shutdown:
+```bash
+# Restart port forwards for HTTPS
+kubectl port-forward -n kube-system svc/traefik 8443:443 --address=0.0.0.0 > /tmp/traefik-forward-https.log 2>&1 &
+WSL_IP=$(ip addr show eth0 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+sudo socat TCP-LISTEN:443,bind=$WSL_IP,reuseaddr,fork TCP:$WSL_IP:8443 > /tmp/socat-443.log 2>&1 &
+```
+
+**Alternative**: Use a systemd service or startup script to automatically restart the port forwards.
+
+---
+
+### Image Pull Errors with Rancher Desktop
+
+If you're using **Rancher Desktop** and encounter `ImagePullBackOff` errors when deploying with private registries:
+
+1. **Root Cause**: Rancher Desktop uses containerd which is isolated from Docker's credential store. Even if Docker can pull an image, containerd may not have access to the registry credentials.
+
+2. **Solution**: Manually import the image into Rancher Desktop:
+   - Build or pull the image locally: `docker pull <registry>/<image>:tag`
+   - Open **Rancher Desktop GUI** → Images
+   - Click **Import** and select the image
+   - The image will now be available to Kubernetes
+
+---
+
+## �📝 License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](../LICENSE) file for details.

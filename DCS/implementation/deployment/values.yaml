@@ -7,7 +7,7 @@ replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: digital-contracting-service
+  repository: [registry]
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
@@ -66,12 +66,18 @@ ingress:
     kubernetes.io/ingress.allow-http: "true"
     cert-manager.io/cluster-issuer: cert-manager-webhook
     traefik.ingress.kubernetes.io/router.middlewares: digital-contracting-service-dcs-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
 
   hosts:
     - host: [domain-name]
       paths:
         - path: /[path]/digital-contracting-service/
           pathType: Prefix
+  
+  tls:
+    - hosts:
+        - [domain-name]
+      secretName: dev-wildcard-tls
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -117,8 +123,28 @@ volumeMounts: []
   #   mountPath: "/etc/foo"
   #   readOnly: true
 
+# Custom CA certificates for HTTPS connections (e.g., self-signed Keycloak certs)
+customCA:
+  enabled: false
+  # Name of the ConfigMap containing CA certificate(s)
+  # The ConfigMap should have files with .crt extension
+  configMapName: ""
+
+# Host aliases for in-cluster DNS resolution (e.g., map keycloak.xfsc.local to Traefik ClusterIP)
+# Example:
+# hostAliases:
+#   - ip: "10.43.99.151"
+#     hostnames:
+#       - "keycloak.xfsc.local"
+hostAliases: []
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+# OIDC Configuration
+oidc:
+  issuerURL: "[oidc-issuer-url]"
+  clientID: "[oidc-client-id]"
