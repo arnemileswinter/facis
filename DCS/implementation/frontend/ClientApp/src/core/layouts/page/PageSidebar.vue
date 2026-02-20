@@ -1,0 +1,67 @@
+<template>
+  <div class="flex items-center h-16 px-4 overflow-hidden">
+    <div class="font-bold text-2xl tracking-tight text-base-content uppercase">DCS</div>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4">
+    <ul class="menu px-3 gap-1 w-full text-base-content">
+      <li v-for="route in navigationRoutes" :key="route.path">
+        <RouterLink :to="route.path" @click="closeMobileDrawer" :class="[
+          'flex items-center gap-4 py-3 rounded-btn',
+          isSidebarCollapsed ? 'justify-center px-0' : 'px-4'
+        ]" active-class="active bg-primary text-primary-content" :data-tip="isSidebarCollapsed ? route.name : ''">
+          <component :is="route.meta?.icon" class="w-6 h-6 flex-shrink-0" aria-hidden="true" />
+          <span v-if="!isSidebarCollapsed" class="font-medium whitespace-nowrap">
+            {{ route.name }}
+          </span>
+        </RouterLink>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="p-4 border-t border-base-content/10 bg-base-300/20">
+    <div :class="['flex items-center gap-3', isSidebarCollapsed ? 'justify-center' : 'px-2']">
+      <div class="avatar">
+        <div class="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+          <img
+            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=facearea&facepad=2&w=128&h=128&q=80"
+            alt="Profile" />
+        </div>
+      </div>
+      <div v-if="!isSidebarCollapsed" class="overflow-hidden">
+        <p class="text-sm font-bold truncate">Tom Cook</p>
+        <p class="text-xs opacity-60">Admin</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter, RouterLink, RouterView } from 'vue-router'
+import { storeToRefs } from 'pinia';
+import { usePageStore } from '@core/store/page'
+
+const router = useRouter()
+
+const pageStore = usePageStore()
+const { isSidebarCollapsed, pageSidebarId } = storeToRefs(pageStore)
+
+const closeMobileDrawer = () => {
+  const drawerToggle = document.getElementById(pageSidebarId)
+  if (drawerToggle) drawerToggle.checked = false
+}
+
+const navigationRoutes = computed(() => {
+  try {
+    return router.getRoutes().filter(route =>
+      route.name &&
+      !route.path.includes(':') &&
+      route.meta?.hideInSidebar !== true
+    )
+  } catch (e) {
+    return []
+  }
+})
+</script>
