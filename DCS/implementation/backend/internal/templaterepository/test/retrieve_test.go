@@ -20,7 +20,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
@@ -60,7 +60,7 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		did, err := base.GetDID()
 		if err != nil {
-			t.Fatalf("Failed to connect get new DID: %v", err)
+			t.Fatalf("Failed to get new DID: %v", err)
 		}
 		dids = append(dids, *did)
 		createTestContractTemplate(t, db, did, templatestate.Draft, creator)

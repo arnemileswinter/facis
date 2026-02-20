@@ -95,19 +95,96 @@ func ReadAllContractTemplateMetaData(ctx context.Context, tx *sqlx.Tx) ([]Contra
 	return cts, nil
 }
 
-func ReadAllContractTemplateMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, filter map[string]interface{}) ([]ContractTemplateMetaData, error) {
-	//query := `
-	//    SELECT did, document_number, version, state, name, description, created_at, updated_at, meta_data
-	//    FROM contract_templates
-	//    WHERE state = $1
-	// `
+type SearchValues struct {
+	DID            *string
+	DocumentNumber *int
+	Version        *int
+	State          *templatestate.TemplateState
+	Name           *string
+	Description    *string
+	Filter         *string
+}
+
+func createSearchConditions(values SearchValues) (*string, []interface{}, error) {
+
+	conditions := ""
+
+	var params []interface{}
+	paramIndex := 1
+
+	if values.DID != nil {
+		conditions += ` did = $` + strconv.Itoa(paramIndex) + ` AND`
+		params = append(params, *values.DID)
+		paramIndex++
+	}
+
+	if values.DocumentNumber != nil {
+		conditions += ` document_number = $` + strconv.Itoa(paramIndex) + ` AND`
+		params = append(params, *values.DocumentNumber)
+		paramIndex++
+	}
+
+	if values.Version != nil {
+		conditions += ` version = $` + strconv.Itoa(paramIndex) + ` AND`
+		params = append(params, *values.Version)
+		paramIndex++
+	}
+
+	if values.State != nil {
+		conditions += ` state = $` + strconv.Itoa(paramIndex) + ` AND`
+		params = append(params, *values.State)
+		paramIndex++
+	}
+
+	if values.Name != nil {
+		conditions += ` name ILIKE $` + strconv.Itoa(paramIndex) + ` AND`
+		params = append(params, "%"+*values.Name+"%")
+		paramIndex++
+	}
+
+	if values.Description != nil {
+		conditions += ` description ILIKE $` + strconv.Itoa(paramIndex) + ` AND`
+		params = append(params, "%"+*values.Description+"%")
+		paramIndex++
+	}
+
+	if values.Filter != nil {
+		conditions += ` search_vector @@ plainto_tsquery('english', $` +
+			strconv.Itoa(paramIndex) + `) AND`
+		params = append(params, *values.Filter)
+		paramIndex++
+	}
+
+	// Remove last comma " AND"
+	l := len(" AND")
+	if len(conditions) > l {
+		conditions = conditions[:len(conditions)-l]
+	}
+
+	return &conditions, params, nil
+}
+
+func ReadAllContractTemplateMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, values SearchValues) ([]ContractTemplateMetaData, error) {
+	query := `
+SELECT did, document_number, version, state, name, description, created_by, created_at, updated_at
+FROM contract_templates
+`
+
+	conditions, params, err := createSearchConditions(values)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(params) > 0 {
+		query += " WHERE " + *conditions
+	}
 
 	var cts []ContractTemplateMetaData
 	_ = cts
-	//err := tx.SelectContext(ctx, &cts, query, state)
-	//if err != nil {
-	//	return []ContractTemplateMetaData{}, err
-	//}
+	err = tx.SelectContext(ctx, &cts, query, params...)
+	if err != nil {
+		return []ContractTemplateMetaData{}, err
+	}
 	return cts, nil
 }
 

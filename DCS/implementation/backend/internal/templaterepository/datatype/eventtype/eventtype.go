@@ -22,6 +22,7 @@ const (
 	DeleteContractTemplateReviewTask             EventType = "DELETE_CONTRACT_TEMPLATE_REVIEW_TASK"
 	RetrieveAllContractTemplateApprovalTasks     EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATE_APPROVAL_TASKS"
 	DeleteContractTemplateApprovalTask           EventType = "DELETE_CONTRACT_TEMPLATE_APPROVAL_TASK"
+	SearchContractTemplate                       EventType = "SEARCH_CONTRACT_TEMPLATE"
 )
 
 var validStates = map[EventType]bool{
@@ -38,6 +39,7 @@ var validStates = map[EventType]bool{
 	DeleteContractTemplateReviewTask:             true,
 	RetrieveAllContractTemplateApprovalTasks:     true,
 	DeleteContractTemplateApprovalTask:           true,
+	SearchContractTemplate:                       true,
 }
 
 func NewEventType(s string) (EventType, error) {

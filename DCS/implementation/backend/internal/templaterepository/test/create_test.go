@@ -19,29 +19,31 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	name := "Test Contract Template"
 	description := "Test Description"
 
-	metaData := map[string]interface{}{}
-	jsonMetaData, err := datatype.NewJSON(metaData)
+	templateData := map[string]interface{}{}
+	jsonMetaData, err := datatype.NewJSON(templateData)
 	if err != nil {
-		t.Fatalf("Failed to create JSON metadata: %v", err)
+		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
-	createBy := "Test User"
+	ctx := context.Background()
+
+	creator := "Test User"
 
 	cmd := command.CreateTemplateContractCommand{
 		DID:          *did,
-		CreatedBy:    createBy,
+		CreatedBy:    creator,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonMetaData,
 	}
 	createHandler := command.CreateTemplateContractHandler{
-		Ctx: context.Background(),
+		Ctx: ctx,
 		DB:  db,
 	}
 	err = createHandler.Handle(cmd)
@@ -49,14 +51,11 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to create template contract: %v", err)
 	}
 
-	ctx := context.Background()
-	retrievedBy := "Test User"
-
 	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,

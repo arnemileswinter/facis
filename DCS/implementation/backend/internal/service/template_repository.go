@@ -7,8 +7,8 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
+	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
-	"encoding/json"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -151,20 +151,26 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context) (res int, err
 
 // perform filtered searches.
 func (s *templateRepositorysrvc) Search(ctx context.Context, req *templaterepository.ContractTemplateSearchRequest) (res []*templaterepository.ContractTemplateSearchResponse, err error) {
-	data, err := json.Marshal(req.Filter)
-	if err != nil {
-		return nil, templaterepository.MakeInternalError(err)
-	}
 
-	var filterData map[string]interface{}
-	err = json.Unmarshal(data, &filterData)
-	if err != nil {
-		return nil, templaterepository.MakeInternalError(err)
+	var state *templatestate.TemplateState
+	if req.State != nil {
+		tState, err := templatestate.NewTemplateState(*req.State)
+		if err != nil {
+			return nil, templaterepository.MakeInternalError(err)
+		}
+
+		state = &tState
 	}
 
 	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
-		RetrievedBy: "Test User",
-		Filter:      filterData,
+		RetrievedBy:    "Test User",
+		DID:            req.Did,
+		DocumentNumber: req.DocumentNumber,
+		Version:        req.Version,
+		State:          state,
+		Name:           req.Name,
+		Description:    req.Description,
+		Filter:         req.Filter,
 	}
 	queryHandler := contracttemplate.GetAllContractTemplatesMetaDataByFilterHandler{
 		Ctx: ctx,

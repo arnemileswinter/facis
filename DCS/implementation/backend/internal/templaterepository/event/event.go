@@ -176,14 +176,40 @@ func (e ContractTemplateUpdatedEvent) GetVersion() int {
 	return e.Version
 }
 
+// ContractTemplateSearchEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type ContractTemplateSearchEvent struct {
+	RetrievedBy    string    `json:"updated_by"`
+	DocumentNumber int       `json:"document_number"`
+	Version        int       `json:"version"`
+	OccurredAt     time.Time `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e ContractTemplateSearchEvent) EventType() string {
+	return eventtype.SearchContractTemplate.String()
+}
+
+// GetDID implements the Event interface.
+func (e ContractTemplateSearchEvent) GetDID() string {
+	return "*"
+}
+
+// GetDocumentNumber implements the Event interface.
+func (e ContractTemplateSearchEvent) GetDocumentNumber() int {
+	return e.DocumentNumber
+}
+
+// GetVersion implements the Event interface.
+func (e ContractTemplateSearchEvent) GetVersion() int {
+	return e.Version
+}
+
 // ContractTemplateRetrievedAllEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type ContractTemplateRetrievedAllEvent struct {
-	RetrievedBy    string                 `json:"updated_by"`
-	DocumentNumber int                    `json:"document_number"`
-	Version        int                    `json:"version"`
-	OccurredAt     time.Time              `json:"occurred_at"`
-	Filter         map[string]interface{} `json:"filter"`
+	RetrievedBy string    `json:"updated_by"`
+	OccurredAt  time.Time `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
@@ -198,12 +224,12 @@ func (e ContractTemplateRetrievedAllEvent) GetDID() string {
 
 // GetDocumentNumber implements the Event interface.
 func (e ContractTemplateRetrievedAllEvent) GetDocumentNumber() int {
-	return e.DocumentNumber
+	return 0
 }
 
 // GetVersion implements the Event interface.
 func (e ContractTemplateRetrievedAllEvent) GetVersion() int {
-	return e.Version
+	return 0
 }
 
 // ContractTemplateRetrievedByIdEvent is emitted when template metadata is updated.
