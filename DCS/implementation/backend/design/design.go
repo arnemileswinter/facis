@@ -5,7 +5,6 @@ import (
 )
 
 // JWTAuth defines the JWT-based security scheme backed by Keycloak OIDC.
-// Scopes map 1:1 to Keycloak realm roles (realm_access.roles claim).
 var JWTAuth = JWTSecurity("jwt", func() {
 	Description("Keycloak OIDC JWT Bearer token. Scopes correspond to Keycloak realm roles.")
 	Scope("Archive Manager", "Manage archived contracts and evidence")
