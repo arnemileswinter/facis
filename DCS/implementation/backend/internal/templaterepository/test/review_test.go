@@ -19,7 +19,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
@@ -79,7 +79,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"

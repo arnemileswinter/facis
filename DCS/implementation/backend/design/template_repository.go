@@ -76,9 +76,13 @@ var ContractTemplateUpdateResponse = Type("ContractTemplateUpdateResponse", func
 var ContractTemplateSearchRequest = Type("ContractTemplateSearchRequest", func() {
 	Description("Contract template search request")
 
-	Attribute("filter", Any, "Filter values for searching")
-
-	Required("filter")
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+	Attribute("state", String, "The state of the contract template")
+	Attribute("name", String, "The name of the contract template")
+	Attribute("description", String, "A description for that template")
+	Attribute("filter", String, "Search value for full text search in template data")
 })
 
 var ContractTemplateSearchResponse = Type("ContractTemplateSearchResponse", func() {
@@ -333,6 +337,7 @@ var _ = Service("TemplateRepository", func() {
 
 		HTTP(func() {
 			GET("/template/search")
+			Param("filter")
 			Response(StatusOK)
 			Response("bad_request", StatusBadRequest)
 			Response("internal_error", StatusInternalServerError)

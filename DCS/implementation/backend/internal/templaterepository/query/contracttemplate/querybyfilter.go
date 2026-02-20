@@ -16,7 +16,14 @@ import (
 
 type GetAllContractTemplatesMetaDataByFilterQuery struct {
 	RetrievedBy string
-	Filter      map[string]interface{}
+
+	DID            *string
+	DocumentNumber *int
+	Version        *int
+	State          *templatestate.TemplateState
+	Name           *string
+	Description    *string
+	Filter         *string
 }
 
 type GetAllContractTemplatesMetaDataByFilterResult struct {
@@ -47,14 +54,23 @@ func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllCont
 	}
 	defer tx.Rollback()
 
-	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaData(ctx, tx)
+	searchValues := templaterepository.SearchValues{
+		DID:            query.DID,
+		DocumentNumber: query.DocumentNumber,
+		Version:        query.Version,
+		State:          query.State,
+		Name:           query.Name,
+		Description:    query.Description,
+		Filter:         query.Filter,
+	}
+
+	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaDataByFilter(ctx, tx, searchValues)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
 	evt := templateevents.ContractTemplateRetrievedAllEvent{
 		RetrievedBy: query.RetrievedBy,
-		Filter:      query.Filter,
 		OccurredAt:  time.Now(),
 	}
 	err = event.Create(h.Ctx, tx, evt)

@@ -21,7 +21,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
@@ -80,7 +80,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	ctx := context.Background()
@@ -119,7 +119,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
@@ -153,7 +153,7 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
@@ -187,7 +187,7 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"

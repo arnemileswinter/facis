@@ -19,7 +19,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	name := "Test Contract Template"
