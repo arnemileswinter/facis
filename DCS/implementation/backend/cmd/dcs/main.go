@@ -110,7 +110,7 @@ func main() {
 		processAuditAndComplianceSvc = service.NewProcessAuditAndCompliance(jwtAuth)
 		signatureManagementSvc = service.NewSignatureManagement(jwtAuth)
 		templateCatalogueIntegrationSvc = service.NewTemplateCatalogueIntegration(jwtAuth)
-		templateRepositorySvc = templateRepositorySvc
+		templateRepositorySvc = templateRepositorySrv
 	}
 
 	// Wrap the service in endpoints that can be invoked from other service

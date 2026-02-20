@@ -2,8 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
-
 	"digital-contracting-service/internal/middleware"
 
 	goa "goa.design/goa/v3/pkg"
@@ -40,13 +38,13 @@ func (a JWTAuthenticator) JWTAuth(ctx context.Context, token string, scheme *sec
 	// Validate the token and extract Keycloak realm_access.roles.
 	roles, err := a.Validator.ValidateToken(ctx, token)
 	if err != nil {
-		return ctx, goa.PermanentError("unauthorized", fmt.Sprintf("invalid token: %s", err))
+		return ctx, goa.PermanentError("unauthorized", "invalid token: %s", err)
 	}
 
 	// If the endpoint declares required scopes, enforce at least one match.
 	if len(scheme.RequiredScopes) > 0 {
 		if !hasAnyRole(roles, scheme.RequiredScopes) {
-			return ctx, goa.PermanentError("forbidden", fmt.Sprintf("insufficient permissions: requires one of %v", scheme.RequiredScopes))
+			return ctx, goa.PermanentError("forbidden", "insufficient permissions: requires one of %v", scheme.RequiredScopes)
 		}
 	}
 

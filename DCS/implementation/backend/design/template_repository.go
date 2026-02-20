@@ -228,6 +228,8 @@ var ContractTemplateApproveResponse = Type("ContractTemplateApproveResponse", fu
 var ContractTemplateRejectRequest = Type("ContractTemplateRejectRequest", func() {
 	Description("Contract template retrieve by id request")
 
+	Token("token", String, "JWT token")
+
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", Int, "The number of the contract template")
 	Attribute("version", Int, "The version of the contract template")
