@@ -221,7 +221,45 @@ You should see the Keycloak login page. Default admin credentials: `admin/admin`
 5. Click **"Next"**
 6. Click **"Save"**
 
-#### 7.3 Configure Redirect URIs (Required for OAuth)
+#### 7.3 Create Client Roles
+
+The DCS backend enforces role-based access control using Keycloak **client roles** (read from the `resource_access.<client_id>.roles` JWT claim). You must create the following roles under the `digital-contracting-service` client:
+
+1. In the `dcs` realm, go to **Clients** → **digital-contracting-service**
+2. Go to the **Roles** tab
+3. Click **"Create role"** and add each of the following roles (one at a time):
+
+| Role | Description |
+|------|-------------|
+| `Archive Manager` | Manage archived contracts and evidence |
+| `Contract Observer` | Read-only access to archived contracts |
+| `Contract Creator` | Create new contract drafts |
+| `Sys. Contract Creator` | System-level contract creation |
+| `Contract Negotiator` | Negotiate contract terms |
+| `Contract Reviewer` | Review submitted contracts |
+| `Sys. Contract Reviewer` | System-level contract review |
+| `Contract Approver` | Approve or reject contracts |
+| `Sys. Contract Approver` | System-level contract approval |
+| `Contract Manager` | Manage contract lifecycle |
+| `Sys. Contract Manager` | System-level contract management |
+| `Contract Signer` | Sign contracts digitally |
+| `Sys. Contract Signer` | System-level contract signing |
+| `Template Creator` | Create new templates |
+| `Template Reviewer` | Review submitted templates |
+| `Template Approver` | Approve or reject templates |
+| `Template Manager` | Manage template lifecycle |
+| `Auditor` | Perform audits and generate reports |
+| `Compliance Officer` | Monitor compliance and report incidents |
+
+4. Assign roles to users:
+   - Go to **Users** → select a user → **Role mapping** tab
+   - Click **"Assign role"**
+   - Filter by client: **digital-contracting-service**
+   - Select the desired roles and click **"Assign"**
+
+> **Note**: A user's client roles appear in the JWT under `resource_access.digital-contracting-service.roles`. The DCS backend checks these roles against the required scopes declared for each API endpoint. If a user lacks the required role, the request is rejected with **403 Forbidden**.
+
+#### 7.4 Configure Redirect URIs (Required for OAuth)
 
 For the OAuth authorization code flow to work, you must configure valid redirect URIs in your OIDC client:
 
@@ -272,7 +310,7 @@ Frontend → POST /auth/refresh (cookie sent automatically)
 
 **Note**: If you skip this step, the OAuth authorization code flow will fail with "Incorrect redirect_uri" error. Only the direct grant (password) flow works without redirect URIs, but that's not recommended for production apps.
 
-#### 7.4 Create a Test User
+#### 7.5 Create a Test User
 1. Go to **Users** (left sidebar)
 2. Click **"Create new user"**
 3. **Username**: `test`
