@@ -1,5 +1,5 @@
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ContractTemplateService } from '../../services/contract-template-service'
 import type { ContractTemplateRetrieveByIdRequest } from '../../models/requests/template-request';
 
@@ -16,12 +16,11 @@ interface SemanticRule {
 }
 
 export function useContractTemplateController(did?: string, document_number?: number, version?: number) {
-    const route = useRoute()
     const router = useRouter()
 
     const isSubmitting = ref(false)
     const isLoadingSuggestions = ref(false)
-    const isEditMode = computed(() => !!route.params.did)
+    const isEditMode = computed(() => !!did)
 
     const form = ref({
         name: '',
@@ -109,7 +108,7 @@ export function useContractTemplateController(did?: string, document_number?: nu
         try {
             console.log("Publishing Template to Repository...", JSON.parse(JSON.stringify(form.value)))
             await new Promise(resolve => setTimeout(resolve, 1500))
-            router.push('/')
+            router.push({ name: 'templates.list' })
         } catch (error) {
             console.error("Submission failed", error)
         } finally {

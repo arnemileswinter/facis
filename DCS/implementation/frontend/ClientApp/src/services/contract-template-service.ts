@@ -41,6 +41,10 @@ export const ContractTemplateService = {
     return http.put<ContractTemplateUpdateResponse>('/template/update', request).then((res) => res.data)
   },
 
+  async search(_request: ContractTemplateSearchRequest) {
+    return http.get<ContractTemplateSearchResponse>('template/search').then((res) => res.data)
+  },
+
   async retrieve(_request?: ContractTemplateRetrieveRequest): Promise<ContractTemplate[]> {
     return http
       .get<ContractTemplateRetrieveResponse>('/template/retrieve')
@@ -65,10 +69,6 @@ export const ContractTemplateService = {
         console.error('Retrieve ID Error:', err.message)
         return null
       })
-  },
-
-  async search(_request: ContractTemplateSearchRequest) {
-    return http.get<ContractTemplateSearchResponse>('template/search').then((res) => res.data)
   },
 
   async approve(request: ContractTemplateApproveRequest) {
