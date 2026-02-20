@@ -22,7 +22,11 @@ export const ContractTemplateService = {
 
     retrieve() {
         return http.get('/template/retrieve')
-            .then(res => Array.isArray(res.data) ? res.data : [])
+            .then(res => {
+                return Array.isArray(res.data.contract_templates)
+                    ? res.data.contract_templates
+                    : []
+            })
             .catch(err => {
                 console.error('Retrieve Error:', err)
                 return []
