@@ -44,7 +44,7 @@ var _ = API("dcs", func() {
 
 	Server("dcs", func() {
 		Host("local", func() {
-			URI("http://0.0.0.0:8991")
+			URI("http://localhost:8991")
 		})
 	})
 })

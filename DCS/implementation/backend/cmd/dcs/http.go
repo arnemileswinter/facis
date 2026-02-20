@@ -105,6 +105,9 @@ func handleHTTPServer(ctx context.Context, u *url.URL, authEndpoints *genauth.En
 	templatecatalogueintegrationsvr.Mount(mux, templateCatalogueIntegrationServer)
 	templaterepositorysvr.Mount(mux, templateRepositoryServer)
 
+	// Mount Swagger UI on /swagger and OpenAPI spec on /openapi3.json.
+	mountSwaggerUI(mux)
+
 	var handler http.Handler = mux
 	handler = service.RequestContextMiddleware(handler)
 	if dbg {
