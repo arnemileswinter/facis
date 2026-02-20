@@ -59,7 +59,7 @@ export interface SemanticConditionParameter {
     value: unknown
 }
 
-const DocumentBlockType = {
+export const DocumentBlockType = {
     Section: 'SECTION',
     Text: 'TEXT',
     Clause: 'CLAUSE',
