@@ -1,5 +1,4 @@
 interface PageState {
-  title: string
   isSidebarCollapsed: boolean
   breadcrumbs?: BreadcrumbItem[]
   pageSidebarId: string

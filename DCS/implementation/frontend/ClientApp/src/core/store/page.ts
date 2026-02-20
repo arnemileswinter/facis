@@ -3,7 +3,6 @@ import type { PageState } from '@core/models/page-store'
 
 const storeId = "page"
 const defaultState: PageState = {
-  title: "DCS",
   pageSidebarId: "main-drawer",
   isSidebarCollapsed: false,
   breadcrumbs: []
