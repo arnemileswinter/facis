@@ -4,6 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/command"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
@@ -23,17 +24,25 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Reviewed, db)
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	ctx := context.Background()
-	rejectedBy := "Test User"
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	approver := "Test User 1"
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
 	cmd := command.RejectTemplateContractCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		RejectedBy:     rejectedBy,
+		RejectedBy:     approver,
 		Reason:         "Test Reason",
 	}
 	handler := command.RejectTemplateContractHandler{
@@ -65,6 +74,45 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)
 }
 
+func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 1")
+
+	cmd := command.RejectTemplateContractCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		RejectedBy:     "Test User 2",
+		Reason:         "Test Reason",
+	}
+	handler := command.RejectTemplateContractHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)
@@ -76,7 +124,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
@@ -109,7 +157,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Approved, db)
+	createTestContractTemplate(t, db, did, templatestate.Approved, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
@@ -142,7 +190,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Reviewed, db)
+	createTestContractTemplate(t, db, did, templatestate.Reviewed, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"

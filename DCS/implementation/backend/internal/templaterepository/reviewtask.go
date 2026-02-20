@@ -3,6 +3,7 @@ package templaterepository
 import (
 	"context"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
+	"errors"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -43,18 +44,47 @@ func CreateReviewTasks(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*
 	return &createdAt, nil
 }
 
-func ReopenReviewTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
-	query := `
+func IsValidUserForReviewerTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string) (bool, error) {
+	selectQuery := `
+        SELECT COUNT(*) FROM contract_templates_review_task
+		WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
+`
+
+	var count int
+	err := tx.GetContext(ctx, &count, selectQuery, did, documentNumber, version, reviewer)
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func ReopenReviewAndApprovalTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	updateRTQuery := `
         UPDATE contract_templates_review_task SET state = 'OPEN'
         WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
+	_, err := tx.ExecContext(ctx, updateRTQuery, did, documentNumber, version)
 	if err != nil {
 		return err
 	}
 
-	return err
+	updateATQuery := `
+        UPDATE contract_templates_approval_task SET state = 'OPEN'
+        WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	_, err = tx.ExecContext(ctx, updateATQuery, did, documentNumber, version)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewTaskData, error) {
@@ -72,15 +102,39 @@ func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewT
 	return reviewTasks, nil
 }
 
+func ReadAllReviewTasksByReviewer(ctx context.Context, tx *sqlx.Tx, reviewer string) ([]ReviewTaskData, error) {
+	query := `
+        SELECT id, did, document_number, version, state, reviewer,
+               created_by, created_at
+        FROM contract_templates_review_task WHERE reviewer = $1
+    `
+
+	var reviewTasks []ReviewTaskData
+	err := tx.SelectContext(ctx, &reviewTasks, query, reviewer)
+	if err != nil {
+		return nil, err
+	}
+	return reviewTasks, nil
+}
+
 func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) error {
 	query := `
         UPDATE contract_templates_review_task SET state = $5
         WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
     `
 
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, reviewer, state)
+	result, err := tx.ExecContext(ctx, query, did, documentNumber, version, reviewer, state)
 	if err != nil {
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("user has no review task for this contract template")
 	}
 
 	return err

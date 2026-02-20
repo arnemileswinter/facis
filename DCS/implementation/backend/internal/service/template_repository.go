@@ -43,7 +43,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 	cmd := command.CreateTemplateContractCommand{
 		DID:          *did,
-		CreatedBy:    "",
+		CreatedBy:    "Test User",
 		Name:         req.Name,
 		Description:  req.Description,
 		TemplateData: &jsonMetaData,
@@ -87,7 +87,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		SubmittedBy:    "",
+		SubmittedBy:    "Test User",
 		ActionFlag:     actionFlag,
 		Comments:       req.Comments,
 	}
@@ -163,7 +163,7 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 	}
 
 	qry := contracttemplate.GetAllContractTemplatesMetaDataByFilterQuery{
-		RetrievedBy: "",
+		RetrievedBy: "Test User",
 		Filter:      filterData,
 	}
 	queryHandler := contracttemplate.GetAllContractTemplatesMetaDataByFilterHandler{
@@ -193,10 +193,10 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 }
 
 // retrieve templates
-func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.ContractTemplateRetrieveRequest) (res []*templaterepository.ContractTemplateRetrieveResponse, err error) {
+func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.ContractTemplateRetrieveRequest) (res *templaterepository.ContractTemplateRetrieveResponse, err error) {
 
 	qry := contracttemplate.GetAllContractTemplatesMetaData{
-		RetrievedBy: "",
+		RetrievedBy: "Test User",
 	}
 	queryHandler := contracttemplate.GetAllContractTemplateMetaDataHandler{
 		Ctx: ctx,
@@ -207,9 +207,9 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	var contractTemplates []*templaterepository.ContractTemplateRetrieveResponse
-	for _, item := range result {
-		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateRetrieveResponse{
+	var contractTemplates []*templaterepository.ContractTemplateItem
+	for _, item := range result.ContractTemplates {
+		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateItem{
 			Did:            item.DID,
 			DocumentNumber: item.DocumentNumber,
 			Version:        item.Version,
@@ -221,7 +221,35 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 		})
 	}
 
-	return contractTemplates, nil
+	var reviewTasks []*templaterepository.ContractTemplateReviewTaskItem
+	for _, item := range result.ReviewerTasks {
+		reviewTasks = append(reviewTasks, &templaterepository.ContractTemplateReviewTaskItem{
+			Did:            item.DID,
+			DocumentNumber: item.DocumentNumber,
+			Version:        item.Version,
+			Reviewer:       item.Reviewer,
+			State:          item.State.String(),
+			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	var approvalTasks []*templaterepository.ContractTemplateApprovalTaskItem
+	for _, item := range result.ApprovalTasks {
+		approvalTasks = append(approvalTasks, &templaterepository.ContractTemplateApprovalTaskItem{
+			Did:            item.DID,
+			DocumentNumber: item.DocumentNumber,
+			Version:        item.Version,
+			State:          item.State.String(),
+			Approver:       item.Approver,
+			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return &templaterepository.ContractTemplateRetrieveResponse{
+		ContractTemplates: contractTemplates,
+		ReviewTasks:       reviewTasks,
+		ApprovalTasks:     approvalTasks,
+	}, nil
 }
 
 // Retrieve a template by template id.
@@ -231,7 +259,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
-		RetrievedBy:    "",
+		RetrievedBy:    "Test User",
 	}
 	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -275,7 +303,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		ApprovedBy:     "",
+		ApprovedBy:     "Test User",
 		DecisionNotes:  req.DecisionNotes,
 	}
 	handler := command.ApproveTemplateContractHandler{
@@ -307,7 +335,7 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		RejectedBy:     "",
+		RejectedBy:     "Test User",
 		Reason:         req.Reason,
 	}
 	handler := command.RejectTemplateContractHandler{

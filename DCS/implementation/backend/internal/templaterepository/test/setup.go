@@ -40,7 +40,7 @@ func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
 	}
 }
 
-func createTestContractTemplate(t *testing.T, did *string, state templatestate.TemplateState, db *sqlx.DB) {
+func createTestContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templatestate.TemplateState, createdBy string) {
 	name := "Test Contract Template"
 	description := "Test Description"
 
@@ -52,11 +52,9 @@ func createTestContractTemplate(t *testing.T, did *string, state templatestate.T
 		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
-	createBy := "Test User"
-
 	cmd := command.CreateTemplateContractCommand{
 		DID:          *did,
-		CreatedBy:    createBy,
+		CreatedBy:    createdBy,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
@@ -99,7 +97,7 @@ func createTestContractTemplate(t *testing.T, did *string, state templatestate.T
 	}
 }
 
-func createTestContractTemplateWithTemplateData(t *testing.T, did *string, state templatestate.TemplateState, db *sqlx.DB, templateData map[string]interface{}) {
+func createTestContractTemplateWithTemplateData(t *testing.T, db *sqlx.DB, did *string, state templatestate.TemplateState, createdBy string, templateData map[string]interface{}) {
 	name := "Test Contract Template"
 	description := "Test Description"
 
@@ -108,11 +106,9 @@ func createTestContractTemplateWithTemplateData(t *testing.T, did *string, state
 		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
-	createBy := "Test User"
-
 	cmd := command.CreateTemplateContractCommand{
 		DID:          *did,
-		CreatedBy:    createBy,
+		CreatedBy:    createdBy,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
