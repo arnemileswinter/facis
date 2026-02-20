@@ -12,15 +12,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("create", func() {
 		Description("Create a new template.")
 		Meta("dcs:requirements", "DCS-IR-TR-01")
-		Meta("dcs:roles", "Template Creator")
 		Meta("dcs:tr:components", "Single- or multi-tiered template generation")
 		Meta("dcs:ui", "Template Builder")
-
+		Security(JWTAuth, func() {
+			Scope("Template Creator")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/create")
 			Response(StatusOK)
 		})
-
 		Result(String)
 	})
 
@@ -28,15 +31,20 @@ var _ = Service("TemplateRepository", func() {
 	Method("submit", func() {
 		Description(`with action flag { forwardTo: "approval" | "draft" } and optional reviewComments. allow resubmission path with approver comments.`)
 		Meta("dcs:requirements", "DCS-IR-TR-03", "DCS-IR-TR-04", "DCS-IR-TR-05")
-		Meta("dcs:roles", "Template Creator", "Template Reviewer", "Template Approver")
 		Meta("dcs:tr:components", "Single- or multi-tiered template generation")
 		Meta("dcs:ui", "Template Builder, Template Review, Template Approver")
-
+		Security(JWTAuth, func() {
+			Scope("Template Creator")
+			Scope("Template Reviewer")
+			Scope("Template Approver")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/submit")
 			Response(StatusOK)
 		})
-
 		Result(String)
 	})
 
@@ -44,15 +52,19 @@ var _ = Service("TemplateRepository", func() {
 	Method("update", func() {
 		Description("persist reviewer edits (metadata/clauses/semantics).")
 		Meta("dcs:requirements", "DCS-IR-TR-03")
-		Meta("dcs:roles", "Template Creator", "Template Reviewer")
 		Meta("dcs:tr:components", "Template Versioning")
 		Meta("dcs:ui", "Template Builder, Template Review")
-
+		Security(JWTAuth, func() {
+			Scope("Template Creator")
+			Scope("Template Reviewer")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			PUT("/template/update")
 			Response(StatusOK)
 		})
-
 		Result(Int)
 	})
 
@@ -60,15 +72,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("update_manage", func() {
 		Description("update metadata or status.")
 		Meta("dcs:requirements", "DCS-IR-TR-07")
-		Meta("dcs:roles", "Template Manager")
 		Meta("dcs:tr:components", "Template Versioning")
 		Meta("dcs:ui", "Template Management Dashboard")
-
+		Security(JWTAuth, func() {
+			Scope("Template Manager")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/update")
 			Response(StatusOK)
 		})
-
 		Result(Int)
 	})
 
@@ -76,15 +91,19 @@ var _ = Service("TemplateRepository", func() {
 	Method("search", func() {
 		Description("perform filtered searches.")
 		Meta("dcs:requirements", "DCS-IR-TR-02", "DCS-IR-TR-07")
-		Meta("dcs:roles", "Template Creator", "Template Manager")
 		Meta("dcs:tr:components", "Search Capabilities")
 		Meta("dcs:ui", "Template Builder, Template Management Dashboard")
-
+		Security(JWTAuth, func() {
+			Scope("Template Creator")
+			Scope("Template Manager")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			GET("/template/search")
 			Response(StatusOK)
 		})
-
 		Result(ArrayOf(Any))
 	})
 
@@ -92,15 +111,20 @@ var _ = Service("TemplateRepository", func() {
 	Method("retrieve", func() {
 		Description("load submitted template and history/provenance summary. fetch reviewed template with metadata, review history, and validation results. fetch all template entries for dashboard view.")
 		Meta("dcs:requirements", "DCS-IR-TR-02", "DCS-IR-TR-03", "DCS-IR-TR-05", "DCS-IR-TR-08")
-		Meta("dcs:roles", "Template Reviewer", "Template Approver", "Template Manager")
 		Meta("dcs:tr:components", "Template Versioning")
 		Meta("dcs:ui", "Template Builder, Template Approver, Template Management Dashboard")
-
+		Security(JWTAuth, func() {
+			Scope("Template Reviewer")
+			Scope("Template Approver")
+			Scope("Template Manager")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			GET("/template/retrieve")
 			Response(StatusOK)
 		})
-
 		Result(Any)
 	})
 
@@ -108,21 +132,23 @@ var _ = Service("TemplateRepository", func() {
 	Method("retrieve_by_id", func() {
 		Description("Retrieve a template by template id.")
 		Meta("dcs:requirements", "DCS-IR-TR-02", "DCS-IR-TR-03", "DCS-FR-TR-19")
-		Meta("dcs:roles", "Template Reviewer", "Template Approver", "Template Manager")
 		Meta("dcs:tr:components", "Template Versioning")
 		Meta("dcs:ui", "Template Builder, Template Approver, Template Management Dashboard")
-
+		Security(JWTAuth, func() {
+			Scope("Template Reviewer")
+			Scope("Template Approver")
+			Scope("Template Manager")
+		})
 		Payload(func() {
+			Token("token", String, "JWT token")
 			Attribute("template_id", String, "Template ID")
 			Required("template_id")
 		})
-
 		HTTP(func() {
 			GET("/template/retrieve/{template_id}")
 			Param("template_id")
 			Response(StatusOK)
 		})
-
 		Result(Any)
 	})
 
@@ -130,15 +156,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("verify", func() {
 		Description("run policy, schema, and semantic validations; return findings.")
 		Meta("dcs:requirements", "DCS-IR-TR-03")
-		Meta("dcs:roles", "Template Reviewer")
 		Meta("dcs:tr:components", "Semantic Hub")
 		Meta("dcs:ui", "Template Review")
-
+		Security(JWTAuth, func() {
+			Scope("Template Reviewer")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/verify")
 			Response(StatusOK)
 		})
-
 		Result(Any)
 	})
 
@@ -146,15 +175,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("approve", func() {
 		Description("mark template as approved, with optional decision notes.")
 		Meta("dcs:requirements", "DCS-IR-TR-05", "DCS-IR-TR-06")
-		Meta("dcs:roles", "Template Approver")
 		Meta("dcs:tr:components", "Template Versioning")
 		Meta("dcs:ui", "Template Approver")
-
+		Security(JWTAuth, func() {
+			Scope("Template Approver")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/approve")
 			Response(StatusOK)
 		})
-
 		Result(Int)
 	})
 
@@ -162,15 +194,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("reject", func() {
 		Description("mark template as rejected, requiring reason field.")
 		Meta("dcs:requirements", "DCS-IR-TR-05")
-		Meta("dcs:roles", "Template Approver")
 		Meta("dcs:tr:components", "")
 		Meta("dcs:ui", "Template Approver")
-
+		Security(JWTAuth, func() {
+			Scope("Template Approver")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/reject")
 			Response(StatusOK)
 		})
-
 		Result(Int)
 	})
 
@@ -178,15 +213,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("register", func() {
 		Description("register new template into the repository.")
 		Meta("dcs:requirements", "DCS-IR-TR-07")
-		Meta("dcs:roles", "Template Manager")
 		Meta("dcs:tr:components", "Contract Templates Storage & Provenance")
 		Meta("dcs:ui", "Template Management Dashboard")
-
+		Security(JWTAuth, func() {
+			Scope("Template Manager")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/register")
 			Response(StatusOK)
 		})
-
 		Result(Any)
 	})
 
@@ -194,15 +232,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("archive", func() {
 		Description("archive obsolete template.")
 		Meta("dcs:requirements", "DCS-IR-TR-07")
-		Meta("dcs:roles", "Template Manager")
 		Meta("dcs:tr:components", "Contract Templates Storage & Provenance")
 		Meta("dcs:ui", "Template Management Dashboard")
-
+		Security(JWTAuth, func() {
+			Scope("Template Manager")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			POST("/template/archive")
 			Response(StatusOK)
 		})
-
 		Result(Int)
 	})
 
@@ -210,15 +251,18 @@ var _ = Service("TemplateRepository", func() {
 	Method("audit", func() {
 		Description("retrieve audit history of template actions.")
 		Meta("dcs:requirements", "DCS-IR-TR-07", "DCS-IR-TR-08")
-		Meta("dcs:roles", "Template Manager")
 		Meta("dcs:tr:components", "")
 		Meta("dcs:ui", "Template Management Dashboard")
-
+		Security(JWTAuth, func() {
+			Scope("Template Manager")
+		})
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			GET("/template/audit")
 			Response(StatusOK)
 		})
-
 		Result(ArrayOf(String))
 	})
 })
