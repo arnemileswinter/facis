@@ -1,1 +1,1 @@
-export type ActionFlag = 'approval' | 'draft'
+export type ActionFlag = 'APPROVAL' | 'DRAFT'

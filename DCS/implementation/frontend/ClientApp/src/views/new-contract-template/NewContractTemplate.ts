@@ -1,5 +1,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ContractTemplateService } from '../../services/contract-template-service'
+import type { ContractTemplateRetrieveByIdRequest } from '../../models/requests/template-request';
 
 interface Clause {
     title: string;
@@ -13,7 +15,7 @@ interface SemanticRule {
     required: boolean;
 }
 
-export function useContractTemplateController() {
+export function useContractTemplateController(did?: string, document_number?: number, version?: number) {
     const route = useRoute()
     const router = useRouter()
 
@@ -98,9 +100,6 @@ export function useContractTemplateController() {
         newRule.value.required = false
     }
 
-
-
-
     const removeRule = (index: number) => {
         form.value.semantic_rules.splice(index, 1)
     }
@@ -118,9 +117,27 @@ export function useContractTemplateController() {
         }
     }
 
-    onMounted(() => {
+    const retrieveById = async () => {
+        if (!did || !document_number ||!version) return
+
+        const request: ContractTemplateRetrieveByIdRequest = {
+            did,
+            document_number,
+            version
+        }
+        const response = await ContractTemplateService.retrieveById(request)
+        if (response) {
+            form.value.name = response.name ?? ''
+            form.value.description = response.description ?? ''
+            form.value.state = response.state
+            form.value.version = response.version
+        }
+    }
+
+    onMounted(async () => {
         fetchSuggestions()
         if (isEditMode.value) {
+            await retrieveById()
         }
     })
 

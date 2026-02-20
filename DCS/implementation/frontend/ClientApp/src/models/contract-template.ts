@@ -7,8 +7,9 @@ export interface ContractTemplate {
     document_number: number
     version: number
     state: ContractTemplateType
-    name: string
+    name?: string
     description?: string
-    meta_data?: any
+    template_data?: any
+    updated_at: string
     clauses?: []
 }

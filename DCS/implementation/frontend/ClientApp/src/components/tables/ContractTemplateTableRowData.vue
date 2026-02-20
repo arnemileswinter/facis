@@ -15,5 +15,5 @@ defineProps<{
     <td class="pl-8">{{ template.created_by }}</td>
     <td class="pl-8">{{ new Date(template.created_at).toLocaleDateString() }}</td>
     <td class="pl-8">{{ template.description }}</td>
-    <td class="pl-8">{{ template.meta_data }}</td>
+    <td class="pl-8">{{ template.template_data }}</td>
 </template>

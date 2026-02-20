@@ -2,26 +2,34 @@ import type { ActionFlag } from '../../types/action-flag'
 
 interface ContractTemplateBaseRequest {
   did: string
+  document_number: number
+  version: number
 }
 
 export interface ContractTemplateCreateRequest {
   name?: string
   description?: string
-  /** The metadata of the contract template */
-  meta_data?: any
+  /** The template data of the contract template */
+  template_data?: any
 }
 
 export interface ContractTemplateSubmitRequest extends ContractTemplateBaseRequest {
   forward_to?: ActionFlag
-  review_comments?: string[]
+  comments?: string[]
 }
 
 export interface ContractTemplateUpdateRequest extends ContractTemplateBaseRequest {
   name?: string
   description?: string
-  /** The metadata of the contract template */
-  meta_data?: any
+  /** The template data of the contract template */
+  template_data?: any
 }
+
+export interface ContractTemplateSearchRequest {
+  filter: any
+}
+
+export interface ContractTemplateRetrieveRequest {}
 
 export interface ContractTemplateRetrieveByIdRequest extends ContractTemplateBaseRequest {}
 

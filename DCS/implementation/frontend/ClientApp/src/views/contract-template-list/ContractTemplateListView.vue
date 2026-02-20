@@ -1,11 +1,15 @@
 <template>
   <div class="flex justify-between mb-8">
-    <h2 class="text-2xl/7 font-bold  sm:truncate sm:text-3xl sm:tracking-tight ">
-      Contract Templates
+    <h2 class="text-2xl/7 font-bold sm:truncate sm:text-3xl sm:tracking-tight">
+      {{ $route.meta.name }}
     </h2>
 
-    <RouterLink to="/templates/new" class="btn rounded-box btn self-end btn-secondary gap-2">
-      Neues Template
+    <RouterLink
+      :to="{ name: 'templates.new' }"
+      class="btn rounded-box btn self-end btn-secondary gap-2"
+      #default="{ route }"
+    >
+      {{ route.meta.name }}
     </RouterLink>
   </div>
   <div>
