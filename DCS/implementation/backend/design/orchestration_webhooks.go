@@ -12,6 +12,7 @@ var _ = Service("OrchestrationWebhooks", func() {
 	Method("node_red_webhook", func() {
 		Description("Expose Node-Red - compatible endpoints and webhook callbacks.")
 		Meta("dcs:requirements", "DCS-IR-SI-02")
+		Security(JWTAuth)
 		Payload(func() {
 			Token("token", String, "JWT token")
 		})
