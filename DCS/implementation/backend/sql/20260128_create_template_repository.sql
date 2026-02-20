@@ -17,11 +17,19 @@ CREATE TABLE IF NOT EXISTS contract_templates (
 
     template_data JSONB DEFAULT '{}'::jsonb,
 
+    search_vector tsvector GENERATED ALWAYS AS (
+        to_tsvector('english', template_data::text)
+        ) STORED,
+
     CONSTRAINT pk_contract_templates PRIMARY KEY (did, document_number, version),
     CONSTRAINT chk_did_not_empty CHECK (did <> ''),
     CONSTRAINT chk_document_number_positive CHECK (document_number > 0),
     CONSTRAINT chk_version_positive CHECK (version > 0)
 );
+
+-- Index for full text search
+CREATE INDEX idx_contract_templates_search ON contract_templates
+    USING GIN(search_vector);
 
 -- Trigger for updating updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()

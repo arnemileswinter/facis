@@ -6,6 +6,8 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
@@ -18,7 +20,7 @@ type GetAllContractTemplatesMetaData struct {
 	RetrievedBy string
 }
 
-type GetAllContractTemplatesMetaDataResult struct {
+type ContractTemplatesMetaDataItem struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -30,12 +32,36 @@ type GetAllContractTemplatesMetaDataResult struct {
 	MetaData       datatype.JSON
 }
 
+type ContractTemplatesReviewTaskItem struct {
+	DID            string
+	DocumentNumber int
+	Version        int
+	State          reviewtaskstate.ReviewTaskState
+	Reviewer       string
+	CreatedAt      time.Time
+}
+
+type ContractTemplatesApprovalTaskItem struct {
+	DID            string
+	DocumentNumber int
+	Version        int
+	State          approvaltaskstate.ApprovalTaskState
+	Approver       string
+	CreatedAt      time.Time
+}
+
+type GetAllContractTemplatesMetaDataResult struct {
+	ContractTemplates []ContractTemplatesMetaDataItem
+	ReviewerTasks     []ContractTemplatesReviewTaskItem
+	ApprovalTasks     []ContractTemplatesApprovalTaskItem
+}
+
 type GetAllContractTemplateMetaDataHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTemplatesMetaData) ([]GetAllContractTemplatesMetaDataResult, error) {
+func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTemplatesMetaData) (*GetAllContractTemplatesMetaDataResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -60,14 +86,24 @@ func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTempl
 		return nil, fmt.Errorf("could not create event: %w", err)
 	}
 
+	reviewerTasks, err := templaterepository.ReadAllReviewTasksByReviewer(ctx, tx, query.RetrievedBy)
+	if err != nil {
+		return nil, fmt.Errorf("could not read all review tasks: %w", err)
+	}
+
+	approvalTasks, err := templaterepository.ReadAllApprovalTasksByApprover(ctx, tx, query.RetrievedBy)
+	if err != nil {
+		return nil, fmt.Errorf("could not read all review tasks: %w", err)
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllContractTemplatesMetaDataResult, len(contractTemplates))
-	for i, data := range contractTemplates {
-		result[i] = GetAllContractTemplatesMetaDataResult{
+	var contractTemplatesItems []ContractTemplatesMetaDataItem
+	for _, data := range contractTemplates {
+		contractTemplatesItems = append(contractTemplatesItems, ContractTemplatesMetaDataItem{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
@@ -76,8 +112,36 @@ func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTempl
 			Description:    *data.Description,
 			CreatedAt:      data.CreatedAt,
 			UpdatedAt:      data.UpdatedAt,
-		}
+		})
 	}
 
-	return result, nil
+	var reviewTaskItems []ContractTemplatesReviewTaskItem
+	for _, data := range reviewerTasks {
+		reviewTaskItems = append(reviewTaskItems, ContractTemplatesReviewTaskItem{
+			DID:            data.DID,
+			DocumentNumber: data.DocumentNumber,
+			Version:        data.Version,
+			State:          data.State,
+			Reviewer:       data.Reviewer,
+			CreatedAt:      data.CreatedAt,
+		})
+	}
+
+	var approvalTasksItems []ContractTemplatesApprovalTaskItem
+	for _, data := range approvalTasks {
+		approvalTasksItems = append(approvalTasksItems, ContractTemplatesApprovalTaskItem{
+			DID:            data.DID,
+			DocumentNumber: data.DocumentNumber,
+			Version:        data.Version,
+			State:          data.State,
+			Approver:       data.Approver,
+			CreatedAt:      data.CreatedAt,
+		})
+	}
+
+	return &GetAllContractTemplatesMetaDataResult{
+		ContractTemplates: contractTemplatesItems,
+		ReviewerTasks:     reviewTaskItems,
+		ApprovalTasks:     approvalTasksItems,
+	}, nil
 }

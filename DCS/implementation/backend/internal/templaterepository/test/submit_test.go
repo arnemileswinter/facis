@@ -3,7 +3,6 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
@@ -15,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,17 +28,19 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
+
 	approver := "Test User 5"
 	cmd := command.SubmitContractTemplateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    creator,
 		ActionFlag:     nil,
 		Comments:       nil,
 		Reviewer: []string{
@@ -59,13 +59,11 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy := "Test User"
-
 	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -82,7 +80,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerReviewTasks := query.GetAllContractTemplateReviewTasksForDIDHandler{
 		Ctx: ctx,
@@ -102,28 +100,48 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	}
 }
 
-func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did string, submittedBy string, reviewers []string) error {
-	tx, err := db.BeginTxx(ctx, nil)
-	defer tx.Rollback()
+func TestSubmit_SubmitContractTemplateInDraftStateWithInvalidUser(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to begin transaction: %v", err)
+		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	for _, reviewer := range reviewers {
-		reviewTask := templaterepository.ReviewTaskData{
-			DID:            did,
-			DocumentNumber: 1,
-			Version:        1,
-			Reviewer:       reviewer,
-			State:          reviewtaskstate.Open,
-			CreatedBy:      submittedBy,
-		}
-		_, err = templaterepository.CreateReviewTasks(ctx, tx, reviewTask)
-		if err != nil {
-			t.Fatalf("Failed to create review task: %v", err)
-		}
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+
+	ctx := context.Background()
+
+	approver := "Test User 5"
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
 	}
-	return tx.Commit()
+
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    "Test User 6",
+		ActionFlag:     nil,
+		Comments:       nil,
+		Reviewer:       reviewers,
+		Approver:       &approver,
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
 }
 
 func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T) {
@@ -137,10 +155,14 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
 
 	reviewers := []string{
 		"Test User 1",
@@ -148,12 +170,9 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		"Test User 3",
 	}
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
-	defer cancel()
-	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
-	if err != nil {
-		t.Fatalf("Failed to create review tasks: %v", err)
-	}
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 4")
 
 	tx, err := db.BeginTxx(ctxTx, nil)
 	defer tx.Rollback()
@@ -168,13 +187,12 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 
 	actionFlag := actionflag.Approval
 
-	submittedBy = "Test User 1"
 	cmd := command.SubmitContractTemplateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    reviewers[0],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -187,13 +205,11 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy := "Test User"
-
 	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -207,6 +223,124 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 }
 
+func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	tx, err := db.BeginTxx(ctxTx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		t.Fatalf("Failed to begin transaction: %v", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		t.Fatalf("Failed to commit transaction: %v", err)
+	}
+
+	actionFlag := actionflag.Approval
+
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    "Test User 4",
+		ActionFlag:     &actionFlag,
+		Comments:       []string{},
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestSubmit_RejectContractTemplateInSubmittedStateWithInvalidUser(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	tx, err := db.BeginTxx(ctxTx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		t.Fatalf("Failed to begin transaction: %v", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		t.Fatalf("Failed to commit transaction: %v", err)
+	}
+
+	actionFlag := actionflag.Draft
+
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    "Test User 4",
+		ActionFlag:     &actionFlag,
+		Comments:       []string{},
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
@@ -218,10 +352,14 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
 
 	reviewers := []string{
 		"Test User 1",
@@ -229,12 +367,9 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		"Test User 3",
 	}
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
-	defer cancel()
-	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
-	if err != nil {
-		t.Fatalf("Failed to create review tasks: %v", err)
-	}
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 4")
 
 	tx, err := db.BeginTxx(ctxTx, nil)
 	defer tx.Rollback()
@@ -269,13 +404,11 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		}
 	}
 
-	retrievedBy := "Test User"
-
 	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -300,11 +433,14 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 
-	submittedBy := "Test User"
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
 
 	reviewers := []string{
 		"Test User 1",
@@ -312,12 +448,9 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		"Test User 3",
 	}
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
-	defer cancel()
-	err = createReviewTasks(t, ctxTx, db, *did, submittedBy, reviewers)
-	if err != nil {
-		t.Fatalf("Failed to create review tasks: %v", err)
-	}
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 4")
 
 	tx, err := db.BeginTxx(ctxTx, nil)
 	defer tx.Rollback()
@@ -337,7 +470,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    reviewers[1],
+		SubmittedBy:    reviewers[0],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -381,17 +514,18 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Submitted, db)
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
 
 	cmd := command.SubmitContractTemplateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    creator,
 		ActionFlag:     nil,
 		Comments:       []string{},
 	}
@@ -402,6 +536,96 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 	err = handler.Handle(cmd)
 
 	assert.NotNil(t, err)
+}
+
+func TestSubmit_SubmitContractTemplateInReviewedStateWithInvalidUser(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+
+	approver := "Test User 1"
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
+
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    "Test User 2",
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.Error(t, err)
+}
+
+func TestSubmit_SubmitContractTemplateInSubmittedStateWithApproverUser(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to connect get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	approver := "Test User 4"
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
+
+	aFlag := actionflag.Approval
+	cmd := command.SubmitContractTemplateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    approver,
+		ActionFlag:     &aFlag,
+	}
+	handler := command.SubmitContractTemplateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.Error(t, err)
 }
 
 func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
@@ -415,13 +639,15 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
+	creator := "Test User"
+
 	/**
 	Create and Submit the Draft
 	*/
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
+
 	approver := "Test User 4"
 	reviewers := []string{
 		"Test User 1",
@@ -434,7 +660,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    creator,
 		ActionFlag:     nil,
 		Comments:       nil,
 		Reviewer:       reviewers,
@@ -449,13 +675,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy := "Test User"
-
 	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -472,7 +696,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerReviewTasks := query.GetAllContractTemplateReviewTasksForDIDHandler{
 		Ctx: ctx,
@@ -497,7 +721,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerApprovalTasks := query.GetAllContractTemplateApprovalTasksForDIDHandler{
 		Ctx: ctx,
@@ -516,13 +740,12 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	*/
 	actionFlag := actionflag.Approval
 
-	submittedBy = "Test User 1"
 	cmd = command.SubmitContractTemplateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    reviewers[1],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -535,13 +758,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -558,7 +779,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerReviewTasks = query.GetAllContractTemplateReviewTasksForDIDHandler{
 		Ctx: ctx,
@@ -575,7 +796,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerApprovalTasks = query.GetAllContractTemplateApprovalTasksForDIDHandler{
 		Ctx: ctx,
@@ -598,7 +819,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    reviewers[1],
+		SubmittedBy:    reviewers[2],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -611,13 +832,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -633,20 +852,12 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	/**
 	Contract Template creator submits it again
 	*/
-	approver = "Test User 4"
-	reviewers = []string{
-		"Test User 1",
-		"Test User 2",
-		"Test User 3",
-	}
-
-	submittedBy = "Test User"
 	cmd = command.SubmitContractTemplateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    creator,
 		ActionFlag:     nil,
 		Comments:       nil,
 		Approver:       &approver,
@@ -661,13 +872,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -705,13 +914,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -746,13 +953,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -790,13 +995,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -831,13 +1034,11 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -862,13 +1063,15 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
+	creator := "Test User"
+
 	/**
 	Create and Submit the Draft
 	*/
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
-	submittedBy := "Test User"
+
 	approver := "Test User 4"
 	reviewers := []string{
 		"Test User 1",
@@ -881,7 +1084,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    creator,
 		ActionFlag:     nil,
 		Comments:       nil,
 		Reviewer:       reviewers,
@@ -896,13 +1099,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy := "Test User"
-
 	qry := contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -919,7 +1120,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerReviewTasks := query.GetAllContractTemplateReviewTasksForDIDHandler{
 		Ctx: ctx,
@@ -944,7 +1145,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerApprovalTasks := query.GetAllContractTemplateApprovalTasksForDIDHandler{
 		Ctx: ctx,
@@ -963,13 +1164,12 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	actionFlag := actionflag.Approval
 
-	submittedBy = "Test User 1"
 	cmd = command.SubmitContractTemplateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    reviewers[1],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -982,13 +1182,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -1005,7 +1203,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerReviewTasks = query.GetAllContractTemplateReviewTasksForDIDHandler{
 		Ctx: ctx,
@@ -1022,7 +1220,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	handlerApprovalTasks = query.GetAllContractTemplateApprovalTasksForDIDHandler{
 		Ctx: ctx,
@@ -1058,13 +1256,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -1080,20 +1276,12 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	Contract Template creator submits it again
 	*/
-	approver = "Test User 4"
-	reviewers = []string{
-		"Test User 1",
-		"Test User 2",
-		"Test User 3",
-	}
-
-	submittedBy = "Test User"
 	cmd = command.SubmitContractTemplateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    creator,
 		ActionFlag:     nil,
 		Comments:       nil,
 		Approver:       &approver,
@@ -1108,13 +1296,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -1152,13 +1338,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -1193,13 +1377,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -1237,13 +1419,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -1276,13 +1456,11 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	retrievedBy = "Test User"
-
 	qry = contracttemplate.GetContractTemplateByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		RetrievedBy:    creator,
 	}
 	queryHandler = contracttemplate.GetContractTemplateByIdHandler{
 		Ctx: ctx,
@@ -1310,7 +1488,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	/**
 	Create and Submit the Draft
 	*/
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"
@@ -1752,7 +1930,7 @@ func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
 		t.Fatalf("Failed to connect get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, did, templatestate.Draft, db)
+	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	submittedBy := "Test User"

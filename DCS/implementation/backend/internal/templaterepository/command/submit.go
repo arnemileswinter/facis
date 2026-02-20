@@ -34,45 +34,6 @@ type SubmitContractTemplateHandler struct {
 	DB  *sqlx.DB
 }
 
-func reopenReviewTasks(ctx context.Context, tx *sqlx.Tx, submittedBy string, processData *templaterepository.ContractTemplateMetaData) error {
-
-	err := templaterepository.ReopenReviewTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
-	if err != nil {
-		return fmt.Errorf("could not reopen review tasks: %w", err)
-	}
-
-	reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
-		DID:            processData.DID,
-		DocumentNumber: processData.DocumentNumber,
-		Version:        processData.Version,
-		CreatedBy:      submittedBy,
-		OccurredAt:     time.Now(),
-	}
-	err = event.Create(ctx, tx, reopenReviewTaskEvent)
-	if err != nil {
-		return fmt.Errorf("could not create event: %w", err)
-	}
-
-	err = templaterepository.ReopenApprovalTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
-	if err != nil {
-		return fmt.Errorf("could not reopen approval tasks: %w", err)
-	}
-
-	reopenApprovalTaskEvent := templateevents.ContractTemplateReopenApprovalTaskEvent{
-		DID:            processData.DID,
-		DocumentNumber: processData.DocumentNumber,
-		Version:        processData.Version,
-		CreatedBy:      submittedBy,
-		OccurredAt:     time.Now(),
-	}
-	err = event.Create(ctx, tx, reopenApprovalTaskEvent)
-	if err != nil {
-		return fmt.Errorf("could not create event: %w", err)
-	}
-
-	return nil
-}
-
 func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
@@ -95,6 +56,10 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 	var nextTemplateState templatestate.TemplateState
 	if processData.State == templatestate.Draft {
+
+		if cmd.SubmittedBy != processData.CreatedBy {
+			return errors.New("invalid user")
+		}
 
 		if cmd.Reviewer == nil || len(cmd.Reviewer) == 0 {
 			return errors.New("no reviewer provided")
@@ -162,9 +127,25 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 	} else if processData.State == templatestate.Rejected {
 
-		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, processData)
+		if processData.CreatedBy != cmd.SubmittedBy {
+			return errors.New("invalid user")
+		}
+
+		err = templaterepository.ReopenReviewAndApprovalTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
 		if err != nil {
 			return fmt.Errorf("could not reopen review tasks: %w", err)
+		}
+
+		evt := templateevents.ContractTemplateReopenReviewAndApprovalTasksEvent{
+			DID:            processData.DID,
+			DocumentNumber: processData.DocumentNumber,
+			Version:        processData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			OccurredAt:     time.Now(),
+		}
+		err = event.Create(ctx, tx, evt)
+		if err != nil {
+			return fmt.Errorf("could not create event: %w", err)
 		}
 
 		nextTemplateState = templatestate.Submitted
@@ -174,7 +155,16 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == actionflag.Approval {
 
-				err := templaterepository.UpdateReviewTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
+				valid, err := templaterepository.IsValidUserForReviewerTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				if err != nil {
+					return err
+				}
+
+				if !valid {
+					return errors.New("invalid user")
+				}
+
+				err = templaterepository.UpdateReviewTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
 				if err != nil {
 					return fmt.Errorf("could not update approval task: %w", err)
 				}
@@ -190,19 +180,28 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 			} else if *cmd.ActionFlag == actionflag.Draft {
 
-				err := templaterepository.ReopenReviewTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
+				isValid, err := templaterepository.IsValidUserForReviewerTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				if err != nil {
+					return err
+				}
+
+				if !isValid {
+					return errors.New("invalid user")
+				}
+
+				err = templaterepository.ReopenReviewAndApprovalTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
 				if err != nil {
 					return fmt.Errorf("could not reopen review tasks: %w", err)
 				}
 
-				reopenReviewTaskEvent := templateevents.ContractTemplateReopenReviewTaskEvent{
+				evt := templateevents.ContractTemplateReopenReviewAndApprovalTasksEvent{
 					DID:            processData.DID,
 					DocumentNumber: processData.DocumentNumber,
 					Version:        processData.Version,
 					CreatedBy:      cmd.SubmittedBy,
 					OccurredAt:     time.Now(),
 				}
-				err = event.Create(ctx, tx, reopenReviewTaskEvent)
+				err = event.Create(ctx, tx, evt)
 				if err != nil {
 					return fmt.Errorf("could not create event: %w", err)
 				}
@@ -215,9 +214,30 @@ func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand
 
 	} else if processData.State == templatestate.Reviewed {
 
-		err := reopenReviewTasks(ctx, tx, cmd.SubmittedBy, processData)
+		isValid, err := templaterepository.IsValidUserForApprovalTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+		if err != nil {
+			return err
+		}
+
+		if !isValid {
+			return errors.New("invalid user")
+		}
+
+		err = templaterepository.ReopenReviewAndApprovalTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
 		if err != nil {
 			return fmt.Errorf("could not reopen review tasks: %w", err)
+		}
+
+		evt := templateevents.ContractTemplateReopenReviewAndApprovalTasksEvent{
+			DID:            processData.DID,
+			DocumentNumber: processData.DocumentNumber,
+			Version:        processData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			OccurredAt:     time.Now(),
+		}
+		err = event.Create(ctx, tx, evt)
+		if err != nil {
+			return fmt.Errorf("could not create event: %w", err)
 		}
 
 		nextTemplateState = templatestate.Submitted

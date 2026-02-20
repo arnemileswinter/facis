@@ -52,6 +52,15 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return errors.New("invalid contract template state")
 	}
 
+	exist, err := templaterepository.IsValidUserForApprovalTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.RejectedBy)
+	if err != nil {
+		return err
+	}
+
+	if !exist {
+		return errors.New("invalid user")
+	}
+
 	err = templaterepository.UpdateContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Draft)
 	if err != nil {
 		return fmt.Errorf("could not update current template state: %w", err)

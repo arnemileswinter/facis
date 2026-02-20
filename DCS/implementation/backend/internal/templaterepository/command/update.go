@@ -19,6 +19,7 @@ type UpdateTemplateContractCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
+	UpdatedBy      string
 	UpdatedAt      time.Time
 	Name           *string
 	Description    *string
@@ -44,6 +45,10 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	oldData, err := templaterepository.ReadContractTemplateDataById(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
+	}
+
+	if oldData.CreatedBy != cmd.UpdatedBy {
+		return fmt.Errorf("invalid user")
 	}
 
 	if cmd.UpdatedAt.Before(oldData.UpdatedAt) {
@@ -77,6 +82,7 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 		NewDescription:  cmd.Description,
 		OldTemplateData: oldData.TemplateData,
 		NewTemplateData: cmd.TemplateData,
+		UpdatedBy:       cmd.UpdatedBy,
 		OccurredAt:      time.Now(),
 	}
 	err = event.Create(ctx, tx, evt)
