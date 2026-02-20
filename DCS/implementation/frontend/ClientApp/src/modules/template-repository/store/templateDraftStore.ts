@@ -41,6 +41,13 @@ export const useTemplateDraftStore = defineStore(storeId, {
     deleteBlock(blockId: string): void {
       deleteBlock(this.documentOutline, this.documentBlocks, blockId)
     },
+    /** Updates block fields. */
+    updateBlock(blockId: string, payload: { title?: string; text?: string }): void {
+      const block = this.documentBlocks.find((b) => b.blockId === blockId)
+      if (!block) return
+      if (payload.title !== undefined) block.title = payload.title
+      if (payload.text !== undefined) block.text = payload.text
+    },
 
     reset() {
       Object.assign(this, getInitialState())
