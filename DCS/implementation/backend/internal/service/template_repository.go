@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	templaterepository "digital-contracting-service/gen/template_repository"
+	"digital-contracting-service/internal/auth"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
@@ -19,12 +20,14 @@ import (
 // The example methods log the requests and return zero values.
 type templateRepositorysrvc struct {
 	DB *sqlx.DB
+	auth.JWTAuthenticator
 }
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
-func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository.Service, error) {
+func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator) (templaterepository.Service, error) {
 	return &templateRepositorysrvc{
 		DB: db,
+		JWTAuthenticator: jwtAuth,
 	}, nil
 }
 
@@ -143,8 +146,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 	}, nil
 }
 
-// update metadata or status.
-func (s *templateRepositorysrvc) UpdateManage(ctx context.Context) (res int, err error) {
+func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, p *templaterepository.UpdateManagePayload) (res int, err error) {
 	log.Printf(ctx, "templateRepository.update_manage")
 	return
 }
@@ -290,8 +292,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 	}, nil
 }
 
-// run policy, schema, and semantic validations; return findings.
-func (s *templateRepositorysrvc) Verify(ctx context.Context) (res any, err error) {
+func (s *templateRepositorysrvc) Verify(ctx context.Context, p *templaterepository.VerifyPayload) (res any, err error) {
 	log.Printf(ctx, "templateRepository.verify")
 	return
 }
@@ -361,20 +362,17 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 
 }
 
-// register new template into the repository.
-func (s *templateRepositorysrvc) Register(ctx context.Context) (res any, err error) {
+func (s *templateRepositorysrvc) Register(ctx context.Context, p *templaterepository.RegisterPayload) (res any, err error) {
 	log.Printf(ctx, "templateRepository.register")
 	return
 }
 
-// archive obsolete template.
-func (s *templateRepositorysrvc) Archive(ctx context.Context) (res int, err error) {
+func (s *templateRepositorysrvc) Archive(ctx context.Context, p *templaterepository.ArchivePayload) (res int, err error) {
 	log.Printf(ctx, "templateRepository.archive")
 	return
 }
 
-// retrieve audit history of template actions.
-func (s *templateRepositorysrvc) Audit(ctx context.Context) (res []string, err error) {
+func (s *templateRepositorysrvc) Audit(ctx context.Context, p *templaterepository.AuditPayload) (res []string, err error) {
 	log.Printf(ctx, "templateRepository.audit")
 	return
 }

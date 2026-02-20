@@ -8,6 +8,9 @@ log() {
 usage() {
   echo "Usage: $0 <kubeconfig> <private_key_path> <crt_path> <domain> <path> <oidc_issuer_url> <oidc_client_id>"
   echo "Example: $0 ~/.kube/config ./certs/dev.key ./certs/dev.crt xfsc.local dcs https://keycloak.xfsc.local/realms/dcs digital-contracting-service"
+  echo ""
+  echo "Optional environment variables:"
+  echo "  OIDC_REDIRECT_URI - Redirect URI for OIDC flow (default: http://localhost:8991)"
   exit 1
 }
 
@@ -20,6 +23,7 @@ DOMAIN="$4"
 URL_PATH="$5"
 OIDC_ISSUER_URL="$6"
 OIDC_CLIENT_ID="$7"
+OIDC_REDIRECT_URI="${OIDC_REDIRECT_URI:-http://localhost:8991}"
 
 # Image Registry Configuration
 DOCKER_REGISTRY="${DOCKER_REGISTRY:-}"
@@ -62,6 +66,7 @@ fi
 log "ℹ️ OIDC Configuration:"
 log "  - Issuer URL (for backend): $OIDC_ISSUER_URL"
 log "  - Client ID: $OIDC_CLIENT_ID"
+log "  - Redirect URI: $OIDC_REDIRECT_URI"
 
 if [[ ! -f "$KUBECONFIG" ]]; then
   log "❌ Kubeconfig file not found: $KUBECONFIG"
@@ -138,6 +143,7 @@ sed -i \
   -e "s|\[namespace\]|${NAMESPACE}|g" \
   -e "s|\[oidc-issuer-url\]|${OIDC_ISSUER_URL}|g" \
   -e "s|\[oidc-client-id\]|${OIDC_CLIENT_ID}|g" \
+  -e "s|\[oidc-redirect-uri\]|${OIDC_REDIRECT_URI}|g" \
   -e "s|\[registry\]|${IMAGE_NAME}|g" \
   -e "s|tag: \"latest\"|tag: \"${DOCKER_TAG}\"|g" \
   -e "s|enabled: false|enabled: ${CUSTOM_CA_ENABLED}|g" \

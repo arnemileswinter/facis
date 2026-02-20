@@ -30,7 +30,12 @@ func NewOIDCValidator(ctx context.Context, config OIDCConfig) (*OIDCValidator, e
 		return nil, fmt.Errorf("failed to discover OIDC provider: %w", err)
 	}
 
-	verifier := provider.Verifier(&oidc.Config{ClientID: config.ClientID})
+	// Skip audience check — Keycloak places the client ID in the "azp" claim,
+	// not in "aud". The token signature and issuer are still fully validated.
+	verifier := provider.Verifier(&oidc.Config{
+		ClientID:          config.ClientID,
+		SkipClientIDCheck: true,
+	})
 
 	return &OIDCValidator{
 		provider: provider,
@@ -54,21 +59,39 @@ func (v *OIDCValidator) ValidateToken(ctx context.Context, token string) ([]stri
 	return extractRoles(claims), nil
 }
 
-// extractRoles extracts role information from JWT claims
-// Uses Keycloak standard: realm_access.roles
+// extractRoles extracts client-scoped roles from the
+// resource_access.<azp>.roles JWT claim.
 func extractRoles(claims map[string]interface{}) []string {
-	if ra, ok := claims["realm_access"].(map[string]interface{}); ok {
-		if r, ok := ra["roles"].([]interface{}); ok {
-			roles := make([]string, 0, len(r))
-			for _, role := range r {
-				if roleStr, ok := role.(string); ok {
-					roles = append(roles, roleStr)
-				}
-			}
-			return roles
-		}
+	ra, ok := claims["resource_access"].(map[string]interface{})
+	if !ok {
+		return []string{}
+	}
+	azp, ok := claims["azp"].(string)
+	if !ok {
+		return []string{}
+	}
+	client, ok := ra[azp].(map[string]interface{})
+	if !ok {
+		return []string{}
+	}
+	if roles := toStringSlice(client["roles"]); len(roles) > 0 {
+		return roles
 	}
 	return []string{}
+}
+
+func toStringSlice(v interface{}) []string {
+	arr, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	out := make([]string, 0, len(arr))
+	for _, item := range arr {
+		if s, ok := item.(string); ok {
+			out = append(out, s)
+		}
+	}
+	return out
 }
 
 // Expected format: "Authorization: Bearer <token>"

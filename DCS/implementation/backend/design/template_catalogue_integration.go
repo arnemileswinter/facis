@@ -12,13 +12,14 @@ var _ = Service("TemplateCatalogueIntegration", func() {
 	Method("discover", func() {
 		Description("Discover templates via XFSC Catalogue.")
 		Meta("dcs:requirements", "DCS-IR-SI-01")
-
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			// NOTE: Defined placeholder path (DCS-IR-SI-01 does not specify concrete path).
 			GET("/catalogue/template/discover")
 			Response(StatusOK)
 		})
-
 		Result(Any)
 	})
 
@@ -26,13 +27,14 @@ var _ = Service("TemplateCatalogueIntegration", func() {
 	Method("request", func() {
 		Description("Request template via XFSC Catalogue.")
 		Meta("dcs:requirements", "DCS-IR-SI-01")
-
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			// NOTE: Defined placeholder path (DCS-IR-SI-01 does not specify concrete path).
 			POST("/catalogue/template/request")
 			Response(StatusOK)
 		})
-
 		Result(Any)
 	})
 
@@ -40,13 +42,14 @@ var _ = Service("TemplateCatalogueIntegration", func() {
 	Method("register", func() {
 		Description("Register template into XFSC Catalogue.")
 		Meta("dcs:requirements", "DCS-IR-SI-01")
-
+		Payload(func() {
+			Token("token", String, "JWT token")
+		})
 		HTTP(func() {
 			// NOTE: Defined placeholder path (DCS-IR-SI-01 does not specify concrete path).
 			POST("/catalogue/template/register")
 			Response(StatusOK)
 		})
-
 		Result(Any)
 	})
 })
