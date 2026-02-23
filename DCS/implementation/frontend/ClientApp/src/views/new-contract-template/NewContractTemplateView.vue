@@ -8,25 +8,9 @@
             </div>
         </div>
         <div role="tablist" class="tabs tabs-lift tabs-lg">
-            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'details' }" @click="activeTab = 'details'">
-                Details
-            </a>
-
-            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'semantic' }"
-                @click="activeTab = 'semantic'">
-                Semantic Rules
-            </a>
-
-            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'clauses' }" @click="activeTab = 'clauses'">
-                Clauses
-            </a>
-
-            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'builder' }" @click="activeTab = 'builder'">
-                Builder
-            </a>
-
-            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'meta' }" @click="activeTab = 'meta'">
-                Meta Data
+            <a v-for="(tab, _index) in tabs" :key="tab.id" role="tab" class="tab"
+                :class="{ 'tab-active': activeTab === tab.id }" @click="setActiveTab(tab.id)">
+                {{ tab.label }}
             </a>
         </div>
 
@@ -88,7 +72,7 @@
                         <div class="md:col-span-3">
                             <label class="label-text text-[10px] uppercase font-bold ml-1 opacity-60">Type</label>
                             <select v-model="newRule.type" class="select select-bordered select-sm w-full mt-1"
-                                required="">
+                                required>
                                 <option value="Date">Date</option>
                                 <option value="Text">Text</option>
                                 <option value="Decimal">Decimal</option>
@@ -209,9 +193,14 @@
             <!-- BUILDER TAB (Platzhalter) -->
             <div v-show="activeTab === 'builder'">
                 <div class="border border-base-300 bg-base-100 shadow-sm rounded-box p-6">
-                    <div class="font-bold text-lg">Builder</div>
-                    <p class="text-sm opacity-60 mt-2">TODO</p>
+                    <div class="flex items-center gap-2 font-bold text-lg">
+                        <span class="text-primary">04</span> Builder
+                    </div>
+                    <div class="mt-2">
+                        <TemplateEditor />
+                    </div>
                 </div>
+                <AddBlockModal />
             </div>
 
             <!-- META TAB (Platzhalter) -->
@@ -236,8 +225,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useContractTemplateController } from './NewContractTemplate.ts'
+import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
+import TemplateEditor from '@template-repository/components/TemplateEditor.vue'
+import AddBlockModal from '@template-repository/components/AddBlockModal.vue'
+import { storeToRefs } from 'pinia'
+
+const templateEditorUiStore = useTemplateEditorUiStore()
+const { activeTab, tabs } = storeToRefs(templateEditorUiStore)
+const { setActiveTab } = templateEditorUiStore
 
 const props = defineProps<{
     did?: string
@@ -245,8 +241,6 @@ const props = defineProps<{
     version?: number
 }>()
 console.log(props)
-
-const activeTab = ref<'details' | 'clauses' | 'semantic' | 'builder' | 'meta'>('clauses')
 
 const {
     form,

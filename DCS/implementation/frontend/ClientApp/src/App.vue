@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import NavBar from './components/NavBar.vue'
+import { PageLayout } from '@core/layouts/page'
+import { useSyncPageTitle } from '@core/composables/useSyncPageTitle'
 
+useSyncPageTitle()
 </script>
+
 <template>
-  <div class="min-h-screen">
-    <header>
-      <NavBar />
-    </header>
-  </div>
+  <PageLayout />
 </template>
