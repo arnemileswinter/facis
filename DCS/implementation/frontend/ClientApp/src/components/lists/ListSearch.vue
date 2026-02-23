@@ -17,7 +17,7 @@ function searchList() {
 
 <template>
   <div class="join m-2">
-    <label class="input input-neutral join-item">
+    <label class="input input-neutral join-item grow">
       <input
         type="text"
         v-model="search"

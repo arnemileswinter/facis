@@ -14,31 +14,25 @@ const props = defineProps<{
           <div>Name: {{ item.name }}</div>
           <div class="badge badge-secondary">{{ item.state }}</div>
         </h2>
-        <div class="mt-4 flex justify-between">
+        <div class="flex justify-between">
           <div>Document number: {{ item.document_number }}</div>
           <div>Version: {{ item.version }}</div>
         </div>
-        <div class="my-4 flex justify-between">
-          <div>Created by: {{ item.created_by }}</div>
+        <div class="flex justify-between">
           <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
+        <div class="card-actions justify-end">
+          <button class="btn btn-sm rounded-box btn-primary">View</button>
+          <RouterLink
+            :to="{
+              name: 'templates.edit',
+              params: { did: item.did },
+              query: { document_number: item.document_number, version: item.version },
+            }"
+            class="btn btn-sm rounded-box btn-secondary gap-2"
+          >
+            Edit
+          </RouterLink>
         </div>
-        <div class="card-actions justify-between">
-          <div class="card-actions justify-start">
-            <input type="checkbox" class="checkbox checkbox-xl checkbox-accent" />
-          </div>
-          <div class="card-actions justify-end">
-            <button class="btn btn-outline rounded-box btn-info">View</button>
-            <RouterLink
-              :to="{
-                name: 'templates.edit',
-                params: { did: item.did },
-                query: { document_number: item.document_number, version: item.version },
-              }"
-              class="btn btn-outline rounded-box btn-warning gap-2"
-            >
-              Edit
-            </RouterLink>
-          </div>
         </div>
       </div>
     </div>

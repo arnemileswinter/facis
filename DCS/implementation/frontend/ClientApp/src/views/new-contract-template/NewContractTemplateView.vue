@@ -240,7 +240,6 @@ const props = defineProps<{
     document_number?: number
     version?: number
 }>()
-console.log(props)
 
 const activeTab = ref<'details' | 'clauses' | 'semantic' | 'builder' | 'meta'>('clauses')
 
