@@ -68,6 +68,11 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 // reviewComments. allow resubmission path with approver comments.
 func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templaterepository.ContractTemplateSubmitRequest) (res *templaterepository.ContractTemplateSubmitResponse, err error) {
 
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
 	var actionFlag *actionflag.ActionFlag
 	if req.ForwardTo != nil {
 		flag, err := actionflag.NewActionFlag(*req.ForwardTo)
@@ -81,6 +86,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
+		UpdatedAt:      updatedAt,
 		SubmittedBy:    "Test User",
 		ActionFlag:     actionFlag,
 		Comments:       req.Comments,
@@ -103,6 +109,11 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 // persist reviewer edits (metadata/clauses/semantics).
 func (s *templateRepositorysrvc) Update(ctx context.Context, req *templaterepository.ContractTemplateUpdateRequest) (res *templaterepository.ContractTemplateUpdateResponse, err error) {
 
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
 	metaData, err := datatype.NewJSON(req.TemplateData)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
@@ -111,6 +122,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
+		UpdatedAt:      updatedAt,
 		Name:           req.Name,
 		Description:    req.Description,
 		TemplateData:   &metaData,
@@ -280,10 +292,17 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 
 // run policy, schema, and semantic validations; return findings.
 func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templaterepository.ContractTemplateVerifyRequest) (res *templaterepository.ContractTemplateVerifyResponse, err error) {
+
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
 	cmd := command.VerifyCommand{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
+		UpdatedAt:      updatedAt,
 	}
 	handler := command.VerifyHandler{
 		DB: s.DB,
@@ -302,10 +321,17 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 
 // mark template as approved, with optional decision notes.
 func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepository.ContractTemplateApproveRequest) (res *templaterepository.ContractTemplateApproveResponse, err error) {
+
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
 	cmd := command.ApproveCommand{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
+		UpdatedAt:      updatedAt,
 		ApprovedBy:     "Test User",
 		DecisionNotes:  req.DecisionNotes,
 	}
@@ -326,10 +352,17 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 
 // mark template as rejected, requiring reason field.
 func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templaterepository.ContractTemplateRejectRequest) (res *templaterepository.ContractTemplateRejectResponse, err error) {
+
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
 	cmd := command.RejectCommand{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
+		UpdatedAt:      updatedAt,
 		RejectedBy:     "Test User",
 		Reason:         req.Reason,
 	}
@@ -350,15 +383,65 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 }
 
 // register new template into the repository.
-func (s *templateRepositorysrvc) Register(ctx context.Context) (res any, err error) {
-	log.Printf(ctx, "templateRepository.register")
-	return
+func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepository.ContractTemplateRegisterRequest) (res *templaterepository.ContractTemplateRegisterResponse, err error) {
+
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	cmd := command.RegisterCommand{
+		DID:            req.Did,
+		DocumentNumber: req.DocumentNumber,
+		Version:        req.Version,
+		UpdatedAt:      updatedAt,
+		RegisteredBy:   "Test User",
+	}
+	handler := command.RegisterHandler{
+		Ctx: ctx,
+		DB:  s.DB,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	return &templaterepository.ContractTemplateRegisterResponse{
+		Did:            req.Did,
+		DocumentNumber: req.DocumentNumber,
+		Version:        req.Version,
+	}, nil
 }
 
 // archive obsolete template.
-func (s *templateRepositorysrvc) Archive(ctx context.Context) (res int, err error) {
-	log.Printf(ctx, "templateRepository.archive")
-	return
+func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepository.ContractTemplateArchiveRequest) (res *templaterepository.ContractTemplateArchiveResponse, err error) {
+
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	cmd := command.ArchiveCommand{
+		DID:            req.Did,
+		DocumentNumber: req.DocumentNumber,
+		Version:        req.Version,
+		UpdatedAt:      updatedAt,
+		ArchivedBy:     "Test User",
+	}
+	handler := command.ArchiveHandler{
+		Ctx: ctx,
+		DB:  s.DB,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	return &templaterepository.ContractTemplateArchiveResponse{
+		Did:            req.Did,
+		DocumentNumber: req.DocumentNumber,
+		Version:        req.Version,
+	}, nil
 }
 
 // retrieve audit history of template actions.
