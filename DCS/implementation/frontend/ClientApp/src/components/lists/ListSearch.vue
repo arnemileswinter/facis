@@ -17,14 +17,15 @@ function searchList() {
 
 <template>
   <div class="join m-2">
-    <input
-      type="text"
-      v-model="search"
-      @keyup.enter="searchList"
-      placeholder="Search templates"
-      aria-label="Search"
-      class="input join-item"
-    />
-    <button @click="searchList" class="btn join-item">Search</button>
+    <label class="input input-neutral join-item">
+      <input
+        type="text"
+        v-model="search"
+        @keyup.enter="searchList"
+        placeholder="Search templates"
+        aria-label="Search templates"
+      />
+    </label>
+    <button @click="searchList" class="btn btn-neutral join-item">Search</button>
   </div>
 </template>

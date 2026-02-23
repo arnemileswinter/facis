@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { ContractTemplate } from '../../../models/contract-template'
 
-defineProps<{
+const props = defineProps<{
   item: ContractTemplate
 }>()
 </script>
 
 <template>
   <li class="list-row">
-    <div class="list-col-grow card bg-base-100 card-border hover:bg-base-300">
+    <div class="list-col-grow card bg-base-200 card-border hover:bg-base-300">
       <div class="card-body">
         <h2 class="card-title justify-between">
           <div>Name: {{ item.name }}</div>
@@ -27,8 +27,17 @@ defineProps<{
             <input type="checkbox" class="checkbox checkbox-xl checkbox-accent" />
           </div>
           <div class="card-actions justify-end">
-            <button class="btn btn-outline btn-info">View</button>
-            <button class="btn btn-outline btn-warning">Edit</button>
+            <button class="btn btn-outline rounded-box btn-info">View</button>
+            <RouterLink
+              :to="{
+                name: 'templates.edit',
+                params: { did: item.did },
+                query: { document_number: item.document_number, version: item.version },
+              }"
+              class="btn btn-outline rounded-box btn-warning gap-2"
+            >
+              Edit
+            </RouterLink>
           </div>
         </div>
       </div>

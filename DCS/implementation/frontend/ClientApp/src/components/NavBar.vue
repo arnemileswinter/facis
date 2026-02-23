@@ -62,7 +62,7 @@
                   isCollapsed ? 'justify-center px-0' : 'px-4'
                 ]"
                 active-class="active bg-primary text-primary-content"
-                :data-tip="isCollapsed ? route.name : ''"
+                :data-tip="isCollapsed ? route.meta.name : ''"
               >
                 <component 
                   :is="route.meta?.icon" 
@@ -70,7 +70,7 @@
                   aria-hidden="true" 
                 />
                 <span v-if="!isCollapsed" class="font-medium whitespace-nowrap">
-                  {{ route.name }}
+                  {{ route.meta.name }}
                 </span>
               </RouterLink>
             </li>
@@ -95,7 +95,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter, RouterLink, RouterView } from 'vue-router'
 
@@ -103,7 +103,7 @@ const router = useRouter()
 const isCollapsed = ref(false)
 
 const closeMobileDrawer = () => {
-  const drawerToggle = document.getElementById('main-drawer')
+  const drawerToggle = document.getElementById('main-drawer') as HTMLInputElement | null
   if (drawerToggle) drawerToggle.checked = false
 }
 
@@ -112,6 +112,7 @@ const navigationRoutes = computed(() => {
     return router.getRoutes().filter(route =>
       route.name &&
       !route.path.includes(':') &&
+      route.meta?.name &&
       route.meta?.hideInSidebar !== true
     )
   } catch (e) {
