@@ -37,7 +37,7 @@ const itemsSorted = computed(() => {
 <template>
   <ul class="list">
     <li class="tracking-wide px-4 flex justify-between">
-      <ListSearch />
+      <ListSearch class="grow" />
       <ListSort :sorter="sorter" v-model:sort-by="sortBy" v-model:sort-order="sortOrder" />
     </li>
     <TemplateListItem v-for="item in itemsSorted" :key="item.did" :item="item" />
