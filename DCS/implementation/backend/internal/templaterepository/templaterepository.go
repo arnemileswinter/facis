@@ -13,7 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type ContractTemplateData struct {
+type ContractTemplate struct {
 	DID            string                      `db:"did"`
 	DocumentNumber int                         `db:"document_number"`
 	Version        int                         `db:"version"`
@@ -26,8 +26,8 @@ type ContractTemplateData struct {
 	TemplateData   *datatype.JSON              `db:"template_data"`
 }
 
-func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) (*time.Time, error) {
-	query := `
+func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplate) (*time.Time, error) {
+	statement := `
     INSERT INTO contract_templates (
         did, created_by, state, name, 
         description, template_data
@@ -36,7 +36,7 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 `
 
 	var createdAt time.Time
-	err := tx.GetContext(ctx, &createdAt, query,
+	err := tx.GetContext(ctx, &createdAt, statement,
 		data.DID,
 		data.CreatedBy,
 		data.State,
@@ -51,14 +51,14 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 	return &createdAt, nil
 }
 
-func ReadContractTemplateDataById(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateData, error) {
+func ReadDataById(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplate, error) {
 	query := `
         SELECT did, document_number, version, state, name, description,
                created_by, created_at, updated_at, template_data
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	var ct ContractTemplateData
+	var ct ContractTemplate
 	err := tx.GetContext(ctx, &ct, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -69,7 +69,7 @@ func ReadContractTemplateDataById(ctx context.Context, tx *sqlx.Tx, did string, 
 	return &ct, nil
 }
 
-type ContractTemplateMetaData struct {
+type MetaData struct {
 	DID            string                      `db:"did"`
 	DocumentNumber int                         `db:"document_number"`
 	Version        int                         `db:"version"`
@@ -81,16 +81,16 @@ type ContractTemplateMetaData struct {
 	UpdatedAt      time.Time                   `db:"updated_at"`
 }
 
-func ReadAllContractTemplateMetaData(ctx context.Context, tx *sqlx.Tx) ([]ContractTemplateMetaData, error) {
+func ReadAllMetaData(ctx context.Context, tx *sqlx.Tx) ([]MetaData, error) {
 	query := `
         SELECT did, document_number, version, state, name, description, created_by, created_at, updated_at
         FROM contract_templates
     `
 
-	var cts []ContractTemplateMetaData
+	var cts []MetaData
 	err := tx.SelectContext(ctx, &cts, query)
 	if err != nil {
-		return []ContractTemplateMetaData{}, err
+		return []MetaData{}, err
 	}
 	return cts, nil
 }
@@ -164,7 +164,7 @@ func createSearchConditions(values SearchValues) (*string, []interface{}, error)
 	return &conditions, params, nil
 }
 
-func ReadAllContractTemplateMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, values SearchValues) ([]ContractTemplateMetaData, error) {
+func ReadAllMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, values SearchValues) ([]MetaData, error) {
 	query := `
 SELECT did, document_number, version, state, name, description, created_by, created_at, updated_at
 FROM contract_templates
@@ -179,16 +179,16 @@ FROM contract_templates
 		query += " WHERE " + *conditions
 	}
 
-	var cts []ContractTemplateMetaData
+	var cts []MetaData
 	_ = cts
 	err = tx.SelectContext(ctx, &cts, query, params...)
 	if err != nil {
-		return []ContractTemplateMetaData{}, err
+		return []MetaData{}, err
 	}
 	return cts, nil
 }
 
-type ContractTemplateProcessData struct {
+type ProcessData struct {
 	DID            string                      `db:"did"`
 	DocumentNumber int                         `db:"document_number"`
 	Version        int                         `db:"version"`
@@ -197,13 +197,13 @@ type ContractTemplateProcessData struct {
 	UpdatedAt      time.Time                   `db:"updated_at"`
 }
 
-func ReadContractTemplateProcessData(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateProcessData, error) {
+func ReadProcessData(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ProcessData, error) {
 	query := `
         SELECT did, document_number, version, state, updated_at, created_by
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	var processData ContractTemplateProcessData
+	var processData ProcessData
 	err := tx.GetContext(ctx, &processData, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -214,12 +214,12 @@ func ReadContractTemplateProcessData(ctx context.Context, tx *sqlx.Tx, did strin
 	return &processData, nil
 }
 
-func UpdateContractTemplateState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, state templatestate.TemplateState) error {
-	query := `UPDATE contract_templates SET
+func UpdateState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, state templatestate.TemplateState) error {
+	statement := `UPDATE contract_templates SET
         	state = $4
     	WHERE did = $1 AND document_number = $2 AND version = $3	
 `
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, state)
+	_, err := tx.ExecContext(ctx, statement, did, documentNumber, version, state)
 	if err != nil {
 		return err
 	}
@@ -227,7 +227,7 @@ func UpdateContractTemplateState(ctx context.Context, tx *sqlx.Tx, did string, d
 	return err
 }
 
-func createQuery(data ContractTemplateData) (*string, []interface{}, error) {
+func createQuery(data ContractTemplate) (*string, []interface{}, error) {
 	query := `UPDATE contract_templates SET`
 
 	var params []interface{}
@@ -264,7 +264,7 @@ func createQuery(data ContractTemplateData) (*string, []interface{}, error) {
 	return &query, params, nil
 }
 
-func UpdateTemplateContractData(ctx context.Context, tx *sqlx.Tx, data ContractTemplateData) error {
+func UpdateData(ctx context.Context, tx *sqlx.Tx, data ContractTemplate) error {
 	query, params, err := createQuery(data)
 	if err != nil {
 		return err

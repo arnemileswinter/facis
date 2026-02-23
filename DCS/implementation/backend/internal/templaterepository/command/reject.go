@@ -5,8 +5,10 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -39,7 +41,7 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 	}
 	defer tx.Rollback()
 
-	processData, err := templaterepository.ReadContractTemplateProcessData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := templaterepository.ReadProcessData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -52,7 +54,7 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return errors.New("invalid contract template state")
 	}
 
-	exist, err := templaterepository.IsValidUserForApprovalTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.RejectedBy)
+	exist, err := approvaltask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.RejectedBy)
 	if err != nil {
 		return err
 	}
@@ -61,12 +63,12 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return errors.New("invalid user")
 	}
 
-	err = templaterepository.UpdateContractTemplateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Draft)
+	err = templaterepository.UpdateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Draft)
 	if err != nil {
 		return fmt.Errorf("could not update current template state: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateRejectedEvent{
+	evt := templateevents.RejectContractTemplateEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
@@ -79,12 +81,12 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = templaterepository.DeleteReviewTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = reviewtask.DeleteTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not delete review task: %w", err)
 	}
 
-	deleteReviewTaskEvt := templateevents.ContractTemplateDeleteReviewTaskEvent{
+	deleteReviewTaskEvt := templateevents.DeleteContractTemplateReviewTaskEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
@@ -96,12 +98,12 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = templaterepository.DeleteApprovalTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = approvaltask.DeleteTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not delete approval task: %w", err)
 	}
 
-	deleteApprovalTaskEvt := templateevents.ContractTemplateDeleteApprovalTaskEvent{
+	deleteApprovalTaskEvt := templateevents.DeleteContractTemplateApprovalTaskEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

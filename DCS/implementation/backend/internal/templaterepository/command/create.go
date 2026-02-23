@@ -39,7 +39,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 	}
 	defer tx.Rollback()
 
-	data := templaterepository.ContractTemplateData{
+	data := templaterepository.ContractTemplate{
 		DID:          cmd.DID,
 		CreatedBy:    cmd.CreatedBy,
 		State:        templatestate.Draft,
@@ -52,7 +52,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 		return fmt.Errorf("could not create contract template: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateCreatedEvent{
+	evt := templateevents.CreateContractTemplate{
 		DID:            cmd.DID,
 		DocumentNumber: 1,
 		Version:        1,

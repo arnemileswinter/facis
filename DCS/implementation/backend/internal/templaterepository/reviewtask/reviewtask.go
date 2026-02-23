@@ -1,4 +1,4 @@
-package templaterepository
+package reviewtask
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type ReviewTaskData struct {
+type TaskData struct {
 	ID             string                          `db:"id"`
 	DID            string                          `db:"did"`
 	DocumentNumber int                             `db:"document_number"`
@@ -20,8 +20,8 @@ type ReviewTaskData struct {
 	CreatedAt      time.Time                       `db:"created_at"`
 }
 
-func CreateReviewTasks(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*time.Time, error) {
-	query := `
+func CreateTask(ctx context.Context, tx *sqlx.Tx, data TaskData) (*time.Time, error) {
+	statement := `
     INSERT INTO contract_templates_review_task (
         did, document_number, version, state, reviewer, created_by
     ) VALUES ($1, $2, $3, $4, $5, $6)
@@ -29,7 +29,7 @@ func CreateReviewTasks(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*
 `
 
 	var createdAt time.Time
-	err := tx.GetContext(ctx, &createdAt, query,
+	err := tx.GetContext(ctx, &createdAt, statement,
 		data.DID,
 		data.DocumentNumber,
 		data.Version,
@@ -44,14 +44,14 @@ func CreateReviewTasks(ctx context.Context, tx *sqlx.Tx, data ReviewTaskData) (*
 	return &createdAt, nil
 }
 
-func IsValidUserForReviewerTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string) (bool, error) {
-	selectQuery := `
+func IsValidTaskUser(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string) (bool, error) {
+	query := `
         SELECT COUNT(*) FROM contract_templates_review_task
 		WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
 `
 
 	var count int
-	err := tx.GetContext(ctx, &count, selectQuery, did, documentNumber, version, reviewer)
+	err := tx.GetContext(ctx, &count, query, did, documentNumber, version, reviewer)
 	if err != nil {
 		return false, err
 	}
@@ -63,23 +63,13 @@ func IsValidUserForReviewerTask(ctx context.Context, tx *sqlx.Tx, did string, do
 	return false, nil
 }
 
-func ReopenReviewAndApprovalTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
-	updateRTQuery := `
+func ReopenTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	statement := `
         UPDATE contract_templates_review_task SET state = 'OPEN'
         WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	_, err := tx.ExecContext(ctx, updateRTQuery, did, documentNumber, version)
-	if err != nil {
-		return err
-	}
-
-	updateATQuery := `
-        UPDATE contract_templates_approval_task SET state = 'OPEN'
-        WHERE did = $1 AND document_number = $2 AND version = $3
-    `
-
-	_, err = tx.ExecContext(ctx, updateATQuery, did, documentNumber, version)
+	_, err := tx.ExecContext(ctx, statement, did, documentNumber, version)
 	if err != nil {
 		return err
 	}
@@ -87,14 +77,14 @@ func ReopenReviewAndApprovalTasks(ctx context.Context, tx *sqlx.Tx, did string, 
 	return nil
 }
 
-func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewTaskData, error) {
+func ReadAll(ctx context.Context, tx *sqlx.Tx, did string) ([]TaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
                created_by, created_at
         FROM contract_templates_review_task WHERE did = $1
     `
 
-	var reviewTasks []ReviewTaskData
+	var reviewTasks []TaskData
 	err := tx.SelectContext(ctx, &reviewTasks, query, did)
 	if err != nil {
 		return nil, err
@@ -102,14 +92,14 @@ func ReadAllReviewTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ReviewT
 	return reviewTasks, nil
 }
 
-func ReadAllReviewTasksByReviewer(ctx context.Context, tx *sqlx.Tx, reviewer string) ([]ReviewTaskData, error) {
+func ReadAllByReviewer(ctx context.Context, tx *sqlx.Tx, reviewer string) ([]TaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
                created_by, created_at
         FROM contract_templates_review_task WHERE reviewer = $1
     `
 
-	var reviewTasks []ReviewTaskData
+	var reviewTasks []TaskData
 	err := tx.SelectContext(ctx, &reviewTasks, query, reviewer)
 	if err != nil {
 		return nil, err
@@ -117,13 +107,13 @@ func ReadAllReviewTasksByReviewer(ctx context.Context, tx *sqlx.Tx, reviewer str
 	return reviewTasks, nil
 }
 
-func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) error {
-	query := `
+func UpdateTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) error {
+	statement := `
         UPDATE contract_templates_review_task SET state = $5
         WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
     `
 
-	result, err := tx.ExecContext(ctx, query, did, documentNumber, version, reviewer, state)
+	result, err := tx.ExecContext(ctx, statement, did, documentNumber, version, reviewer, state)
 	if err != nil {
 		return err
 	}
@@ -140,7 +130,7 @@ func UpdateReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumb
 	return err
 }
 
-func ExistReviewTaskInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, state reviewtaskstate.ReviewTaskState) (bool, error) {
+func ExistTasksInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, state reviewtaskstate.ReviewTaskState) (bool, error) {
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_review_task 
@@ -156,13 +146,13 @@ func ExistReviewTaskInState(ctx context.Context, tx *sqlx.Tx, did string, docume
 	return count > 0, nil
 }
 
-func DeleteReviewTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
-	query := `
+func DeleteTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	statement := `
         DELETE FROM contract_templates_review_task
         WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
+	_, err := tx.ExecContext(ctx, statement, did, documentNumber, version)
 	if err != nil {
 		return err
 	}

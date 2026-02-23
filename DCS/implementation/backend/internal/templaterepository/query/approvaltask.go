@@ -4,7 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	aopprovaltaskstate "digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
@@ -48,12 +48,12 @@ func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllCo
 	}
 	defer tx.Rollback()
 
-	reviewTasks, err := templaterepository.ReadAllApprovalTasks(ctx, tx, query.DID)
+	reviewTasks, err := approvaltask.ReadAll(ctx, tx, query.DID)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateRetrieveAllReviewTasksEvent{
+	evt := templateevents.RetrieveAllContractTemplateReviewTasksEvent{
 		DID:            query.DID,
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,

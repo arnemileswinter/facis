@@ -6,10 +6,12 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"fmt"
 	"time"
 
@@ -72,12 +74,12 @@ func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTempl
 	}
 	defer tx.Rollback()
 
-	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaData(ctx, tx)
+	contractTemplates, err := templaterepository.ReadAllMetaData(ctx, tx)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateRetrievedAllEvent{
+	evt := templateevents.RetrieveAllContractTemplatesEvent{
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}
@@ -86,12 +88,12 @@ func (h *GetAllContractTemplateMetaDataHandler) Handle(query GetAllContractTempl
 		return nil, fmt.Errorf("could not create event: %w", err)
 	}
 
-	reviewerTasks, err := templaterepository.ReadAllReviewTasksByReviewer(ctx, tx, query.RetrievedBy)
+	reviewerTasks, err := reviewtask.ReadAllByReviewer(ctx, tx, query.RetrievedBy)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}
 
-	approvalTasks, err := templaterepository.ReadAllApprovalTasksByApprover(ctx, tx, query.RetrievedBy)
+	approvalTasks, err := approvaltask.ReadAllByApprover(ctx, tx, query.RetrievedBy)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}
