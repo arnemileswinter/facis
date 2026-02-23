@@ -1,7 +1,7 @@
 <template>
   <div :class="[drawerClasses.root, 'min-h-screen']">
     <input :id="pageSidebarId" type="checkbox" class="drawer-toggle" />
-    <div :class="[drawerClasses.header, 'flex flex-col min-h-screen bg-base-100']">
+    <div :class="[drawerClasses.header, 'flex flex-col h-screen overflow-hidden bg-base-100']">
       <!-- Navbar -->
       <header class="navbar w-full bg-base-200 border-b border-base-content/10 sticky top-0 z-30">
         <slot name="navbar">
@@ -10,7 +10,7 @@
       </header>
 
       <!-- Main Content -->
-      <main class="flex-grow p-4 md:p-8">
+      <main class="flex-grow overflow-y-auto p-4 md:p-8">
         <slot>
           <RouterView />
         </slot>
