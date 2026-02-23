@@ -5,6 +5,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
+	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
@@ -97,7 +98,11 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 
 	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
 
+	reviewers := []string{"Test User 2"}
+
 	ctx := context.Background()
+	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
 	templateData := map[string]interface{}{
 		"test": "update",
 	}
@@ -128,7 +133,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 	assert.NotNil(t, err)
 }
 
-func TestUpdate_UpdateContractTemplateDataInSubmittedState(t *testing.T) {
+func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -173,6 +178,79 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+
+	reviewers := []string{"Test User 2"}
+
+	ctx := context.Background()
+	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	templateData := map[string]interface{}{
+		"test": "update",
+	}
+	jsonTemplateData, err := datatype.NewJSON(templateData)
+	if err != nil {
+		t.Fatalf("Failed to create JSON template data: %v", err)
+	}
+
+	name := "Updated Contract Template"
+	description := "Updated Description"
+
+	cmd := command.UpdateTemplateContractCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedBy:      reviewers[0],
+		UpdatedAt:      time.Now(),
+		Name:           &name,
+		Description:    &description,
+		TemplateData:   &jsonTemplateData,
+	}
+	handler := command.UpdateTemplateContractHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	retrievedBy := "Test User"
+
+	qry := contracttemplate.GetContractTemplateByIdQuery{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    retrievedBy,
+	}
+	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query template contract: %v", err)
+	}
+
+	assert.Equal(t, *did, contractTemplate.DID)
+	assert.Equal(t, name, *contractTemplate.Name)
+	assert.Equal(t, description, *contractTemplate.Description)
+	//assert.Equal(t, jsonTemplateData, contractTemplate.TemplateData)
+}
+
 func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *testing.T) {
 
 	db := setupTestDB(t)
@@ -187,6 +265,11 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 	creator := "Test User"
 
 	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+
+	reviewers := []string{"Test User 2"}
+
+	ctx := context.Background()
+	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
 
 	templateData := map[string]interface{}{
 		"test": "update",

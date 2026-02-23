@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -47,16 +48,27 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 		return fmt.Errorf("could not read template data: %w", err)
 	}
 
-	if oldData.CreatedBy != cmd.UpdatedBy {
-		return fmt.Errorf("invalid user")
-	}
-
 	if cmd.UpdatedAt.Before(oldData.UpdatedAt) {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if oldData.State != templatestate.Draft {
+	if oldData.State != templatestate.Draft && oldData.State != templatestate.Submitted {
 		return errors.New("invalid contract template state")
+	}
+
+	isValidUser := false
+	if oldData.State == templatestate.Draft && oldData.CreatedBy == cmd.UpdatedBy {
+		isValidUser = true
+	} else if oldData.State == templatestate.Submitted {
+		valid, err := reviewtask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
+		if err != nil {
+			return err
+		}
+		isValidUser = valid
+	}
+
+	if !isValidUser {
+		return fmt.Errorf("invalid user")
 	}
 
 	newData := templaterepository.ContractTemplate{
