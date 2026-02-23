@@ -14,19 +14,22 @@
         <IconInsertNestBelow :size="20" class="w-5 h-5" />
       </button>
       <button type="button" :class="[btnIcon, !canMoveUp && 'opacity-50 cursor-not-allowed']" title="Move up"
-        aria-label="Move up" :disabled="!canMoveUp" @click="onMoveUp">
+        aria-label="Move up" :disabled="!canMoveUp" @click="onMoveUp" @pointerenter="preview.onMoveUpEnter"
+        @pointerleave="preview.onMoveUpLeave">
         <IconMoveUp :size="20" class="w-5 h-5" />
       </button>
       <button type="button" :class="[btnIcon, !canMoveDown && 'opacity-50 cursor-not-allowed']" title="Move down"
-        aria-label="Move down" :disabled="!canMoveDown" @click="onMoveDown">
+        aria-label="Move down" :disabled="!canMoveDown" @click="onMoveDown" @pointerenter="preview.onMoveDownEnter"
+        @pointerleave="preview.onMoveDownLeave">
         <IconMoveDown :size="20" class="w-5 h-5" />
       </button>
       <button v-if="canOutdent" type="button" :class="btnIcon" title="Outdent (move to same level as parent)"
-        aria-label="Outdent" @click="onMoveOutdent">
+        aria-label="Outdent" @click="onMoveOutdent" @mouseenter="preview.onOutdentEnter"
+        @mouseleave="preview.onOutdentLeave">
         <IconMoveLeft :size="20" class="w-5 h-5" />
       </button>
       <button v-if="canIndent" type="button" :class="btnIcon" title="Indent (move into block above)" aria-label="Indent"
-        @click="onMoveIndent">
+        @click="onMoveIndent" @mouseenter="preview.onIndentEnter" @mouseleave="preview.onIndentLeave">
         <IconMoveRight :size="20" class="w-5 h-5" />
       </button>
       <button type="button" :class="[btnIcon, 'text-error hover:bg-error/10']" title="Delete" aria-label="Delete block"
@@ -46,6 +49,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import type { EnrichedBlockItem } from '@template-repository/models/enriched-block-item'
+import { isSectionBlock } from '@template-repository/models/contract-templace'
+import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
 import IconInsertAbove from '@template-repository/components/toolbar/icons/IconInsertAbove.vue'
 import IconInsertBelow from '@template-repository/components/toolbar/icons/IconInsertBelow.vue'
 import IconInsertNestBelow from '@template-repository/components/toolbar/icons/IconInsertNestBelow.vue'
@@ -57,14 +64,13 @@ import IconMoveRight from '@template-repository/components/toolbar/icons/IconMov
 
 const btnIcon = 'btn btn-ghost btn-xs btn-square'
 
-defineProps<{
-  isSection: boolean
-  isDirty?: boolean
-  canMoveUp?: boolean
-  canMoveDown?: boolean
-  canOutdent?: boolean
-  canIndent?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    item: EnrichedBlockItem
+    isDirty?: boolean
+  }>(),
+  { isDirty: false }
+)
 
 const emit = defineEmits<{
   insertAbove: []
@@ -78,6 +84,22 @@ const emit = defineEmits<{
   moveIndent: []
   delete: []
 }>()
+
+const isSection = computed(() => !!(props.item.block && isSectionBlock(props.item.block)))
+const canMoveUp = computed(() => props.item.siblingIndex > 0)
+const canMoveDown = computed(() => props.item.siblingIndex < props.item.siblingCount - 1)
+const canOutdent = computed(() => props.item.canOutdent)
+const canIndent = computed(() => props.item.canIndent)
+
+const preview = useBlockMovementPreview().createToolbarHandlers(() => ({
+  blockId: props.item.blockId,
+  prevSiblingBlockId: props.item.prevSiblingBlockId,
+  nextSiblingBlockId: props.item.nextSiblingBlockId,
+  canMoveUp: canMoveUp.value,
+  canMoveDown: canMoveDown.value,
+  canOutdent: props.item.canOutdent,
+  canIndent: props.item.canIndent,
+}))
 
 function onInsertAbove() {
   emit('insertAbove')
@@ -95,15 +117,19 @@ function onCancel() {
   emit('cancel')
 }
 function onMoveUp() {
+  preview.clearVerticalPreview()
   emit('moveUp')
 }
 function onMoveDown() {
+  preview.clearVerticalPreview()
   emit('moveDown')
 }
 function onMoveOutdent() {
+  preview.clearHorizontalPreview()
   emit('moveOutdent')
 }
 function onMoveIndent() {
+  preview.clearHorizontalPreview()
   emit('moveIndent')
 }
 function onDelete() {

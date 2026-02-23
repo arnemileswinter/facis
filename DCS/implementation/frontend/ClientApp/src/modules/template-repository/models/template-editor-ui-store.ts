@@ -5,6 +5,10 @@ export interface AddBlockModalContext {
   insertIndex: number
 }
 
+export type BlockMovementPreview =
+  | { type: 'vertical'; sourceBlockId: string; targetBlockId: string }
+  | { type: 'horizontal'; blockId: string; direction: 'left' | 'right' }
+
 /** UI state for template create/edit page */
 interface TemplateEditorUiState {
   activeTab: TemplateEditorTabId
@@ -19,6 +23,9 @@ interface TemplateEditorUiState {
    * When non-null: add-block modal is open
    */
   addBlockModalContext: AddBlockModalContext | null
+  /** When non-null: movement preview is active */
+  blockMovementPreview: BlockMovementPreview | null
+  selectedBlockId: string | null
 }
 
 export type { TemplateEditorUiState }
