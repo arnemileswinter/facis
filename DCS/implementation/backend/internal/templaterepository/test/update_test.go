@@ -347,6 +347,96 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Registered, creator)
+
+	templateData := map[string]interface{}{
+		"test": "update",
+	}
+	jsonTemplateData, err := datatype.NewJSON(templateData)
+	if err != nil {
+		t.Fatalf("Failed to create JSON template data: %v", err)
+	}
+
+	name := "Updated Contract Template"
+	description := "Updated Description"
+
+	cmd := command.UpdateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedBy:      creator,
+		UpdatedAt:      time.Now(),
+		Name:           &name,
+		Description:    &description,
+		TemplateData:   &jsonTemplateData,
+	}
+	handler := command.UpdateHandler{
+		Ctx: context.Background(),
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Archived, creator)
+
+	templateData := map[string]interface{}{
+		"test": "update",
+	}
+	jsonTemplateData, err := datatype.NewJSON(templateData)
+	if err != nil {
+		t.Fatalf("Failed to create JSON template data: %v", err)
+	}
+
+	name := "Updated Contract Template"
+	description := "Updated Description"
+
+	cmd := command.UpdateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedBy:      creator,
+		UpdatedAt:      time.Now(),
+		Name:           &name,
+		Description:    &description,
+		TemplateData:   &jsonTemplateData,
+	}
+	handler := command.UpdateHandler{
+		Ctx: context.Background(),
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t *testing.T) {
 
 	db := setupTestDB(t)

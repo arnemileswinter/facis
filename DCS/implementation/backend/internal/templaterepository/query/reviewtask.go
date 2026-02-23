@@ -3,9 +3,7 @@ package query
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"fmt"
 	"time"
@@ -50,18 +48,6 @@ func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDID) (
 	reviewTasks, err := reviewtask.ReadAll(ctx, tx, query.DID)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
-	}
-
-	evt := templateevents.RetrieveAllContractTemplateReviewTasksEvent{
-		DID:            query.DID,
-		DocumentNumber: query.DocumentNumber,
-		Version:        query.Version,
-		RetrievedBy:    query.RetrievedBy,
-		OccurredAt:     time.Now(),
-	}
-	err = event.Create(h.Ctx, tx, evt)
-	if err != nil {
-		return nil, fmt.Errorf("could not create event: %w", err)
 	}
 
 	err = tx.Commit()
