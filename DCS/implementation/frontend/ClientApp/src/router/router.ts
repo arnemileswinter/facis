@@ -9,19 +9,19 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'templates.list',
     component: ContractTemplateView,
-    meta: { name: 'Contract Templates', icon: DocumentTextIcon },
+    meta: { name: 'Contract Templates', icon: DocumentTextIcon, title: "DCS" },
   },
   {
     path: '/templates/new',
     name: 'templates.new',
     component: NewContractTemplateView,
-    meta: { name: 'New Template', hideInSidebar: true },
+    meta: { name: 'New Template', hideInSidebar: true, title: "DCS - New Template" },
   },
   {
     path: '/templates/edit/:did',
     name: 'templates.edit',
     component: NewContractTemplateView,
-    meta: { name: 'Edit Template', hideInSidebar: true },
+    meta: { name: 'Edit Template', hideInSidebar: true, title: "DCS - Edit Template" },
     props: (route) => {
       const did = route.params.did
       const document_number = route.query.document_number
@@ -46,9 +46,17 @@ const routes: RouteRecordRaw[] = [
     path: '/table',
     name: 'table',
     component: TableView,
-    meta: { name: 'Table' },
+    meta: { name: 'Table', title: "DCS - Table" },
   },
 ]
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    title: string
+    icon?: unknown
+    hideInSidebar?: boolean
+  }
+}
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
