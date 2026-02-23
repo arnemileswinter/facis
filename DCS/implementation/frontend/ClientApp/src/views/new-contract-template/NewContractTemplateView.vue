@@ -15,7 +15,7 @@
         </div>
 
         <!-- Tab content -->
-        <div class="flex-grow">
+        <div class="flex-grow mt-5">
             <div class="max-w-4xl mx-auto p-6">
                 <div class="grid grid-cols-1 gap-4">
 

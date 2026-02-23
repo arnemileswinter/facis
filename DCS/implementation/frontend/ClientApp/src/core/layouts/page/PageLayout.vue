@@ -10,7 +10,7 @@
       </header>
 
       <!-- Main Content -->
-      <main class="flex-grow overflow-y-auto p-4 md:p-8">
+      <main class="flex-grow overflow-y-auto">
         <slot>
           <RouterView />
         </slot>
