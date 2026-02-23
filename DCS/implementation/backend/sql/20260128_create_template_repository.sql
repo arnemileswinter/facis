@@ -1,4 +1,4 @@
-CREATE TYPE template_state AS ENUM ('DRAFT', 'SUBMITTED', 'REJECTED', 'REVIEWED', 'APPROVED');
+CREATE TYPE template_state AS ENUM ('DRAFT', 'SUBMITTED', 'REJECTED', 'REVIEWED', 'APPROVED', 'REGISTERED', 'ARCHIVED');
 
 CREATE TABLE IF NOT EXISTS contract_templates (
     did VARCHAR(255),
@@ -47,7 +47,7 @@ EXECUTE FUNCTION update_updated_at_column();
 
 ------------------------------------------------------------------------------------------------------------------------
 
-CREATE TYPE review_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED');
+CREATE TYPE review_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'VERIFIED');
 
 CREATE TABLE IF NOT EXISTS contract_templates_review_task
 (
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
 
 ------------------------------------------------------------------------------------------------------------------------
 
-CREATE TYPE approval_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'RESUBMITTED');
+CREATE TYPE approval_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'RESUBMITTED', 'VERIFIED');
 
 CREATE TABLE IF NOT EXISTS contract_templates_approval_task
 (

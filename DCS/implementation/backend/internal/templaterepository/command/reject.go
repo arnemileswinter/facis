@@ -8,7 +8,6 @@ import (
 	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -16,7 +15,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type RejectTemplateContractCommand struct {
+type RejectCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -25,12 +24,12 @@ type RejectTemplateContractCommand struct {
 	Reason         string
 }
 
-type RejectTemplateContractHandler struct {
+type RejectHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand) error {
+func (h *RejectHandler) Handle(cmd RejectCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -81,38 +80,9 @@ func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = reviewtask.DeleteTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = templaterepository.CleanupTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return fmt.Errorf("could not delete review task: %w", err)
-	}
-
-	deleteReviewTaskEvt := templateevents.DeleteContractTemplateReviewTaskEvent{
-		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
-		DeletedBy:      cmd.RejectedBy,
-		OccurredAt:     time.Now(),
-	}
-	err = event.Create(ctx, tx, deleteReviewTaskEvt)
-	if err != nil {
-		return fmt.Errorf("could not create event: %w", err)
-	}
-
-	err = approvaltask.DeleteTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
-	if err != nil {
-		return fmt.Errorf("could not delete approval task: %w", err)
-	}
-
-	deleteApprovalTaskEvt := templateevents.DeleteContractTemplateApprovalTaskEvent{
-		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
-		DeletedBy:      cmd.RejectedBy,
-		OccurredAt:     time.Now(),
-	}
-	err = event.Create(ctx, tx, deleteApprovalTaskEvt)
-	if err != nil {
-		return fmt.Errorf("could not create event: %w", err)
+		return fmt.Errorf("could not cleanup tasks: %w", err)
 	}
 
 	return tx.Commit()

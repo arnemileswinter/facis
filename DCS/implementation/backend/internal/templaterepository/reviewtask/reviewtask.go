@@ -4,6 +4,8 @@ import (
 	"context"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -130,15 +132,39 @@ func UpdateTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int
 	return err
 }
 
-func ExistTasksInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, state reviewtaskstate.ReviewTaskState) (bool, error) {
+func ExistTasksInStates(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, states ...reviewtaskstate.ReviewTaskState) (bool, error) {
+	placeholders := make([]string, len(states))
+	args := []interface{}{did, documentNumber, version}
+
+	for i, s := range states {
+		placeholders[i] = fmt.Sprintf("$%d", i+4)
+		args = append(args, s)
+	}
+
+	query := fmt.Sprintf(`
+        SELECT COUNT(*) 
+        FROM contract_templates_review_task 
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND state IN (%s)
+    `, strings.Join(placeholders, ", "))
+
+	var count int
+	err := tx.GetContext(ctx, &count, query, args...)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func HasTaskInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) (bool, error) {
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_review_task 
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND state = $4
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4 AND state = $5
     `
 
 	var count int
-	err := tx.GetContext(ctx, &count, query, did, documentNumber, version, state)
+	err := tx.GetContext(ctx, &count, query, did, documentNumber, version, reviewer, state)
 	if err != nil {
 		return false, err
 	}

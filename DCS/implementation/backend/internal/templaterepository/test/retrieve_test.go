@@ -25,17 +25,17 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -63,16 +63,16 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 			t.Fatalf("Failed to get new DID: %v", err)
 		}
 		dids = append(dids, *did)
-		createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+		createContractTemplate(t, db, did, templatestate.Draft, creator)
 	}
 	sort.Strings(dids)
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetAllContractTemplatesMetaData{
+	qry := contracttemplate.GetAllMetaDataQuery{
 		RetrievedBy: creator,
 	}
-	queryHandler := contracttemplate.GetAllContractTemplateMetaDataHandler{
+	queryHandler := contracttemplate.GetAllMetaDataHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

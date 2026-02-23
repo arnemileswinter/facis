@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"strconv"
@@ -276,4 +278,32 @@ func UpdateData(ctx context.Context, tx *sqlx.Tx, data ContractTemplate) error {
 	}
 
 	return err
+}
+
+func ReopenTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	err := reviewtask.ReopenTasks(ctx, tx, did, documentNumber, version)
+	if err != nil {
+		return fmt.Errorf("could not reopen review tasks: %w", err)
+	}
+
+	err = approvaltask.ReopenTasks(ctx, tx, did, documentNumber, version)
+	if err != nil {
+		return fmt.Errorf("could not reopen approval tasks: %w", err)
+	}
+
+	return nil
+}
+
+func CleanupTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	err := reviewtask.DeleteTask(ctx, tx, did, documentNumber, version)
+	if err != nil {
+		return fmt.Errorf("could not delete review task: %w", err)
+	}
+
+	err = approvaltask.DeleteTask(ctx, tx, did, documentNumber, version)
+	if err != nil {
+		return fmt.Errorf("could not delete approval task: %w", err)
+	}
+
+	return nil
 }

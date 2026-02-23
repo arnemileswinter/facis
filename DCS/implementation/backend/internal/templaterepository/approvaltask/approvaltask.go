@@ -2,21 +2,22 @@ package approvaltask
 
 import (
 	"context"
-	aopprovaltaskstate "digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"errors"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type TaskData struct {
-	ID             string                               `db:"id"`
-	DID            string                               `db:"did"`
-	DocumentNumber int                                  `db:"document_number"`
-	Version        int                                  `db:"version"`
-	State          aopprovaltaskstate.ApprovalTaskState `db:"state"`
-	Approver       string                               `db:"approver"`
-	CreatedBy      string                               `db:"created_by"`
-	CreatedAt      time.Time                            `db:"created_at"`
+	ID             string                              `db:"id"`
+	DID            string                              `db:"did"`
+	DocumentNumber int                                 `db:"document_number"`
+	Version        int                                 `db:"version"`
+	State          approvaltaskstate.ApprovalTaskState `db:"state"`
+	Approver       string                              `db:"approver"`
+	CreatedBy      string                              `db:"created_by"`
+	CreatedAt      time.Time                           `db:"created_at"`
 }
 
 func CreateTask(ctx context.Context, tx *sqlx.Tx, data TaskData) (*time.Time, error) {
@@ -87,6 +88,29 @@ func ReadAllByApprover(ctx context.Context, tx *sqlx.Tx, approver string) ([]Tas
 	return approvalTasks, nil
 }
 
+func UpdateTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) error {
+	statement := `
+        UPDATE contract_templates_approval_task SET state = $5
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
+    `
+
+	result, err := tx.ExecContext(ctx, statement, did, documentNumber, version, approver, state)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("user has no review task for this contract template")
+	}
+
+	return err
+}
+
 func IsValidTaskUser(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string) (bool, error) {
 	selectQuery := `
         SELECT COUNT(*) FROM contract_templates_approval_task
@@ -104,6 +128,22 @@ func IsValidTaskUser(ctx context.Context, tx *sqlx.Tx, did string, documentNumbe
 	}
 
 	return false, nil
+}
+
+func HasTaskInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) (bool, error) {
+	query := `
+        SELECT COUNT(*) 
+        FROM contract_templates_approval_task 
+        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4 AND state = $5
+    `
+
+	var count int
+	err := tx.GetContext(ctx, &count, query, did, documentNumber, version, approver, state)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }
 
 func DeleteTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {

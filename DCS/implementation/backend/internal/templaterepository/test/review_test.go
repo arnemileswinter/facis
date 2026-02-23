@@ -24,7 +24,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 
@@ -58,7 +58,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 		}
 	}
 
-	exists, err := reviewtask.ExistTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}
@@ -84,7 +84,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 
@@ -125,7 +125,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 		}
 	}
 
-	exists, err := reviewtask.ExistTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}

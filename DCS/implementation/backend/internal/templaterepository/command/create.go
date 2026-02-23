@@ -9,26 +9,24 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type CreateTemplateContractCommand struct {
+type CreateCommand struct {
 	DID          string
 	CreatedBy    string
-	UpdatedAt    time.Time
 	Name         *string
 	Description  *string
 	TemplateData *datatype.JSON
 }
 
-type CreateTemplateContractHandler struct {
+type CreateHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand) error {
+func (h *CreateHandler) Handle(cmd CreateCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -52,7 +50,7 @@ func (h *CreateTemplateContractHandler) Handle(cmd CreateTemplateContractCommand
 		return fmt.Errorf("could not create contract template: %w", err)
 	}
 
-	evt := templateevents.CreateContractTemplate{
+	evt := templateevents.CreateContractTemplateEvent{
 		DID:            cmd.DID,
 		DocumentNumber: 1,
 		Version:        1,
