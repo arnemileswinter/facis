@@ -16,7 +16,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type RejectTemplateContractCommand struct {
+type RejectCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -25,12 +25,12 @@ type RejectTemplateContractCommand struct {
 	Reason         string
 }
 
-type RejectTemplateContractHandler struct {
+type RejectHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *RejectTemplateContractHandler) Handle(cmd RejectTemplateContractCommand) error {
+func (h *RejectHandler) Handle(cmd RejectCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()

@@ -27,7 +27,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
 	templateData := map[string]interface{}{
@@ -41,7 +41,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -51,7 +51,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -62,13 +62,13 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -96,7 +96,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	reviewers := []string{"Test User 2"}
 
@@ -114,7 +114,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -124,7 +124,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -146,7 +146,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -159,7 +159,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -169,7 +169,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -191,7 +191,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	reviewers := []string{"Test User 2"}
 
@@ -209,7 +209,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -219,7 +219,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -230,13 +230,13 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -264,7 +264,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	reviewers := []string{"Test User 2"}
 
@@ -282,7 +282,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -292,7 +292,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -314,7 +314,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Approved, creator)
+	createContractTemplate(t, db, did, templatestate.Approved, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -327,7 +327,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -337,7 +337,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -359,7 +359,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Approved, creator)
+	createContractTemplate(t, db, did, templatestate.Approved, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -372,7 +372,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -382,7 +382,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -404,7 +404,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
 	templateData := map[string]interface{}{
@@ -418,7 +418,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateTemplateContractCommand{
+	cmd := command.UpdateCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -428,7 +428,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateTemplateContractHandler{
+	handler := command.UpdateHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

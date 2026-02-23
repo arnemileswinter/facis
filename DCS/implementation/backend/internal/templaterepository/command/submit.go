@@ -19,7 +19,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type SubmitContractTemplateCommand struct {
+type SubmitCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -31,7 +31,7 @@ type SubmitContractTemplateCommand struct {
 	Approver       *string
 }
 
-type SubmitContractTemplateHandler struct {
+type SubmitHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
@@ -62,7 +62,7 @@ func reopenTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 	return nil
 }
 
-func (h *SubmitContractTemplateHandler) Handle(cmd SubmitContractTemplateCommand) error {
+func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()

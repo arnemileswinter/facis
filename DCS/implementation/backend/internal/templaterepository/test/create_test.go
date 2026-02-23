@@ -35,14 +35,14 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	creator := "Test User"
 
-	cmd := command.CreateTemplateContractCommand{
+	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    creator,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonMetaData,
 	}
-	createHandler := command.CreateTemplateContractHandler{
+	createHandler := command.CreateHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -51,13 +51,13 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to create template contract: %v", err)
 	}
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

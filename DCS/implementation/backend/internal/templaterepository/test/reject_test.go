@@ -26,7 +26,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	ctx := context.Background()
 
@@ -37,7 +37,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -45,7 +45,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 		RejectedBy:     approver,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -56,13 +56,13 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -87,7 +87,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	ctx := context.Background()
 
@@ -96,7 +96,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 1")
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -104,7 +104,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 		RejectedBy:     "Test User 2",
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -124,12 +124,12 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
+	createContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -137,7 +137,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 		RejectedBy:     rejectedBy,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -157,12 +157,12 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Approved, "Test User")
+	createContractTemplate(t, db, did, templatestate.Approved, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -170,7 +170,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 		RejectedBy:     rejectedBy,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -190,12 +190,12 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, "Test User")
+	createContractTemplate(t, db, did, templatestate.Reviewed, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -203,7 +203,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 		RejectedBy:     rejectedBy,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

@@ -13,14 +13,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplateApprovalTasksForDID struct {
+type GetAllApprovalTasksForDID struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	RetrievedBy    string
 }
 
-type GetAllContractTemplateApprovalTasksForDIDResult struct {
+type GetAllApprovalTasksForDIDResult struct {
 	ID             int
 	DID            string
 	DocumentNumber int
@@ -32,12 +32,12 @@ type GetAllContractTemplateApprovalTasksForDIDResult struct {
 	CancelledAt    *time.Time
 }
 
-type GetAllContractTemplateApprovalTasksForDIDHandler struct {
+type GetAllApprovalTasksForDIDHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllContractTemplateApprovalTasksForDID) ([]GetAllContractTemplateApprovalTasksForDIDResult, error) {
+func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDID) ([]GetAllApprovalTasksForDIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -70,9 +70,9 @@ func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllCo
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllContractTemplateApprovalTasksForDIDResult, len(reviewTasks))
+	result := make([]GetAllApprovalTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
-		result[i] = GetAllContractTemplateApprovalTasksForDIDResult{
+		result[i] = GetAllApprovalTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,

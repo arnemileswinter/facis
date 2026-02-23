@@ -10,16 +10,18 @@ type ApprovalTaskState string
 
 const (
 	Open        ApprovalTaskState = "OPEN"
-	Approved    ApprovalTaskState = "APPROVED"
 	Rejected    ApprovalTaskState = "REJECTED"
 	Resubmitted ApprovalTaskState = "RESUBMITTED"
+	Validated   ApprovalTaskState = "VALIDATED"
+	Approved    ApprovalTaskState = "APPROVED"
 )
 
 var validStates = map[ApprovalTaskState]bool{
 	Open:        true,
-	Approved:    true,
 	Rejected:    true,
 	Resubmitted: true,
+	Validated:   true,
+	Approved:    true,
 }
 
 func NewApprovalTaskState(s string) (ApprovalTaskState, error) {

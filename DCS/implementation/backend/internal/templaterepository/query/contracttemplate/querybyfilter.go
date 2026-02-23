@@ -14,7 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplatesMetaDataByFilterQuery struct {
+type GetAllMetaDataByFilterQuery struct {
 	RetrievedBy string
 
 	DID            *string
@@ -26,7 +26,7 @@ type GetAllContractTemplatesMetaDataByFilterQuery struct {
 	Filter         *string
 }
 
-type GetAllContractTemplatesMetaDataByFilterResult struct {
+type GetAllMetaDataByFilterResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -38,12 +38,12 @@ type GetAllContractTemplatesMetaDataByFilterResult struct {
 	MetaData       datatype.JSON
 }
 
-type GetAllContractTemplatesMetaDataByFilterHandler struct {
+type GetAllMetaDataByFilterHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllContractTemplatesMetaDataByFilterQuery) ([]GetAllContractTemplatesMetaDataByFilterResult, error) {
+func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery) ([]GetAllMetaDataByFilterResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -83,9 +83,9 @@ func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllCont
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllContractTemplatesMetaDataByFilterResult, len(contractTemplates))
+	result := make([]GetAllMetaDataByFilterResult, len(contractTemplates))
 	for i, data := range contractTemplates {
-		result[i] = GetAllContractTemplatesMetaDataByFilterResult{
+		result[i] = GetAllMetaDataByFilterResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,

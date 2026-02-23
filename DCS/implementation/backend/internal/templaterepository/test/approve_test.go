@@ -26,7 +26,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	ctx := context.Background()
 
@@ -37,7 +37,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
-	cmd := command.ApproveTemplateContractCommand{
+	cmd := command.ApproveCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -45,7 +45,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		ApprovedBy:     approver,
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveTemplateContractHandler{
+	handler := command.ApproveHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -54,13 +54,13 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to submit template contract: %v", err)
 	}
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -90,11 +90,11 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 1")
 
-	cmd := command.ApproveTemplateContractCommand{
+	cmd := command.ApproveCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -102,7 +102,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 		ApprovedBy:     "Test User 2",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveTemplateContractHandler{
+	handler := command.ApproveHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -124,11 +124,11 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
 
-	cmd := command.ApproveTemplateContractCommand{
+	cmd := command.ApproveCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -136,7 +136,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 		ApprovedBy:     "Test User 1",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveTemplateContractHandler{
+	handler := command.ApproveHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -158,11 +158,11 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Approved, creator)
+	createContractTemplate(t, db, did, templatestate.Approved, creator)
 
 	ctx := context.Background()
 
-	cmd := command.ApproveTemplateContractCommand{
+	cmd := command.ApproveCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -170,7 +170,7 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 		ApprovedBy:     "Test User 1",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveTemplateContractHandler{
+	handler := command.ApproveHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -192,11 +192,11 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	ctx := context.Background()
 
-	cmd := command.ApproveTemplateContractCommand{
+	cmd := command.ApproveCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -204,7 +204,7 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 		ApprovedBy:     "Test User 1",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveTemplateContractHandler{
+	handler := command.ApproveHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

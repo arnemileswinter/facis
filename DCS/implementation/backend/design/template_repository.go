@@ -202,7 +202,7 @@ var ContractTemplateApproveRequest = Type("ContractTemplateApproveRequest", func
 })
 
 var ContractTemplateApproveResponse = Type("ContractTemplateApproveResponse", func() {
-	Description("Result for retrieving a contract template by id")
+	Description("Result for approving a contract template")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", Int, "The number of the contract template")
@@ -226,7 +226,31 @@ var ContractTemplateRejectRequest = Type("ContractTemplateRejectRequest", func()
 })
 
 var ContractTemplateRejectResponse = Type("ContractTemplateRejectResponse", func() {
-	Description("Result for retrieving a contract template by id")
+	Description("Result for rejecting a contract template")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Required("did", "document_number", "version")
+})
+
+var ContractTemplateVerifyRequest = Type("ContractTemplateVerifyRequest", func() {
+	Description("Contract template verify request")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
+	Attribute("decision_notes", ArrayOf(String), "A list of decision notes")
+
+	Required("did", "document_number", "version", "updated_at")
+})
+
+var ContractTemplateVerifyResponse = Type("ContractTemplateVerifyResponse", func() {
+	Description("Result for verifying a contract template")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", Int, "The number of the contract template")
@@ -400,12 +424,18 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:tr:components", "Semantic Hub")
 		Meta("dcs:ui", "Template Review")
 
+		Payload(ContractTemplateVerifyRequest)
+		Result(ContractTemplateVerifyResponse)
+
+		Error("bad_request", ErrorResult, "Bad request")
+		Error("internal_error", ErrorResult, "Internal server error")
+
 		HTTP(func() {
 			POST("/template/verify")
 			Response(StatusOK)
+			Response("bad_request", StatusBadRequest)
+			Response("internal_error", StatusInternalServerError)
 		})
-
-		Result(Any)
 	})
 
 	// POST /template/approve

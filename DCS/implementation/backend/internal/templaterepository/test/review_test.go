@@ -24,7 +24,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 
@@ -84,7 +84,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 

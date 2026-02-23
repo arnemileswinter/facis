@@ -13,14 +13,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplateReviewTasksForDID struct {
+type GetAllReviewTasksForDID struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	RetrievedBy    string
 }
 
-type GetAllContractTemplateReviewTasksForDIDResult struct {
+type GetAllReviewTasksForDIDResult struct {
 	ID             int
 	DID            string
 	DocumentNumber int
@@ -31,12 +31,12 @@ type GetAllContractTemplateReviewTasksForDIDResult struct {
 	CreatedAt      time.Time
 }
 
-type GetAllContractTemplateReviewTasksForDIDHandler struct {
+type GetAllReviewTasksForDIDHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllContractTemplateReviewTasksForDID) ([]GetAllContractTemplateReviewTasksForDIDResult, error) {
+func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDID) ([]GetAllReviewTasksForDIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -69,9 +69,9 @@ func (h *GetAllContractTemplateReviewTasksForDIDHandler) Handle(query GetAllCont
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllContractTemplateReviewTasksForDIDResult, len(reviewTasks))
+	result := make([]GetAllReviewTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
-		result[i] = GetAllContractTemplateReviewTasksForDIDResult{
+		result[i] = GetAllReviewTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
