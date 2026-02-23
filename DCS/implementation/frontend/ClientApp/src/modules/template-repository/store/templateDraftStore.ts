@@ -10,7 +10,7 @@ const defaultState: Readonly<TemplateDraftState> = {
   documentBlocks: [],
   semanticConditions: [],
   customMetaData: [],
-  type: 'subContract',
+  type: DocumentType.subContract,
 }
 
 export const useTemplateDraftStore = defineStore(storeId, {
