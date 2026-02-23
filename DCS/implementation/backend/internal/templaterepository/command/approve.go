@@ -6,6 +6,7 @@ import (
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/approvaltask"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"digital-contracting-service/internal/templaterepository/reviewtask"
@@ -61,6 +62,15 @@ func (h *ApproveHandler) Handle(cmd ApproveCommand) error {
 
 	if !valid {
 		return errors.New("invalid user")
+	}
+
+	exist, err := approvaltask.HasTaskInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.ApprovedBy, approvaltaskstate.Open)
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		return errors.New("contract template needs to be verified before")
 	}
 
 	err = templaterepository.UpdateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Approved)

@@ -62,6 +62,64 @@ func reopenTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 	return nil
 }
 
+func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, cmd SubmitCommand) error {
+	for _, reviewer := range cmd.Reviewer {
+		reviewTask := reviewtask.TaskData{
+			DID:            cmd.DID,
+			DocumentNumber: processData.DocumentNumber,
+			Version:        processData.Version,
+			Reviewer:       reviewer,
+			State:          reviewtaskstate.Open,
+			CreatedBy:      cmd.SubmittedBy,
+		}
+		createdAt, err := reviewtask.CreateTask(ctx, tx, reviewTask)
+		if err != nil {
+			return fmt.Errorf("could not create review tasks: %w", err)
+		}
+
+		createReviewTaskEvent := templateevents.CreateContractTemplateReviewTaskEvent{
+			DID:            processData.DID,
+			DocumentNumber: processData.DocumentNumber,
+			Version:        processData.Version,
+			CreatedBy:      cmd.SubmittedBy,
+			Reviewer:       reviewer,
+			OccurredAt:     *createdAt,
+		}
+		err = event.Create(ctx, tx, createReviewTaskEvent)
+		if err != nil {
+			return fmt.Errorf("could not create event: %w", err)
+		}
+	}
+
+	data := approvaltask.TaskData{
+		DID:            cmd.DID,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
+		CreatedBy:      cmd.SubmittedBy,
+		Approver:       *cmd.Approver,
+		State:          aopprovaltaskstate.Open,
+	}
+	createdAt, err := approvaltask.CreateTask(ctx, tx, data)
+	if err != nil {
+		return fmt.Errorf("could not create approval task: %w", err)
+	}
+
+	createApprovalTaskEvent := templateevents.CreateContractTemplateApprovalTaskEvent{
+		DID:            processData.DID,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
+		CreatedBy:      cmd.SubmittedBy,
+		Approver:       *cmd.Approver,
+		OccurredAt:     *createdAt,
+	}
+	err = event.Create(ctx, tx, createApprovalTaskEvent)
+	if err != nil {
+		return fmt.Errorf("could not create event: %w", err)
+	}
+
+	return nil
+}
+
 func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
@@ -97,58 +155,9 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return errors.New("no approver provided")
 		}
 
-		for _, reviewer := range cmd.Reviewer {
-			reviewTask := reviewtask.TaskData{
-				DID:            cmd.DID,
-				DocumentNumber: processData.DocumentNumber,
-				Version:        processData.Version,
-				Reviewer:       reviewer,
-				State:          reviewtaskstate.Open,
-				CreatedBy:      cmd.SubmittedBy,
-			}
-			createdAt, err := reviewtask.CreateTask(ctx, tx, reviewTask)
-			if err != nil {
-				return fmt.Errorf("could not create review tasks: %w", err)
-			}
-
-			createReviewTaskEvent := templateevents.CreateContractTemplateReviewTaskEvent{
-				DID:            processData.DID,
-				DocumentNumber: processData.DocumentNumber,
-				Version:        processData.Version,
-				CreatedBy:      cmd.SubmittedBy,
-				Reviewer:       reviewer,
-				OccurredAt:     *createdAt,
-			}
-			err = event.Create(ctx, tx, createReviewTaskEvent)
-			if err != nil {
-				return fmt.Errorf("could not create event: %w", err)
-			}
-		}
-
-		data := approvaltask.TaskData{
-			DID:            cmd.DID,
-			DocumentNumber: processData.DocumentNumber,
-			Version:        processData.Version,
-			CreatedBy:      cmd.SubmittedBy,
-			Approver:       *cmd.Approver,
-			State:          aopprovaltaskstate.Open,
-		}
-		createdAt, err := approvaltask.CreateTask(ctx, tx, data)
+		err := createTasks(ctx, tx, processData, cmd)
 		if err != nil {
-			return fmt.Errorf("could not create approval task: %w", err)
-		}
-
-		createApprovalTaskEvent := templateevents.CreateContractTemplateApprovalTaskEvent{
-			DID:            processData.DID,
-			DocumentNumber: processData.DocumentNumber,
-			Version:        processData.Version,
-			CreatedBy:      cmd.SubmittedBy,
-			Approver:       *cmd.Approver,
-			OccurredAt:     *createdAt,
-		}
-		err = event.Create(ctx, tx, createApprovalTaskEvent)
-		if err != nil {
-			return fmt.Errorf("could not create event: %w", err)
+			return err
 		}
 
 		nextTemplateState = templatestate.Submitted
@@ -180,17 +189,26 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 					return errors.New("invalid user")
 				}
 
+				exist, err := reviewtask.HasTaskInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Open)
+				if err != nil {
+					return err
+				}
+
+				if exist {
+					return errors.New("contract template needs to be verified before")
+				}
+
 				err = reviewtask.UpdateTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
 				if err != nil {
 					return fmt.Errorf("could not update approval task: %w", err)
 				}
 
-				exist, err := reviewtask.ExistTasksInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open)
+				existOpenTasks, err := reviewtask.ExistTasksInStates(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open, reviewtaskstate.Verified)
 				if err != nil {
 					return fmt.Errorf("could not check if review task exists: %w", err)
 				}
 
-				if !exist {
+				if !existOpenTasks {
 					nextTemplateState = templatestate.Reviewed
 				}
 

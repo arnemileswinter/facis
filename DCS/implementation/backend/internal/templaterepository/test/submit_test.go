@@ -185,6 +185,22 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to commit transaction: %v", err)
 	}
 
+	verifyCmd := command.VerifyCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		VerifiedBy:     reviewers[0],
+	}
+	verifyHandler := command.VerifyHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = verifyHandler.Handle(verifyCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
 	actionFlag := actionflag.Approval
 
 	cmd := command.SubmitCommand{
@@ -270,6 +286,65 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testin
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 4",
+		ActionFlag:     &actionFlag,
+		Comments:       []string{},
+	}
+	handler := command.SubmitHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestSubmit_ApproveContractTemplateInSubmittedStateWithoutVerifying(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Open, creator, reviewers)
+
+	tx, err := db.BeginTxx(ctxTx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		t.Fatalf("Failed to begin transaction: %v", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		t.Fatalf("Failed to commit transaction: %v", err)
+	}
+
+	actionFlag := actionflag.Approval
+
+	cmd := command.SubmitCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    "Test User 1",
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -380,6 +455,27 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	err = tx.Commit()
 	if err != nil {
 		t.Fatalf("Failed to commit transaction: %v", err)
+	}
+
+	/**
+	All reviewers verify contract template
+	*/
+	for _, reviewer := range reviewers {
+		verifyCmd := command.VerifyCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			UpdatedAt:      time.Now(),
+			VerifiedBy:     reviewer,
+		}
+		verifyHandler := command.VerifyHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = verifyHandler.Handle(verifyCmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
 	}
 
 	actionFlag := actionflag.Approval
@@ -736,7 +832,26 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	assert.Equal(t, approvaltaskstate.Open, approvalTasks[0].State)
 
 	/**
-	First reviewer approves the Contract Template
+	First reviewer verifies contract template
+	*/
+	verifyCmd := command.VerifyCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		VerifiedBy:     reviewers[0],
+	}
+	verifyHandler := command.VerifyHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = verifyHandler.Handle(verifyCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	/**
+	First reviewer approves the contract template
 	*/
 	actionFlag := actionflag.Approval
 
@@ -745,7 +860,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    reviewers[1],
+		SubmittedBy:    reviewers[0],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -810,7 +925,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	assert.Equal(t, len(approvalTasks), 1)
 
 	/**
-	Second reviewer declined the Contract Template
+	Second reviewer declined the contract template
 	*/
 	actionFlag = actionflag.Draft
 
@@ -850,7 +965,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
 
 	/**
-	Contract Template creator submits it again
+	contract template creator submits it again
 	*/
 	cmd = command.SubmitCommand{
 		DID:            *did,
@@ -890,7 +1005,28 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
 	/**
-	All reviewer approve the Contract Template
+	All reviewers verify contract template
+	*/
+	for _, reviewer := range reviewers {
+		verifyCmd := command.VerifyCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			UpdatedAt:      time.Now(),
+			VerifiedBy:     reviewer,
+		}
+		verifyHandler := command.VerifyHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = verifyHandler.Handle(verifyCmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	/**
+	All reviewer approve the contract template
 	*/
 	actionFlag = actionflag.Approval
 
@@ -932,7 +1068,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
 
 	/**
-	Approver resubmits reviewed Contract Template
+	Approver resubmits reviewed contract template
 	*/
 	cmd = command.SubmitCommand{
 		DID:            *did,
@@ -971,7 +1107,28 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
 	/**
-	All reviewer approve the Contract Template
+	All reviewers verify contract template
+	*/
+	for _, reviewer := range reviewers {
+		verifyCmd := command.VerifyCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			UpdatedAt:      time.Now(),
+			VerifiedBy:     reviewer,
+		}
+		verifyHandler := command.VerifyHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = verifyHandler.Handle(verifyCmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	/**
+	All reviewer approve the contract template
 	*/
 	actionFlag = actionflag.Approval
 
@@ -1013,7 +1170,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
 
 	/**
-	Approver resubmits reviewed Contract Template
+	Approver resubmits reviewed contract template
 	*/
 	cmd = command.SubmitCommand{
 		DID:            *did,
@@ -1160,7 +1317,26 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	assert.Equal(t, approvaltaskstate.Open, approvalTasks[0].State)
 
 	/**
-	First reviewer approves the Contract Template
+	First reviewer verifies contract template
+	*/
+	verifyCmd := command.VerifyCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		VerifiedBy:     reviewers[0],
+	}
+	verifyHandler := command.VerifyHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = verifyHandler.Handle(verifyCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	/**
+	First reviewer approves the contract template
 	*/
 	actionFlag := actionflag.Approval
 
@@ -1169,7 +1345,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    reviewers[1],
+		SubmittedBy:    reviewers[0],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -1234,7 +1410,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	assert.Equal(t, len(approvalTasks), 1)
 
 	/**
-	Second reviewer declined the Contract Template
+	Second reviewer declined the contract template
 	*/
 	actionFlag = actionflag.Draft
 
@@ -1274,7 +1450,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
 
 	/**
-	Contract Template creator submits it again
+	contract template creator submits it again
 	*/
 	cmd = command.SubmitCommand{
 		DID:            *did,
@@ -1314,7 +1490,28 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
 	/**
-	All reviewer approve the Contract Template
+	All reviewers verify contract template
+	*/
+	for _, reviewer := range reviewers {
+		verifyCmd := command.VerifyCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			UpdatedAt:      time.Now(),
+			VerifiedBy:     reviewer,
+		}
+		verifyHandler := command.VerifyHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = verifyHandler.Handle(verifyCmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	/**
+	All reviewer approve the contract template
 	*/
 	actionFlag = actionflag.Approval
 
@@ -1356,7 +1553,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
 
 	/**
-	Approver resubmits reviewed Contract Template
+	Approver resubmits reviewed contract template
 	*/
 	cmd = command.SubmitCommand{
 		DID:            *did,
@@ -1395,7 +1592,28 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
 	/**
-	All reviewer approve the Contract Template
+	All reviewers verify contract template
+	*/
+	for _, reviewer := range reviewers {
+		verifyCmd := command.VerifyCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			UpdatedAt:      time.Now(),
+			VerifiedBy:     reviewer,
+		}
+		verifyHandler := command.VerifyHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = verifyHandler.Handle(verifyCmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	/**
+	All reviewer approve the contract template
 	*/
 	actionFlag = actionflag.Approval
 
@@ -1437,7 +1655,26 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
 
 	/**
-	Approver approves reviewed Contract Template
+	Approver verifies reviewed contract template
+	*/
+	verifyCmd = command.VerifyCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		VerifiedBy:     approver,
+	}
+	verifyHandler = command.VerifyHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = verifyHandler.Handle(verifyCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	/**
+	Approver approves reviewed contract template
 	*/
 	approveCmd := command.ApproveCommand{
 		DID:            *did,
@@ -1582,17 +1819,35 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	assert.Equal(t, approvaltaskstate.Open, approvalTasks[0].State)
 
 	/**
-	First reviewer approves the Contract Template
+	First reviewer verifies contract template
+	*/
+	verifyCmd := command.VerifyCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		VerifiedBy:     reviewers[0],
+	}
+	verifyHandler := command.VerifyHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = verifyHandler.Handle(verifyCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
+	/**
+	First reviewer approves the contract template
 	*/
 	actionFlag := actionflag.Approval
 
-	submittedBy = "Test User 1"
 	cmd = command.SubmitCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
-		SubmittedBy:    submittedBy,
+		SubmittedBy:    reviewers[0],
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
@@ -1659,7 +1914,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	assert.Equal(t, len(approvalTasks), 1)
 
 	/**
-	Second reviewer declined the Contract Template
+	Second reviewer declined the contract template
 	*/
 	actionFlag = actionflag.Draft
 
@@ -1701,7 +1956,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
 
 	/**
-	Contract Template creator submits it again
+	contract template creator submits it again
 	*/
 	approver = "Test User 4"
 	reviewers = []string{
@@ -1751,7 +2006,28 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
 	/**
-	All reviewer approve the Contract Template
+	All reviewers verify contract template
+	*/
+	for _, reviewer := range reviewers {
+		verifyCmd := command.VerifyCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			UpdatedAt:      time.Now(),
+			VerifiedBy:     reviewer,
+		}
+		verifyHandler := command.VerifyHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = verifyHandler.Handle(verifyCmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	/**
+	All reviewer approve the contract template
 	*/
 	actionFlag = actionflag.Approval
 
@@ -1795,7 +2071,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
 
 	/**
-	Approver resubmits reviewed Contract Template
+	Approver resubmits reviewed contract template
 	*/
 	cmd = command.SubmitCommand{
 		DID:            *did,
@@ -1836,7 +2112,28 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
 	/**
-	All reviewer approve the Contract Template
+	All reviewers verify contract template
+	*/
+	for _, reviewer := range reviewers {
+		verifyCmd := command.VerifyCommand{
+			DID:            *did,
+			DocumentNumber: 1,
+			Version:        1,
+			UpdatedAt:      time.Now(),
+			VerifiedBy:     reviewer,
+		}
+		verifyHandler := command.VerifyHandler{
+			Ctx: ctx,
+			DB:  db,
+		}
+		err = verifyHandler.Handle(verifyCmd)
+		if err != nil {
+			t.Fatalf("Failed to submit template contract: %v", err)
+		}
+	}
+
+	/**
+	All reviewer approve the contract template
 	*/
 	actionFlag = actionflag.Approval
 
@@ -1880,7 +2177,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
 
 	/**
-	Approver rejects reviewed Contract Template
+	Approver rejects reviewed contract template
 	*/
 	rejectCmd := command.RejectCommand{
 		DID:            *did,

@@ -5,7 +5,12 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
+	"errors"
 	"fmt"
 	"time"
 
@@ -41,7 +46,33 @@ func (h *VerifyHandler) Handle(cmd VerifyCommand) error {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
 
-	fmt.Println("process data:", processData)
+	if cmd.UpdatedAt.Before(processData.UpdatedAt) {
+		return errors.New("contract template was updated elsewhere, please reload")
+	}
+
+	hasTask, err := reviewtask.HasTaskInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open)
+	if err != nil {
+		return err
+	}
+
+	if hasTask {
+		err := reviewtask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
+		if err != nil {
+			return err
+		}
+	}
+
+	hasTask, err = approvaltask.HasTaskInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Open)
+	if err != nil {
+		return err
+	}
+
+	if hasTask {
+		err := approvaltask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
+		if err != nil {
+			return err
+		}
+	}
 
 	evt := templateevents.VerifyContractTemplateEvent{
 		DID:            cmd.DID,

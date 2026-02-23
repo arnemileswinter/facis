@@ -37,6 +37,22 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
+	verifyCmd := command.VerifyCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		VerifiedBy:     approver,
+	}
+	verifyHandler := command.VerifyHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = verifyHandler.Handle(verifyCmd)
+	if err != nil {
+		t.Fatalf("Failed to submit template contract: %v", err)
+	}
+
 	cmd := command.ApproveCommand{
 		DID:            *did,
 		DocumentNumber: 1,
@@ -70,6 +86,47 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 	}
 
 	assert.Equal(t, templatestate.Approved, contractTemplate.State)
+}
+
+func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	approver := "Test User 1"
+
+	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
+
+	cmd := command.ApproveCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedAt:      time.Now(),
+		ApprovedBy:     approver,
+		DecisionNotes:  []string{},
+	}
+	handler := command.ApproveHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
 }
 
 func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testing.T) {

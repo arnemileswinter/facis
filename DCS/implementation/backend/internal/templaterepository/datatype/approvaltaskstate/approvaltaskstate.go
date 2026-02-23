@@ -12,7 +12,7 @@ const (
 	Open        ApprovalTaskState = "OPEN"
 	Rejected    ApprovalTaskState = "REJECTED"
 	Resubmitted ApprovalTaskState = "RESUBMITTED"
-	Validated   ApprovalTaskState = "VALIDATED"
+	Verified    ApprovalTaskState = "VERIFIED"
 	Approved    ApprovalTaskState = "APPROVED"
 )
 
@@ -20,7 +20,7 @@ var validStates = map[ApprovalTaskState]bool{
 	Open:        true,
 	Rejected:    true,
 	Resubmitted: true,
-	Validated:   true,
+	Verified:    true,
 	Approved:    true,
 }
 
