@@ -129,6 +129,36 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 	assert.NotNil(t, err)
 }
 
+func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.ApproveCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		ApprovedBy:     "Test User 1",
+		DecisionNotes:  []string{},
+	}
+	handler := command.ApproveHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testing.T) {
 
 	db := setupTestDB(t)

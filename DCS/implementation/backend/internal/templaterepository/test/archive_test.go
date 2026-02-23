@@ -64,6 +64,35 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 	assert.Equal(t, templatestate.Archived, contractTemplate.State)
 }
 
+func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.ArchiveCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		ArchivedBy:     "Test User 1",
+	}
+	handler := command.ArchiveHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)

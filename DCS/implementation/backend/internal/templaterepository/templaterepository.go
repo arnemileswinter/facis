@@ -209,7 +209,7 @@ func ReadProcessData(ctx context.Context, tx *sqlx.Tx, did string, documentNumbe
 	err := tx.GetContext(ctx, &processData, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", did))
+			return nil, errors.New(fmt.Sprintf("contract template with DID %s, DocumentNumber %d and Version %d not found", did, documentNumber, version))
 		}
 		return nil, err
 	}

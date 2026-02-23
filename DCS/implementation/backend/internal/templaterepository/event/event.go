@@ -335,7 +335,7 @@ type RegisterContractTemplateEvent struct {
 
 // EventType implements the Event interface.
 func (e RegisterContractTemplateEvent) EventType() string {
-	return eventtype.PublishContractTemplate.String()
+	return eventtype.RegisterContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
