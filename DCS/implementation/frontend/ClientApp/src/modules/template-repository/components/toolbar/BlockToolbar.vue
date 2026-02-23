@@ -21,6 +21,14 @@
         aria-label="Move down" :disabled="!canMoveDown" @click="onMoveDown">
         <IconMoveDown :size="20" class="w-5 h-5" />
       </button>
+      <button v-if="canOutdent" type="button" :class="btnIcon" title="Outdent (move to same level as parent)"
+        aria-label="Outdent" @click="onMoveOutdent">
+        <IconMoveLeft :size="20" class="w-5 h-5" />
+      </button>
+      <button v-if="canIndent" type="button" :class="btnIcon" title="Indent (move into block above)" aria-label="Indent"
+        @click="onMoveIndent">
+        <IconMoveRight :size="20" class="w-5 h-5" />
+      </button>
       <button type="button" :class="[btnIcon, 'text-error hover:bg-error/10']" title="Delete" aria-label="Delete block"
         @click="onDelete">
         <IconTrash :size="20" class="w-5 h-5" />
@@ -44,6 +52,8 @@ import IconInsertNestBelow from '@template-repository/components/toolbar/icons/I
 import IconTrash from '@template-repository/components/toolbar/icons/IconTrash.vue'
 import IconMoveUp from '@template-repository/components/toolbar/icons/IconMoveUp.vue'
 import IconMoveDown from '@template-repository/components/toolbar/icons/IconMoveDown.vue'
+import IconMoveLeft from '@template-repository/components/toolbar/icons/IconMoveLeft.vue'
+import IconMoveRight from '@template-repository/components/toolbar/icons/IconMoveRight.vue'
 
 const btnIcon = 'btn btn-ghost btn-xs btn-square'
 
@@ -52,6 +62,8 @@ defineProps<{
   isDirty?: boolean
   canMoveUp?: boolean
   canMoveDown?: boolean
+  canOutdent?: boolean
+  canIndent?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -62,6 +74,8 @@ const emit = defineEmits<{
   cancel: []
   moveUp: []
   moveDown: []
+  moveOutdent: []
+  moveIndent: []
   delete: []
 }>()
 
@@ -85,6 +99,12 @@ function onMoveUp() {
 }
 function onMoveDown() {
   emit('moveDown')
+}
+function onMoveOutdent() {
+  emit('moveOutdent')
+}
+function onMoveIndent() {
+  emit('moveIndent')
 }
 function onDelete() {
   emit('delete')

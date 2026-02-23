@@ -20,9 +20,10 @@
     </div>
     <div class="pt-2 pr-2 pb-2">
       <BlockToolbar :is-section="!!(block && isSectionBlock(block))" :is-dirty="isDirty" :can-move-up="canMoveUp"
-        :can-move-down="canMoveDown" @insert-above="emit('insertAbove')" @insert-below="emit('insertBelow')"
-        @insert-nest="emit('insertNest')" @confirm="onConfirm" @cancel="revertToSaved" @move-up="emit('moveUp')"
-        @move-down="emit('moveDown')" @delete="emit('delete')" />
+        :can-move-down="canMoveDown" :can-outdent="canOutdent" :can-indent="canIndent"
+        @insert-above="emit('insertAbove')" @insert-below="emit('insertBelow')" @insert-nest="emit('insertNest')"
+        @confirm="onConfirm" @cancel="revertToSaved" @move-up="emit('moveUp')" @move-down="emit('moveDown')"
+        @move-outdent="emit('moveOutdent')" @move-indent="emit('moveIndent')" @delete="emit('delete')" />
     </div>
   </div>
 </template>
@@ -39,8 +40,10 @@ const props = withDefaults(
     block?: DocumentBlock
     canMoveUp?: boolean
     canMoveDown?: boolean
+    canOutdent?: boolean
+    canIndent?: boolean
   }>(),
-  { canMoveUp: false, canMoveDown: false }
+  { canMoveUp: false, canMoveDown: false, canOutdent: false, canIndent: false }
 )
 
 const emit = defineEmits<{
@@ -50,6 +53,8 @@ const emit = defineEmits<{
   confirm: [payload: { title: string; text: string }]
   moveUp: []
   moveDown: []
+  moveOutdent: []
+  moveIndent: []
   delete: []
 }>()
 
