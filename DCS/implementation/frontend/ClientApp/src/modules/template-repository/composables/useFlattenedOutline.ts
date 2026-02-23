@@ -32,7 +32,9 @@ function flattenOutline(outline: DocumentOutline): FlattenedOutlineItem[] {
     childIds.forEach((id, i) => collect(id, blockId, i, depthLevel + 1, [...sectionNumberPath, i + 1]))
   }
 
-  rootChildIds.forEach((id, i) => collect(id, 'root', i, 0, [i + 1]))
+  if (root) {
+    rootChildIds.forEach((id, i) => collect(id, root.blockId, i, 0, [i + 1]))
+  }
   return result
 }
 

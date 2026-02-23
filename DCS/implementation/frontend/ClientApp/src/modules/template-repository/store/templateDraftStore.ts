@@ -48,6 +48,15 @@ export const useTemplateDraftStore = defineStore(storeId, {
       if (payload.title !== undefined) block.title = payload.title
       if (payload.text !== undefined) block.text = payload.text
     },
+    /**
+     * Moves a block to a new position under the same or another parent.
+     * @param blockId - block to move
+     * @param parentBlockId - outline node (parent) under which to place the block
+     * @param insertIndex - index in the parent's children array (0 = first)
+     */
+    moveBlock(blockId: string, parentBlockId: string, insertIndex: number): void {
+      moveBlock(this.documentOutline, blockId, parentBlockId, insertIndex)
+    },
 
     reset() {
       Object.assign(this, getInitialState())
@@ -83,6 +92,35 @@ function addBlock(
   }
   blocks.push(block)
   return blockId
+}
+
+/**
+ * Moves a block within the outline (same parent or different parent). Mutates documentOutline only.
+ */
+function moveBlock(
+  outline: DocumentOutlineBlock[],
+  blockId: string,
+  parentBlockId: string,
+  insertIndex: number
+): void {
+  const oldParent = outline.find((b) => b.children.includes(blockId))
+  const newParent = outline.find((b) => b.blockId === parentBlockId)
+  if (!oldParent || !newParent) return
+
+  // same parent
+  if (oldParent.blockId === newParent.blockId) {
+    const siblings = oldParent.children.filter((id) => id !== blockId)
+    const idx = Math.min(insertIndex, siblings.length)
+    siblings.splice(idx, 0, blockId)
+    oldParent.children = siblings
+    return
+  }
+  // different parent
+  oldParent.children = oldParent.children.filter((id) => id !== blockId)
+  const newSiblings = [...newParent.children]
+  const idx = Math.min(insertIndex, newSiblings.length)
+  newSiblings.splice(idx, 0, blockId)
+  newParent.children = newSiblings
 }
 
 /**

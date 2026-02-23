@@ -19,9 +19,10 @@
       </div>
     </div>
     <div class="pt-2 pr-2 pb-2">
-      <BlockToolbar :is-section="!!(block && isSectionBlock(block))" :is-dirty="isDirty" @insert-above="emit('insertAbove')"
-        @insert-below="emit('insertBelow')" @insert-nest="emit('insertNest')" @confirm="onConfirm"
-        @cancel="revertToSaved" @delete="emit('delete')" />
+      <BlockToolbar :is-section="!!(block && isSectionBlock(block))" :is-dirty="isDirty" :can-move-up="canMoveUp"
+        :can-move-down="canMoveDown" @insert-above="emit('insertAbove')" @insert-below="emit('insertBelow')"
+        @insert-nest="emit('insertNest')" @confirm="onConfirm" @cancel="revertToSaved" @move-up="emit('moveUp')"
+        @move-down="emit('moveDown')" @delete="emit('delete')" />
     </div>
   </div>
 </template>
@@ -32,16 +33,23 @@ import type { DocumentBlock } from '@template-repository/models/contract-templac
 import { isSectionBlock, isTextBlock } from '@template-repository/models/contract-templace'
 import BlockToolbar from '@template-repository/components/toolbar/BlockToolbar.vue'
 
-const props = defineProps<{
-  blockId: string
-  block?: DocumentBlock
-}>()
+const props = withDefaults(
+  defineProps<{
+    blockId: string
+    block?: DocumentBlock
+    canMoveUp?: boolean
+    canMoveDown?: boolean
+  }>(),
+  { canMoveUp: false, canMoveDown: false }
+)
 
 const emit = defineEmits<{
   insertAbove: []
   insertBelow: []
   insertNest: []
   confirm: [payload: { title: string; text: string }]
+  moveUp: []
+  moveDown: []
   delete: []
 }>()
 

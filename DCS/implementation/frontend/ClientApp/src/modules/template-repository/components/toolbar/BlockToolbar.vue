@@ -1,28 +1,28 @@
 <template>
   <div class="flex flex-col items-start gap-1 flex-shrink-0" role="toolbar" aria-label="Block actions">
     <div class="flex items-center gap-0.5">
-      <button type="button" class="btn btn-ghost btn-xs btn-square" title="Insert above" aria-label="Insert block above"
+      <button type="button" :class="btnIcon" title="Insert above" aria-label="Insert block above"
         @click="onInsertAbove">
         <IconInsertAbove :size="20" class="w-5 h-5" />
       </button>
-      <button type="button" class="btn btn-ghost btn-xs btn-square" title="Insert below" aria-label="Insert block below"
+      <button type="button" :class="btnIcon" title="Insert below" aria-label="Insert block below"
         @click="onInsertBelow">
         <IconInsertBelow :size="20" class="w-5 h-5" />
       </button>
-      <button v-if="isSection" type="button" class="btn btn-ghost btn-xs btn-square" title="Insert nested"
-        aria-label="Insert block nested" @click="onInsertNest">
+      <button v-if="isSection" type="button" :class="btnIcon" title="Insert nested" aria-label="Insert block nested"
+        @click="onInsertNest">
         <IconInsertNestBelow :size="20" class="w-5 h-5" />
       </button>
-      <button type="button" class="btn btn-ghost btn-xs btn-square opacity-50 cursor-not-allowed"
-        title="Move up (not implemented)" aria-label="Move up" disabled>
+      <button type="button" :class="[btnIcon, !canMoveUp && 'opacity-50 cursor-not-allowed']" title="Move up"
+        aria-label="Move up" :disabled="!canMoveUp" @click="onMoveUp">
         <IconMoveUp :size="20" class="w-5 h-5" />
       </button>
-      <button type="button" class="btn btn-ghost btn-xs btn-square opacity-50 cursor-not-allowed"
-        title="Move down (not implemented)" aria-label="Move down" disabled>
+      <button type="button" :class="[btnIcon, !canMoveDown && 'opacity-50 cursor-not-allowed']" title="Move down"
+        aria-label="Move down" :disabled="!canMoveDown" @click="onMoveDown">
         <IconMoveDown :size="20" class="w-5 h-5" />
       </button>
-      <button type="button" class="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10" title="Delete"
-        aria-label="Delete block" @click="onDelete">
+      <button type="button" :class="[btnIcon, 'text-error hover:bg-error/10']" title="Delete" aria-label="Delete block"
+        @click="onDelete">
         <IconTrash :size="20" class="w-5 h-5" />
       </button>
     </div>
@@ -45,9 +45,13 @@ import IconTrash from '@template-repository/components/toolbar/icons/IconTrash.v
 import IconMoveUp from '@template-repository/components/toolbar/icons/IconMoveUp.vue'
 import IconMoveDown from '@template-repository/components/toolbar/icons/IconMoveDown.vue'
 
+const btnIcon = 'btn btn-ghost btn-xs btn-square'
+
 defineProps<{
   isSection: boolean
   isDirty?: boolean
+  canMoveUp?: boolean
+  canMoveDown?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -56,6 +60,8 @@ const emit = defineEmits<{
   insertNest: []
   confirm: []
   cancel: []
+  moveUp: []
+  moveDown: []
   delete: []
 }>()
 
@@ -73,6 +79,12 @@ function onConfirm() {
 }
 function onCancel() {
   emit('cancel')
+}
+function onMoveUp() {
+  emit('moveUp')
+}
+function onMoveDown() {
+  emit('moveDown')
 }
 function onDelete() {
   emit('delete')
