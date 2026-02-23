@@ -50,12 +50,12 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 	}
 	defer tx.Rollback()
 
-	data, err := templaterepository.ReadContractTemplateDataById(ctx, tx, query.DID, query.DocumentNumber, query.Version)
+	data, err := templaterepository.ReadDataById(ctx, tx, query.DID, query.DocumentNumber, query.Version)
 	if err != nil {
 		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateRetrievedByIdEvent{
+	evt := templateevents.RetrieveContractTemplateByIdEvent{
 		DID:            query.DID,
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,

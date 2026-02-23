@@ -2,9 +2,10 @@ package test
 
 import (
 	"context"
-	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"log"
 	"os"
 	"testing"
@@ -37,7 +38,7 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did strin
 	}
 
 	for _, reviewer := range reviewers {
-		reviewTask := templaterepository.ReviewTaskData{
+		reviewTask := reviewtask.TaskData{
 			DID:            did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -45,7 +46,7 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did strin
 			State:          state,
 			CreatedBy:      submittedBy,
 		}
-		_, err = templaterepository.CreateReviewTasks(ctx, tx, reviewTask)
+		_, err = reviewtask.CreateTask(ctx, tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
@@ -64,7 +65,7 @@ func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did str
 		t.Fatalf("Failed to begin transaction: %v", err)
 	}
 
-	approvalTask := templaterepository.ApprovalTaskData{
+	approvalTask := approvaltask.TaskData{
 		DID:            did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -72,7 +73,7 @@ func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did str
 		State:          state,
 		CreatedBy:      submittedBy,
 	}
-	_, err = templaterepository.CreateApprovalTask(ctx, tx, approvalTask)
+	_, err = approvaltask.CreateTask(ctx, tx, approvalTask)
 	if err != nil {
 		t.Fatalf("Failed to create review task: %v", err)
 	}

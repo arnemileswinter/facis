@@ -1,4 +1,4 @@
-package templaterepository
+package approvaltask
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type ApprovalTaskData struct {
+type TaskData struct {
 	ID             string                               `db:"id"`
 	DID            string                               `db:"did"`
 	DocumentNumber int                                  `db:"document_number"`
@@ -19,8 +19,8 @@ type ApprovalTaskData struct {
 	CreatedAt      time.Time                            `db:"created_at"`
 }
 
-func CreateApprovalTask(ctx context.Context, tx *sqlx.Tx, data ApprovalTaskData) (*time.Time, error) {
-	query := `
+func CreateTask(ctx context.Context, tx *sqlx.Tx, data TaskData) (*time.Time, error) {
+	statement := `
     INSERT INTO contract_templates_approval_task (
         did, document_number, version, state, approver, created_by
     ) VALUES ($1, $2, $3, $4, $5, $6)
@@ -28,7 +28,7 @@ func CreateApprovalTask(ctx context.Context, tx *sqlx.Tx, data ApprovalTaskData)
 `
 
 	var createdAt time.Time
-	err := tx.GetContext(ctx, &createdAt, query,
+	err := tx.GetContext(ctx, &createdAt, statement,
 		data.DID,
 		data.DocumentNumber,
 		data.Version,
@@ -43,14 +43,28 @@ func CreateApprovalTask(ctx context.Context, tx *sqlx.Tx, data ApprovalTaskData)
 	return &createdAt, nil
 }
 
-func ReadAllApprovalTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]ApprovalTaskData, error) {
+func ReopenTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	statement := `
+        UPDATE contract_templates_approval_task SET state = 'OPEN'
+        WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	_, err := tx.ExecContext(ctx, statement, did, documentNumber, version)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ReadAll(ctx context.Context, tx *sqlx.Tx, did string) ([]TaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, approver,
                created_by, created_at
         FROM contract_templates_approval_task WHERE did = $1
     `
 
-	var approvalTasks []ApprovalTaskData
+	var approvalTasks []TaskData
 	err := tx.SelectContext(ctx, &approvalTasks, query, did)
 	if err != nil {
 		return nil, err
@@ -58,14 +72,14 @@ func ReadAllApprovalTasks(ctx context.Context, tx *sqlx.Tx, did string) ([]Appro
 	return approvalTasks, nil
 }
 
-func ReadAllApprovalTasksByApprover(ctx context.Context, tx *sqlx.Tx, approver string) ([]ApprovalTaskData, error) {
+func ReadAllByApprover(ctx context.Context, tx *sqlx.Tx, approver string) ([]TaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, approver,
                created_by, created_at
         FROM contract_templates_approval_task WHERE approver = $1
     `
 
-	var approvalTasks []ApprovalTaskData
+	var approvalTasks []TaskData
 	err := tx.SelectContext(ctx, &approvalTasks, query, approver)
 	if err != nil {
 		return nil, err
@@ -73,7 +87,7 @@ func ReadAllApprovalTasksByApprover(ctx context.Context, tx *sqlx.Tx, approver s
 	return approvalTasks, nil
 }
 
-func IsValidUserForApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string) (bool, error) {
+func IsValidTaskUser(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string) (bool, error) {
 	selectQuery := `
         SELECT COUNT(*) FROM contract_templates_approval_task
 		WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
@@ -92,27 +106,13 @@ func IsValidUserForApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, do
 	return false, nil
 }
 
-func UpdateApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state aopprovaltaskstate.ApprovalTaskState) error {
-	query := `
-        UPDATE contract_templates_approval_task SET state = $5
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
-    `
-
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version, approver, state)
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func DeleteApprovalTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
-	query := `
+func DeleteTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+	statement := `
         DELETE FROM contract_templates_approval_task
         WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
-	_, err := tx.ExecContext(ctx, query, did, documentNumber, version)
+	_, err := tx.ExecContext(ctx, statement, did, documentNumber, version)
 	if err != nil {
 		return err
 	}

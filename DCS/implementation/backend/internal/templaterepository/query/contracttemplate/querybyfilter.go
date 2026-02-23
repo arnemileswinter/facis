@@ -64,12 +64,12 @@ func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllCont
 		Filter:         query.Filter,
 	}
 
-	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaDataByFilter(ctx, tx, searchValues)
+	contractTemplates, err := templaterepository.ReadAllMetaDataByFilter(ctx, tx, searchValues)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateRetrievedAllEvent{
+	evt := templateevents.RetrieveAllContractTemplatesEvent{
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}

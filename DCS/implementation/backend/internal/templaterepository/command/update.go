@@ -42,7 +42,7 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 	}
 	defer tx.Rollback()
 
-	oldData, err := templaterepository.ReadContractTemplateDataById(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	oldData, err := templaterepository.ReadDataById(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
@@ -59,7 +59,7 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 		return errors.New("invalid contract template state")
 	}
 
-	newData := templaterepository.ContractTemplateData{
+	newData := templaterepository.ContractTemplate{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
@@ -67,12 +67,12 @@ func (h *UpdateTemplateContractHandler) Handle(cmd UpdateTemplateContractCommand
 		Description:    cmd.Description,
 		TemplateData:   cmd.TemplateData,
 	}
-	err = templaterepository.UpdateTemplateContractData(ctx, tx, newData)
+	err = templaterepository.UpdateData(ctx, tx, newData)
 	if err != nil {
 		return fmt.Errorf("could not update template data: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateUpdatedEvent{
+	evt := templateevents.UpdateContractTemplateEvent{
 		DID:             cmd.DID,
 		DocumentNumber:  cmd.DocumentNumber,
 		Version:         cmd.Version,
