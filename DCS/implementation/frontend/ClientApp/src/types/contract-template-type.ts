@@ -1,2 +1,1 @@
-export type ContractTemplateType =
-'DRAFT' | 'ACTIVE' | 'ARCHIVED'
+export type ContractTemplateType = 'DRAFT' | 'SUBMITTED' | 'REJECTED' | 'REVIEWED' | 'APPROVED'

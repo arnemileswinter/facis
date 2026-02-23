@@ -239,6 +239,13 @@
 import { ref } from 'vue'
 import { useContractTemplateController } from './NewContractTemplate.ts'
 
+const props = defineProps<{
+    did?: string
+    document_number?: number
+    version?: number
+}>()
+console.log(props)
+
 const activeTab = ref<'details' | 'clauses' | 'semantic' | 'builder' | 'meta'>('clauses')
 
 const {
@@ -257,5 +264,5 @@ const {
     removeRule,
     removeRuleFromNewClause,
     addRuleToNewClause
-} = useContractTemplateController()
+} = useContractTemplateController(props.did, props.document_number, props.version)
 </script>

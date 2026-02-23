@@ -1,3 +1,4 @@
+import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import TableView from '../views/TableView.vue'
 import ContractTemplateView from '../views/contract-template-list/ContractTemplateListView.vue'
@@ -7,21 +8,46 @@ import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Contract Templates',
+    name: 'templates.list',
     component: ContractTemplateView,
-    meta: { icon: DocumentTextIcon, title: "DCS" }
+    meta: { name: 'Contract Templates', icon: DocumentTextIcon },
   },
   {
     path: '/templates/new',
-    name: 'New Template',
+    name: 'templates.new',
     component: NewContractTemplateView,
-    meta: { hideInSidebar: true, title: "DCS - New Template" }
+    meta: { name: 'New Template', hideInSidebar: true },
+  },
+  {
+    path: '/templates/edit/:did',
+    name: 'templates.edit',
+    component: NewContractTemplateView,
+    meta: { name: 'Edit Template', hideInSidebar: true },
+    props: (route) => {
+      const did = route.params.did
+      const document_number = route.query.document_number
+      const version = route.query.version
+      if (
+        did &&
+        document_number &&
+        version &&
+        !Array.isArray(did) &&
+        !Array.isArray(document_number) &&
+        !Array.isArray(version)
+      ) {
+        return {
+          did: did,
+          document_number: parseInt(document_number),
+          version: parseInt(version),
+        }
+      }
+    },
   },
   {
     path: '/table',
-    name: 'Table',
+    name: 'table',
     component: TableView,
-    meta: { title: "DCS - Table" }
+    meta: { name: 'Table' },
   },
 ]
 

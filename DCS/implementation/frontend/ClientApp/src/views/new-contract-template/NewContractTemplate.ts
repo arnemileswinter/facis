@@ -1,5 +1,7 @@
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { ContractTemplateService } from '../../services/contract-template-service'
+import type { ContractTemplateRetrieveByIdRequest } from '../../models/requests/template-request';
 
 interface Clause {
     title: string;
@@ -13,13 +15,12 @@ interface SemanticRule {
     required: boolean;
 }
 
-export function useContractTemplateController() {
-    const route = useRoute()
+export function useContractTemplateController(did?: string, document_number?: number, version?: number) {
     const router = useRouter()
 
     const isSubmitting = ref(false)
     const isLoadingSuggestions = ref(false)
-    const isEditMode = computed(() => !!route.params.did)
+    const isEditMode = computed(() => !!did)
 
     const form = ref({
         name: '',
@@ -98,9 +99,6 @@ export function useContractTemplateController() {
         newRule.value.required = false
     }
 
-
-
-
     const removeRule = (index: number) => {
         form.value.semantic_rules.splice(index, 1)
     }
@@ -110,7 +108,7 @@ export function useContractTemplateController() {
         try {
             console.log("Publishing Template to Repository...", JSON.parse(JSON.stringify(form.value)))
             await new Promise(resolve => setTimeout(resolve, 1500))
-            router.push('/')
+            router.push({ name: 'templates.list' })
         } catch (error) {
             console.error("Submission failed", error)
         } finally {
@@ -118,9 +116,27 @@ export function useContractTemplateController() {
         }
     }
 
-    onMounted(() => {
+    const retrieveById = async () => {
+        if (!did || !document_number ||!version) return
+
+        const request: ContractTemplateRetrieveByIdRequest = {
+            did,
+            document_number,
+            version
+        }
+        const response = await ContractTemplateService.retrieveById(request)
+        if (response) {
+            form.value.name = response.name ?? ''
+            form.value.description = response.description ?? ''
+            form.value.state = response.state
+            form.value.version = response.version
+        }
+    }
+
+    onMounted(async () => {
         fetchSuggestions()
         if (isEditMode.value) {
+            await retrieveById()
         }
     })
 
