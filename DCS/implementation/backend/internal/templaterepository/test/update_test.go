@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"testing"
 	"time"
 
@@ -435,4 +436,81 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 	err = handler.Handle(cmd)
 
 	assert.NotNil(t, err)
+}
+
+func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+
+	ctx := context.Background()
+
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	reviewers := []string{
+		"Test User 1",
+		"Test User 2",
+		"Test User 3",
+	}
+
+	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Approved, creator, reviewers)
+
+	templateData := map[string]interface{}{
+		"test": "update",
+	}
+	jsonTemplateData, err := datatype.NewJSON(templateData)
+	if err != nil {
+		t.Fatalf("Failed to create JSON template data: %v", err)
+	}
+
+	name := "Updated Contract Template"
+	description := "Updated Description"
+
+	cmd := command.UpdateCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		UpdatedBy:      reviewers[1],
+		UpdatedAt:      time.Now(),
+		Name:           &name,
+		Description:    &description,
+		TemplateData:   &jsonTemplateData,
+	}
+	handler := command.UpdateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to update template: %v", err)
+	}
+
+	tx, err := db.BeginTxx(ctx, nil)
+	if err != nil {
+		t.Fatal("could not start transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Approved, reviewtaskstate.Verified, reviewtaskstate.Rejected)
+	if err != nil {
+		t.Fatalf("Failed to check existence of review tasks: %v", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		t.Fatal("could not commit transaction: %w", err)
+	}
+
+	assert.False(t, exists)
 }

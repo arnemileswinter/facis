@@ -36,32 +36,6 @@ type SubmitHandler struct {
 	DB  *sqlx.DB
 }
 
-func reopenTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, submittedBy string) error {
-	err := reviewtask.ReopenTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
-	if err != nil {
-		return fmt.Errorf("could not reopen review tasks: %w", err)
-	}
-
-	err = approvaltask.ReopenTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
-	if err != nil {
-		return fmt.Errorf("could not reopen approval tasks: %w", err)
-	}
-
-	evt := templateevents.ReopenContractTemplateReviewAndApprovalTasksEvent{
-		DID:            processData.DID,
-		DocumentNumber: processData.DocumentNumber,
-		Version:        processData.Version,
-		CreatedBy:      submittedBy,
-		OccurredAt:     time.Now(),
-	}
-	err = event.Create(ctx, tx, evt)
-	if err != nil {
-		return fmt.Errorf("could not create event: %w", err)
-	}
-
-	return nil
-}
-
 func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, cmd SubmitCommand) error {
 	for _, reviewer := range cmd.Reviewer {
 		reviewTask := reviewtask.TaskData{
@@ -168,7 +142,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return errors.New("invalid user")
 		}
 
-		err := reopenTasks(ctx, tx, processData, cmd.SubmittedBy)
+		err := templaterepository.ReopenTasks(ctx, tx, processData, cmd.SubmittedBy)
 		if err != nil {
 			return err
 		}
@@ -223,7 +197,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 					return errors.New("invalid user")
 				}
 
-				err = reopenTasks(ctx, tx, processData, cmd.SubmittedBy)
+				err = templaterepository.ReopenTasks(ctx, tx, processData, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
@@ -257,7 +231,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return errors.New("invalid user")
 		}
 
-		err = reopenTasks(ctx, tx, processData, cmd.SubmittedBy)
+		err = templaterepository.ReopenTasks(ctx, tx, processData, cmd.SubmittedBy)
 		if err != nil {
 			return err
 		}

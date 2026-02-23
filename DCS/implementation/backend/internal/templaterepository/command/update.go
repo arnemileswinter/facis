@@ -71,6 +71,17 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 		return fmt.Errorf("invalid user")
 	}
 
+	processData := &templaterepository.ProcessData{
+		DID:            cmd.DID,
+		DocumentNumber: cmd.DocumentNumber,
+		Version:        cmd.Version,
+		UpdatedAt:      cmd.UpdatedAt,
+	}
+	err = templaterepository.ReopenTasks(ctx, tx, processData, cmd.UpdatedBy)
+	if err != nil {
+		return fmt.Errorf("could not reopen tasks: %w", err)
+	}
+
 	newData := templaterepository.ContractTemplate{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,

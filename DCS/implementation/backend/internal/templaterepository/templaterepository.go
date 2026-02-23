@@ -4,7 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/event"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"strconv"
@@ -276,4 +280,30 @@ func UpdateData(ctx context.Context, tx *sqlx.Tx, data ContractTemplate) error {
 	}
 
 	return err
+}
+
+func ReopenTasks(ctx context.Context, tx *sqlx.Tx, processData *ProcessData, submittedBy string) error {
+	err := reviewtask.ReopenTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
+	if err != nil {
+		return fmt.Errorf("could not reopen review tasks: %w", err)
+	}
+
+	err = approvaltask.ReopenTasks(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version)
+	if err != nil {
+		return fmt.Errorf("could not reopen approval tasks: %w", err)
+	}
+
+	evt := templateevents.ReopenContractTemplateReviewAndApprovalTasksEvent{
+		DID:            processData.DID,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
+		CreatedBy:      submittedBy,
+		OccurredAt:     time.Now(),
+	}
+	err = event.Create(ctx, tx, evt)
+	if err != nil {
+		return fmt.Errorf("could not create event: %w", err)
+	}
+
+	return nil
 }
