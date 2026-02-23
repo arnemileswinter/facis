@@ -126,7 +126,7 @@ export interface MetaData {
 // ---- DocumentTypeValue ----
 
 export const DocumentType = {
-    subContract: 'subContract',
+    subContract: 'subcontract',
     frameContract: 'frame_contract',
 } as const
 
