@@ -21,7 +21,7 @@ export function useContractTemplateController(did?: string, document_number?: nu
     const isSubmitting = ref(false)
     const isLoadingSuggestions = ref(false)
     const isEditMode = computed(() => !!did)
-
+    const selectedRules = ref([])
     const form = ref({
         name: '',
         description: '',
@@ -54,13 +54,16 @@ export function useContractTemplateController(did?: string, document_number?: nu
 
     const addClause = () => {
         if (!newClause.value.title || !newClause.value.description) return
-
         form.value.clauses.push({
             ...newClause.value,
-            rules: [...(newClause.value.rules || [])],
+            rules: [...selectedRules.value],
         })
-
-        newClause.value = { title: '', description: '', rules: [] }
+        newClause.value = {
+            title: '',
+            description: '',
+            rules: []
+        }
+        selectedRules.value = []
     }
 
     const removeClause = (index: number) => {
@@ -117,7 +120,7 @@ export function useContractTemplateController(did?: string, document_number?: nu
     }
 
     const retrieveById = async () => {
-        if (!did || !document_number ||!version) return
+        if (!did || !document_number || !version) return
 
         const request: ContractTemplateRetrieveByIdRequest = {
             did,
@@ -149,13 +152,14 @@ export function useContractTemplateController(did?: string, document_number?: nu
         newRule,
         suggestions,
         addRuleToNewClause,
-        removeRuleFromNewClause, 
+        removeRuleFromNewClause,
         addClause,
         removeClause,
         addRuleFromSuggestion,
         addNewCustomRule,
         removeRule,
         submit,
+        selectedRules,
         cancel: () => router.back()
     }
 }

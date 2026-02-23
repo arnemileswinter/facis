@@ -148,35 +148,26 @@
                             placeholder="Clause Title " />
                         <textarea v-model="newClause.description" class="textarea textarea-sm textarea-bordered w-full"
                             placeholder="Legal text content "></textarea>
+
+                        <label class="text-[10px] uppercase font-black tracking-widest opacity-50 block">
+                            Semantic Rules for this Clause
+                        </label>
+
+                        <div class="flex flex-wrap gap-2">
+                            <div v-if="!form.semantic_rules?.length" class="text-xs opacity-50 italic">
+                                No semantic rules yet.
+                            </div>
+                            <form class="flex flex-wrap gap-2">
+                                <input v-for="(rule, idx) in form.semantic_rules" :key="idx" class="btn btn-xs"
+                                    type="checkbox" :aria-label="rule.label" :value="rule" v-model="selectedRules" />
+                            </form>
+                        </div>
                         <button @click="addClause" type="button" class="btn btn-primary btn-sm self-end px-8"
                             :disabled="!newClause.title || !newClause.description">
                             Add Clause
                         </button>
                     </div>
                     <div class="space-y-2">
-                        <label class="text-[10px] uppercase font-black tracking-widest opacity-50 block">
-                            Semantic Rules for this Clause
-                        </label>
-
-                        <div class="flex flex-wrap gap-2">
-                            <button v-for="(rule, idx) in form.semantic_rules" :key="idx" type="button"
-                                class="btn btn-outline btn-secondary btn-xs normal-case"
-                                @click="addRuleToNewClause(rule)">
-                                + {{ rule.label }}
-                            </button>
-
-                            <div v-if="!form.semantic_rules?.length" class="text-xs opacity-50 italic">
-                                No semantic rules yet.
-                            </div>
-                        </div>
-
-                        <div v-if="newClause.rules?.length" class="flex flex-wrap gap-2">
-                            <span v-for="(r, rIdx) in newClause.rules" :key="rIdx" class="badge badge-secondary gap-2">
-                                {{ r.label }}
-                                <button type="button" class="btn btn-ghost btn-xs"
-                                    @click="removeRuleFromNewClause(rIdx)">✕</button>
-                            </span>
-                        </div>
                     </div>
 
                     <div class="space-y-3">
@@ -189,6 +180,11 @@
                                     </h4>
                                     <p class="text-xs opacity-80 mt-2 leading-relaxed whitespace-pre-wrap">
                                         {{ clause.description }}
+                                    </p>
+                                    <p class="text-xs opacity-80 mt-2 leading-relaxed">
+                                        <strong v-for="rule in clause.rules" class="text-primary mr-2">
+                                            {{ rule.label }}
+                                        </strong>
                                     </p>
                                 </div>
                                 <button @click="removeClause(index)"
@@ -259,6 +255,7 @@ const {
     removeClause,
     newRule,
     suggestions,
+    selectedRules,
     addRuleFromSuggestion,
     addNewCustomRule,
     removeRule,
