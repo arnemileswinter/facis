@@ -9,10 +9,10 @@
         <RouterLink :to="route.path" @click="closeMobileDrawer" :class="[
           'flex items-center gap-4 py-3 rounded-btn',
           isSidebarCollapsed ? 'justify-center px-0' : 'px-4'
-        ]" active-class="active bg-primary text-primary-content" :data-tip="isSidebarCollapsed ? route.name : ''">
+        ]" active-class="active bg-primary text-primary-content" :data-tip="isSidebarCollapsed ? route.meta.name : ''">
           <component :is="route.meta?.icon" class="w-6 h-6 flex-shrink-0" aria-hidden="true" />
           <span v-if="!isSidebarCollapsed" class="font-medium whitespace-nowrap">
-            {{ route.name }}
+            {{ route.meta.name }}
           </span>
         </RouterLink>
       </li>
@@ -37,19 +37,19 @@
 </template>
 
 
-<script setup>
-import { ref, computed } from 'vue'
-import { useRouter, RouterLink, RouterView } from 'vue-router'
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter, RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia';
 import { usePageStore } from '@core/store/page'
 
 const router = useRouter()
 
 const pageStore = usePageStore()
-const { isSidebarCollapsed, pageSidebarId } = storeToRefs(pageStore)
+const { isSidebarCollapsed } = storeToRefs(pageStore)
 
 const closeMobileDrawer = () => {
-  const drawerToggle = document.getElementById(pageSidebarId)
+  const drawerToggle = document.getElementById(pageStore.pageSidebarId) as HTMLInputElement | null
   if (drawerToggle) drawerToggle.checked = false
 }
 
@@ -58,6 +58,7 @@ const navigationRoutes = computed(() => {
     return router.getRoutes().filter(route =>
       route.name &&
       !route.path.includes(':') &&
+      route.meta?.name &&
       route.meta?.hideInSidebar !== true
     )
   } catch (e) {
