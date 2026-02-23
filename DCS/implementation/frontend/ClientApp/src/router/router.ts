@@ -3,7 +3,6 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import TableView from '../views/TableView.vue'
 import ContractTemplateView from '../views/contract-template-list/ContractTemplateListView.vue'
 import NewContractTemplateView from '../views/new-contract-template/NewContractTemplateView.vue'
-import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 
 const routes: RouteRecordRaw[] = [
   {
