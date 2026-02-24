@@ -3,14 +3,14 @@
     <div class="font-bold text-2xl tracking-tight text-base-content uppercase">DCS</div>
   </div>
 
-  <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4">
+  <nav class="overflow-y-auto overflow-x-hidden py-4">
     <ul class="menu px-3 gap-1 w-full text-base-content">
       <li v-for="route in navigationRoutes" :key="route.path">
         <RouterLink :to="route.path" @click="closeMobileDrawer" :class="[
           'flex items-center gap-4 py-3 rounded-btn',
           isSidebarCollapsed ? 'justify-center px-0' : 'px-4'
         ]" active-class="active bg-primary text-primary-content" :data-tip="isSidebarCollapsed ? route.meta.name : ''">
-          <component :is="route.meta?.icon" class="w-6 h-6 flex-shrink-0" aria-hidden="true" />
+          <component :is="route.meta?.icon" class="w-6 h-6 shrink-0" aria-hidden="true" />
           <span v-if="!isSidebarCollapsed" class="font-medium whitespace-nowrap">
             {{ route.meta.name }}
           </span>
@@ -18,6 +18,10 @@
       </li>
     </ul>
   </nav>
+
+  <TemplateListStateFilter v-if="$route.matched.some(route => route.name === 'templates.list') && !isSidebarCollapsed" class="px-3" />
+
+  <div class="flex-1"></div>
 
   <div class="p-4 border-t border-base-content/10 bg-base-300/20">
     <div :class="['flex items-center gap-3', isSidebarCollapsed ? 'justify-center' : 'px-2']">
@@ -38,10 +42,11 @@
 
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
-import { storeToRefs } from 'pinia';
+import TemplateListStateFilter from '@/components/lists/template-list/TemplateListStateFilter.vue'
 import { usePageStore } from '@core/store/page'
+import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 
 const router = useRouter()
 

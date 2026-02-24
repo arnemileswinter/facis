@@ -1,5 +1,6 @@
-import type { ContractTemplateType } from "../../types/contract-template-type"
-import type { ContractTemplate } from "../contract-template"
+import type { ContractTemplateType } from '@/types/contract-template-type'
+import type { TemplateType } from '@/types/template-type'
+import type { ContractTemplate } from '../contract-template'
 
 interface ContractTemplateBaseResponse {
   did: string
@@ -31,6 +32,7 @@ export interface ContractTemplateRetrieveByIdResponse extends ContractTemplateBa
   state: ContractTemplateType
   name?: string
   description?: string
+  template_type?: TemplateType
   created_by: string
   created_at: string
   updated_at: string

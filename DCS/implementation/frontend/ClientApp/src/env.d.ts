@@ -5,3 +5,11 @@ declare module '*.vue' {
   const component: DefineComponent<object, object, unknown>
   export default component
 }
+
+interface ViteTypeOptions {
+  strictImportMetaEnv: unknown
+}
+
+interface ImportMetaEnv {
+  readonly DCS_API_BASE_URL: string
+}

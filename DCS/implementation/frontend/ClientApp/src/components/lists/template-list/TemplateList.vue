@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import type { ContractTemplate } from '@/models/contract-template'
+import { useContractTemplateStateFilterStore } from '@/stores/contract-template-state-filter-store'
+import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
-import type { ContractTemplate } from '../../../models/contract-template'
+import ListSearch from '../ListSearch.vue'
 import ListSort from '../ListSort.vue'
 import TemplateListItem from './TemplateListItem.vue'
-import ListSearch from '../ListSearch.vue';
 
 const props = defineProps<{
   items: ContractTemplate[]
@@ -17,7 +19,10 @@ const defaultSort = sorter.keys().next().value!
 const sortBy = ref(defaultSort)
 const sortOrder = ref(1)
 
-const itemsSorted = computed(() => {
+const stateFilterStore = useContractTemplateStateFilterStore()
+const { stateFilters } = storeToRefs(stateFilterStore)
+
+const sortedItems = computed(() => {
   if (!sorter.has(sortBy.value)) {
     return props.items
   }
@@ -32,6 +37,14 @@ const itemsSorted = computed(() => {
     return sortOrder.value * result
   })
 })
+
+const filteredItems = computed(() => {
+  const filters = stateFilters.value
+  if (filters.size > 0) {
+    return sortedItems.value.filter((item) => filters.has(item.state))
+  }
+  return sortedItems.value
+})
 </script>
 
 <template>
@@ -40,6 +53,10 @@ const itemsSorted = computed(() => {
       <ListSearch class="grow" />
       <ListSort :sorter="sorter" v-model:sort-by="sortBy" v-model:sort-order="sortOrder" />
     </li>
-    <TemplateListItem v-for="item in itemsSorted" :key="item.did" :item="item" />
+    <TemplateListItem
+      v-for="item in filteredItems"
+      :key="`${item.did},${item.document_number},${item.version}`"
+      :item="item"
+    />
   </ul>
 </template>

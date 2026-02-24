@@ -33,7 +33,7 @@
         </div>
       </header>
 
-      <main class="flex-grow p-4 md:p-8">
+      <main class="grow p-4 md:p-8">
         <RouterView />
       </main>
     </div>
@@ -51,14 +51,14 @@
           <div  class="font-bold text-2xl tracking-tight text-base-content uppercase">DCS</div>
         </div>
 
-        <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4">
+        <nav class="overflow-y-auto overflow-x-hidden py-4">
           <ul class="menu px-3 gap-1 w-full text-base-content">
             <li v-for="route in navigationRoutes" :key="route.path">
               <RouterLink 
                 :to="route.path"
                 @click="closeMobileDrawer"
                 :class="[
-                  'flex items-center gap-4 py-3 rounded-btn',
+                  'tooltip flex items-center gap-4 py-3 rounded-btn',
                   isCollapsed ? 'justify-center px-0' : 'px-4'
                 ]"
                 active-class="active bg-primary text-primary-content"
@@ -66,7 +66,7 @@
               >
                 <component 
                   :is="route.meta?.icon" 
-                  class="w-6 h-6 flex-shrink-0" 
+                  class="w-6 h-6 shrink-0" 
                   aria-hidden="true" 
                 />
                 <span v-if="!isCollapsed" class="font-medium whitespace-nowrap">
@@ -76,6 +76,10 @@
             </li>
           </ul>
         </nav>
+
+        <TemplateListStateFilter v-if="$route.matched.some(route => route.name === 'templates.list') && !isCollapsed" class="px-3" />
+
+        <div class="flex-1"></div>
 
         <div class="p-4 border-t border-base-content/10 bg-base-300/20">
           <div :class="['flex items-center gap-3', isCollapsed ? 'justify-center' : 'px-2']">
@@ -96,8 +100,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter, RouterLink, RouterView } from 'vue-router'
+import { computed, ref } from 'vue'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+import TemplateListStateFilter from './lists/template-list/TemplateListStateFilter.vue'
 
 const router = useRouter()
 const isCollapsed = ref(false)

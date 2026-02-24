@@ -6,7 +6,7 @@
 
     <RouterLink
       :to="{ name: 'templates.new' }"
-      class="btn rounded-box btn self-end btn-secondary gap-2"
+      class="btn rounded-box self-end btn-secondary gap-2"
       #default="{ route }"
     >
       {{ route.meta.name }}
