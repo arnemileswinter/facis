@@ -3,24 +3,22 @@ package query
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	aopprovaltaskstate "digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
-	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplateApprovalTasksForDID struct {
+type GetAllApprovalTasksForDID struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	RetrievedBy    string
 }
 
-type GetAllContractTemplateApprovalTasksForDIDResult struct {
+type GetAllApprovalTasksForDIDResult struct {
 	ID             int
 	DID            string
 	DocumentNumber int
@@ -32,12 +30,12 @@ type GetAllContractTemplateApprovalTasksForDIDResult struct {
 	CancelledAt    *time.Time
 }
 
-type GetAllContractTemplateApprovalTasksForDIDHandler struct {
+type GetAllApprovalTasksForDIDHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllContractTemplateApprovalTasksForDID) ([]GetAllContractTemplateApprovalTasksForDIDResult, error) {
+func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDID) ([]GetAllApprovalTasksForDIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -48,21 +46,9 @@ func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllCo
 	}
 	defer tx.Rollback()
 
-	reviewTasks, err := templaterepository.ReadAllApprovalTasks(ctx, tx, query.DID)
+	reviewTasks, err := approvaltask.ReadAll(ctx, tx, query.DID)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
-	}
-
-	evt := templateevents.ContractTemplateRetrieveAllReviewTasksEvent{
-		DID:            query.DID,
-		DocumentNumber: query.DocumentNumber,
-		Version:        query.Version,
-		RetrievedBy:    query.RetrievedBy,
-		OccurredAt:     time.Now(),
-	}
-	err = event.Create(h.Ctx, tx, evt)
-	if err != nil {
-		return nil, fmt.Errorf("could not create event: %w", err)
 	}
 
 	err = tx.Commit()
@@ -70,9 +56,9 @@ func (h *GetAllContractTemplateApprovalTasksForDIDHandler) Handle(query GetAllCo
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllContractTemplateApprovalTasksForDIDResult, len(reviewTasks))
+	result := make([]GetAllApprovalTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
-		result[i] = GetAllContractTemplateApprovalTasksForDIDResult{
+		result[i] = GetAllApprovalTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,

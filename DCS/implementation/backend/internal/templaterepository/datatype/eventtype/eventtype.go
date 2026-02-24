@@ -8,36 +8,31 @@ import (
 type EventType string
 
 const (
-	CreateContractTemplate                       EventType = "CREATE_CONTRACT_TEMPLATE"
-	SubmitContractTemplate                       EventType = "SUBMIT_CONTRACT_TEMPLATE"
-	ApproveContractTemplate                      EventType = "APPROVE_CONTRACT_TEMPLATE"
-	RejectContractTemplate                       EventType = "REJECT_CONTRACT_TEMPLATE"
-	UpdateContractTemplate                       EventType = "UPDATE_CONTRACT_TEMPLATE"
-	RetrieveAllContractTemplates                 EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATES"
-	RetrieveContractTemplateById                 EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
-	CreateContractTemplateReviewTask             EventType = "CREATE_CONTRACT_TEMPLATE_REVIEW_TASK"
-	RetrieveAllContractTemplateReviewTasks       EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATE_REVIEW_TASKS"
-	CreateContractTemplateApprovalTask           EventType = "CREATE_CONTRACT_TEMPLATE_APPROVAL_TASK"
-	ReopenContractTemplateReviewAndApprovalTasks EventType = "REOPEN_CONTRACT_TEMPLATE_REVIEW_TASK"
-	DeleteContractTemplateReviewTask             EventType = "DELETE_CONTRACT_TEMPLATE_REVIEW_TASK"
-	RetrieveAllContractTemplateApprovalTasks     EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATE_APPROVAL_TASKS"
-	DeleteContractTemplateApprovalTask           EventType = "DELETE_CONTRACT_TEMPLATE_APPROVAL_TASK"
+	CreateContractTemplate       EventType = "CREATE_CONTRACT_TEMPLATE"
+	SubmitContractTemplate       EventType = "SUBMIT_CONTRACT_TEMPLATE"
+	ApproveContractTemplate      EventType = "APPROVE_CONTRACT_TEMPLATE"
+	RejectContractTemplate       EventType = "REJECT_CONTRACT_TEMPLATE"
+	VerifyContractTemplate       EventType = "VALIDATE_CONTRACT_TEMPLATE"
+	UpdateContractTemplate       EventType = "UPDATE_CONTRACT_TEMPLATE"
+	RetrieveAllContractTemplates EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATES"
+	RetrieveContractTemplateById EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
+	SearchContractTemplate       EventType = "SEARCH_CONTRACT_TEMPLATE"
+	ArchiveContractTemplate      EventType = "ARCHIVE_CONTRACT_TEMPLATE"
+	RegisterContractTemplate     EventType = "REGISTER_CONTRACT_TEMPLATE"
 )
 
 var validStates = map[EventType]bool{
-	CreateContractTemplate:                       true,
-	SubmitContractTemplate:                       true,
-	ApproveContractTemplate:                      true,
-	RejectContractTemplate:                       true,
-	UpdateContractTemplate:                       true,
-	RetrieveAllContractTemplates:                 true,
-	RetrieveContractTemplateById:                 true,
-	CreateContractTemplateReviewTask:             true,
-	CreateContractTemplateApprovalTask:           true,
-	ReopenContractTemplateReviewAndApprovalTasks: true,
-	DeleteContractTemplateReviewTask:             true,
-	RetrieveAllContractTemplateApprovalTasks:     true,
-	DeleteContractTemplateApprovalTask:           true,
+	CreateContractTemplate:       true,
+	SubmitContractTemplate:       true,
+	ApproveContractTemplate:      true,
+	RejectContractTemplate:       true,
+	VerifyContractTemplate:       true,
+	UpdateContractTemplate:       true,
+	RetrieveAllContractTemplates: true,
+	RetrieveContractTemplateById: true,
+	SearchContractTemplate:       true,
+	ArchiveContractTemplate:      true,
+	RegisterContractTemplate:     true,
 }
 
 func NewEventType(s string) (EventType, error) {

@@ -3,13 +3,36 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/command"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
+	"log"
+	"os"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
+
+func setupTestDB(t *testing.T) *sqlx.DB {
+	databaseUrl := os.Getenv("DATABASE_URL")
+	if databaseUrl == "" {
+		t.Fatalf("DATABASE_URL isn't set")
+	}
+
+	db, err := sqlx.Connect("postgres", databaseUrl)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	t.Cleanup(func() { db.Close() })
+
+	return db
+}
 
 func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
 	cleanApprovalTasksStatement := `
@@ -40,7 +63,7 @@ func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
 	}
 }
 
-func createTestContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templatestate.TemplateState, createdBy string) {
+func createContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templatestate.TemplateState, createdBy string) {
 	name := "Test Contract Template"
 	description := "Test Description"
 
@@ -52,15 +75,18 @@ func createTestContractTemplate(t *testing.T, db *sqlx.DB, did *string, state te
 		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
-	cmd := command.CreateTemplateContractCommand{
+	ctx := context.Background()
+
+	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    createdBy,
+		TemplateType: templatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
 	}
-	createHandler := command.CreateTemplateContractHandler{
-		Ctx: context.Background(),
+	createHandler := command.CreateHandler{
+		Ctx: ctx,
 		DB:  db,
 	}
 	err = createHandler.Handle(cmd)
@@ -77,44 +103,26 @@ func createTestContractTemplate(t *testing.T, db *sqlx.DB, did *string, state te
 	if err != nil {
 		t.Fatalf("Failed to update template state: %v", err)
 	}
-
-	ctx := context.Background()
-	retrievedBy := "Test User"
-
-	qry := contracttemplate.GetContractTemplateByIdQuery{
-		DID:            *did,
-		DocumentNumber: 1,
-		Version:        1,
-		RetrievedBy:    retrievedBy,
-	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
-		Ctx: ctx,
-		DB:  db,
-	}
-	_, err = queryHandler.Handle(qry)
-	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
-	}
 }
 
-func createTestContractTemplateWithTemplateData(t *testing.T, db *sqlx.DB, did *string, state templatestate.TemplateState, createdBy string, templateData map[string]interface{}) {
-	name := "Test Contract Template"
-	description := "Test Description"
-
+func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, did *string, state templatestate.TemplateState, createdBy string, documentNumber int, version int, name string, description string, templateData map[string]interface{}) {
 	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
 		t.Fatalf("Failed to create JSON template data: %v", err)
 	}
 
-	cmd := command.CreateTemplateContractCommand{
+	ctx := context.Background()
+
+	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    createdBy,
+		TemplateType: templatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
 	}
-	createHandler := command.CreateTemplateContractHandler{
-		Ctx: context.Background(),
+	createHandler := command.CreateHandler{
+		Ctx: ctx,
 		DB:  db,
 	}
 	err = createHandler.Handle(cmd)
@@ -123,30 +131,66 @@ func createTestContractTemplateWithTemplateData(t *testing.T, db *sqlx.DB, did *
 	}
 
 	updateStatement := `UPDATE contract_templates SET
-        	state = $2
+        	state = $2, document_number = $3, version = $4
     	WHERE did = $1
 `
 
-	_, err = db.Exec(updateStatement, cmd.DID, state)
+	_, err = db.Exec(updateStatement, *did, state, documentNumber, version)
 	if err != nil {
 		t.Fatalf("Failed to update template state: %v", err)
 	}
+}
 
-	ctx := context.Background()
-	retrievedBy := "Test User"
+func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did string, state reviewtaskstate.ReviewTaskState, submittedBy string, reviewers []string) {
+	tx, err := db.BeginTxx(ctx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		t.Fatalf("Failed to begin transaction: %v", err)
+	}
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
-		DID:            *did,
+	for _, reviewer := range reviewers {
+		reviewTask := reviewtask.TaskData{
+			DID:            did,
+			DocumentNumber: 1,
+			Version:        1,
+			Reviewer:       reviewer,
+			State:          state,
+			CreatedBy:      submittedBy,
+		}
+		_, err = reviewtask.CreateTask(ctx, tx, reviewTask)
+		if err != nil {
+			t.Fatalf("Failed to create review task: %v", err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		t.Fatalf("Failed to commit transaction: %v", err)
+	}
+}
+
+func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did string, state approvaltaskstate.ApprovalTaskState, submittedBy string, approver string) {
+	tx, err := db.BeginTxx(ctx, nil)
+	defer tx.Rollback()
+	if err != nil {
+		t.Fatalf("Failed to begin transaction: %v", err)
+	}
+
+	approvalTask := approvaltask.TaskData{
+		DID:            did,
 		DocumentNumber: 1,
 		Version:        1,
-		RetrievedBy:    retrievedBy,
+		Approver:       approver,
+		State:          state,
+		CreatedBy:      submittedBy,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
-		Ctx: ctx,
-		DB:  db,
-	}
-	_, err = queryHandler.Handle(qry)
+	_, err = approvaltask.CreateTask(ctx, tx, approvalTask)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to create review task: %v", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		t.Fatalf("Failed to commit transaction: %v", err)
 	}
 }
