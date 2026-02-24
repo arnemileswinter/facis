@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"time"
 
@@ -31,6 +32,11 @@ func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository
 // Create a new template.
 func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.ContractTemplateCreateRequest) (*templaterepository.ContractTemplateCreateResponse, error) {
 
+	templateType, err := templatetype.NewTemplateType(*req.TemplateType)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
 	jsonMetaData, err := datatype.NewJSON(req.TemplateData)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
@@ -44,6 +50,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    "Test User",
+		TemplateType: templateType,
 		Name:         req.Name,
 		Description:  req.Description,
 		TemplateData: &jsonMetaData,
@@ -118,11 +125,22 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
+
+	var templateType *templatetype.TemplateType
+	if req.TemplateType != nil {
+		tType, err := templatetype.NewTemplateType(*req.TemplateType)
+		if err != nil {
+			return nil, templaterepository.MakeInternalError(err)
+		}
+		templateType = &tType
+	}
+
 	cmd := command.UpdateCommand{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
+		TemplateType:   templateType,
 		Name:           req.Name,
 		Description:    req.Description,
 		TemplateData:   &metaData,

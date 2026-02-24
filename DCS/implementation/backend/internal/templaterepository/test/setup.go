@@ -8,6 +8,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"log"
 	"os"
@@ -79,6 +80,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templa
 	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    createdBy,
+		TemplateType: templatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
@@ -114,6 +116,7 @@ func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, did *string, 
 	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    createdBy,
+		TemplateType: templatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,

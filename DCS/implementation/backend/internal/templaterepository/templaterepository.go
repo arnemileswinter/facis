@@ -6,10 +6,12 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -20,6 +22,7 @@ type ContractTemplate struct {
 	DocumentNumber int                         `db:"document_number"`
 	Version        int                         `db:"version"`
 	State          templatestate.TemplateState `db:"state"`
+	TemplateType   templatetype.TemplateType   `db:"template_type"`
 	Name           *string                     `db:"name"`
 	Description    *string                     `db:"description"`
 	CreatedBy      string                      `db:"created_by"`
@@ -32,8 +35,8 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 	statement := `
     INSERT INTO contract_templates (
         did, created_by, state, name, 
-        description, template_data
-    ) VALUES ($1, $2, $3, $4, $5, $6)
+        description, template_data, template_type
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING created_at
 `
 
@@ -45,6 +48,7 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 		data.Name,
 		data.Description,
 		data.TemplateData,
+		data.TemplateType,
 	)
 	if err != nil {
 		return nil, err
@@ -53,10 +57,36 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 	return &createdAt, nil
 }
 
+/*
+	func GetAmountOfContractTemplatesForId(ctx context.Context, tx *sqlx.Tx, did string, documentNumber *int, version *int) (int, error) {
+		query := `
+	        SELECT COUNT(*)
+	        FROM contract_templates
+	        WHERE did = $1
+		`
+
+		var params []interface{}
+		paramIndex := 1
+
+		if documentNumber != nil {
+			query += `AND document_number = $` + strconv.Itoa(paramIndex) + `,`
+			params = append(params, documentNumber)
+			paramIndex++
+		}
+
+		if version != nil {
+			query += `AND version = $` + strconv.Itoa(paramIndex) + `,`
+			params = append(params, version)
+			paramIndex++
+		}
+
+		return count > 0, nil
+	}
+*/
 func ReadDataById(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplate, error) {
 	query := `
         SELECT did, document_number, version, state, name, description,
-               created_by, created_at, updated_at, template_data
+               created_by, created_at, updated_at, template_data, template_type
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
 
@@ -76,6 +106,7 @@ type MetaData struct {
 	DocumentNumber int                         `db:"document_number"`
 	Version        int                         `db:"version"`
 	State          templatestate.TemplateState `db:"state"`
+	TemplateType   templatetype.TemplateType   `db:"template_type"`
 	Name           *string                     `db:"name"`
 	Description    *string                     `db:"description"`
 	CreatedBy      string                      `db:"created_by"`
@@ -85,7 +116,7 @@ type MetaData struct {
 
 func ReadAllMetaData(ctx context.Context, tx *sqlx.Tx) ([]MetaData, error) {
 	query := `
-        SELECT did, document_number, version, state, name, description, created_by, created_at, updated_at
+        SELECT did, document_number, version, state, template_type, name, description, created_by, created_at, updated_at
         FROM contract_templates
     `
 
@@ -102,6 +133,7 @@ type SearchValues struct {
 	DocumentNumber *int
 	Version        *int
 	State          *templatestate.TemplateState
+	TemplateType   *templatetype.TemplateType
 	Name           *string
 	Description    *string
 	Filter         *string
@@ -138,6 +170,12 @@ func createSearchConditions(values SearchValues) (*string, []interface{}, error)
 		paramIndex++
 	}
 
+	if values.TemplateType != nil {
+		conditions += ` template_type = $` + strconv.Itoa(paramIndex) + ` AND`
+		params = append(params, "%"+*values.TemplateType+"%")
+		paramIndex++
+	}
+
 	if values.Name != nil {
 		conditions += ` name ILIKE $` + strconv.Itoa(paramIndex) + ` AND`
 		params = append(params, "%"+*values.Name+"%")
@@ -168,7 +206,7 @@ func createSearchConditions(values SearchValues) (*string, []interface{}, error)
 
 func ReadAllMetaDataByFilter(ctx context.Context, tx *sqlx.Tx, values SearchValues) ([]MetaData, error) {
 	query := `
-SELECT did, document_number, version, state, name, description, created_by, created_at, updated_at
+SELECT did, document_number, version, state, name, template_type, description, created_by, created_at, updated_at
 FROM contract_templates
 `
 
@@ -229,44 +267,61 @@ func UpdateState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber in
 	return err
 }
 
-func createQuery(data ContractTemplate) (*string, []interface{}, error) {
-	query := `UPDATE contract_templates SET`
+func createQuery(data ContractTemplateUpdateData) (*string, []interface{}, error) {
 
+	queryBase := `UPDATE contract_templates SET `
+
+	var columns []string
 	var params []interface{}
-	paramIndex := 1
+
+	addParam := func(columnName string, value interface{}) {
+		columns = append(columns, fmt.Sprintf("%s = $%d", columnName, len(params)+1))
+		params = append(params, value)
+	}
 
 	if data.Name != nil {
-		query += ` name = $` + strconv.Itoa(paramIndex) + `,`
-		params = append(params, data.Name)
-		paramIndex++
+		addParam("name", data.Name)
 	}
 
 	if data.Description != nil {
-		query += ` description = $` + strconv.Itoa(paramIndex) + `,`
-		params = append(params, data.Description)
-		paramIndex++
+		addParam("description", data.Description)
 	}
 
 	if data.TemplateData != nil && data.TemplateData.IsNotNullValue() {
-		query += ` template_data = $` + strconv.Itoa(paramIndex) + `,`
-		params = append(params, data.TemplateData)
-		paramIndex++
+		addParam("template_data", data.TemplateData)
 	}
 
-	if len(params) == 0 {
-		return nil, nil, errors.New("no parameters found")
+	if data.TemplateType != nil && data.TemplateData.IsNotNullValue() {
+		addParam("template_type", data.TemplateType)
 	}
 
-	// Remove last comma
-	query = query[:len(query)-1]
+	if len(columns) == 0 {
+		return nil, nil, errors.New("no fields to update")
+	}
 
-	query += ` WHERE did = $` + strconv.Itoa(paramIndex) + ` AND document_number = $` + strconv.Itoa(paramIndex+1) + ` AND version = $` + strconv.Itoa(paramIndex+2) + `;`
+	fullQuery := queryBase + strings.Join(columns, ", ")
+
+	nextIdx := len(params) + 1
+	fullQuery += fmt.Sprintf(" WHERE did = $%d AND document_number = $%d AND version = $%d;",
+		nextIdx, nextIdx+1, nextIdx+2)
+
 	params = append(params, data.DID, data.DocumentNumber, data.Version)
 
-	return &query, params, nil
+	return &fullQuery, params, nil
 }
 
-func UpdateData(ctx context.Context, tx *sqlx.Tx, data ContractTemplate) error {
+type ContractTemplateUpdateData struct {
+	DID            string `db:"did"`
+	DocumentNumber int    `db:"document_number"`
+	Version        int    `db:"version"`
+
+	TemplateType *templatetype.TemplateType `db:"template_type"`
+	Name         *string                    `db:"name"`
+	Description  *string                    `db:"description"`
+	TemplateData *datatype.JSON             `db:"template_data"`
+}
+
+func UpdateData(ctx context.Context, tx *sqlx.Tx, data ContractTemplateUpdateData) error {
 	query, params, err := createQuery(data)
 	if err != nil {
 		return err
