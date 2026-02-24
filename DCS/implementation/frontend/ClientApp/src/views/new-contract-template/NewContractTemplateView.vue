@@ -34,7 +34,7 @@
                                         <label class="card border-2 cursor-pointer transition-all" :class="form.contract_kind === TemplateType.frameContract
                                             ? 'border-primary bg-primary/5'
                                             : 'border-base-300 hover:border-base-content/20'">
-                                            <input type="radio" v-model="form.contract_kind" value="frame_contract"
+                                            <input type="radio" v-model="form.contract_kind" :value="TemplateType.frameContract"
                                                 class="hidden" />
                                             <div class="card-body p-4 gap-1">
                                                 <span class="card-title text-sm">Frame Contract</span>
@@ -45,7 +45,7 @@
                                         <label class="card border-2 cursor-pointer transition-all" :class="form.contract_kind === TemplateType.subContract
                                             ? 'border-primary bg-primary/5'
                                             : 'border-base-300 hover:border-base-content/20'">
-                                            <input type="radio" v-model="form.contract_kind" value="subcontract"
+                                            <input type="radio" v-model="form.contract_kind" :value="TemplateType.subContract"
                                                 class="hidden" />
                                             <div class="card-body p-4 gap-1">
                                                 <span class="card-title text-sm">Subcontract</span>
