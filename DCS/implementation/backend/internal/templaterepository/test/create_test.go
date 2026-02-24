@@ -5,6 +5,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 
@@ -19,7 +20,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	name := "Test Contract Template"
@@ -35,14 +36,15 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	creator := "Test User"
 
-	cmd := command.CreateTemplateContractCommand{
+	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    creator,
+		TemplateType: templatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonMetaData,
 	}
-	createHandler := command.CreateTemplateContractHandler{
+	createHandler := command.CreateHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -51,13 +53,13 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to create template contract: %v", err)
 	}
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

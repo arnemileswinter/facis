@@ -7,8 +7,9 @@ import (
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -16,21 +17,20 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type ApproveCommand struct {
+type VerifyCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	UpdatedAt      time.Time
-	ApprovedBy     string
-	DecisionNotes  []string
+	VerifiedBy     string
 }
 
-type ApproveHandler struct {
+type VerifyHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *ApproveHandler) Handle(cmd ApproveCommand) error {
+func (h *VerifyHandler) Handle(cmd VerifyCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -50,39 +50,35 @@ func (h *ApproveHandler) Handle(cmd ApproveCommand) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if processData.State != templatestate.Reviewed {
-		return errors.New("invalid contract template state")
-	}
-
-	valid, err := approvaltask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.ApprovedBy)
+	hasTask, err := reviewtask.HasTaskInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open)
 	if err != nil {
 		return err
 	}
 
-	if !valid {
-		return errors.New("invalid user")
+	if hasTask {
+		err := reviewtask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
+		if err != nil {
+			return err
+		}
 	}
 
-	exist, err := approvaltask.HasTaskInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.ApprovedBy, approvaltaskstate.Open)
+	hasTask, err = approvaltask.HasTaskInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Open)
 	if err != nil {
 		return err
 	}
 
-	if exist {
-		return errors.New("contract template needs to be verified before")
+	if hasTask {
+		err := approvaltask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = templaterepository.UpdateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Approved)
-	if err != nil {
-		return fmt.Errorf("could not update current template state: %w", err)
-	}
-
-	evt := templateevents.ApproveContractTemplateEvent{
+	evt := templateevents.VerifyContractTemplateEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
-		ApprovedBy:     cmd.ApprovedBy,
-		DecisionNotes:  cmd.DecisionNotes,
+		VerifiedBy:     cmd.VerifiedBy,
 		OccurredAt:     time.Now(),
 	}
 	err = event.Create(ctx, tx, evt)

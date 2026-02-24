@@ -7,6 +7,7 @@ import (
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
@@ -14,18 +15,19 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetContractTemplateByIdQuery struct {
+type GetByIdQuery struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	RetrievedBy    string
 }
 
-type GetContractTemplateByIdResult struct {
+type GetByIdResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	State          templatestate.TemplateState
+	TemplateType   templatetype.TemplateType
 	Name           *string
 	Description    *string
 	CreatedBy      string
@@ -34,12 +36,12 @@ type GetContractTemplateByIdResult struct {
 	TemplateData   *datatype.JSON
 }
 
-type GetContractTemplateByIdHandler struct {
+type GetByIdHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQuery) (*GetContractTemplateByIdResult, error) {
+func (h *GetByIdHandler) Handle(query GetByIdQuery) (*GetByIdResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -50,12 +52,12 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 	}
 	defer tx.Rollback()
 
-	data, err := templaterepository.ReadContractTemplateDataById(ctx, tx, query.DID, query.DocumentNumber, query.Version)
+	data, err := templaterepository.ReadDataById(ctx, tx, query.DID, query.DocumentNumber, query.Version)
 	if err != nil {
 		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateRetrievedByIdEvent{
+	evt := templateevents.RetrieveContractTemplateByIdEvent{
 		DID:            query.DID,
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,
@@ -72,11 +74,12 @@ func (h *GetContractTemplateByIdHandler) Handle(query GetContractTemplateByIdQue
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	return &GetContractTemplateByIdResult{
+	return &GetByIdResult{
 		DID:            query.DID,
 		DocumentNumber: data.DocumentNumber,
 		Version:        data.Version,
 		State:          data.State,
+		TemplateType:   data.TemplateType,
 		Name:           data.Name,
 		Description:    data.Description,
 		CreatedBy:      data.CreatedBy,

@@ -3,9 +3,9 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,12 +19,12 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 
@@ -44,7 +44,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 	}
 
 	for _, assignee := range assignees {
-		reviewTask := templaterepository.ReviewTaskData{
+		reviewTask := reviewtask.TaskData{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -52,13 +52,13 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 			State:          reviewtaskstate.Open,
 			CreatedBy:      creator,
 		}
-		_, err = templaterepository.CreateReviewTasks(ctx, tx, reviewTask)
+		_, err = reviewtask.CreateTask(ctx, tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
 	}
 
-	exists, err := templaterepository.ExistReviewTaskInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}
@@ -79,12 +79,12 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 
@@ -104,7 +104,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 	}
 
 	for _, assignee := range assignees {
-		reviewTask := templaterepository.ReviewTaskData{
+		reviewTask := reviewtask.TaskData{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -112,20 +112,20 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 			State:          reviewtaskstate.Open,
 			CreatedBy:      creator,
 		}
-		_, err = templaterepository.CreateReviewTasks(ctx, tx, reviewTask)
+		_, err = reviewtask.CreateTask(ctx, tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
 	}
 
 	for _, assignee := range assignees {
-		err := templaterepository.UpdateReviewTask(ctx, tx, *did, 1, 1, assignee, reviewtaskstate.Approved)
+		err := reviewtask.UpdateTask(ctx, tx, *did, 1, 1, assignee, reviewtaskstate.Approved)
 		if err != nil {
 			t.Fatalf("Failed to approve review task: %v", err)
 		}
 	}
 
-	exists, err := templaterepository.ExistReviewTaskInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}
