@@ -10,6 +10,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"fmt"
@@ -27,6 +28,7 @@ type MetaDataItem struct {
 	DocumentNumber int
 	Version        int
 	State          templatestate.TemplateState
+	TemplateType   templatetype.TemplateType
 	Name           string
 	Description    string
 	CreatedAt      time.Time
@@ -110,6 +112,7 @@ func (h *GetAllMetaDataHandler) Handle(query GetAllMetaDataQuery) (*GetAllMetaDa
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
 			State:          data.State,
+			TemplateType:   data.TemplateType,
 			Name:           *data.Name,
 			Description:    *data.Description,
 			CreatedAt:      data.CreatedAt,

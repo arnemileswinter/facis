@@ -48,6 +48,38 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)
 }
 
+func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
+
+	ctx := context.Background()
+
+	qry := contracttemplate.GetByIdQuery{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		RetrievedBy:    creator,
+	}
+	queryHandler := contracttemplate.GetByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	_, err = queryHandler.Handle(qry)
+
+	assert.NotNil(t, err)
+}
+
 func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 
 	db := setupTestDB(t)

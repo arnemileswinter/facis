@@ -84,6 +84,35 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	//assert.Equal(t, jsonTemplateData, contractTemplate.TemplateData)
 }
 
+func TestUpdate_UpdateNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.UpdateCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		UpdatedBy:      "Test User 1",
+	}
+	handler := command.UpdateHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing.T) {
 
 	db := setupTestDB(t)

@@ -7,6 +7,7 @@ import (
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
@@ -21,6 +22,7 @@ type GetAllMetaDataByFilterQuery struct {
 	DocumentNumber *int
 	Version        *int
 	State          *templatestate.TemplateState
+	TemplateType   *templatetype.TemplateType
 	Name           *string
 	Description    *string
 	Filter         *string
@@ -31,6 +33,7 @@ type GetAllMetaDataByFilterResult struct {
 	DocumentNumber int
 	Version        int
 	State          templatestate.TemplateState
+	TemplateType   templatetype.TemplateType
 	Name           string
 	Description    string
 	CreatedAt      time.Time
@@ -59,6 +62,7 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,
 		State:          query.State,
+		TemplateType:   query.TemplateType,
 		Name:           query.Name,
 		Description:    query.Description,
 		Filter:         query.Filter,
@@ -90,6 +94,7 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
 			State:          data.State,
+			TemplateType:   data.TemplateType,
 			Name:           *data.Name,
 			Description:    *data.Description,
 			CreatedAt:      data.CreatedAt,

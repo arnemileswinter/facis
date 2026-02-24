@@ -7,6 +7,7 @@ import (
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
@@ -20,6 +21,7 @@ type UpdateCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
+	TemplateType   *templatetype.TemplateType
 	UpdatedAt      time.Time
 	UpdatedBy      string
 	Name           *string
@@ -76,10 +78,11 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 		return fmt.Errorf("could not reopen tasks: %w", err)
 	}
 
-	newData := templaterepository.ContractTemplate{
+	newData := templaterepository.ContractTemplateUpdateData{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
+		TemplateType:   cmd.TemplateType,
 		Name:           cmd.Name,
 		Description:    cmd.Description,
 		TemplateData:   cmd.TemplateData,

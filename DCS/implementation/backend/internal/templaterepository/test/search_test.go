@@ -6,6 +6,7 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 
@@ -81,6 +82,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 	cmd := command.CreateCommand{
 		DID:          *did,
 		CreatedBy:    creator,
+		TemplateType: templatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonMetaData,

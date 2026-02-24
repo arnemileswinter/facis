@@ -18,7 +18,7 @@ const (
 	RetrieveContractTemplateById EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
 	SearchContractTemplate       EventType = "SEARCH_CONTRACT_TEMPLATE"
 	ArchiveContractTemplate      EventType = "ARCHIVE_CONTRACT_TEMPLATE"
-	PublishContractTemplate      EventType = "PUBLISH_CONTRACT_TEMPLATE"
+	RegisterContractTemplate     EventType = "REGISTER_CONTRACT_TEMPLATE"
 )
 
 var validStates = map[EventType]bool{
@@ -32,7 +32,7 @@ var validStates = map[EventType]bool{
 	RetrieveContractTemplateById: true,
 	SearchContractTemplate:       true,
 	ArchiveContractTemplate:      true,
-	PublishContractTemplate:      true,
+	RegisterContractTemplate:     true,
 }
 
 func NewEventType(s string) (EventType, error) {

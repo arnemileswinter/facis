@@ -113,6 +113,35 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 	assert.NotNil(t, err)
 }
 
+func TestCreate_RejectNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.RejectCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		RejectedBy:     "Test User 1",
+	}
+	handler := command.RejectHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)

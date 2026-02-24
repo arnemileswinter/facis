@@ -64,6 +64,35 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 	assert.Equal(t, templatestate.Registered, contractTemplate.State)
 }
 
+func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.RegisterCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		RegisteredBy:   "Test User 1",
+	}
+	handler := command.RegisterHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)

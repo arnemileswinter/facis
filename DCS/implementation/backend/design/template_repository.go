@@ -9,9 +9,13 @@ var ContractTemplateCreateRequest = Type("ContractTemplateCreateRequest", func()
 
 	Token("token", String, "JWT token")
 
+	Attribute("template_type", String, "The type of the template")
+
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
 	Attribute("template_data", Any, "The template data of the contract template")
+
+	Required("template_type")
 })
 
 var ContractTemplateCreateResponse = Type("ContractTemplateCreateResponse", func() {
@@ -62,6 +66,7 @@ var ContractTemplateUpdateRequest = Type("ContractTemplateUpdateRequest", func()
 
 	Attribute("updated_at", String, "The timestamp when the contract template was updated")
 
+	Attribute("template_type", String, "The type of the template")
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
 	Attribute("template_data", Any, "The template data of the contract template")
@@ -87,6 +92,7 @@ var ContractTemplateSearchRequest = Type("ContractTemplateSearchRequest", func()
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", Int, "The number of the contract template")
 	Attribute("version", Int, "The version of the contract template")
+	Attribute("template_type", String, "The type of the template")
 	Attribute("state", String, "The state of the contract template")
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
@@ -123,6 +129,7 @@ var ContractTemplateItem = Type("ContractTemplateItem", func() {
 	Attribute("document_number", Int, "Document number")
 	Attribute("version", Int, "Version")
 	Attribute("state", String, "State")
+	Attribute("template_type", String, "The type of the template")
 	Attribute("name", String, "Name")
 	Attribute("description", String, "Description")
 	Attribute("created_at", String, "Created at")
@@ -185,6 +192,7 @@ var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdRes
 	Attribute("version", Int, "The version number of the contract template")
 
 	Attribute("state", String, "The state of the contract template")
+	Attribute("template_type", String, "The type of the template")
 
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")

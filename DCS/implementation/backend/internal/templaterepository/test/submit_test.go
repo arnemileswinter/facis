@@ -599,6 +599,35 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
 }
 
+func TestSubmit_SubmitNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.SubmitCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		SubmittedBy:    "Test User 1",
+	}
+	handler := command.SubmitHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testing.T) {
 
 	db := setupTestDB(t)

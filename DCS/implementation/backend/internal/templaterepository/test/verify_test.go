@@ -67,6 +67,35 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	assert.True(t, exists)
 }
 
+func TestVerify_VerifyNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.VerifyCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		VerifiedBy:     "Test User 1",
+	}
+	handler := command.VerifyHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
 func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 
 	db := setupTestDB(t)

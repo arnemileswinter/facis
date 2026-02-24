@@ -7,6 +7,7 @@ import (
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 type CreateCommand struct {
 	DID          string
 	CreatedBy    string
+	TemplateType templatetype.TemplateType
 	Name         *string
 	Description  *string
 	TemplateData *datatype.JSON
@@ -41,6 +43,7 @@ func (h *CreateHandler) Handle(cmd CreateCommand) error {
 		DID:          cmd.DID,
 		CreatedBy:    cmd.CreatedBy,
 		State:        templatestate.Draft,
+		TemplateType: cmd.TemplateType,
 		Name:         cmd.Name,
 		Description:  cmd.Description,
 		TemplateData: cmd.TemplateData,
