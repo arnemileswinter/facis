@@ -4,7 +4,6 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/command"
-	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
@@ -13,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
+func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -26,42 +25,18 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Approved, creator)
 
 	ctx := context.Background()
 
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
-	defer cancel()
-
-	approver := "Test User 1"
-
-	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
-
-	verifyCmd := command.VerifyCommand{
+	cmd := command.RegisterCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
-		VerifiedBy:     approver,
 	}
-	verifyHandler := command.VerifyHandler{
-		Ctx: ctx,
-		DB:  db,
-	}
-	err = verifyHandler.Handle(verifyCmd)
-	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
-	}
-
-	cmd := command.ApproveCommand{
-		DID:            *did,
-		DocumentNumber: 1,
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     approver,
-		DecisionNotes:  []string{},
-	}
-	handler := command.ApproveHandler{
+	handler := command.RegisterHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -85,51 +60,11 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to query template contract: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Approved, contractTemplate.State)
+	assert.Equal(t, contractTemplate.DID, *did)
+	assert.Equal(t, templatestate.Registered, contractTemplate.State)
 }
 
-func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to get new DID: %v", err)
-	}
-
-	creator := "Test User"
-
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
-
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
-	defer cancel()
-
-	approver := "Test User 1"
-
-	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
-
-	cmd := command.ApproveCommand{
-		DID:            *did,
-		DocumentNumber: 1,
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     approver,
-		DecisionNotes:  []string{},
-	}
-	handler := command.ApproveHandler{
-		Ctx: ctx,
-		DB:  db,
-	}
-	err = handler.Handle(cmd)
-
-	assert.NotNil(t, err)
-}
-
-func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
+func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -142,15 +77,14 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.RegisterCommand{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
 		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
+		RegisteredBy:   "Test User 1",
 	}
-	handler := command.ApproveHandler{
+	handler := command.RegisterHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -159,46 +93,7 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to get new DID: %v", err)
-	}
-
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
-	defer cancel()
-
-	creator := "Test User"
-
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
-
-	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 1")
-
-	cmd := command.ApproveCommand{
-		DID:            *did,
-		DocumentNumber: 1,
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 2",
-		DecisionNotes:  []string{},
-	}
-	handler := command.ApproveHandler{
-		Ctx: ctx,
-		DB:  db,
-	}
-	err = handler.Handle(cmd)
-
-	assert.Error(t, err)
-}
-
-func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
+func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -215,15 +110,14 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.RegisterCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.RegisterHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -232,7 +126,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
+func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -245,19 +139,18 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Approved, creator)
+	createContractTemplate(t, db, did, templatestate.Submitted, creator)
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.RegisterCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
+		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.RegisterHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -266,7 +159,40 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
+func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Rejected, creator)
+
+	ctx := context.Background()
+
+	cmd := command.RegisterCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RegisteredBy:   creator,
+		UpdatedAt:      time.Now(),
+	}
+	handler := command.RegisterHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -283,15 +209,80 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.RegisterCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
-		UpdatedAt:      time.Now().Add(-5 * time.Second),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
+		RegisteredBy:   creator,
+		UpdatedAt:      time.Now(),
 	}
-	handler := command.ApproveHandler{
+	handler := command.RegisterHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Registered, creator)
+
+	ctx := context.Background()
+
+	cmd := command.RegisterCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RegisteredBy:   creator,
+		UpdatedAt:      time.Now(),
+	}
+	handler := command.RegisterHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Archived, creator)
+
+	ctx := context.Background()
+
+	cmd := command.RegisterCommand{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RegisteredBy:   creator,
+		UpdatedAt:      time.Now(),
+	}
+	handler := command.RegisterHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

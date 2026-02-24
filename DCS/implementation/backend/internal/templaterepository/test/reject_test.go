@@ -21,12 +21,12 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	ctx := context.Background()
 
@@ -37,7 +37,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -45,7 +45,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 		RejectedBy:     approver,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -56,13 +56,13 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -82,12 +82,12 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
 
 	ctx := context.Background()
 
@@ -96,7 +96,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 1")
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -104,7 +104,36 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 		RejectedBy:     "Test User 2",
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestCreate_RejectNonExistingContractTemplate(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	ctx := context.Background()
+
+	cmd := command.RejectCommand{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		UpdatedAt:      time.Now(),
+		RejectedBy:     "Test User 1",
+	}
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -121,15 +150,15 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, "Test User")
+	createContractTemplate(t, db, did, templatestate.Draft, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -137,7 +166,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 		RejectedBy:     rejectedBy,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -154,15 +183,15 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Approved, "Test User")
+	createContractTemplate(t, db, did, templatestate.Approved, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -170,7 +199,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 		RejectedBy:     rejectedBy,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -187,15 +216,15 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	createTestContractTemplate(t, db, did, templatestate.Reviewed, "Test User")
+	createContractTemplate(t, db, did, templatestate.Reviewed, "Test User")
 
 	ctx := context.Background()
 	rejectedBy := "Test User"
 
-	cmd := command.RejectTemplateContractCommand{
+	cmd := command.RejectCommand{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -203,7 +232,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 		RejectedBy:     rejectedBy,
 		Reason:         "Test Reason",
 	}
-	handler := command.RejectTemplateContractHandler{
+	handler := command.RejectHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

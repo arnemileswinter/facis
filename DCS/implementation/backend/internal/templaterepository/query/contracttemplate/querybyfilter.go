@@ -7,6 +7,7 @@ import (
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
@@ -14,16 +15,25 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllContractTemplatesMetaDataByFilterQuery struct {
+type GetAllMetaDataByFilterQuery struct {
 	RetrievedBy string
-	Filter      map[string]interface{}
+
+	DID            *string
+	DocumentNumber *int
+	Version        *int
+	State          *templatestate.TemplateState
+	TemplateType   *templatetype.TemplateType
+	Name           *string
+	Description    *string
+	Filter         *string
 }
 
-type GetAllContractTemplatesMetaDataByFilterResult struct {
+type GetAllMetaDataByFilterResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	State          templatestate.TemplateState
+	TemplateType   templatetype.TemplateType
 	Name           string
 	Description    string
 	CreatedAt      time.Time
@@ -31,12 +41,12 @@ type GetAllContractTemplatesMetaDataByFilterResult struct {
 	MetaData       datatype.JSON
 }
 
-type GetAllContractTemplatesMetaDataByFilterHandler struct {
+type GetAllMetaDataByFilterHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllContractTemplatesMetaDataByFilterQuery) ([]GetAllContractTemplatesMetaDataByFilterResult, error) {
+func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery) ([]GetAllMetaDataByFilterResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -47,14 +57,24 @@ func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllCont
 	}
 	defer tx.Rollback()
 
-	contractTemplates, err := templaterepository.ReadAllContractTemplateMetaData(ctx, tx)
+	searchValues := templaterepository.SearchValues{
+		DID:            query.DID,
+		DocumentNumber: query.DocumentNumber,
+		Version:        query.Version,
+		State:          query.State,
+		TemplateType:   query.TemplateType,
+		Name:           query.Name,
+		Description:    query.Description,
+		Filter:         query.Filter,
+	}
+
+	contractTemplates, err := templaterepository.ReadAllMetaDataByFilter(ctx, tx, searchValues)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
-	evt := templateevents.ContractTemplateRetrievedAllEvent{
+	evt := templateevents.RetrieveAllContractTemplatesEvent{
 		RetrievedBy: query.RetrievedBy,
-		Filter:      query.Filter,
 		OccurredAt:  time.Now(),
 	}
 	err = event.Create(h.Ctx, tx, evt)
@@ -67,13 +87,14 @@ func (h *GetAllContractTemplatesMetaDataByFilterHandler) Handle(query GetAllCont
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllContractTemplatesMetaDataByFilterResult, len(contractTemplates))
+	result := make([]GetAllMetaDataByFilterResult, len(contractTemplates))
 	for i, data := range contractTemplates {
-		result[i] = GetAllContractTemplatesMetaDataByFilterResult{
+		result[i] = GetAllMetaDataByFilterResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
 			State:          data.State,
+			TemplateType:   data.TemplateType,
 			Name:           *data.Name,
 			Description:    *data.Description,
 			CreatedAt:      data.CreatedAt,

@@ -20,22 +20,22 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	did, err := base.GetDID()
 	if err != nil {
-		t.Fatalf("Failed to connect get new DID: %v", err)
+		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
 	creator := "Test User"
 
-	createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetContractTemplateByIdQuery{
+	qry := contracttemplate.GetByIdQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetContractTemplateByIdHandler{
+	queryHandler := contracttemplate.GetByIdHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -46,6 +46,38 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	assert.Equal(t, contractTemplate.DID, *did)
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)
+}
+
+func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	createContractTemplate(t, db, did, templatestate.Draft, creator)
+
+	ctx := context.Background()
+
+	qry := contracttemplate.GetByIdQuery{
+		DID:            *did,
+		DocumentNumber: 2,
+		Version:        2,
+		RetrievedBy:    creator,
+	}
+	queryHandler := contracttemplate.GetByIdHandler{
+		Ctx: ctx,
+		DB:  db,
+	}
+	_, err = queryHandler.Handle(qry)
+
+	assert.NotNil(t, err)
 }
 
 func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
@@ -60,19 +92,19 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		did, err := base.GetDID()
 		if err != nil {
-			t.Fatalf("Failed to connect get new DID: %v", err)
+			t.Fatalf("Failed to get new DID: %v", err)
 		}
 		dids = append(dids, *did)
-		createTestContractTemplate(t, db, did, templatestate.Draft, creator)
+		createContractTemplate(t, db, did, templatestate.Draft, creator)
 	}
 	sort.Strings(dids)
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetAllContractTemplatesMetaData{
+	qry := contracttemplate.GetAllMetaDataQuery{
 		RetrievedBy: creator,
 	}
-	queryHandler := contracttemplate.GetAllContractTemplateMetaDataHandler{
+	queryHandler := contracttemplate.GetAllMetaDataHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
