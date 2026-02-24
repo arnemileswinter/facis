@@ -31,7 +31,7 @@
                                 <fieldset class="fieldset p-0 border-none">
                                     <legend class="fieldset-legend">Contract Type</legend>
                                     <div class="grid grid-cols-2 gap-3 mt-1">
-                                        <label class="card border-2 cursor-pointer transition-all" :class="form.contract_kind === DocumentType.frameContract
+                                        <label class="card border-2 cursor-pointer transition-all" :class="form.contract_kind === TemplateType.frameContract
                                             ? 'border-primary bg-primary/5'
                                             : 'border-base-300 hover:border-base-content/20'">
                                             <input type="radio" v-model="form.contract_kind" value="frame_contract"
@@ -42,7 +42,7 @@
                                                     that groups subcontracts</p>
                                             </div>
                                         </label>
-                                        <label class="card border-2 cursor-pointer transition-all" :class="form.contract_kind === DocumentType.subContract
+                                        <label class="card border-2 cursor-pointer transition-all" :class="form.contract_kind === TemplateType.subContract
                                             ? 'border-primary bg-primary/5'
                                             : 'border-base-300 hover:border-base-content/20'">
                                             <input type="radio" v-model="form.contract_kind" value="subcontract"
@@ -69,7 +69,7 @@
                                 </fieldset>
 
                                 <!-- Subcontracts (only for frame contracts) -->
-                                <fieldset v-if="form.contract_kind === 'frame_contract'"
+                                <fieldset v-if="form.contract_kind === TemplateType.frameContract"
                                     class="fieldset p-0 border-none">
                                     <legend class="fieldset-legend cursor-pointer select-none inline-flex items-center gap-1.5"
                                         @click="showSubcontractPicker = !showSubcontractPicker">
@@ -313,7 +313,7 @@ import { useTemplateEditorUiStore } from '@template-repository/store/templateEdi
 import TemplateEditor from '@template-repository/components/TemplateEditor.vue'
 import AddBlockModal from '@template-repository/components/AddBlockModal.vue'
 import { storeToRefs } from 'pinia'
-import { DocumentType } from "@template-repository/models/contract-templace"
+import { TemplateType } from "@template-repository/models/contract-templace"
 
 const templateEditorUiStore = useTemplateEditorUiStore()
 const { activeTab, tabs } = storeToRefs(templateEditorUiStore)

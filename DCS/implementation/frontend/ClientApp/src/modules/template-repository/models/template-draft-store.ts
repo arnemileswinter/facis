@@ -3,7 +3,7 @@ import type {
   DocumentBlock,
   SemanticCondition,
   MetaData,
-  DocumentTypeValue,
+  TemplateTypeValue,
   DocumentBlockType,
 } from "@template-repository/models/contract-templace"
 
@@ -13,7 +13,7 @@ interface TemplateDraftState {
   documentBlocks: DocumentBlock[]
   semanticConditions: SemanticCondition[]
   customMetaData: MetaData[]
-  type: DocumentTypeValue
+  templateType: TemplateTypeValue
 }
 
 /** Payload for adding a new block. */

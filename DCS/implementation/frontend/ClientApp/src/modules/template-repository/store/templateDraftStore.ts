@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload } from "@template-repository/models/template-draft-store"
 import type { DocumentOutlineBlock, DocumentBlock } from "@template-repository/models/contract-templace"
-import { DocumentBlockType, DocumentType } from "@template-repository/models/contract-templace"
+import { DocumentBlockType, TemplateType } from "@template-repository/models/contract-templace"
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -10,7 +10,7 @@ const defaultState: Readonly<TemplateDraftState> = {
   documentBlocks: [],
   semanticConditions: [],
   customMetaData: [],
-  type: DocumentType.subContract,
+  templateType: TemplateType.subContract,
 }
 
 export const useTemplateDraftStore = defineStore(storeId, {
@@ -29,10 +29,10 @@ export const useTemplateDraftStore = defineStore(storeId, {
      * @returns The new block's blockId.
      */
     addBlock(parentBlockId: string, insertIndex: number, payload: AddBlockPayload): string {
-      if (this.type === DocumentType.subContract && payload.blockType === DocumentBlockType.ApprovedTemplate) {
+      if (this.templateType === TemplateType.subContract && payload.blockType === DocumentBlockType.ApprovedTemplate) {
         throw new Error('subContract template cannot add APPROVED_TEMPLATE blocks')
       }
-      if (this.type === DocumentType.frameContract && payload.blockType !== DocumentBlockType.ApprovedTemplate) {
+      if (this.templateType === TemplateType.frameContract && payload.blockType !== DocumentBlockType.ApprovedTemplate) {
         throw new Error('frameContract template can only add APPROVED_TEMPLATE blocks')
       }
       return addBlock(this.documentOutline, this.documentBlocks, parentBlockId, insertIndex, payload)

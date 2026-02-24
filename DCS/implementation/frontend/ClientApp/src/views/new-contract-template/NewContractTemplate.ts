@@ -2,7 +2,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ContractTemplateService } from '../../services/contract-template-service'
 import type { ContractTemplateRetrieveByIdRequest } from '../../models/requests/template-request';
-import type { DocumentTypeValue } from '@/modules/template-repository/models/contract-templace';
+import {  TemplateType, type TemplateTypeValue } from "@template-repository/models/contract-templace"
 
 interface Clause {
     title: string;
@@ -32,7 +32,7 @@ export function useContractTemplateController(did?: string, document_number?: nu
     const form = ref({
         name: '',
         description: '',
-        contract_kind: 'frame_contract' as DocumentTypeValue,
+        contract_kind: TemplateType.subContract as TemplateTypeValue,
         subcontract_template_dids: [] as string[],
         clauses: [] as Clause[],
         semantic_rules: [] as SemanticRule[],
