@@ -12,6 +12,7 @@ var _ = Service("TemplateCatalogueIntegration", func() {
 	Method("discover", func() {
 		Description("Discover templates via XFSC Catalogue.")
 		Meta("dcs:requirements", "DCS-IR-SI-01")
+		Security(JWTAuth)
 		Payload(func() {
 			Token("token", String, "JWT token")
 		})
@@ -27,6 +28,7 @@ var _ = Service("TemplateCatalogueIntegration", func() {
 	Method("request", func() {
 		Description("Request template via XFSC Catalogue.")
 		Meta("dcs:requirements", "DCS-IR-SI-01")
+		Security(JWTAuth)
 		Payload(func() {
 			Token("token", String, "JWT token")
 		})
@@ -42,6 +44,7 @@ var _ = Service("TemplateCatalogueIntegration", func() {
 	Method("register", func() {
 		Description("Register template into XFSC Catalogue.")
 		Meta("dcs:requirements", "DCS-IR-SI-01")
+		Security(JWTAuth)
 		Payload(func() {
 			Token("token", String, "JWT token")
 		})

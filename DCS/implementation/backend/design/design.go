@@ -6,7 +6,7 @@ import (
 
 // JWTAuth defines the JWT-based security scheme backed by Keycloak OIDC.
 var JWTAuth = JWTSecurity("jwt", func() {
-	Description("Keycloak OIDC JWT Bearer token. Scopes correspond to Keycloak realm roles.")
+	Description("Keycloak OIDC JWT Bearer token. Scopes correspond to Keycloak client roles.")
 	Scope("Archive Manager", "Manage archived contracts and evidence")
 	Scope("Contract Observer", "Read-only access to archived contracts")
 	Scope("Contract Creator", "Create new contract drafts")
@@ -33,10 +33,6 @@ var _ = API("dcs", func() {
 	Title("DCS API Server")
 	Version("0.0.1")
 
-	// All services require JWT auth by default; individual services/methods
-	// can override with NoSecurity() where appropriate.
-	Security(JWTAuth)
-
 	// Global error definitions mapped to HTTP status codes.
 	Error("unauthorized", String, "Credentials are invalid or missing.")
 	Error("forbidden", String, "Insufficient permissions.")
@@ -48,7 +44,7 @@ var _ = API("dcs", func() {
 
 	Server("dcs", func() {
 		Host("local", func() {
-			URI("http://0.0.0.0:8991")
+			URI("http://localhost:8991")
 		})
 	})
 })

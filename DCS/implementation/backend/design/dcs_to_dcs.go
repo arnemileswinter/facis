@@ -12,6 +12,7 @@ var _ = Service("DcsToDcs", func() {
 	Method("retrieve", func() {
 		Description("Offer a policy-gated, read-only contract information endpoint between a DCS instance and a counterparty DCS")
 		Meta("dcs:requirements", "DCS-IR-SI-06")
+		Security(JWTAuth)
 		Payload(func() {
 			Token("token", String, "JWT token")
 		})
