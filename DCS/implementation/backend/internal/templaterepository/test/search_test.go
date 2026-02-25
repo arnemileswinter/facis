@@ -49,7 +49,7 @@ func TestSearch_SearchContractTemplatesWithoutSearchValue(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 5, len(contractTemplate))
@@ -93,7 +93,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
 	qry := contracttemplate.GetAllMetaDataByFilterQuery{
@@ -106,7 +106,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 1, len(contractTemplate))
@@ -161,7 +161,7 @@ func TestSearch_SearchContractTemplatesByDocumentNumberAndVersion(t *testing.T) 
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 3, len(contractTemplate))
@@ -214,7 +214,7 @@ func TestSearch_SearchContractTemplatesByName(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 2, len(contractTemplate))
@@ -261,7 +261,7 @@ func TestSearch_SearchContractTemplatesByDescript(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 2, len(contractTemplate))
@@ -330,7 +330,7 @@ func TestSearch_SearchContractTemplatesByTemplateData(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 2, len(contractTemplate))

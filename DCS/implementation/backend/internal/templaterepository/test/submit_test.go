@@ -56,7 +56,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry := contracttemplate.GetByIdQuery{
@@ -71,7 +71,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -198,7 +198,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	actionFlag := actionflag.Approval
@@ -218,7 +218,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry := contracttemplate.GetByIdQuery{
@@ -233,7 +233,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -474,7 +474,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -496,7 +496,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		}
 		err = handler.Handle(cmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -512,7 +512,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
@@ -576,7 +576,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
@@ -593,7 +593,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
@@ -797,7 +797,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry := contracttemplate.GetByIdQuery{
@@ -812,7 +812,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -876,7 +876,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	/**
@@ -899,7 +899,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -914,7 +914,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -973,7 +973,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -988,7 +988,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
@@ -1013,7 +1013,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1028,7 +1028,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1050,7 +1050,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1075,7 +1075,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 		err = handler.Handle(cmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1091,7 +1091,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
@@ -1115,7 +1115,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1130,7 +1130,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1152,7 +1152,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1177,7 +1177,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 		err = handler.Handle(cmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1193,7 +1193,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
@@ -1217,7 +1217,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1232,7 +1232,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1282,7 +1282,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry := contracttemplate.GetByIdQuery{
@@ -1297,7 +1297,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1361,7 +1361,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	/**
@@ -1384,7 +1384,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1399,7 +1399,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1458,7 +1458,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1473,7 +1473,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
@@ -1498,7 +1498,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1513,7 +1513,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1535,7 +1535,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1560,7 +1560,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 		err = handler.Handle(cmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1576,7 +1576,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
@@ -1600,7 +1600,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1615,7 +1615,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1637,7 +1637,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1662,7 +1662,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 		err = handler.Handle(cmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -1678,7 +1678,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
@@ -1699,7 +1699,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	/**
@@ -1719,7 +1719,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	err = approveHandler.Handle(approveCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	qry = contracttemplate.GetByIdQuery{
@@ -1734,7 +1734,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Approved, contractTemplate.State)
@@ -1782,7 +1782,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
@@ -1799,7 +1799,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1863,7 +1863,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	/**
@@ -1886,7 +1886,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy = "Test User"
@@ -1903,7 +1903,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -1962,7 +1962,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy = "Test User"
@@ -1979,7 +1979,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
@@ -2012,7 +2012,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy = "Test User"
@@ -2029,7 +2029,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -2051,7 +2051,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -2076,7 +2076,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		}
 		err = handler.Handle(cmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -2094,7 +2094,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
@@ -2118,7 +2118,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy = "Test User"
@@ -2135,7 +2135,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
@@ -2157,7 +2157,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -2182,7 +2182,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		}
 		err = handler.Handle(cmd)
 		if err != nil {
-			t.Fatalf("Failed to submit template contract: %v", err)
+			t.Fatalf("Failed to submit contract template: %v", err)
 		}
 	}
 
@@ -2200,7 +2200,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
@@ -2222,7 +2222,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	err = rejectHandler.Handle(rejectCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy = "Test User"
@@ -2239,7 +2239,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 	contractTemplate, err = queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Draft, contractTemplate.State)

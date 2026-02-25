@@ -41,7 +41,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
@@ -110,7 +110,7 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	for _, ct := range result.ContractTemplates {

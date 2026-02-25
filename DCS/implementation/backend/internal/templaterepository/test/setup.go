@@ -91,7 +91,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templa
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
 	updateStatement := `UPDATE contract_templates SET
@@ -127,7 +127,7 @@ func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, did *string, 
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
 	updateStatement := `UPDATE contract_templates SET

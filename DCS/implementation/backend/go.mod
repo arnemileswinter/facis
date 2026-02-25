@@ -5,6 +5,7 @@ go 1.25.4
 require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
+	github.com/nats-io/nats.go v1.48.0
 	github.com/stretchr/testify v1.11.1
 	goa.design/clue v1.2.3
 	goa.design/goa/v3 v3.24.1
@@ -21,7 +22,6 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d // indirect
-	github.com/nats-io/nats.go v1.48.0 // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
