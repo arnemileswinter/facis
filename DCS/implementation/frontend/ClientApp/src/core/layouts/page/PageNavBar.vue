@@ -19,15 +19,34 @@
     DCS <span class="font-normal opacity-50 ml-2">| Dashboard</span>
   </div>
 
+  <div class="flex items-center gap-2 w-20">
+    <RouterLink v-if="!isAuthenticated" :to="{ name: 'login' }" #default="{route}" class="btn btn-ghost flex-1 text-center">
+      {{ route.meta.name }}
+    </RouterLink>
+    <button v-else class="btn btn-ghost flex-1 text-center" @click="logout">Logout</button>
+  </div>
+
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePageStore } from '@core/store/page'
+import { useAuthStore } from '@/stores/auth'
+import { AuthenticationService } from '@/services/authentication-service'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const pageStore = usePageStore()
 const { isSidebarCollapsed, pageSidebarId } = storeToRefs(pageStore)
 const { toggleSidebar } = pageStore
 
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
+
+function logout() {
+  AuthenticationService.logout()
+  router.push({ name: 'login' })
+}
 </script>

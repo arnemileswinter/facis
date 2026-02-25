@@ -8,6 +8,7 @@ declare module 'vue-router' {
     name?: string
     hideInSidebar?: boolean
     icon?: FunctionalComponent<HTMLAttributes & VNodeProps>
+    requiresAuth: boolean
     /** This is used for setting the page title in useSyncPageTitle composable */
     title: string
   }

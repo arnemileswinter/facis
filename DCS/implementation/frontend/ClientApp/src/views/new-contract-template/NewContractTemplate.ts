@@ -1,8 +1,9 @@
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ContractTemplateService } from '../../services/contract-template-service'
-import type { ContractTemplateRetrieveByIdRequest } from '../../models/requests/template-request';
-import {  TemplateType, type TemplateTypeValue } from "@template-repository/models/contract-templace"
+import type { ContractTemplate } from '@/models/contract-template';
+import type { ContractTemplateRetrieveByIdRequest } from '@/models/requests/template-request';
+import { ContractTemplateService } from '@/services/contract-template-service';
+import { TemplateType, type TemplateTypeValue } from "@template-repository/models/contract-templace";
+import { computed, onMounted, ref, type Ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 interface Clause {
     title: string;
@@ -19,17 +20,21 @@ interface SubcontractTemplate {
 export function useContractTemplateController(did?: string, document_number?: number, version?: number) {
     const router = useRouter()
 
+    const contractTemplate: Ref<ContractTemplate | null> = ref(null)
+
     const isSubmitting = ref(false)
     const isEditMode = computed(() => !!did)
-    const form = ref({
-        name: '',
-        description: '',
+    const selectedRules = ref([])
+    const form = computed(() => {
+        return {
+        name: contractTemplate.value?.name ?? '',
+        description: contractTemplate.value?.description ?? '',
         contract_kind: TemplateType.subContract as TemplateTypeValue,
         subcontract_template_dids: [] as string[],
         clauses: [] as Clause[],
-        state: 'DRAFT',
-        version: 1
-    })
+        state: contractTemplate.value?.state ?? 'DRAFT',
+        version: contractTemplate.value?.state ?? 1
+    }})
 
     const newClause = ref<Clause>({ title: '', description: '', conditionIds: [] })
     const selectedConditionIds = ref<string[]>([])
@@ -108,10 +113,7 @@ export function useContractTemplateController(did?: string, document_number?: nu
         }
         const response = await ContractTemplateService.retrieveById(request)
         if (response) {
-            form.value.name = response.name ?? ''
-            form.value.description = response.description ?? ''
-            form.value.state = response.state
-            form.value.version = response.version
+            contractTemplate.value = response
         }
     }
 
