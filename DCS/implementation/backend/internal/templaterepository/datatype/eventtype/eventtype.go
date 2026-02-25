@@ -15,7 +15,7 @@ const (
 	VerifyContractTemplate       EventType = "VALIDATE_CONTRACT_TEMPLATE"
 	UpdateContractTemplate       EventType = "UPDATE_CONTRACT_TEMPLATE"
 	RetrieveAllContractTemplates EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATES"
-	RetrieveContractTemplateByID EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
+	RetrieveContractTemplateById EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
 	SearchContractTemplate       EventType = "SEARCH_CONTRACT_TEMPLATE"
 	ArchiveContractTemplate      EventType = "ARCHIVE_CONTRACT_TEMPLATE"
 	RegisterContractTemplate     EventType = "REGISTER_CONTRACT_TEMPLATE"
@@ -29,7 +29,7 @@ var validStates = map[EventType]bool{
 	VerifyContractTemplate:       true,
 	UpdateContractTemplate:       true,
 	RetrieveAllContractTemplates: true,
-	RetrieveContractTemplateByID: true,
+	RetrieveContractTemplateById: true,
 	SearchContractTemplate:       true,
 	ArchiveContractTemplate:      true,
 	RegisterContractTemplate:     true,
