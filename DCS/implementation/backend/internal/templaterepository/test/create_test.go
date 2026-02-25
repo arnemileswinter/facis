@@ -50,22 +50,22 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, *did, contractTemplate.DID)

@@ -95,7 +95,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return errors.New("invalid user")
 		}
 
-		if cmd.Reviewer == nil || len(cmd.Reviewer) == 0 {
+		if len(cmd.Reviewer) == 0 {
 			return errors.New("no reviewer provided")
 		}
 
@@ -201,7 +201,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 		nextTemplateState = templatestate.Submitted
 
 	} else {
-		return errors.New("current template contract state is invalid")
+		return errors.New("current contract template state is invalid")
 	}
 
 	if len(nextTemplateState) > 0 && processData.State != nextTemplateState {

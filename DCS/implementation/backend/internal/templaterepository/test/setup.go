@@ -19,12 +19,12 @@ import (
 )
 
 func setupTestDB(t *testing.T) *sqlx.DB {
-	databaseUrl := os.Getenv("DATABASE_URL")
-	if databaseUrl == "" {
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
 		t.Fatalf("DATABASE_URL isn't set")
 	}
 
-	db, err := sqlx.Connect("postgres", databaseUrl)
+	db, err := sqlx.Connect("postgres", databaseURL)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -91,7 +91,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templa
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
 	updateStatement := `UPDATE contract_templates SET
@@ -127,7 +127,7 @@ func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, did *string, 
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
 	updateStatement := `UPDATE contract_templates SET
