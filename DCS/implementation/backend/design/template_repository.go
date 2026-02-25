@@ -162,7 +162,7 @@ var ContractTemplateRetrieveResponse = Type("ContractTemplateRetrieveResponse", 
 	Required("contract_templates", "review_tasks", "approval_tasks")
 })
 
-var ContractTemplateRetrieveByIdRequest = Type("ContractTemplateRetrieveByIdRequest", func() {
+var ContractTemplateRetrieveByIDRequest = Type("ContractTemplateRetrieveByIDRequest", func() {
 	Description("Contract template retrieve by id request")
 
 	Attribute("did", String, "DID of the contract template")
@@ -172,7 +172,7 @@ var ContractTemplateRetrieveByIdRequest = Type("ContractTemplateRetrieveByIdRequ
 	Required("did", "document_number", "version")
 })
 
-var ContractTemplateRetrieveByIdResponse = Type("ContractTemplateRetrieveByIdResponse", func() {
+var ContractTemplateRetrieveByIDResponse = Type("ContractTemplateRetrieveByIDResponse", func() {
 	Description("Result for retrieving a contract template by id")
 
 	Attribute("did", String, "Decentralized Identifier of the contract template")
@@ -450,8 +450,8 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:tr:components", "Template Versioning")
 		Meta("dcs:ui", "Template Builder, Template Approver, Template Management Dashboard")
 
-		Payload(ContractTemplateRetrieveByIdRequest)
-		Result(ContractTemplateRetrieveByIdResponse)
+		Payload(ContractTemplateRetrieveByIDRequest)
+		Result(ContractTemplateRetrieveByIDResponse)
 
 		Error("bad_request", ErrorResult, "Bad request")
 		Error("internal_error", ErrorResult, "Internal server error")

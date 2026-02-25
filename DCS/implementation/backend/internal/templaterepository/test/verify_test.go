@@ -131,6 +131,9 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to verify contract template: %v", err)
+	}
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {

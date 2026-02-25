@@ -95,7 +95,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return errors.New("invalid user")
 		}
 
-		if cmd.Reviewer == nil || len(cmd.Reviewer) == 0 {
+		if len(cmd.Reviewer) == 0 {
 			return errors.New("no reviewer provided")
 		}
 

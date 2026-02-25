@@ -63,13 +63,13 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -260,13 +260,13 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

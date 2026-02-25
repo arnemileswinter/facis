@@ -59,13 +59,13 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -221,13 +221,13 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -500,13 +500,13 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		}
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -581,13 +581,13 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -800,13 +800,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -902,13 +902,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -976,13 +976,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1016,13 +1016,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1079,13 +1079,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1118,13 +1118,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1181,13 +1181,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1220,13 +1220,13 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1285,13 +1285,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1387,13 +1387,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1461,13 +1461,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1501,13 +1501,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1564,13 +1564,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1603,13 +1603,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1666,13 +1666,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1722,13 +1722,13 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1787,13 +1787,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1891,13 +1891,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1967,13 +1967,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2017,13 +2017,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2082,13 +2082,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2123,13 +2123,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2188,13 +2188,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2227,13 +2227,13 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIdQuery{
+	qry = contracttemplate.GetByIDQuery{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler = contracttemplate.GetByIdHandler{
+	queryHandler = contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

@@ -57,33 +57,32 @@ func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTempl
 	return &createdAt, nil
 }
 
-/*
-	func GetAmountOfContractTemplatesForId(ctx context.Context, tx *sqlx.Tx, did string, documentNumber *int, version *int) (int, error) {
-		query := `
-	        SELECT COUNT(*)
-	        FROM contract_templates
-	        WHERE did = $1
-		`
+////	func GetAmountOfContractTemplatesForID(ctx context.Context, tx *sqlx.Tx, did string, documentNumber *int, version *int) (int, error) {
+////		query := `
+////	        SELECT COUNT(*)
+////	        FROM contract_templates
+////	        WHERE did = $1
+////		`
+////
+////		var params []interface{}
+////		paramIndex := 1
+////
+////		if documentNumber != nil {
+////			query += `AND document_number = $` + strconv.Itoa(paramIndex) + `,`
+////			params = append(params, documentNumber)
+////			paramIndex++
+////		}
+////
+////		if version != nil {
+////			query += `AND version = $` + strconv.Itoa(paramIndex) + `,`
+////			params = append(params, version)
+////			paramIndex++
+////		}
+////
+////		return count > 0, nil
+////	}
 
-		var params []interface{}
-		paramIndex := 1
-
-		if documentNumber != nil {
-			query += `AND document_number = $` + strconv.Itoa(paramIndex) + `,`
-			params = append(params, documentNumber)
-			paramIndex++
-		}
-
-		if version != nil {
-			query += `AND version = $` + strconv.Itoa(paramIndex) + `,`
-			params = append(params, version)
-			paramIndex++
-		}
-
-		return count > 0, nil
-	}
-*/
-func ReadDataById(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplate, error) {
+func ReadDataByID(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplate, error) {
 	query := `
         SELECT did, document_number, version, state, name, description,
                created_by, created_at, updated_at, template_data, template_type
@@ -94,7 +93,7 @@ func ReadDataById(ctx context.Context, tx *sqlx.Tx, did string, documentNumber i
 	err := tx.GetContext(ctx, &ct, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New(fmt.Sprintf("contract template with DID %s not found", did))
+			return nil, fmt.Errorf("contract template with DID %s not found", did)
 		}
 		return nil, err
 	}
@@ -247,7 +246,7 @@ func ReadProcessData(ctx context.Context, tx *sqlx.Tx, did string, documentNumbe
 	err := tx.GetContext(ctx, &processData, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New(fmt.Sprintf("contract template with DID %s, DocumentNumber %d and Version %d not found", did, documentNumber, version))
+			return nil, fmt.Errorf("contract template with DID %s, DocumentNumber %d and Version %d not found", did, documentNumber, version)
 		}
 		return nil, err
 	}

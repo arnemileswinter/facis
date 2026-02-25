@@ -5,36 +5,36 @@ type UserRole string
 const (
 	// Human User Roles - Template Management
 	TemplateCreator  UserRole = "TEMPLATE_CREATOR"
-	TemplateReviewer          = "TEMPLATE_REVIEWER"
-	TemplateApprover          = "TEMPLATE_APPROVER"
-	TemplateManager           = "TEMPLATE_MANAGER"
+	TemplateReviewer UserRole = "TEMPLATE_REVIEWER"
+	TemplateApprover UserRole = "TEMPLATE_APPROVER"
+	TemplateManager  UserRole = "TEMPLATE_MANAGER"
 
 	// Human User Roles - Contract Management
 	ContractCreator  UserRole = "CONTRACT_CREATOR"
-	ContractReviewer          = "CONTRACT_REVIEWER"
-	ContractApprover          = "CONTRACT_APPROVER"
-	ContractManager           = "CONTRACT_MANAGER"
-	ContractSigner            = "CONTRACT_SIGNER"
-	ContractObserver          = "CONTRACT_OBSERVER"
+	ContractReviewer UserRole = "CONTRACT_REVIEWER"
+	ContractApprover UserRole = "CONTRACT_APPROVER"
+	ContractManager  UserRole = "CONTRACT_MANAGER"
+	ContractSigner   UserRole = "CONTRACT_SIGNER"
+	ContractObserver UserRole = "CONTRACT_OBSERVER"
 
 	// Human User Roles - System Administration
 	ArchiveManager     UserRole = "ARCHIVE_MANAGER"
-	Auditor                     = "AUDITOR"
-	SystemAdmin                 = "SYSTEM_ADMINISTRATOR"
-	ComplianceOfficer           = "COMPLIANCE_OFFICER"
-	IntegrationManager          = "INTEGRATION_MANAGER"
+	Auditor            UserRole = "AUDITOR"
+	SystemAdmin        UserRole = "SYSTEM_ADMINISTRATOR"
+	ComplianceOfficer  UserRole = "COMPLIANCE_OFFICER"
+	IntegrationManager UserRole = "INTEGRATION_MANAGER"
 
 	// Human User Roles - Process Management
 	ProcessOrchestrator UserRole = "PROCESS_ORCHESTRATOR"
-	Validator                    = "VALIDATOR"
+	Validator           UserRole = "VALIDATOR"
 
 	// System User Roles - API/Automated
 	SystemContractCreator  UserRole = "SYSTEM_CONTRACT_CREATOR"
-	SystemContractReviewer          = "SYSTEM_CONTRACT_REVIEWER"
-	SystemContractApprover          = "SYSTEM_CONTRACT_APPROVER"
-	SystemContractManager           = "SYSTEM_CONTRACT_MANAGER"
-	SystemContractSigner            = "SYSTEM_CONTRACT_SIGNER"
-	ContractTargetSystem            = "CONTRACT_TARGET_SYSTEM"
+	SystemContractReviewer UserRole = "SYSTEM_CONTRACT_REVIEWER"
+	SystemContractApprover UserRole = "SYSTEM_CONTRACT_APPROVER"
+	SystemContractManager  UserRole = "SYSTEM_CONTRACT_MANAGER"
+	SystemContractSigner   UserRole = "SYSTEM_CONTRACT_SIGNER"
+	ContractTargetSystem   UserRole = "CONTRACT_TARGET_SYSTEM"
 )
 
 // IsValid checks if the UserRole is a valid role

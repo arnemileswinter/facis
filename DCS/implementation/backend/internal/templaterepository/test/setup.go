@@ -19,12 +19,12 @@ import (
 )
 
 func setupTestDB(t *testing.T) *sqlx.DB {
-	databaseUrl := os.Getenv("DATABASE_URL")
-	if databaseUrl == "" {
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
 		t.Fatalf("DATABASE_URL isn't set")
 	}
 
-	db, err := sqlx.Connect("postgres", databaseUrl)
+	db, err := sqlx.Connect("postgres", databaseURL)
 	if err != nil {
 		log.Fatalln(err)
 	}

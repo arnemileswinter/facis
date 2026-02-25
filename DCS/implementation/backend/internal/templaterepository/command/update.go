@@ -45,7 +45,7 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 	}
 	defer tx.Rollback()
 
-	oldData, err := templaterepository.ReadDataById(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	oldData, err := templaterepository.ReadDataByID(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
