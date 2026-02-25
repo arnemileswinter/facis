@@ -32,7 +32,7 @@ func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository
 // Create a new template.
 func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.ContractTemplateCreateRequest) (*templaterepository.ContractTemplateCreateResponse, error) {
 
-	templateType, err := templatetype.NewTemplateType(*req.TemplateType)
+	templateType, err := templatetype.NewTemplateType(req.TemplateType)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
