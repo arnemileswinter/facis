@@ -129,73 +129,10 @@
                                 <h2 class="card-title text-sm">
                                     <span class="badge badge-secondary">02</span> Semantic Rules
                                 </h2>
-
-                                <div v-if="suggestions.length">
-                                    <p class="label-text text-xs text-base-content/50 mb-2">Suggested by Semantic Hub
-                                    </p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button v-for="sug in suggestions" :key="sug.label"
-                                            @click="addRuleFromSuggestion(sug)"
-                                            class="btn btn-outline btn-secondary btn-xs normal-case">
-                                            + {{ sug.label }}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="grid grid-cols-1 md:grid-cols-12 gap-2 p-4 bg-base-200 rounded-box items-end">
-                                    <div class="md:col-span-4">
-                                        <label class="label-text text-xs text-base-content/60 block mb-1">Label</label>
-                                        <input v-model="newRule.label" type="text"
-                                            class="input input-bordered input-sm w-full" />
-                                    </div>
-                                    <div class="md:col-span-3">
-                                        <label class="label-text text-xs text-base-content/60 block mb-1">Type</label>
-                                        <select v-model="newRule.type" class="select select-bordered select-sm w-full"
-                                            required>
-                                            <option value="Date">Date</option>
-                                            <option value="Text">Text</option>
-                                            <option value="Decimal">Decimal</option>
-                                        </select>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label
-                                            class="label-text text-xs text-base-content/60 block mb-1">Required</label>
-                                        <select class="select select-bordered select-sm w-full">
-                                            <option value="true">required</option>
-                                            <option value="false">optional</option>
-                                        </select>
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <button @click="addNewCustomRule" class="btn btn-secondary btn-sm w-full"
-                                            :disabled="!newRule.label || !newRule.type">Add</button>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-2">
-                                    <div v-for="(rule, index) in form.semantic_rules" :key="index"
-                                        class="flex items-center gap-3 p-3 bg-base-100 border border-base-300 border-l-4 border-l-secondary rounded-r-box group hover:shadow-sm transition-all">
-                                        <div class="text-secondary bg-secondary/10 p-2 rounded-box">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                            </svg>
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-sm font-black font-mono uppercase">{{ rule.label
-                                                    }}</span>
-                                                <span class="badge badge-ghost badge-xs">{{ rule.type }}</span>
-                                            </div>
-                                            <p class="text-xs text-base-content/50">required: {{ rule.required }}</p>
-                                        </div>
-                                        <button @click="removeRule(index)"
-                                            class="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
-                                    </div>
-                                </div>
+                                <SemanticRulesEditor />
                             </div>
                         </div>
+                        
                     </div>
 
                     <!-- CLAUSES TAB -->
@@ -218,13 +155,13 @@
                                             <p class="label-text text-xs text-base-content/50 mb-2">Semantic Rules for
                                                 this Clause</p>
                                             <div class="flex flex-wrap gap-2">
-                                                <p v-if="!form.semantic_rules?.length"
+                                                <p v-if="!semanticConditions.length"
                                                     class="text-xs text-base-content/50 italic">No semantic rules yet.
                                                 </p>
                                                 <form class="flex flex-wrap gap-2">
-                                                    <input v-for="(rule, idx) in form.semantic_rules" :key="idx"
-                                                        class="btn btn-xs" type="checkbox" :aria-label="rule.label"
-                                                        :value="rule" v-model="selectedRules" />
+                                                    <input v-for="(rule, idx) in semanticConditions" :key="idx"
+                                                        class="btn btn-xs" type="checkbox" :aria-label="rule.conditionName"
+                                                        :value="rule.conditionId" v-model="selectedConditionIds" />
                                                 </form>
                                             </div>
                                         </div>
@@ -249,9 +186,9 @@
                                                         class="text-xs text-base-content/70 mt-1 leading-relaxed whitespace-pre-wrap">
                                                         {{ clause.description }}</p>
                                                     <div class="flex flex-wrap gap-1 mt-2">
-                                                        <span v-for="rule in clause.rules"
-                                                            class=" text-primary  ">{{
-                                                            rule.label }}</span>
+                                                        <span v-for="cid in clause.conditionIds" :key="cid"
+                                                            class="text-primary">{{
+                                                            getConditionName(cid) }}</span>
                                                     </div>
                                                 </div>
                                                 <button @click="removeClause(index)"
@@ -312,12 +249,21 @@ import { useContractTemplateController } from './NewContractTemplate.ts'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
 import TemplateEditor from '@template-repository/components/TemplateEditor.vue'
 import AddBlockModal from '@template-repository/components/AddBlockModal.vue'
+import SemanticRulesEditor from '@template-repository/components/SemanticRulesEditor.vue'
+import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { storeToRefs } from 'pinia'
-import { TemplateType } from "@template-repository/models/contract-templace"
+import { TemplateType } from '@template-repository/models/contract-templace'
 
 const templateEditorUiStore = useTemplateEditorUiStore()
+const templateDraftStore = useTemplateDraftStore()
 const { activeTab, tabs } = storeToRefs(templateEditorUiStore)
 const { setActiveTab } = templateEditorUiStore
+const { semanticConditions } = storeToRefs(templateDraftStore)
+
+function getConditionName(conditionId: string): string {
+  const c = semanticConditions.value.find((x) => x.conditionId === conditionId)
+  return c?.conditionName ?? conditionId
+}
 
 const props = defineProps<{
     did?: string
@@ -336,18 +282,11 @@ const {
     newClause,
     addClause,
     removeClause,
-    newRule,
+    selectedConditionIds,
     subcontractSearchQuery,
     filteredSubcontractTemplates,
     getSubcontractTemplateName,
     addSubcontractTemplate,
     removeSubcontractTemplate,
-    suggestions,
-    selectedRules,
-    addRuleFromSuggestion,
-    addNewCustomRule,
-    removeRule,
-    removeRuleFromNewClause,
-    addRuleToNewClause
 } = useContractTemplateController(props.did, props.document_number, props.version)
 </script>

@@ -7,13 +7,7 @@ import {  TemplateType, type TemplateTypeValue } from "@template-repository/mode
 interface Clause {
     title: string;
     description: string;
-    rules?: SemanticRule[]
-}
-
-interface SemanticRule {
-    label: string;
-    type: string;
-    required: boolean;
+    conditionIds: string[];
 }
 
 interface SubcontractTemplate {
@@ -26,22 +20,19 @@ export function useContractTemplateController(did?: string, document_number?: nu
     const router = useRouter()
 
     const isSubmitting = ref(false)
-    const isLoadingSuggestions = ref(false)
     const isEditMode = computed(() => !!did)
-    const selectedRules = ref([])
     const form = ref({
         name: '',
         description: '',
         contract_kind: TemplateType.subContract as TemplateTypeValue,
         subcontract_template_dids: [] as string[],
         clauses: [] as Clause[],
-        semantic_rules: [] as SemanticRule[],
         state: 'DRAFT',
         version: 1
     })
 
-    const newClause = ref<Clause>({ title: '', description: '', rules: [] })
-    const newRule = ref<SemanticRule>({ label: '', type: '', required: false, })
+    const newClause = ref<Clause>({ title: '', description: '', conditionIds: [] })
+    const selectedConditionIds = ref<string[]>([])
 
     // Subcontract template picker
     const availableSubcontractTemplates = ref<SubcontractTemplate[]>([
@@ -79,76 +70,19 @@ export function useContractTemplateController(did?: string, document_number?: nu
         if (idx !== -1) form.value.subcontract_template_dids.splice(idx, 1)
     }
 
-    const suggestions = ref<SemanticRule[]>([])
-
-    const fetchSuggestions = async () => {
-        isLoadingSuggestions.value = true
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1000))
-
-            suggestions.value = [
-                { label: 'Availability_SLA', type: 'text', required: true },
-                { label: 'startDate', type: 'date', required: true },
-                { label: 'endDate', type: 'date', required: true },
-                { label: 'payment_fee', type: 'decimal', required: false },
-            ]
-        } finally {
-            isLoadingSuggestions.value = false
-        }
-    }
-
     const addClause = () => {
         if (!newClause.value.title || !newClause.value.description) return
         form.value.clauses.push({
-            ...newClause.value,
-            rules: [...selectedRules.value],
+            title: newClause.value.title,
+            description: newClause.value.description,
+            conditionIds: [...selectedConditionIds.value],
         })
-        newClause.value = {
-            title: '',
-            description: '',
-            rules: []
-        }
-        selectedRules.value = []
+        newClause.value = { title: '', description: '', conditionIds: [] }
+        selectedConditionIds.value = []
     }
 
     const removeClause = (index: number) => {
         form.value.clauses.splice(index, 1)
-    }
-
-    const addRuleToNewClause = (rule: { label: string; type: string; required: boolean }) => {
-        newClause.value.rules ||= []
-        const exists = newClause.value.rules.some(r => r.label === rule.label)
-        if (!exists) newClause.value.rules.push({ ...rule })
-    }
-
-    const removeRuleFromNewClause = (idx: number) => {
-        newClause.value.rules?.splice(idx, 1)
-    }
-
-    const addRuleFromSuggestion = (rule: SemanticRule) => {
-        const exists = form.value.semantic_rules.some(r => r.label === rule.label)
-        if (!exists) {
-            form.value.semantic_rules.push({ ...rule })
-        }
-    }
-
-    const addNewCustomRule = () => {
-        if (!newRule.value.label) return
-
-        form.value.semantic_rules = form.value.semantic_rules || []
-        form.value.semantic_rules.push({
-            label: newRule.value.label,
-            type: newRule.value.type,
-            required: newRule.value.required ?? true,
-        })
-
-        newRule.value.label = ''
-        newRule.value.type = 'Text'
-        newRule.value.required = false
-    }
-
-    const removeRule = (index: number) => {
-        form.value.semantic_rules.splice(index, 1)
     }
 
     const submit = async () => {
@@ -182,7 +116,6 @@ export function useContractTemplateController(did?: string, document_number?: nu
     }
 
     onMounted(async () => {
-        fetchSuggestions()
         if (isEditMode.value) {
             await retrieveById()
         }
@@ -192,24 +125,16 @@ export function useContractTemplateController(did?: string, document_number?: nu
         form,
         isEditMode,
         isSubmitting,
-        isLoadingSuggestions,
         newClause,
-        newRule,
+        selectedConditionIds,
         subcontractSearchQuery,
         filteredSubcontractTemplates,
         getSubcontractTemplateName,
         addSubcontractTemplate,
         removeSubcontractTemplate,
-        suggestions,
-        addRuleToNewClause,
-        removeRuleFromNewClause,
         addClause,
         removeClause,
-        addRuleFromSuggestion,
-        addNewCustomRule,
-        removeRule,
         submit,
-        selectedRules,
-        cancel: () => router.back()
+        cancel: () => router.back(),
     }
 }

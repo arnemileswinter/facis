@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload } from "@template-repository/models/template-draft-store"
-import type { DocumentOutlineBlock, DocumentBlock } from "@template-repository/models/contract-templace"
+import type { DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition } from "@template-repository/models/contract-templace"
 import { DocumentBlockType, TemplateType } from "@template-repository/models/contract-templace"
 
 const storeId = "templateDraft"
@@ -19,6 +19,7 @@ export const useTemplateDraftStore = defineStore(storeId, {
     hasTemplateId(): boolean { return !!this.did }
   },
   actions: {
+    // Block operations: add, delete, update, move
     /**
      * Adds a new block under the given parent at the given index.
      * 
@@ -56,6 +57,28 @@ export const useTemplateDraftStore = defineStore(storeId, {
      */
     moveBlock(blockId: string, parentBlockId: string, insertIndex: number): void {
       moveBlock(this.documentOutline, blockId, parentBlockId, insertIndex)
+    },
+    // Semantic Rules operations: add, delete
+    addSemanticCondition(payload: Omit<SemanticCondition, 'conditionId'>): void {
+      this.semanticConditions.push({
+        ...payload,
+        conditionId: crypto.randomUUID(),
+      })
+    },
+    deleteSemanticCondition(conditionId: string): void {
+      this.semanticConditions = this.semanticConditions.filter((c) => c.conditionId !== conditionId)
+    },
+    // TBD: Clauses operations: add, delete, update
+    // TBD: MetaData operations: add, delete, update
+    // TBD: Basic info operations: name, description, templateType...
+    updateTemplateType(templateType: TemplateTypeValue): void {
+      if (this.did !== null && this.did !== undefined) {
+        throw new Error('Cannot change template type after template is created')
+      }
+      this.templateType = templateType
+      /**  TBD: after changing template type, the blocks that are not allowed in the new 
+       * template type should be removed. For example, if changing from frameContract 
+       * to subContract, the APPROVED_TEMPLATE blocks should be removed. */
     },
 
     reset() {
