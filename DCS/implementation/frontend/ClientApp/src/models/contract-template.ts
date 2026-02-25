@@ -1,4 +1,4 @@
-import type { ContractTemplateType } from "@/types/contract-template-type"
+import type { ContractTemplateState } from "@/types/contract-template-state"
 import type { TemplateType } from "@/types/template-type"
 
 export interface ContractTemplate {
@@ -8,7 +8,7 @@ export interface ContractTemplate {
     document_number: number
     version: number
     template_type?: TemplateType
-    state: ContractTemplateType
+    state: ContractTemplateState
     name?: string
     description?: string
     template_data?: any

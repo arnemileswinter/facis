@@ -1,16 +1,16 @@
-import type { ContractTemplateType } from '@/types/contract-template-type'
+import type { ContractTemplateState } from '@/types/contract-template-state'
 import { defineStore } from 'pinia'
 import { ref, type Ref } from 'vue'
 
 export const useContractTemplateStateFilterStore = defineStore('contractTemplateStateFilter', () => {
-  const stateFilters: Ref<Set<ContractTemplateType>> = ref(new Set())
+  const stateFilters: Ref<Set<ContractTemplateState>> = ref(new Set())
 
-  function setFilter(type: ContractTemplateType) {
-    stateFilters.value.add(type)
+  function setFilter(filter: ContractTemplateState) {
+    stateFilters.value.add(filter)
   }
 
-  function removeFilter(type: ContractTemplateType) {
-    stateFilters.value.delete(type)
+  function removeFilter(filter: ContractTemplateState) {
+    stateFilters.value.delete(filter)
   }
 
   return { stateFilters, setFilter, removeFilter }

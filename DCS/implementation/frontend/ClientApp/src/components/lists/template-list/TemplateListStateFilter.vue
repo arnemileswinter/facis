@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useContractTemplateStateFilterStore } from '@/stores/contract-template-state-filter-store'
-import type { ContractTemplateType as ContractTemplateTypeFilter } from '@/types/contract-template-type'
+import { contractTemplateStates, type ContractTemplateState as ContractTemplateStateFilter } from '@/types/contract-template-state'
 import { storeToRefs } from 'pinia'
 import { computed, ref, type Ref } from 'vue'
 
-const filters: Ref<ContractTemplateTypeFilter[]> = ref(['DRAFT', 'SUBMITTED', 'REJECTED', 'REVIEWED', 'APPROVED'])
+const filters: Ref<ContractTemplateStateFilter[]> = ref(contractTemplateStates)
 const stateFilterStore = useContractTemplateStateFilterStore()
 const { stateFilters } = storeToRefs(stateFilterStore)
 
@@ -26,17 +26,17 @@ const hasFilters = computed(() => {
   return activeFilters.value.length > 0
 })
 
-function setFilter(typeFilter: ContractTemplateTypeFilter) {
-  if (stateFilters.value.has(typeFilter)) {
-    stateFilterStore.removeFilter(typeFilter)
+function setFilter(stateFilter: ContractTemplateStateFilter) {
+  if (stateFilters.value.has(stateFilter)) {
+    stateFilterStore.removeFilter(stateFilter)
     showAll.value = !hasFilters.value
   } else {
-    stateFilterStore.setFilter(typeFilter)
+    stateFilterStore.setFilter(stateFilter)
     showAll.value = false
   }
 }
 
-function isSelected(type: ContractTemplateTypeFilter) {
+function isSelected(type: ContractTemplateStateFilter) {
   return stateFilters.value.has(type)
 }
 </script>

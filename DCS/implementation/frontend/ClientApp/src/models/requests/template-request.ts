@@ -1,4 +1,6 @@
+import type { TemplateType } from '@/types/template-type'
 import type { ActionFlag } from '../../types/action-flag'
+import type { ContractTemplateState } from '@/types/contract-template-state'
 
 interface ContractTemplateBaseRequest {
   did: string
@@ -28,7 +30,14 @@ export interface ContractTemplateUpdateRequest extends ContractTemplateBaseReque
 }
 
 export interface ContractTemplateSearchRequest {
-  filter: any
+  did?: string
+  document_number?: number
+  version?: number
+  template_type?: TemplateType
+  state?: ContractTemplateState
+  name?: string
+  description?: string
+  filter?: any
 }
 
 export interface ContractTemplateRetrieveRequest {}

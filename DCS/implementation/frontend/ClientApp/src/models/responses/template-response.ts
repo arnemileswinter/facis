@@ -1,6 +1,8 @@
-import type { ContractTemplateType } from '@/types/contract-template-type'
+import type { ContractTemplateState } from '@/types/contract-template-state'
 import type { TemplateType } from '@/types/template-type'
 import type { ContractTemplate } from '../contract-template'
+import type { ContractTemplateReviewTask } from '../contract-template-review-task'
+import type { ContractTemplateApprovalTask } from '../contract-template-approval-task'
 
 interface ContractTemplateBaseResponse {
   did: string
@@ -15,7 +17,7 @@ export interface ContractTemplateSubmitResponse extends ContractTemplateBaseResp
 export interface ContractTemplateUpdateResponse extends ContractTemplateBaseResponse {}
 
 export interface ContractTemplateSearchResponse extends ContractTemplateBaseResponse {
-  state: ContractTemplateType
+  state: ContractTemplateState
   name?: string
   description?: string
   created_at: string
@@ -24,12 +26,12 @@ export interface ContractTemplateSearchResponse extends ContractTemplateBaseResp
 
 export interface ContractTemplateRetrieveResponse {
   contract_templates: ContractTemplate[]
-  review_tasks: any[]
-  approval_tasks: any[]
+  review_tasks: ContractTemplateReviewTask[]
+  approval_tasks: ContractTemplateApprovalTask[]
 }
 
 export interface ContractTemplateRetrieveByIdResponse extends ContractTemplateBaseResponse {
-  state: ContractTemplateType
+  state: ContractTemplateState
   name?: string
   description?: string
   template_type?: TemplateType
