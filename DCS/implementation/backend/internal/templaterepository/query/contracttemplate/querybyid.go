@@ -57,7 +57,7 @@ func (h *GetByIDHandler) Handle(query GetByIDQuery) (*GetByIDResult, error) {
 		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
 
-	evt := templateevents.RetrieveContractTemplateByIDEvent{
+	evt := templateevents.RetrieveByIDEvent{
 		DID:            query.DID,
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,

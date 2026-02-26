@@ -157,7 +157,7 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did strin
 			State:          state,
 			CreatedBy:      submittedBy,
 		}
-		_, err = reviewtask.CreateTask(ctx, tx, reviewTask)
+		_, err = reviewtask.Create(ctx, tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
@@ -184,7 +184,7 @@ func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, did str
 		State:          state,
 		CreatedBy:      submittedBy,
 	}
-	_, err = approvaltask.CreateTask(ctx, tx, approvalTask)
+	_, err = approvaltask.Create(ctx, tx, approvalTask)
 	if err != nil {
 		t.Fatalf("Failed to create review task: %v", err)
 	}

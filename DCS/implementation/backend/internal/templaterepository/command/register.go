@@ -56,7 +56,7 @@ func (h *RegisterHandler) Handle(cmd RegisterCommand) error {
 		return fmt.Errorf("could not update state: %w", err)
 	}
 
-	evt := templateevents.RegisterContractTemplateEvent{
+	evt := templateevents.RegisterEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

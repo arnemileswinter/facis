@@ -163,8 +163,60 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 
 // update metadata or status.
 func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *templaterepository.UpdateManageRequest) (res *templaterepository.UpdateManageResponse, err error) {
-	log.Printf(ctx, "templateRepository.update_manage")
-	return
+
+	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	metaData, err := datatype.NewJSON(req.TemplateData)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	var state *templatestate.TemplateState
+	if req.State != nil {
+		ts, err := templatestate.NewTemplateState(*req.State)
+		if err != nil {
+			return nil, templaterepository.MakeInternalError(err)
+		}
+		state = &ts
+	}
+
+	var templateType *templatetype.TemplateType
+	if req.TemplateType != nil {
+		tType, err := templatetype.NewTemplateType(*req.TemplateType)
+		if err != nil {
+			return nil, templaterepository.MakeInternalError(err)
+		}
+		templateType = &tType
+	}
+
+	cmd := command.UpdateManageCommand{
+		DID:            req.Did,
+		DocumentNumber: req.DocumentNumber,
+		Version:        req.Version,
+		State:          state,
+		UpdatedAt:      updatedAt,
+		TemplateType:   templateType,
+		Name:           req.Name,
+		Description:    req.Description,
+		TemplateData:   &metaData,
+	}
+	handler := command.UpdateManageHandler{
+		Ctx: ctx,
+		DB:  s.DB,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		return nil, templaterepository.MakeInternalError(err)
+	}
+
+	return &templaterepository.UpdateManageResponse{
+		Did:            req.Did,
+		DocumentNumber: req.DocumentNumber,
+		Version:        req.Version,
+	}, nil
 }
 
 // perform filtered searches.

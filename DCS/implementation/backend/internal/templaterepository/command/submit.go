@@ -46,7 +46,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 			State:          reviewtaskstate.Open,
 			CreatedBy:      cmd.SubmittedBy,
 		}
-		_, err := reviewtask.CreateTask(ctx, tx, reviewTask)
+		_, err := reviewtask.Create(ctx, tx, reviewTask)
 		if err != nil {
 			return fmt.Errorf("could not create review tasks: %w", err)
 		}
@@ -60,7 +60,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 		Approver:       *cmd.Approver,
 		State:          aopprovaltaskstate.Open,
 	}
-	_, err := approvaltask.CreateTask(ctx, tx, data)
+	_, err := approvaltask.Create(ctx, tx, data)
 	if err != nil {
 		return fmt.Errorf("could not create approval task: %w", err)
 	}
@@ -146,7 +146,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 					return errors.New("contract template needs to be verified before")
 				}
 
-				err = reviewtask.UpdateTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
+				err = reviewtask.Update(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
 				if err != nil {
 					return fmt.Errorf("could not update approval task: %w", err)
 				}
@@ -210,7 +210,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return fmt.Errorf("could not update contract template state: %w", err)
 		}
 
-		evt := templateevents.SubmitContractTemplateEvent{
+		evt := templateevents.SubmitEvent{
 			DID:            cmd.DID,
 			DocumentNumber: cmd.DocumentNumber,
 			Version:        cmd.DocumentNumber,

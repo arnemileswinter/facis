@@ -20,7 +20,7 @@ type TaskData struct {
 	CreatedAt      time.Time                           `db:"created_at"`
 }
 
-func CreateTask(ctx context.Context, tx *sqlx.Tx, data TaskData) (*time.Time, error) {
+func Create(ctx context.Context, tx *sqlx.Tx, data TaskData) (*time.Time, error) {
 	statement := `
     INSERT INTO contract_templates_approval_task (
         did, document_number, version, state, approver, created_by
@@ -88,7 +88,7 @@ func ReadAllByApprover(ctx context.Context, tx *sqlx.Tx, approver string) ([]Tas
 	return approvalTasks, nil
 }
 
-func UpdateTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) error {
+func Update(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) error {
 	statement := `
         UPDATE contract_templates_approval_task SET state = $5
         WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
@@ -146,7 +146,7 @@ func HasTaskInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber
 	return count > 0, nil
 }
 
-func DeleteTask(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
+func Delete(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
 	statement := `
         DELETE FROM contract_templates_approval_task
         WHERE did = $1 AND document_number = $2 AND version = $3

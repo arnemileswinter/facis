@@ -31,7 +31,7 @@ type ContractTemplate struct {
 	TemplateData   *datatype.JSON              `db:"template_data"`
 }
 
-func CreateContractTemplate(ctx context.Context, tx *sqlx.Tx, data ContractTemplate) (*time.Time, error) {
+func Create(ctx context.Context, tx *sqlx.Tx, data ContractTemplate) (*time.Time, error) {
 	statement := `
     INSERT INTO contract_templates (
         did, created_by, state, name, 
@@ -266,7 +266,7 @@ func UpdateState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber in
 	return err
 }
 
-func createQuery(data ContractTemplateUpdateData) (*string, []interface{}, error) {
+func createQuery(data UpdateData) (*string, []interface{}, error) {
 
 	queryBase := `UPDATE contract_templates SET `
 
@@ -309,7 +309,7 @@ func createQuery(data ContractTemplateUpdateData) (*string, []interface{}, error
 	return &fullQuery, params, nil
 }
 
-type ContractTemplateUpdateData struct {
+type UpdateData struct {
 	DID            string `db:"did"`
 	DocumentNumber int    `db:"document_number"`
 	Version        int    `db:"version"`
@@ -320,7 +320,7 @@ type ContractTemplateUpdateData struct {
 	TemplateData *datatype.JSON             `db:"template_data"`
 }
 
-func UpdateData(ctx context.Context, tx *sqlx.Tx, data ContractTemplateUpdateData) error {
+func Update(ctx context.Context, tx *sqlx.Tx, data UpdateData) error {
 	query, params, err := createQuery(data)
 	if err != nil {
 		return err
@@ -349,12 +349,12 @@ func ReopenTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber in
 }
 
 func CleanupTasks(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
-	err := reviewtask.DeleteTask(ctx, tx, did, documentNumber, version)
+	err := reviewtask.Delete(ctx, tx, did, documentNumber, version)
 	if err != nil {
 		return fmt.Errorf("could not delete review task: %w", err)
 	}
 
-	err = approvaltask.DeleteTask(ctx, tx, did, documentNumber, version)
+	err = approvaltask.Delete(ctx, tx, did, documentNumber, version)
 	if err != nil {
 		return fmt.Errorf("could not delete approval task: %w", err)
 	}

@@ -77,7 +77,7 @@ func (h *ApproveHandler) Handle(cmd ApproveCommand) error {
 		return fmt.Errorf("could not update current template state: %w", err)
 	}
 
-	evt := templateevents.ApproveContractTemplateEvent{
+	evt := templateevents.ApproveEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

@@ -8,31 +8,31 @@ import (
 type EventType string
 
 const (
-	CreateContractTemplate       EventType = "CREATE_CONTRACT_TEMPLATE"
-	SubmitContractTemplate       EventType = "SUBMIT_CONTRACT_TEMPLATE"
-	ApproveContractTemplate      EventType = "APPROVE_CONTRACT_TEMPLATE"
-	RejectContractTemplate       EventType = "REJECT_CONTRACT_TEMPLATE"
-	VerifyContractTemplate       EventType = "VALIDATE_CONTRACT_TEMPLATE"
-	UpdateContractTemplate       EventType = "UPDATE_CONTRACT_TEMPLATE"
-	RetrieveAllContractTemplates EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATES"
-	RetrieveContractTemplateByID EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
-	SearchContractTemplate       EventType = "SEARCH_CONTRACT_TEMPLATE"
-	ArchiveContractTemplate      EventType = "ARCHIVE_CONTRACT_TEMPLATE"
-	RegisterContractTemplate     EventType = "REGISTER_CONTRACT_TEMPLATE"
+	Create                 EventType = "CREATE_CONTRACT_TEMPLATE"
+	Submit                 EventType = "SUBMIT_CONTRACT_TEMPLATE"
+	Approve                EventType = "APPROVE_CONTRACT_TEMPLATE"
+	Reject                 EventType = "REJECT_CONTRACT_TEMPLATE"
+	VerifyContractTemplate EventType = "VALIDATE_CONTRACT_TEMPLATE"
+	Update                 EventType = "UPDATE_CONTRACT_TEMPLATE"
+	RetrieveAll            EventType = "RETRIEVE_ALL_CONTRACT_TEMPLATES"
+	RetrieveByID           EventType = "RETRIEVE_CONTRACT_TEMPLATE_BY_ID"
+	SearchContractTemplate EventType = "SEARCH_CONTRACT_TEMPLATE"
+	Archive                EventType = "ARCHIVE_CONTRACT_TEMPLATE"
+	Register               EventType = "REGISTER_CONTRACT_TEMPLATE"
 )
 
 var validStates = map[EventType]bool{
-	CreateContractTemplate:       true,
-	SubmitContractTemplate:       true,
-	ApproveContractTemplate:      true,
-	RejectContractTemplate:       true,
-	VerifyContractTemplate:       true,
-	UpdateContractTemplate:       true,
-	RetrieveAllContractTemplates: true,
-	RetrieveContractTemplateByID: true,
-	SearchContractTemplate:       true,
-	ArchiveContractTemplate:      true,
-	RegisterContractTemplate:     true,
+	Create:                 true,
+	Submit:                 true,
+	Approve:                true,
+	Reject:                 true,
+	VerifyContractTemplate: true,
+	Update:                 true,
+	RetrieveAll:            true,
+	RetrieveByID:           true,
+	SearchContractTemplate: true,
+	Archive:                true,
+	Register:               true,
 }
 
 func NewEventType(s string) (EventType, error) {

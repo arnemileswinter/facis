@@ -73,7 +73,7 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
-	evt := templateevents.RetrieveAllContractTemplatesEvent{
+	evt := templateevents.RetrieveAllEvent{
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}

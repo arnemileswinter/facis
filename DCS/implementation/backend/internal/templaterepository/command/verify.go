@@ -56,7 +56,7 @@ func (h *VerifyHandler) Handle(cmd VerifyCommand) error {
 	}
 
 	if hasTask {
-		err := reviewtask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
+		err := reviewtask.Update(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
 		if err != nil {
 			return err
 		}
@@ -68,13 +68,13 @@ func (h *VerifyHandler) Handle(cmd VerifyCommand) error {
 	}
 
 	if hasTask {
-		err := approvaltask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
+		err := approvaltask.Update(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
 		if err != nil {
 			return err
 		}
 	}
 
-	evt := templateevents.VerifyContractTemplateEvent{
+	evt := templateevents.VerifyEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
