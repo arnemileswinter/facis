@@ -162,7 +162,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 }
 
 // update metadata or status.
-func (s *templateRepositorysrvc) UpdateManage(ctx context.Context) (res int, err error) {
+func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *templaterepository.ContractTemplateUpdateManageRequest) (res *templaterepository.ContractTemplateUpdateManageResponse, err error) {
 	log.Printf(ctx, "templateRepository.update_manage")
 	return
 }
@@ -463,7 +463,7 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 }
 
 // retrieve audit history of template actions.
-func (s *templateRepositorysrvc) Audit(ctx context.Context) (res []string, err error) {
+func (s *templateRepositorysrvc) Audit(ctx context.Context, req *templaterepository.ContractTemplateAuditRequest) (res *templaterepository.ContractTemplateAuditResponse, err error) {
 	log.Printf(ctx, "templateRepository.audit")
 	return
 }

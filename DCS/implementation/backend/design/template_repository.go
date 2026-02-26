@@ -78,6 +78,35 @@ var ContractTemplateUpdateResponse = Type("ContractTemplateUpdateResponse", func
 	Required("did", "document_number", "version")
 })
 
+var ContractTemplateUpdateManageRequest = Type("ContractTemplateUpdateManageRequest", func() {
+	Description("Contract template update manage request")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Attribute("state", String, "The state of the contract template")
+
+	Attribute("updated_at", String, "The timestamp when the contract template was updated")
+
+	Attribute("template_type", String, "The type of the template")
+	Attribute("name", String, "The name of the contract template")
+	Attribute("description", String, "A description for that template")
+	Attribute("template_data", Any, "The template data of the contract template")
+
+	Required("did", "document_number", "version", "updated_at")
+})
+
+var ContractTemplateUpdateManageResponse = Type("ContractTemplateUpdateManageResponse", func() {
+	Description("Result for updating a contract template")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Required("did", "document_number", "version")
+})
+
 var ContractTemplateSearchRequest = Type("ContractTemplateSearchRequest", func() {
 	Description("Contract template search request")
 
@@ -311,6 +340,26 @@ var ContractTemplateRegisterResponse = Type("ContractTemplateRegisterResponse", 
 	Required("did", "document_number", "version")
 })
 
+var ContractTemplateAuditRequest = Type("ContractTemplateAuditRequest", func() {
+	Description("Contract template audit request")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Required("did", "document_number", "version")
+})
+
+var ContractTemplateAuditResponse = Type("ContractTemplateAuditResponse", func() {
+	Description("Result for auditing a contract template")
+
+	Attribute("did", String, "Decentralized Identifier of the contract template")
+	Attribute("document_number", Int, "The number of the contract template")
+	Attribute("version", Int, "The version of the contract template")
+
+	Required("did", "document_number", "version")
+})
+
 // Template Repository Service  (/template/...)
 var _ = Service("TemplateRepository", func() {
 	Description("Template Repository APIs (/template/...)")
@@ -389,12 +438,18 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:tr:components", "Template Versioning")
 		Meta("dcs:ui", "Template Management Dashboard")
 
+		Payload(ContractTemplateUpdateManageRequest)
+		Result(ContractTemplateUpdateManageResponse)
+
+		Error("bad_request", ErrorResult, "Bad request")
+		Error("internal_error", ErrorResult, "Internal server error")
+
 		HTTP(func() {
 			POST("/template/update")
 			Response(StatusOK)
+			Response("bad_request", StatusBadRequest)
+			Response("internal_error", StatusInternalServerError)
 		})
-
-		Result(Int)
 	})
 
 	// GET /template/search
@@ -586,11 +641,17 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:tr:components", "")
 		Meta("dcs:ui", "Template Management Dashboard")
 
+		Payload(ContractTemplateAuditRequest)
+		Result(ContractTemplateAuditResponse)
+
+		Error("bad_request", ErrorResult, "Bad request")
+		Error("internal_error", ErrorResult, "Internal server error")
+
 		HTTP(func() {
 			GET("/template/audit")
 			Response(StatusOK)
+			Response("bad_request", StatusBadRequest)
+			Response("internal_error", StatusInternalServerError)
 		})
-
-		Result(ArrayOf(String))
 	})
 })
