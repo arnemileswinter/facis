@@ -1,6 +1,8 @@
 <template>
   <div class="flex items-center h-16 px-4 overflow-hidden">
-    <div class="font-bold text-2xl tracking-tight text-base-content uppercase">DCS</div>
+    <RouterLink :to="{ name: 'home' }" #default="{ route }" class="font-bold text-2xl tracking-tight text-base-content uppercase">
+      {{ route.meta.name }}
+    </RouterLink>
   </div>
 
   <nav class="overflow-y-auto overflow-x-hidden py-4">

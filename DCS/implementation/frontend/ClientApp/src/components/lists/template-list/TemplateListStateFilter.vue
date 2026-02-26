@@ -57,7 +57,7 @@ function isSelected(type: ContractTemplateStateFilter) {
             class="list-row flex justify-between w-full cursor-pointer py-2 hover:bg-base-200"
             @click="setFilter(filter)"
           >
-            <label class="label flex-1" :class="{ 'font-bold': isSelected(filter) }">{{ filter }}</label>
+            <label class="label flex-1 cursor-pointer" :class="{ 'font-bold': isSelected(filter) }">{{ filter }}</label>
           </li>
           <li class="text-sm opacity-60 px-4">
             <label v-if="hasFilters" class="link" @click="showAll = !showAll">

@@ -11,26 +11,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    meta: { name: 'Home', hideInSidebar: true, requiresAuth: false, title: 'DCS' },
-    redirect: { name: 'templates.list' },
+    meta: { name: 'DCS', hideInSidebar: true, requiresAuth: false, title: 'DCS' },
+    component: LoginView,
   },
   {
     path: '/templates',
     name: 'templates.list',
     component: ContractTemplateListView,
     meta: { name: 'Contract Templates', icon: DocumentTextIcon, requiresAuth: false, title: 'DCS - Templates' },
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: LoginView,
-    meta: { name: 'Login', hideInSidebar: true, requiresAuth: false, title: 'DCS - Login' },
-    beforeEnter: () => {
-      const authStore = useAuthStore()
-      const { isAuthenticated } = storeToRefs(authStore)
-      console.log(isAuthenticated.value)
-      return !isAuthenticated.value
-    },
   },
   {
     path: '/templates/new',
@@ -80,7 +68,7 @@ router.beforeEach((to, _from) => {
   const authStore = useAuthStore()
   const { isAuthenticated } = storeToRefs(authStore)
   if (to.meta.requiresAuth && !isAuthenticated.value) {
-    return { name: 'login' }
+    return { name: 'home' }
   }
 })
 
