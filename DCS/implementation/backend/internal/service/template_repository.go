@@ -6,6 +6,7 @@ import (
 	"digital-contracting-service/internal/auth"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/middleware"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
@@ -52,7 +53,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 	cmd := command.CreateCommand{
 		DID:          *did,
-		CreatedBy:    "Test User",
+		CreatedBy:    middleware.GetUsername(ctx),
 		TemplateType: templateType,
 		Name:         req.Name,
 		Description:  req.Description,
@@ -97,7 +98,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		SubmittedBy:    "Test User",
+		SubmittedBy:    middleware.GetUsername(ctx),
 		ActionFlag:     actionFlag,
 		Comments:       req.Comments,
 	}
@@ -183,7 +184,7 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 	}
 
 	qry := contracttemplate.GetAllMetaDataByFilterQuery{
-		RetrievedBy:    "Test User",
+		RetrievedBy:    middleware.GetUsername(ctx),
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -222,7 +223,7 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.ContractTemplateRetrieveRequest) (res *templaterepository.ContractTemplateRetrieveResponse, err error) {
 
 	qry := contracttemplate.GetAllMetaDataQuery{
-		RetrievedBy: "Test User",
+		RetrievedBy: middleware.GetUsername(ctx),
 	}
 	queryHandler := contracttemplate.GetAllMetaDataHandler{
 		Ctx: ctx,
@@ -285,7 +286,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
-		RetrievedBy:    "Test User",
+		RetrievedBy:    middleware.GetUsername(ctx),
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
@@ -352,7 +353,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		ApprovedBy:     "Test User",
+		ApprovedBy:     middleware.GetUsername(ctx),
 		DecisionNotes:  req.DecisionNotes,
 	}
 	handler := command.ApproveHandler{
@@ -383,7 +384,7 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		RejectedBy:     "Test User",
+		RejectedBy:     middleware.GetUsername(ctx),
 		Reason:         req.Reason,
 	}
 	handler := command.RejectHandler{
@@ -415,7 +416,7 @@ func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepo
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		RegisteredBy:   "Test User",
+		RegisteredBy:   middleware.GetUsername(ctx),
 	}
 	handler := command.RegisterHandler{
 		Ctx: ctx,
@@ -446,7 +447,7 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
-		ArchivedBy:     "Test User",
+		ArchivedBy:     middleware.GetUsername(ctx),
 	}
 	handler := command.ArchiveHandler{
 		Ctx: ctx,
