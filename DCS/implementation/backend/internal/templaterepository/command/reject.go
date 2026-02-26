@@ -67,7 +67,7 @@ func (h *RejectHandler) Handle(cmd RejectCommand) error {
 		return fmt.Errorf("could not update current template state: %w", err)
 	}
 
-	evt := templateevents.RejectContractTemplateEvent{
+	evt := templateevents.RejectEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

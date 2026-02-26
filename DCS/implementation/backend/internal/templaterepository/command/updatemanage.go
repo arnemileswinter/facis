@@ -17,10 +17,11 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type UpdateCommand struct {
+type UpdateManageCommand struct {
 	DID            string
 	DocumentNumber int
 	Version        int
+	State          *templatestate.TemplateState
 	TemplateType   *templatetype.TemplateType
 	UpdatedAt      time.Time
 	UpdatedBy      string
@@ -29,12 +30,12 @@ type UpdateCommand struct {
 	TemplateData   *datatype.JSON
 }
 
-type UpdateHandler struct {
+type UpdateManageHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
+func (h *UpdateManageHandler) Handle(cmd UpdateManageCommand) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()

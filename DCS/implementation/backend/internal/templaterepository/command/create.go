@@ -48,12 +48,12 @@ func (h *CreateHandler) Handle(cmd CreateCommand) error {
 		Description:  cmd.Description,
 		TemplateData: cmd.TemplateData,
 	}
-	createdAt, err := templaterepository.CreateContractTemplate(ctx, tx, data)
+	createdAt, err := templaterepository.Create(ctx, tx, data)
 	if err != nil {
 		return fmt.Errorf("could not create contract template: %w", err)
 	}
 
-	evt := templateevents.CreateContractTemplateEvent{
+	evt := templateevents.CreateEvent{
 		DID:            cmd.DID,
 		DocumentNumber: 1,
 		Version:        1,

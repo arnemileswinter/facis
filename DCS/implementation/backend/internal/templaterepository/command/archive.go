@@ -56,7 +56,7 @@ func (h *ArchiveHandler) Handle(cmd ArchiveCommand) error {
 		return fmt.Errorf("could not update state: %w", err)
 	}
 
-	evt := templateevents.ArchiveContractTemplateEvent{
+	evt := templateevents.ArchiveEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
