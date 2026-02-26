@@ -152,7 +152,7 @@
                         <div class="card bg-base-100 border border-base-300 shadow-sm">
                             <div class="card-body">
                                 <h2 class="card-title text-sm">Builder</h2>
-                                <TemplateEditor />
+                                <BuilderEditor />
                             </div>
                         </div>
                         <AddBlockModal />
@@ -189,8 +189,8 @@
 import { ref } from 'vue'
 import { useContractTemplateController } from './NewContractTemplate.ts'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
-import TemplateEditor from '@template-repository/components/TemplateEditor.vue'
-import AddBlockModal from '@template-repository/components/AddBlockModal.vue'
+import BuilderEditor from '@template-repository/components/BuilderEditor.vue'
+import AddBlockModal from '@template-repository/components/builder-editor/AddBlockModal.vue'
 import SemanticRulesEditor from '@template-repository/components/SemanticRulesEditor.vue'
 import ClausesEditor from '@template-repository/components/ClausesEditor.vue'
 import { storeToRefs } from 'pinia'

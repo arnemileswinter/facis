@@ -9,8 +9,8 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
-import EmptyBlockCreator from '@template-repository/components/EmptyBlockCreator.vue'
-import EditorBlocks from '@template-repository/components/EditorBlocks.vue'
+import EmptyBlockCreator from '@template-repository/components/builder-editor/EmptyBlockCreator.vue'
+import EditorBlocks from '@template-repository/components/builder-editor/EditorBlocks.vue'
 
 const { documentOutline } = storeToRefs(useTemplateDraftStore())
 

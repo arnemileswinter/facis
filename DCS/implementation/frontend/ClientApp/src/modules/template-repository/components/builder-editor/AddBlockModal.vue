@@ -22,7 +22,7 @@ import { storeToRefs } from 'pinia'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore'
 import { DocumentBlockType } from '@template-repository/models/contract-templace'
-import BlockPaletteItem from '@template-repository/components/document-block/BlockPaletteItem.vue'
+import BlockPaletteItem from '@template-repository/components/builder-editor/document-block/BlockPaletteItem.vue'
 
 const draftStore = useTemplateDraftStore()
 const uiStore = useTemplateEditorUiStore()

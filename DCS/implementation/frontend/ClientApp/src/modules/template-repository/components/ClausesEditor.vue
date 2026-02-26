@@ -41,7 +41,7 @@ import { storeToRefs } from 'pinia'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { isClauseBlock, type ClauseBlock } from '@template-repository/models/contract-templace'
 import RequiredIndicator from '@core/components/RequiredIndicator.vue'
-import ClauseTextEditor from '@template-repository/components/ClauseTextEditor.vue'
+import ClauseTextEditor from '@template-repository/components/clauses-editor/ClauseTextEditor.vue'
 import ExistingClausesList from '@template-repository/components/clauses-editor/ExistingClausesList.vue'
 
 const store = useTemplateDraftStore()

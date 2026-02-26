@@ -36,7 +36,7 @@ import {
 import type { DocumentBlock, DocumentOutline, DocumentOutlineBlock } from '@template-repository/models/contract-templace'
 import type { EnrichedBlockItem } from '@template-repository/models/enriched-block-item'
 import { isSectionBlock } from '@template-repository/models/contract-templace'
-import EditorBlock from '@template-repository/components/document-block/EditorBlock.vue'
+import EditorBlock from '@template-repository/components/builder-editor/document-block/EditorBlock.vue'
 import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
 
 const draftStore = useTemplateDraftStore()

@@ -38,7 +38,7 @@ import type { EnrichedBlockItem } from '@template-repository/models/enriched-blo
 import { isSectionBlock, isTextBlock } from '@template-repository/models/contract-templace'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore'
 import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
-import BlockToolbar from '@template-repository/components/toolbar/BlockToolbar.vue'
+import BlockToolbar from '@template-repository/components/builder-editor/toolbar/BlockToolbar.vue'
 
 const props = defineProps<{
   item: EnrichedBlockItem

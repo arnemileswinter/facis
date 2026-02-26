@@ -2,8 +2,8 @@ import { computed, ref, unref, onBeforeUnmount, type MaybeRef, type Component } 
 import { storeToRefs } from 'pinia'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore'
 import type { DocumentOutline } from '@template-repository/models/contract-templace'
-import IconMoveLeft from '@template-repository/components/toolbar/icons/IconMoveLeft.vue'
-import IconMoveRight from '@template-repository/components/toolbar/icons/IconMoveRight.vue'
+import IconMoveLeft from '@template-repository/components/builder-editor/toolbar/icons/IconMoveLeft.vue'
+import IconMoveRight from '@template-repository/components/builder-editor/toolbar/icons/IconMoveRight.vue'
 
 const VERTICAL_ENTER_MS = 100
 const VERTICAL_LEAVE_MS = 120
