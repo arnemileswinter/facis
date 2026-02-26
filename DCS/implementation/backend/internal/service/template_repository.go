@@ -28,7 +28,7 @@ type templateRepositorysrvc struct {
 // NewTemplateRepository returns the TemplateRepository service implementation.
 func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator) (templaterepository.Service, error) {
 	return &templateRepositorysrvc{
-		DB: db,
+		DB:               db,
 		JWTAuthenticator: jwtAuth,
 	}, nil
 }
