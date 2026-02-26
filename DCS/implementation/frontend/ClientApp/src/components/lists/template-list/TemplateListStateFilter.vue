@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useContractTemplateStateFilterStore } from '@/stores/contract-template-state-filter-store'
-import { contractTemplateStates, type ContractTemplateState as ContractTemplateStateFilter } from '@/types/contract-template-state'
+import {
+  contractTemplateStates,
+  type ContractTemplateState as ContractTemplateStateFilter,
+} from '@/types/contract-template-state'
 import { storeToRefs } from 'pinia'
 import { computed, ref, type Ref } from 'vue'
 
@@ -52,9 +55,9 @@ function isSelected(type: ContractTemplateStateFilter) {
             v-for="filter in shownFilters"
             :key="filter"
             class="list-row flex justify-between w-full cursor-pointer py-2 hover:bg-base-200"
-              @click="setFilter(filter)"
+            @click="setFilter(filter)"
           >
-            <label class="label flex-1" :class="{'font-bold': isSelected(filter)}">{{ filter }}</label>
+            <label class="label flex-1" :class="{ 'font-bold': isSelected(filter) }">{{ filter }}</label>
           </li>
           <li class="text-sm opacity-60 px-4">
             <label v-if="hasFilters" class="link" @click="showAll = !showAll">

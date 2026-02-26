@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth-store'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
 import LoginPage from '@/views/login/LoginPage.vue'
 import NewContractTemplateView from '@/views/new-contract-template/NewContractTemplateView.vue'

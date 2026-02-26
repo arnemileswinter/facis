@@ -32,7 +32,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePageStore } from '@core/store/page'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth-store'
 import { AuthenticationService } from '@/services/authentication-service'
 import { useRouter } from 'vue-router'
 

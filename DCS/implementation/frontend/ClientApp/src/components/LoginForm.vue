@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AuthenticationService } from '@/services/authentication-service'
 import { reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 interface FormData {
   username: string
@@ -9,7 +9,6 @@ interface FormData {
 }
 
 const router = useRouter()
-const route = useRoute()
 
 const formData = reactive<FormData>({ username: '', password: '' })
 const loginError = ref(false)
@@ -25,7 +24,6 @@ async function login() {
     loginError.value = true
     setTimeout(() => (loginError.value = false), 2000)
   } else {
-    route.meta.hideInSidebar = true
     router.push({ name: 'templates.list' })
   }
 }
