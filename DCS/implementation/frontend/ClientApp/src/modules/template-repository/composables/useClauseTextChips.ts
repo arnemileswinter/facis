@@ -122,6 +122,50 @@ export function useClauseTextChips(
     return result
   }
 
+  /** Logical length of a node: text length, placeholder length, or sum of children. */
+  function getNodeLength(node: Node): number {
+    if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? '').length
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const el = node as HTMLElement
+      if (el.dataset.conditionId != null && el.dataset.parameterName != null)
+        return toPlaceholderString(el.dataset.conditionId, el.dataset.parameterName).length
+    }
+    let len = 0
+    node.childNodes.forEach((child) => { len += getNodeLength(child) })
+    return len
+  }
+
+  function computeLogicalOffsetInContainer(
+    container: Node,
+    targetNode: Node,
+    targetOffset: number
+  ): number {
+    let index = 0
+    function walk(node: Node): boolean {
+      if (node === targetNode) {
+        index += targetOffset
+        return true
+      }
+      if (node.nodeType === Node.TEXT_NODE) {
+        index += getNodeLength(node)
+        return false
+      }
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement
+        if (el.dataset.conditionId != null && el.dataset.parameterName != null) {
+          index += getNodeLength(node)
+          return false
+        }
+      }
+      for (let i = 0; i < node.childNodes.length; i++) {
+        if (walk(node.childNodes.item(i))) return true
+      }
+      return false
+    }
+    walk(container)
+    return index
+  }
+
   /**
    * Returns the caret index in the logical clause string (same as getTemplateText() length units).
    * Text nodes and {{id.param}} each count as their string length.
@@ -134,33 +178,20 @@ export function useClauseTextChips(
     const sel = document.getSelection()
     if (!sel || sel.rangeCount === 0) return 0
     if (!editorEl.contains(sel.anchorNode)) return 0
-    let index = 0
     const anchorNode = sel.anchorNode
     const anchorOffset = sel.anchorOffset
-    function walk(node: Node): boolean {
-      if (node === anchorNode) {
-        index += anchorOffset
-        return true
+    if (!anchorNode) return 0
+    // Caret is "after" the last child: anchorOffset = number of children before caret. Sum their logical lengths.
+    if (anchorNode === editorEl) {
+      let index = 0
+      for (let i = 0; i < anchorOffset && i < editorEl.childNodes.length; i++) {
+        const child = editorEl.childNodes.item(i)
+        if (child) index += getNodeLength(child)
       }
-      if (node.nodeType === Node.TEXT_NODE) {
-        index += (node.textContent ?? '').length
-        return false
-      }
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as HTMLElement
-        if (el.dataset.conditionId != null && el.dataset.parameterName != null) {
-          index += toPlaceholderString(el.dataset.conditionId, el.dataset.parameterName).length
-          return false
-        }
-      }
-      for (let i = 0; i < node.childNodes.length; i++) {
-        const child = node.childNodes.item(i)
-        if (walk(child)) return true
-      }
-      return false
+      return index
     }
-    walk(editorEl)
-    return index
+    // Caret is inside a descendant (text or element).
+    return computeLogicalOffsetInContainer(editorEl, anchorNode, anchorOffset)
   }
 
   /** Returns selection range in logical template text indices.
@@ -178,31 +209,16 @@ export function useClauseTextChips(
   }
 
   function indexOfNode(container: Node, targetNode: Node | null, targetOffset: number): number {
-    if (!container.contains(targetNode)) return -1
-    let index = 0
-    function walk(node: Node): boolean {
-      if (node === targetNode) {
-        index += targetOffset
-        return true
+    if (!targetNode || !container.contains(targetNode)) return -1
+    if (targetNode === container) {
+      let index = 0
+      for (let i = 0; i < targetOffset && i < container.childNodes.length; i++) {
+        const child = container.childNodes.item(i)
+        if (child) index += getNodeLength(child)
       }
-      if (node.nodeType === Node.TEXT_NODE) {
-        index += (node.textContent ?? '').length
-        return false
-      }
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as HTMLElement
-        if (el.dataset.conditionId != null && el.dataset.parameterName != null) {
-          index += toPlaceholderString(el.dataset.conditionId, el.dataset.parameterName).length
-          return false
-        }
-      }
-      for (let i = 0; i < node.childNodes.length; i++) {
-        if (walk(node.childNodes.item(i))) return true
-      }
-      return false
+      return index
     }
-    walk(container)
-    return index
+    return computeLogicalOffsetInContainer(container, targetNode, targetOffset)
   }
 
   function setCursorAfter(node: Node): void {
