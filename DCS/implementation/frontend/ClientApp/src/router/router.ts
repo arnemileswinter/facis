@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/auth-store'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
-import LoginPage from '@/views/login/LoginPage.vue'
+import LoginView from '@/views/login/LoginView.vue'
 import NewContractTemplateView from '@/views/new-contract-template/NewContractTemplateView.vue'
 import TableView from '@/views/TableView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: LoginPage,
+    component: LoginView,
     meta: { name: 'Login', hideInSidebar: true, requiresAuth: false, title: 'DCS - Login' },
     beforeEnter: () => {
       const authStore = useAuthStore()

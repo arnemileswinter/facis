@@ -24,7 +24,7 @@ async function login() {
     loginError.value = true
     setTimeout(() => (loginError.value = false), 2000)
   } else {
-    router.push({ name: 'templates.list' })
+    router.push({ name: 'home' })
   }
 }
 </script>
