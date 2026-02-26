@@ -27,7 +27,7 @@ type templateRepositorysrvc struct {
 // NewTemplateRepository returns the TemplateRepository service implementation.
 func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator) (templaterepository.Service, error) {
 	return &templateRepositorysrvc{
-		DB: db,
+		DB:               db,
 		JWTAuthenticator: jwtAuth,
 	}, nil
 }
@@ -518,7 +518,7 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 }
 
 // retrieve audit history of template actions.
-func (s *templateRepositorysrvc) Audit(ctx context.Context) (res []string, err error) {
+func (s *templateRepositorysrvc) Audit(ctx context.Context, req *templaterepository.AuditRequest) (res *templaterepository.AuditResponse, err error) {
 	log.Printf(ctx, "templateRepository.audit")
-	return
+	return nil, nil
 }

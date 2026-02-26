@@ -87,6 +87,8 @@ var UpdateResponse = Type("UpdateResponse", func() {
 var UpdateManageRequest = Type("UpdateManageRequest", func() {
 	Description("Contract template update manage request")
 
+	Token("token", String, "JWT token")
+
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", Int, "The number of the contract template")
 	Attribute("version", Int, "The version of the contract template")
@@ -367,6 +369,8 @@ var RegisterResponse = Type("RegisterResponse", func() {
 var AuditRequest = Type("AuditRequest", func() {
 	Description("Contract template audit request")
 
+	Token("token", String, "JWT token")
+
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", Int, "The number of the contract template")
 	Attribute("version", Int, "The version of the contract template")
@@ -608,7 +612,7 @@ var _ = Service("TemplateRepository", func() {
 		Description("mark template as approved, with optional decision notes.")
 		Meta("dcs:requirements", "DCS-IR-TR-05", "DCS-IR-TR-06")
 		Meta("dcs:tr:components", "Template Versioning")
-		Meta("dcs:ui", "Template Approver"
+		Meta("dcs:ui", "Template Approver")
 
 		Security(JWTAuth, func() {
 			Scope("Template Approver")
@@ -726,7 +730,5 @@ var _ = Service("TemplateRepository", func() {
 			Response("bad_request", StatusBadRequest)
 			Response("internal_error", StatusInternalServerError)
 		})
-
-		Result(ArrayOf(String))
 	})
 })
