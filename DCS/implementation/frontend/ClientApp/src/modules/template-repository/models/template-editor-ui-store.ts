@@ -9,6 +9,15 @@ export type BlockMovementPreview =
   | { type: 'vertical'; sourceBlockId: string; targetBlockId: string }
   | { type: 'horizontal'; blockId: string; direction: 'left' | 'right' }
 
+/**
+ * When non-null: clause editor highlights chips that match.
+ * - conditionId only: highlight all placeholders for that semantic rule
+ * - conditionId + parameterName: highlight placeholders for that param
+ */
+export type ClausePlaceholderHighlight =
+  | { conditionId: string; parameterName?: string }
+  | null
+
 /** UI state for template create/edit page */
 interface TemplateEditorUiState {
   activeTab: TemplateEditorTabId
@@ -26,6 +35,8 @@ interface TemplateEditorUiState {
   /** When non-null: movement preview is active */
   blockMovementPreview: BlockMovementPreview | null
   selectedBlockId: string | null
+  /** When non-null: clause legal-text editor highlights matching placeholder chips */
+  clausePlaceholderHighlight: ClausePlaceholderHighlight
 }
 
 export type { TemplateEditorUiState }

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload } from "@template-repository/models/template-draft-store"
 import type { DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition } from "@template-repository/models/contract-templace"
-import { DocumentBlockType, TemplateType } from "@template-repository/models/contract-templace"
+import { DocumentBlockType, TemplateType, isClauseBlock } from "@template-repository/models/contract-templace"
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -43,11 +43,13 @@ export const useTemplateDraftStore = defineStore(storeId, {
       deleteBlock(this.documentOutline, this.documentBlocks, blockId)
     },
     /** Updates block fields. */
-    updateBlock(blockId: string, payload: { title?: string; text?: string }): void {
+    updateBlock(blockId: string, payload: { title?: string; text?: string; conditionIds?: string[] }): void {
       const block = this.documentBlocks.find((b) => b.blockId === blockId)
       if (!block) return
       if (payload.title !== undefined) block.title = payload.title
       if (payload.text !== undefined) block.text = payload.text
+      if (isClauseBlock(block)) block.conditionIds = payload.conditionIds ?? []
+
     },
     /**
      * Moves a block to a new position under the same or another parent.
@@ -66,9 +68,39 @@ export const useTemplateDraftStore = defineStore(storeId, {
       })
     },
     deleteSemanticCondition(conditionId: string): void {
+      const placeholderRegex = placeholderRegexForCondition(conditionId)
+      for (const block of this.documentBlocks) {
+        if (!isClauseBlock(block)) continue
+        const hadCondition = block.conditionIds.includes(conditionId)
+        block.conditionIds = block.conditionIds.filter((id) => id !== conditionId)
+        if (hadCondition) block.text = block.text.replace(placeholderRegex, '')
+      }
       this.semanticConditions = this.semanticConditions.filter((c) => c.conditionId !== conditionId)
     },
-    // TBD: Clauses operations: add, delete, update
+    // Clauses operations: add, delete, update
+    /** Adds a clause block to documentBlocks only */
+    addClause(payload: { title?: string; text: string; conditionIds: string[] }): string {
+      const blockId = crypto.randomUUID()
+      const block = createBlockFromPayload(blockId, {
+        blockType: DocumentBlockType.Clause,
+        text: payload.text,
+        title: payload.title,
+        conditionIds: payload.conditionIds,
+      })
+      this.documentBlocks.push(block)
+      return blockId
+    },
+    /** Removes the clause from documentBlocks and documentOutline. */
+    deleteClause(blockId: string): void {
+      this.documentBlocks = this.documentBlocks.filter((b) => b.blockId !== blockId)
+      const parent = this.documentOutline.find((b) => b.children.includes(blockId))
+      if (parent) {
+        parent.children = parent.children.filter((id) => id !== blockId)
+      }
+    },
+    updateClause(blockId: string, payload: { title?: string; text?: string; conditionIds?: string[] }): void {
+      this.updateBlock(blockId, payload)
+    },
     // TBD: MetaData operations: add, delete, update
     // TBD: Basic info operations: name, description, templateType...
     updateTemplateType(templateType: TemplateTypeValue): void {
@@ -177,7 +209,7 @@ function createBlockFromPayload(blockId: string, payload: AddBlockPayload): Docu
     case DocumentBlockType.Text:
       return { blockId, type: DocumentBlockType.Text, text }
     case DocumentBlockType.Clause:
-      return { blockId, type: DocumentBlockType.Clause, text, conditionId: payload.conditionId ?? '' }
+      return { blockId, type: DocumentBlockType.Clause, text, title: payload.title, conditionIds: payload.conditionIds ?? [] }
     case DocumentBlockType.ApprovedTemplate:
       return { blockId, type: DocumentBlockType.ApprovedTemplate, text, templateId: payload.templateId ?? '' }
     default:
@@ -195,6 +227,11 @@ function collectDescendantBlockIds(
   const childIds = node?.children ?? []
   childIds.forEach((id) => collectDescendantBlockIds(id, outlineByBlockId).forEach((x) => set.add(x)))
   return set
+}
+
+/** Regex to match {{conditionId.parameterName}}. */
+function placeholderRegexForCondition(conditionId: string): RegExp {
+  return new RegExp(`\\{\\{${conditionId}\\.([^}]*)\\}\\}`, 'g')
 }
 
 /** Returns a copy of defaultState so store state does not share 

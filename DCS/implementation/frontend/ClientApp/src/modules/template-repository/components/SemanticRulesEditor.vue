@@ -5,7 +5,9 @@
       <h3 class="text-sm font-semibold text-base-content/80 mb-4">New rule</h3>
       <div class="space-y-4">
         <div>
-          <label class="label-text text-xs text-base-content/60 block mb-1">Rule name</label>
+          <label class="label-text text-xs text-base-content/60 block mb-1">Rule name
+            <RequiredIndicator />
+          </label>
           <input v-model="newCondition.conditionName" type="text" class="input input-bordered input-sm w-full"
             :class="{ 'input-error': isRuleNameDuplicate }" placeholder="" />
           <p class="text-xs text-base-content/50 mt-0.5">Used when selecting this rule for a clause.</p>
@@ -19,7 +21,9 @@
             <p class="md:col-span-12 text-xs font-medium text-base-content/70 mb-2">New parameter</p>
             <div class="md:col-span-4 flex flex-col gap-1">
               <label class="label py-0 min-h-0">
-                <span class="label-text text-xs text-base-content/60">Parameter name</span>
+                <span class="label-text text-xs text-base-content/60">Parameter name
+                  <RequiredIndicator />
+                </span>
               </label>
               <input v-model="draftParameter.parameterName" type="text" class="input input-bordered input-sm w-full h-9"
                 :class="{ 'input-error': isParameterNameDuplicate }" placeholder="Label" />
@@ -27,7 +31,9 @@
             </div>
             <div class="md:col-span-3 flex flex-col gap-1">
               <label class="label py-0 min-h-0">
-                <span class="label-text text-xs text-base-content/60">Type</span>
+                <span class="label-text text-xs text-base-content/60">Type
+                  <RequiredIndicator />
+                </span>
               </label>
               <select v-model="draftParameter.type" class="select select-bordered select-sm w-full h-9">
                 <option value="date">Date</option>
@@ -93,7 +99,13 @@
         <div v-for="condition in semanticConditions" :key="condition.conditionId"
           class="flex items-start gap-3 p-3 rounded-lg border border-base-300 bg-base-200/30 group hover:shadow-sm transition-all">
           <div class="flex-1 min-w-0">
-            <div class="font-semibold text-sm text-base-content">{{ condition.conditionName }}</div>
+            <div class="font-semibold text-sm text-base-content">
+              {{ condition.conditionName }}
+              <span class="font-normal text-base-content/60 ml-1">
+                (used in {{ clauseCountByConditionId[condition.conditionId] ?? 0 }} clause{{
+                  (clauseCountByConditionId[condition.conditionId] ?? 0) === 1 ? '' : 's' }})
+              </span>
+            </div>
             <div class="flex flex-wrap gap-2 mt-2">
               <div v-for="(p, i) in condition.parameters" :key="i" class="badge badge-ghost badge-sm gap-1">
                 <span>{{ p.parameterName }}</span>
@@ -120,10 +132,24 @@ import {
   type SemanticCondition,
   type SemanticConditionParameter,
   SEMANTIC_CONDITION_SCHEMA_VERSION,
+  isClauseBlock,
 } from '@template-repository/models/contract-templace'
+import RequiredIndicator from '@core/components/RequiredIndicator.vue'
 
 const store = useTemplateDraftStore()
-const { semanticConditions } = storeToRefs(store)
+const { semanticConditions, documentBlocks } = storeToRefs(store)
+
+/** Number of clause blocks that reference each conditionId. */
+const clauseCountByConditionId = computed(() => {
+  const counts: Record<string, number> = {}
+  for (const block of documentBlocks.value) {
+    if (!isClauseBlock(block)) continue
+    for (const id of block.conditionIds) {
+      counts[id] = (counts[id] ?? 0) + 1
+    }
+  }
+  return counts
+})
 
 type NewConditionPayload = Omit<SemanticCondition, 'conditionId'>
 

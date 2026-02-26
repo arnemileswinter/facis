@@ -3,6 +3,7 @@ import type {
   TemplateEditorUiState,
   TemplateEditorTabId,
   BlockMovementPreview,
+  ClausePlaceholderHighlight,
 } from '@template-repository/models/template-editor-ui-store'
 
 const storeId = 'templateEditorUi'
@@ -18,6 +19,7 @@ const defaultState: Readonly<TemplateEditorUiState> = {
   addBlockModalContext: null,
   blockMovementPreview: null,
   selectedBlockId: null,
+  clausePlaceholderHighlight: null,
 }
 
 export const useTemplateEditorUiStore = defineStore(storeId, {
@@ -26,6 +28,8 @@ export const useTemplateEditorUiStore = defineStore(storeId, {
   actions: {
     setActiveTab(tab: TemplateEditorTabId) {
       this.activeTab = tab
+      // Clear clause chip highlight when leaving Clauses tab
+      this.clausePlaceholderHighlight = null
     },
     openAddBlockModal(parentBlockId: string, insertIndex: number) {
       this.addBlockModalContext = { parentBlockId, insertIndex }
@@ -38,6 +42,9 @@ export const useTemplateEditorUiStore = defineStore(storeId, {
     },
     setSelectedBlockId(blockId: string | null) {
       this.selectedBlockId = blockId
+    },
+    setClausePlaceholderHighlight(value: ClausePlaceholderHighlight) {
+      this.clausePlaceholderHighlight = value
     },
     reset() {
       Object.assign(this, getInitialState())

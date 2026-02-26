@@ -21,7 +21,7 @@ export interface AddBlockPayload {
   blockType: DocumentBlockType
   text: string
   title?: string
-  conditionId?: string
+  conditionIds?: string[]
   templateId?: string
 }
 

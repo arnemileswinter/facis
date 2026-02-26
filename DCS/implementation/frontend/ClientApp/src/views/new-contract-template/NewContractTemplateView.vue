@@ -142,65 +142,7 @@
                                 <h2 class="card-title text-sm">
                                     <span class="badge badge-primary">03</span> Clauses
                                 </h2>
-
-                                <div class="card bg-base-200 shadow-none border border-dashed border-base-300">
-                                    <div class="card-body gap-3 p-4">
-                                        <input v-model="newClause.title"
-                                            class="input input-sm input-bordered bg-base-100 font-bold w-full"
-                                            placeholder="Clause Title" />
-                                        <textarea v-model="newClause.description"
-                                            class="textarea textarea-sm textarea-bordered bg-base-100 w-full"
-                                            placeholder="Legal text content"></textarea>
-                                        <div>
-                                            <p class="label-text text-xs text-base-content/50 mb-2">Semantic Rules for
-                                                this Clause</p>
-                                            <div class="flex flex-wrap gap-2">
-                                                <p v-if="!semanticConditions.length"
-                                                    class="text-xs text-base-content/50 italic">No semantic rules yet.
-                                                </p>
-                                                <form class="flex flex-wrap gap-2">
-                                                    <input v-for="(rule, idx) in semanticConditions" :key="idx"
-                                                        class="btn btn-xs" type="checkbox" :aria-label="rule.conditionName"
-                                                        :value="rule.conditionId" v-model="selectedConditionIds" />
-                                                </form>
-                                            </div>
-                                        </div>
-                                        <div class="card-actions justify-end">
-                                            <button @click="addClause" type="button" class="btn btn-primary btn-sm px-8"
-                                                :disabled="!newClause.title || !newClause.description">Add
-                                                Clause</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-2">
-                                    <div v-for="(clause, index) in form.clauses" :key="index"
-                                        class="card border border-base-300 group hover:border-primary transition-colors">
-                                        <div class="card-body p-4 gap-2">
-                                            <div class="flex justify-between items-start gap-2">
-                                                <div class="flex-1">
-                                                    <h4
-                                                        class="font-black text-sm uppercase tracking-tight text-primary">
-                                                        {{ clause.title }}</h4>
-                                                    <p
-                                                        class="text-xs text-base-content/70 mt-1 leading-relaxed whitespace-pre-wrap">
-                                                        {{ clause.description }}</p>
-                                                    <div class="flex flex-wrap gap-1 mt-2">
-                                                        <span v-for="cid in clause.conditionIds" :key="cid"
-                                                            class="text-primary">{{
-                                                            getConditionName(cid) }}</span>
-                                                    </div>
-                                                </div>
-                                                <button @click="removeClause(index)"
-                                                    class="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100 transition-opacity shrink-0">✕</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div v-if="!form.clauses?.length"
-                                        class="text-center py-8  text-xs text-base-content/40 italic">
-                                        No clauses defined yet.
-                                    </div>
-                                </div>
+                                <ClausesEditor />
                             </div>
                         </div>
                     </div>
@@ -250,20 +192,13 @@ import { useTemplateEditorUiStore } from '@template-repository/store/templateEdi
 import TemplateEditor from '@template-repository/components/TemplateEditor.vue'
 import AddBlockModal from '@template-repository/components/AddBlockModal.vue'
 import SemanticRulesEditor from '@template-repository/components/SemanticRulesEditor.vue'
-import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
+import ClausesEditor from '@template-repository/components/ClausesEditor.vue'
 import { storeToRefs } from 'pinia'
 import { TemplateType } from '@template-repository/models/contract-templace'
 
 const templateEditorUiStore = useTemplateEditorUiStore()
-const templateDraftStore = useTemplateDraftStore()
 const { activeTab, tabs } = storeToRefs(templateEditorUiStore)
 const { setActiveTab } = templateEditorUiStore
-const { semanticConditions } = storeToRefs(templateDraftStore)
-
-function getConditionName(conditionId: string): string {
-  const c = semanticConditions.value.find((x) => x.conditionId === conditionId)
-  return c?.conditionName ?? conditionId
-}
 
 const props = defineProps<{
     did?: string
@@ -279,10 +214,6 @@ const {
     isSubmitting,
     submit,
     cancel,
-    newClause,
-    addClause,
-    removeClause,
-    selectedConditionIds,
     subcontractSearchQuery,
     filteredSubcontractTemplates,
     getSubcontractTemplateName,

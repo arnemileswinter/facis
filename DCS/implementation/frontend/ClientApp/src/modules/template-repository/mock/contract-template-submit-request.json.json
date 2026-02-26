@@ -55,7 +55,7 @@
         {
             "conditionId": "sc-001",
             "conditionName": "validityPeriod",
-            "schemaVersion": "v2",
+            "schemaVersion": "v1",
             "parameters": [
                 {
                     "parameterName": "start date",
@@ -72,7 +72,7 @@
                         {
                             "operate": "lessThanOrEqual",
                             "targets": [
-                                "{{start date}}"
+                                "{{sc-001.start date}}"
                             ]
                         }
                     ],
@@ -83,7 +83,7 @@
         {
             "conditionId": "sc-002",
             "conditionName": "paymentTerms",
-            "schemaVersion": "v2",
+            "schemaVersion": "v1",
             "parameters": [
                 {
                     "parameterName": "rentAmount",
@@ -111,7 +111,7 @@
         {
             "conditionId": "sc-003",
             "conditionName": "dataAccessScope",
-            "schemaVersion": "v2",
+            "schemaVersion": "v1",
             "parameters": [
                 {
                     "parameterName": "region",
@@ -150,8 +150,10 @@
         {
             "blockId": "sn-validity",
             "type": "CLAUSE",
-            "conditionId": "sc-001",
-            "text": "The term runs from {{start date}} to {{end date}}"
+            "conditionIds": [
+                "sc-001"
+            ],
+            "text": "The term runs from {{sc-001.start date}} to {{sc-001.end date}}."
         },
         {
             "blockId": "sec-1-2",
@@ -167,8 +169,10 @@
         {
             "blockId": "sn-payment",
             "type": "CLAUSE",
-            "conditionId": "sc-002",
-            "text": "Rent of {{rentAmount}} {{currency}} is due on the {{dueDayOfMonth}} of each month."
+            "conditionIds": [
+                "sc-002"
+            ],
+            "text": "Rent of {{sc-002.rentAmount}} {{sc-002.currency}} is due on the {{sc-002.dueDayOfMonth}} of each month."
         },
         {
             "blockId": "sec-1-3",
@@ -184,8 +188,10 @@
         {
             "blockId": "sn-access",
             "type": "CLAUSE",
-            "conditionId": "sc-003",
-            "text": "Data may be accessed only within {{region}}."
+            "conditionIds": [
+                "sc-003"
+            ],
+            "text": "Data may be accessed only within {{sc-003.region}}."
         },
         {
             "blockId": "cl-other-text",

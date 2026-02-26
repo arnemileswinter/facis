@@ -91,7 +91,7 @@ export interface TextBlock extends BaseBlock {
 
 export interface ClauseBlock extends BaseBlock {
     type: (typeof DocumentBlockType)['Clause']
-    conditionId: string
+    conditionIds: string[]
     // TBD: render
     // number: 0.##
     // date: yyyy-MM-dd

@@ -4,13 +4,6 @@ import { ContractTemplateService } from '@/services/contract-template-service';
 import { TemplateType, type TemplateTypeValue } from "@template-repository/models/contract-templace";
 import { computed, onMounted, ref, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
-
-interface Clause {
-    title: string;
-    description: string;
-    conditionIds: string[];
-}
-
 interface SubcontractTemplate {
     did: string;
     name: string;
@@ -24,20 +17,16 @@ export function useContractTemplateController(did?: string, document_number?: nu
 
     const isSubmitting = ref(false)
     const isEditMode = computed(() => !!did)
-    const selectedRules = ref([])
     const form = computed(() => {
         return {
-        name: contractTemplate.value?.name ?? '',
-        description: contractTemplate.value?.description ?? '',
-        contract_kind: TemplateType.subContract as TemplateTypeValue,
-        subcontract_template_dids: [] as string[],
-        clauses: [] as Clause[],
-        state: contractTemplate.value?.state ?? 'DRAFT',
-        version: contractTemplate.value?.state ?? 1
-    }})
-
-    const newClause = ref<Clause>({ title: '', description: '', conditionIds: [] })
-    const selectedConditionIds = ref<string[]>([])
+            name: contractTemplate.value?.name ?? '',
+            description: contractTemplate.value?.description ?? '',
+            contract_kind: TemplateType.subContract as TemplateTypeValue,
+            subcontract_template_dids: [] as string[],
+            state: contractTemplate.value?.state ?? 'DRAFT',
+            version: contractTemplate.value?.state ?? 1
+        }
+    })
 
     // Subcontract template picker
     const availableSubcontractTemplates = ref<SubcontractTemplate[]>([
@@ -73,21 +62,6 @@ export function useContractTemplateController(did?: string, document_number?: nu
     const removeSubcontractTemplate = (did: string) => {
         const idx = form.value.subcontract_template_dids.indexOf(did)
         if (idx !== -1) form.value.subcontract_template_dids.splice(idx, 1)
-    }
-
-    const addClause = () => {
-        if (!newClause.value.title || !newClause.value.description) return
-        form.value.clauses.push({
-            title: newClause.value.title,
-            description: newClause.value.description,
-            conditionIds: [...selectedConditionIds.value],
-        })
-        newClause.value = { title: '', description: '', conditionIds: [] }
-        selectedConditionIds.value = []
-    }
-
-    const removeClause = (index: number) => {
-        form.value.clauses.splice(index, 1)
     }
 
     const submit = async () => {
@@ -127,15 +101,11 @@ export function useContractTemplateController(did?: string, document_number?: nu
         form,
         isEditMode,
         isSubmitting,
-        newClause,
-        selectedConditionIds,
         subcontractSearchQuery,
         filteredSubcontractTemplates,
         getSubcontractTemplateName,
         addSubcontractTemplate,
         removeSubcontractTemplate,
-        addClause,
-        removeClause,
         submit,
         cancel: () => router.back(),
     }
