@@ -36,7 +36,7 @@ func (s *authSvc) Login(ctx context.Context) (*genauth.LoginResult, error) {
 	log.Printf(ctx, "auth.login")
 	params := url.Values{}
 	params.Set("client_id", s.oidcClientID)
-	params.Set("redirect_uri", s.redirectURI+"/auth/callback")
+	params.Set("redirect_uri", s.redirectURI)
 	params.Set("response_type", "code")
 	params.Set("scope", "openid")
 	authURL := s.oidcIssuerURL + "/protocol/openid-connect/auth?" + params.Encode()
@@ -108,7 +108,7 @@ func (s *authSvc) exchangeCodeForToken(ctx context.Context, code string) (*keycl
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", code)
 	data.Set("client_id", s.oidcClientID)
-	data.Set("redirect_uri", s.redirectURI+"/auth/callback")
+	data.Set("redirect_uri", s.redirectURI)
 
 	req, err := http.NewRequestWithContext(ctx, "POST", tokenEndpoint, strings.NewReader(data.Encode()))
 	if err != nil {

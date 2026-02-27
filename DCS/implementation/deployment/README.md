@@ -517,8 +517,7 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
 
 - **`OIDC_REDIRECT_URI`** - The base URI for OIDC authentication flow (**required**)
   - Example: `https://xfsc.local/dcs` or `http://localhost:8991`
-  - The backend appends `/auth/callback` to form the full redirect URI
-  - Must be registered as a valid redirect URI in your Keycloak client configuration (with `/auth/callback` suffix)
+  - Must be registered as a valid redirect URI in your Keycloak client configuration
   - Used by the login and callback handlers to build the authorization and token exchange URLs
   - Note: `deploy.sh` defaults to `http://localhost:8991` if unset, but the backend requires it explicitly
 
