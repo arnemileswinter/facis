@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { PageLayout } from '@core/layouts/page'
 import { useSyncPageTitle } from '@core/composables/useSyncPageTitle'
+import { RouterView, useRoute } from 'vue-router'
+import { computed } from 'vue'
 
 useSyncPageTitle()
+
+const route = useRoute()
+const isBlankLayout = computed(() => route.meta.layout === 'blank')
 </script>
 
 <template>
-  <PageLayout />
+  <RouterView v-if="isBlankLayout" />
+  <PageLayout v-else />
 </template>
