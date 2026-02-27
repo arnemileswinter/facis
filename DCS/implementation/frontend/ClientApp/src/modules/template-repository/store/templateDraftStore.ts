@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import type { TemplateDraftState, AddBlockPayload } from "@template-repository/models/template-draft-store"
-import type { DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition } from "@template-repository/models/contract-templace"
-import { DocumentBlockType, TemplateType, isClauseBlock } from "@template-repository/models/contract-templace"
+import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@template-repository/models/template-draft-store"
+import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition } from "@template-repository/models/contract-templace"
+import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock } from "@template-repository/models/contract-templace"
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -16,7 +16,11 @@ const defaultState: Readonly<TemplateDraftState> = {
 export const useTemplateDraftStore = defineStore(storeId, {
   state: (): TemplateDraftState => getInitialState(),
   getters: {
-    hasTemplateId(): boolean { return !!this.did }
+    hasTemplateId(): boolean { return !!this.did },
+    /** Set of all block IDs that appear in the document outline tree (root + all descendants). */
+    blockIdsInOutline(): Set<string> {
+      return collectBlockIdsInOutline(this.documentOutline)
+    },
   },
   actions: {
     // Block operations: add, delete, update, move
@@ -27,16 +31,17 @@ export const useTemplateDraftStore = defineStore(storeId, {
      * 
      * @param parentBlockId - blockId of the outline node (parent) under which to insert
      * @param insertIndex - index in the parent's children array (0 = first)
-     * @returns The new block's blockId.
+     * @param options.addToOutline - when false, new block is only added to documentBlocks (default true)
+     * @returns The new or inserted block's blockId.
      */
-    addBlock(parentBlockId: string, insertIndex: number, payload: AddBlockPayload): string {
+    addBlock(parentBlockId: string, insertIndex: number, payload: AddBlockPayload, options?: AddBlockOptions): string {
       if (this.templateType === TemplateType.subContract && payload.blockType === DocumentBlockType.ApprovedTemplate) {
         throw new Error('subContract template cannot add APPROVED_TEMPLATE blocks')
       }
       if (this.templateType === TemplateType.frameContract && payload.blockType !== DocumentBlockType.ApprovedTemplate) {
         throw new Error('frameContract template can only add APPROVED_TEMPLATE blocks')
       }
-      return addBlock(this.documentOutline, this.documentBlocks, parentBlockId, insertIndex, payload)
+      return addBlock(this.documentOutline, this.documentBlocks, parentBlockId, insertIndex, payload, options)
     },
     /** Removes the block and all its descendants from documentOutline and documentBlocks. */
     deleteBlock(blockId: string): void {
@@ -128,21 +133,64 @@ function createOutlineItem(overrides?: Partial<Pick<DocumentOutlineBlock, 'block
   }
 }
 
+/** Returns the set of all block IDs in the outline tree (root + all descendants). */
+function collectBlockIdsInOutline(outline: DocumentOutline): Set<string> {
+  const blockIds = new Set<string>()
+  const blockMap = new Map(outline.map((b) => [b.blockId, b]))
+  function visit(blockId: string) {
+    if (blockIds.has(blockId)) return
+    blockIds.add(blockId)
+    const block = blockMap.get(blockId)
+    if (block) block.children.forEach(visit)
+  }
+  const root = outline.find((b) => b.isRoot)
+  if (root) visit(root.blockId)
+  return blockIds
+}
+
 function addBlock(
   outline: DocumentOutlineBlock[],
   blocks: DocumentBlock[],
   parentBlockId: string,
   insertIndex: number,
-  payload: AddBlockPayload
+  payload: AddBlockPayload,
+  options?: AddBlockOptions
 ): string {
+  const addToOutline = options?.addToOutline !== false
+
+  // Clause block is created from ClausesEditor and only added to documentOutline in BuilderEditor.
+  if (payload.clauseBlockId) {
+    const clauseBlockId = payload.clauseBlockId
+    const block = blocks.find((b) => b.blockId === clauseBlockId)
+    if (!block || !isClauseBlock(block)) {
+      throw new Error(`addBlock: clause block not found: ${clauseBlockId}`)
+    }
+    const inOutline = collectBlockIdsInOutline(outline)
+    if (inOutline.has(clauseBlockId)) {
+      return clauseBlockId
+    }
+    const parent = outline.find((b) => b.blockId === parentBlockId)
+    if (!parent) {
+      throw new Error(`addBlock: parent not found: ${parentBlockId}`)
+    }
+    parent.children.splice(insertIndex, 0, clauseBlockId)
+    return clauseBlockId
+  }
+
   const blockId = crypto.randomUUID()
   const block = createBlockFromPayload(blockId, payload)
+
+  if (isClauseBlock(block) && !addToOutline) {
+    blocks.push(block)
+    return blockId
+  }
+
   const parent = outline.find((b) => b.blockId === parentBlockId)
   if (!parent) {
     throw new Error(`addBlock: parent not found: ${parentBlockId}`)
   }
   parent.children.splice(insertIndex, 0, blockId)
-  if (payload.blockType === DocumentBlockType.Section) {
+  if (isSectionBlock(block)) {
     outline.push(createOutlineItem({ blockId, isRoot: false, children: [] }))
   }
   blocks.push(block)
@@ -186,11 +234,17 @@ function deleteBlock(
   blocks: DocumentBlock[],
   blockId: string
 ): void {
-  const outlineByBlockId = new Map(outline.map((b) => [b.blockId, b]))
+  const block = blocks.find((b) => b.blockId === blockId)
   const parent = outline.find((b) => b.children.includes(blockId))
   if (!parent) {
     return
   }
+  // Clause: only remove from outline so the clause can be re-used from Add block modal.
+  if (block && isClauseBlock(block)) {
+    parent.children = parent.children.filter((id) => id !== blockId)
+    return
+  }
+  const outlineByBlockId = new Map(outline.map((b) => [b.blockId, b]))
   const toRemove = collectDescendantBlockIds(blockId, outlineByBlockId)
   parent.children = parent.children.filter((id) => id !== blockId)
   const outlineToKeep = outline.filter((b) => b.isRoot === true || !toRemove.has(b.blockId))

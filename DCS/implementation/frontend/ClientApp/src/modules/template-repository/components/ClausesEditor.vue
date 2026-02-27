@@ -30,7 +30,7 @@
     <section class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
       <h3 class="text-sm font-semibold text-base-content/80 mb-4">Existing clauses</h3>
       <ExistingClausesList :clause-blocks="clauseBlocks" :semantic-conditions="semanticConditions"
-        :get-condition-name="getConditionName" @delete="deleteClause" />
+        :get-condition-name="getConditionName" @delete="deleteClause" :block-ids-in-outline="store.blockIdsInOutline" />
     </section>
   </div>
 </template>

@@ -18,9 +18,17 @@
           class="textarea textarea-ghost textarea-sm w-full mt-0.5 text-sm min-h-[2.5rem] resize-y"
           placeholder="Text content" rows="2" />
       </template>
-      <div v-else class="rounded border border-base-300 bg-base-200/50 p-3 text-sm opacity-60">
-        Block type "{{ block?.type }}" (TODO: Clause)
-      </div>
+      <!-- Clause: read-only -->
+      <template v-else-if="block && isClauseBlock(block)">
+        <label class="text-[10px] uppercase font-bold opacity-60">Clause <span
+            class="text-[10px] font-semibold mt-0.5 text-base-content">({{ block.title ?? '' }})</span></label>
+        <p class="text-xs text-base-content/70 mt-1 leading-relaxed whitespace-pre-wrap">
+          <template v-for="(seg, i) in clauseSegments" :key="i">
+            <template v-if="isText(seg)">{{ seg.value }}</template>
+            <ClausePlaceholderSpan v-else-if="isPlaceholder(seg)" :label="getPlaceholderLabel(seg)" />
+          </template>
+        </p>
+      </template>
     </div>
     <div class="pt-2 pr-2 pb-2">
       <BlockToolbar :item="item" :is-dirty="isDirty" @insert-above="emit('insertAbove')"
@@ -35,10 +43,13 @@
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import type { EnrichedBlockItem } from '@template-repository/models/enriched-block-item'
-import { isSectionBlock, isTextBlock } from '@template-repository/models/contract-templace'
+import { isSectionBlock, isTextBlock, isClauseBlock } from '@template-repository/models/contract-templace'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore'
 import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
 import BlockToolbar from '@template-repository/components/builder-editor/toolbar/BlockToolbar.vue'
+import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
+import { parseSegments, isText, isPlaceholder, type Segment } from '@template-repository/composables/useClauseTextChips'
+import ClausePlaceholderSpan from '@template-repository/components/clauses-editor/ClausePlaceholderSpan.vue'
 
 const props = defineProps<{
   item: EnrichedBlockItem
@@ -58,8 +69,28 @@ const emit = defineEmits<{
 }>()
 
 const uiStore = useTemplateEditorUiStore()
+const draftStore = useTemplateDraftStore()
 const { selectedBlockId } = storeToRefs(uiStore)
+const { semanticConditions } = storeToRefs(draftStore)
 const { isSwapPreviewTarget } = useBlockMovementPreview()
+
+const clauseSegments = computed(() => {
+  const b = block.value
+  if (!b || !isClauseBlock(b)) return []
+  return parseSegments(b.text ?? '', semanticConditions.value)
+})
+
+function getParamType(conditionId: string, parameterName: string): string {
+  const cond = semanticConditions.value.find((c) => c.conditionId === conditionId)
+  const param = cond?.parameters.find((p) => p.parameterName === parameterName)
+  return param?.type ?? 'string'
+}
+
+function getPlaceholderLabel(seg: Segment): string {
+  if (!isPlaceholder(seg)) return ''
+  const t = getParamType(seg.conditionId, seg.parameterName)
+  return `${seg.parameterName} (${t})`
+}
 
 const isSelected = computed(() => selectedBlockId.value === props.item.blockId)
 const isSwapPreviewTargetForThis = computed(() => isSwapPreviewTarget(props.item.blockId))

@@ -8,14 +8,14 @@
       <div class="flex-1 min-w-0">
         <div class="font-semibold text-sm text-base-content">
           {{ clause.title ?? "" }}
+          <span v-if="outlineBlockIds.has(clause.blockId)" class="font-normal text-base-content/60 ml-1">
+            (used in builder)
+          </span>
         </div>
         <p class="text-xs text-base-content/70 mt-1 leading-relaxed whitespace-pre-wrap">
           <template v-for="(seg, i) in getSegments(clause)" :key="i">
             <template v-if="isText(seg)">{{ seg.value }}</template>
-            <span v-else-if="isPlaceholder(seg)"
-              class="clause-placeholder-slot inline-block border-b-2 border-dashed border-primary/50 bg-primary/5 text-primary px-1 rounded-sm font-medium cursor-default">
-              {{ getPlaceholderLabel(seg) }}
-            </span>
+            <ClausePlaceholderSpan v-else-if="isPlaceholder(seg)" :label="getPlaceholderLabel(seg)" />
           </template>
         </p>
       </div>
@@ -27,14 +27,19 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { ClauseBlock, SemanticCondition } from '@template-repository/models/contract-templace'
 import { parseSegments, isText, isPlaceholder, type Segment } from '@template-repository/composables/useClauseTextChips'
+import ClausePlaceholderSpan from '@template-repository/components/clauses-editor/ClausePlaceholderSpan.vue'
 
 const props = defineProps<{
   clauseBlocks: ClauseBlock[]
   semanticConditions: SemanticCondition[]
   getConditionName: (conditionId: string) => string
+  blockIdsInOutline: Set<string>
 }>()
+
+const outlineBlockIds = computed(() => props.blockIdsInOutline)
 
 defineEmits<{
   delete: [blockId: string]
