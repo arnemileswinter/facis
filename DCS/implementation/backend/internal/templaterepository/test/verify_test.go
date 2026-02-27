@@ -35,18 +35,21 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	reviewers := []string{"Test User 1"}
 	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
 
-	cmd := command.VerifyCommand{
+	cmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		VerifiedBy:     reviewers[0],
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.VerifyHandler{
+	handler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to verify contract template: %v", err)
+	}
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -54,7 +57,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Verified)
+	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Verified)
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}
@@ -80,14 +83,14 @@ func TestVerify_VerifyNonExistingContractTemplate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.VerifyCommand{
+	cmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     "Test User 1",
 	}
-	handler := command.VerifyHandler{
+	handler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -116,18 +119,21 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 	approver := "Test User 1"
 	createApprovalTasks(t, ctx, db, *did, approvaltaskstate.Open, creator, approver)
 
-	cmd := command.VerifyCommand{
+	cmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		VerifiedBy:     approver,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.VerifyHandler{
+	handler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to verify contract template: %v", err)
+	}
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
@@ -135,7 +141,7 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := approvaltask.HasTaskInState(ctx, tx, *did, 1, 1, approver, approvaltaskstate.Verified)
+	exists, err := approvaltask.TaskExistsInState(ctx, tx, *did, 1, 1, approver, approvaltaskstate.Verified)
 	if err != nil {
 		t.Fatalf("Failed to check existence of approval tasks: %v", err)
 	}
@@ -165,14 +171,14 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.VerifyCommand{
+	cmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		VerifiedBy:     creator,
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
 	}
-	handler := command.VerifyHandler{
+	handler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}

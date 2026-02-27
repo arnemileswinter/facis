@@ -52,13 +52,13 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 			State:          reviewtaskstate.Open,
 			CreatedBy:      creator,
 		}
-		_, err = reviewtask.CreateTask(ctx, tx, reviewTask)
+		_, err = reviewtask.Create(ctx, tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
 	}
 
-	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}
@@ -112,20 +112,20 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 			State:          reviewtaskstate.Open,
 			CreatedBy:      creator,
 		}
-		_, err = reviewtask.CreateTask(ctx, tx, reviewTask)
+		_, err = reviewtask.Create(ctx, tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
 	}
 
 	for _, assignee := range assignees {
-		err := reviewtask.UpdateTask(ctx, tx, *did, 1, 1, assignee, reviewtaskstate.Approved)
+		err := reviewtask.Update(ctx, tx, *did, 1, 1, assignee, reviewtaskstate.Approved)
 		if err != nil {
 			t.Fatalf("Failed to approve review task: %v", err)
 		}
 	}
 
-	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}

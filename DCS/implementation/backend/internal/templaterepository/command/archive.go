@@ -14,7 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type ArchiveCommand struct {
+type ArchiveCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -22,12 +22,12 @@ type ArchiveCommand struct {
 	ArchivedBy     string
 }
 
-type ArchiveHandler struct {
+type Archiver struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *ArchiveHandler) Handle(cmd ArchiveCommand) error {
+func (h *Archiver) Handle(cmd ArchiveCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -56,7 +56,7 @@ func (h *ArchiveHandler) Handle(cmd ArchiveCommand) error {
 		return fmt.Errorf("could not update state: %w", err)
 	}
 
-	evt := templateevents.ArchiveContractTemplateEvent{
+	evt := templateevents.ArchiveEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

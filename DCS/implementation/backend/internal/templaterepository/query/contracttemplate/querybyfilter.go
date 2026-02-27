@@ -15,7 +15,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllMetaDataByFilterQuery struct {
+type GetAllMetadataByFilterQry struct {
 	RetrievedBy string
 
 	DID            *string
@@ -28,7 +28,7 @@ type GetAllMetaDataByFilterQuery struct {
 	Filter         *string
 }
 
-type GetAllMetaDataByFilterResult struct {
+type GetAllMetadataByFilterResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -46,7 +46,7 @@ type GetAllMetaDataByFilterHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery) ([]GetAllMetaDataByFilterResult, error) {
+func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) ([]GetAllMetadataByFilterResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -73,7 +73,7 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
-	evt := templateevents.RetrieveAllContractTemplatesEvent{
+	evt := templateevents.RetrieveAllEvent{
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}
@@ -87,9 +87,9 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetaDataByFilterQuery
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	result := make([]GetAllMetaDataByFilterResult, len(contractTemplates))
+	result := make([]GetAllMetadataByFilterResult, len(contractTemplates))
 	for i, data := range contractTemplates {
-		result[i] = GetAllMetaDataByFilterResult{
+		result[i] = GetAllMetadataByFilterResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,

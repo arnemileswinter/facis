@@ -15,14 +15,14 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetByIdQuery struct {
+type GetByIDQry struct {
 	DID            string
 	DocumentNumber int
 	Version        int
 	RetrievedBy    string
 }
 
-type GetByIdResult struct {
+type GetByIDResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -36,12 +36,12 @@ type GetByIdResult struct {
 	TemplateData   *datatype.JSON
 }
 
-type GetByIdHandler struct {
+type GetByIDHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetByIdHandler) Handle(query GetByIdQuery) (*GetByIdResult, error) {
+func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -52,12 +52,12 @@ func (h *GetByIdHandler) Handle(query GetByIdQuery) (*GetByIdResult, error) {
 	}
 	defer tx.Rollback()
 
-	data, err := templaterepository.ReadDataById(ctx, tx, query.DID, query.DocumentNumber, query.Version)
+	data, err := templaterepository.ReadDataByID(ctx, tx, query.DID, query.DocumentNumber, query.Version)
 	if err != nil {
 		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
 
-	evt := templateevents.RetrieveContractTemplateByIdEvent{
+	evt := templateevents.RetrieveByIDEvent{
 		DID:            query.DID,
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,
@@ -74,7 +74,7 @@ func (h *GetByIdHandler) Handle(query GetByIdQuery) (*GetByIdResult, error) {
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	return &GetByIdResult{
+	return &GetByIDResult{
 		DID:            query.DID,
 		DocumentNumber: data.DocumentNumber,
 		Version:        data.Version,

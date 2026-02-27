@@ -14,7 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type CreateCommand struct {
+type CreateCmd struct {
 	DID          string
 	CreatedBy    string
 	TemplateType templatetype.TemplateType
@@ -23,12 +23,12 @@ type CreateCommand struct {
 	TemplateData *datatype.JSON
 }
 
-type CreateHandler struct {
+type Creator struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *CreateHandler) Handle(cmd CreateCommand) error {
+func (h *Creator) Handle(cmd CreateCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -48,12 +48,12 @@ func (h *CreateHandler) Handle(cmd CreateCommand) error {
 		Description:  cmd.Description,
 		TemplateData: cmd.TemplateData,
 	}
-	createdAt, err := templaterepository.CreateContractTemplate(ctx, tx, data)
+	createdAt, err := templaterepository.Create(ctx, tx, data)
 	if err != nil {
 		return fmt.Errorf("could not create contract template: %w", err)
 	}
 
-	evt := templateevents.CreateContractTemplateEvent{
+	evt := templateevents.CreateEvent{
 		DID:            cmd.DID,
 		DocumentNumber: 1,
 		Version:        1,

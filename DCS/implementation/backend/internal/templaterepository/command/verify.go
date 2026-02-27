@@ -17,7 +17,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type VerifyCommand struct {
+type VerifyCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -25,12 +25,12 @@ type VerifyCommand struct {
 	VerifiedBy     string
 }
 
-type VerifyHandler struct {
+type Verifier struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *VerifyHandler) Handle(cmd VerifyCommand) error {
+func (h *Verifier) Handle(cmd VerifyCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -50,31 +50,31 @@ func (h *VerifyHandler) Handle(cmd VerifyCommand) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	hasTask, err := reviewtask.HasTaskInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open)
+	hasTask, err := reviewtask.TaskExistsInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open)
 	if err != nil {
 		return err
 	}
 
 	if hasTask {
-		err := reviewtask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
+		err := reviewtask.Update(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
 		if err != nil {
 			return err
 		}
 	}
 
-	hasTask, err = approvaltask.HasTaskInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Open)
+	hasTask, err = approvaltask.TaskExistsInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Open)
 	if err != nil {
 		return err
 	}
 
 	if hasTask {
-		err := approvaltask.UpdateTask(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
+		err := approvaltask.Update(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
 		if err != nil {
 			return err
 		}
 	}
 
-	evt := templateevents.VerifyContractTemplateEvent{
+	evt := templateevents.VerifyEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

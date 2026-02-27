@@ -29,19 +29,19 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
@@ -65,13 +65,13 @@ func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -101,16 +101,16 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetAllMetaDataQuery{
+	qry := contracttemplate.GetAllMetadataQry{
 		RetrievedBy: creator,
 	}
-	queryHandler := contracttemplate.GetAllMetaDataHandler{
+	queryHandler := contracttemplate.GetAllMetadataHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	for _, ct := range result.ContractTemplates {

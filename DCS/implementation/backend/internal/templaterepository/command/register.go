@@ -14,7 +14,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type RegisterCommand struct {
+type RegisterCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -22,12 +22,12 @@ type RegisterCommand struct {
 	RegisteredBy   string
 }
 
-type RegisterHandler struct {
+type Registrar struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *RegisterHandler) Handle(cmd RegisterCommand) error {
+func (h *Registrar) Handle(cmd RegisterCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -56,7 +56,7 @@ func (h *RegisterHandler) Handle(cmd RegisterCommand) error {
 		return fmt.Errorf("could not update state: %w", err)
 	}
 
-	evt := templateevents.RegisterContractTemplateEvent{
+	evt := templateevents.RegisterEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

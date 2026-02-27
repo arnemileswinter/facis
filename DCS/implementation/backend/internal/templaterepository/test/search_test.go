@@ -40,7 +40,7 @@ func TestSearch_SearchContractTemplatesWithoutSearchValue(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
@@ -49,7 +49,7 @@ func TestSearch_SearchContractTemplatesWithoutSearchValue(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 5, len(contractTemplate))
@@ -79,7 +79,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.CreateCommand{
+	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    creator,
 		TemplateType: templatetype.FrameContract,
@@ -87,16 +87,16 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 		Description:  &description,
 		TemplateData: &jsonMetaData,
 	}
-	createHandler := command.CreateHandler{
+	createHandler := command.Creator{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		DID:         did,
 	}
@@ -106,7 +106,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 1, len(contractTemplate))
@@ -150,7 +150,7 @@ func TestSearch_SearchContractTemplatesByDocumentNumberAndVersion(t *testing.T) 
 
 	documentNumber := 3
 	version := 2
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy:    creator,
 		DocumentNumber: &documentNumber,
 		Version:        &version,
@@ -161,7 +161,7 @@ func TestSearch_SearchContractTemplatesByDocumentNumberAndVersion(t *testing.T) 
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 3, len(contractTemplate))
@@ -204,7 +204,7 @@ func TestSearch_SearchContractTemplatesByName(t *testing.T) {
 	ctx := context.Background()
 
 	searchName := "Test 2." // The search is case-insensitive
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		Name:        &searchName,
 	}
@@ -214,7 +214,7 @@ func TestSearch_SearchContractTemplatesByName(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 2, len(contractTemplate))
@@ -251,7 +251,7 @@ func TestSearch_SearchContractTemplatesByDescript(t *testing.T) {
 	ctx := context.Background()
 
 	searchDescription := "Test2." // The search is case-insensitive
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		Description: &searchDescription,
 	}
@@ -261,7 +261,7 @@ func TestSearch_SearchContractTemplatesByDescript(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 2, len(contractTemplate))
@@ -320,7 +320,7 @@ func TestSearch_SearchContractTemplatesByTemplateData(t *testing.T) {
 	ctx := context.Background()
 
 	filter := "Test2.2" // The search is case-insensitive
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		Filter:      &filter,
 	}
@@ -330,7 +330,7 @@ func TestSearch_SearchContractTemplatesByTemplateData(t *testing.T) {
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, 2, len(contractTemplate))

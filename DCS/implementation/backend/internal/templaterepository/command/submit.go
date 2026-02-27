@@ -19,7 +19,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type SubmitCommand struct {
+type SubmitCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -31,12 +31,12 @@ type SubmitCommand struct {
 	Approver       *string
 }
 
-type SubmitHandler struct {
+type Submitter struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, cmd SubmitCommand) error {
+func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, cmd SubmitCmd) error {
 	for _, reviewer := range cmd.Reviewer {
 		reviewTask := reviewtask.TaskData{
 			DID:            cmd.DID,
@@ -46,7 +46,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 			State:          reviewtaskstate.Open,
 			CreatedBy:      cmd.SubmittedBy,
 		}
-		_, err := reviewtask.CreateTask(ctx, tx, reviewTask)
+		_, err := reviewtask.Create(ctx, tx, reviewTask)
 		if err != nil {
 			return fmt.Errorf("could not create review tasks: %w", err)
 		}
@@ -60,7 +60,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 		Approver:       *cmd.Approver,
 		State:          aopprovaltaskstate.Open,
 	}
-	_, err := approvaltask.CreateTask(ctx, tx, data)
+	_, err := approvaltask.Create(ctx, tx, data)
 	if err != nil {
 		return fmt.Errorf("could not create approval task: %w", err)
 	}
@@ -68,7 +68,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 	return nil
 }
 
-func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
+func (h *Submitter) Handle(cmd SubmitCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -95,7 +95,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return errors.New("invalid user")
 		}
 
-		if cmd.Reviewer == nil || len(cmd.Reviewer) == 0 {
+		if len(cmd.Reviewer) == 0 {
 			return errors.New("no reviewer provided")
 		}
 
@@ -128,7 +128,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == actionflag.Approval {
 
-				valid, err := reviewtask.IsValidTaskUser(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				valid, err := reviewtask.IsValidReviewer(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
@@ -137,7 +137,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 					return errors.New("invalid user")
 				}
 
-				exist, err := reviewtask.HasTaskInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Open)
+				exist, err := reviewtask.TaskExistsInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Open)
 				if err != nil {
 					return err
 				}
@@ -146,12 +146,12 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 					return errors.New("contract template needs to be verified before")
 				}
 
-				err = reviewtask.UpdateTask(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
+				err = reviewtask.Update(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
 				if err != nil {
 					return fmt.Errorf("could not update approval task: %w", err)
 				}
 
-				existOpenTasks, err := reviewtask.ExistTasksInStates(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open, reviewtaskstate.Verified)
+				existOpenTasks, err := reviewtask.AnyTasksInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open, reviewtaskstate.Verified)
 				if err != nil {
 					return fmt.Errorf("could not check if review task exists: %w", err)
 				}
@@ -162,7 +162,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 
 			} else if *cmd.ActionFlag == actionflag.Draft {
 
-				isValid, err := reviewtask.IsValidTaskUser(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				isValid, err := reviewtask.IsValidReviewer(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
@@ -184,7 +184,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 
 	} else if processData.State == templatestate.Reviewed {
 
-		isValid, err := approvaltask.IsValidTaskUser(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+		isValid, err := approvaltask.IsValidApprover(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 		if err != nil {
 			return err
 		}
@@ -201,7 +201,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 		nextTemplateState = templatestate.Submitted
 
 	} else {
-		return errors.New("current template contract state is invalid")
+		return errors.New("current contract template state is invalid")
 	}
 
 	if len(nextTemplateState) > 0 && processData.State != nextTemplateState {
@@ -210,7 +210,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 			return fmt.Errorf("could not update contract template state: %w", err)
 		}
 
-		evt := templateevents.SubmitContractTemplateEvent{
+		evt := templateevents.SubmitEvent{
 			DID:            cmd.DID,
 			DocumentNumber: cmd.DocumentNumber,
 			Version:        cmd.DocumentNumber,

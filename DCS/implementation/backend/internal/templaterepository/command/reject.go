@@ -15,7 +15,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type RejectCommand struct {
+type RejectCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -24,12 +24,12 @@ type RejectCommand struct {
 	Reason         string
 }
 
-type RejectHandler struct {
+type Rejecter struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *RejectHandler) Handle(cmd RejectCommand) error {
+func (h *Rejecter) Handle(cmd RejectCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -53,7 +53,7 @@ func (h *RejectHandler) Handle(cmd RejectCommand) error {
 		return errors.New("invalid contract template state")
 	}
 
-	exist, err := approvaltask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.RejectedBy)
+	exist, err := approvaltask.IsValidApprover(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.RejectedBy)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (h *RejectHandler) Handle(cmd RejectCommand) error {
 		return fmt.Errorf("could not update current template state: %w", err)
 	}
 
-	evt := templateevents.RejectContractTemplateEvent{
+	evt := templateevents.RejectEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,

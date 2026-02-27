@@ -36,7 +36,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	creator := "Test User"
 
-	cmd := command.CreateCommand{
+	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    creator,
 		TemplateType: templatetype.FrameContract,
@@ -44,28 +44,28 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 		Description:  &description,
 		TemplateData: &jsonMetaData,
 	}
-	createHandler := command.CreateHandler{
+	createHandler := command.Creator{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to create template contract: %v", err)
+		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, *did, contractTemplate.DID)

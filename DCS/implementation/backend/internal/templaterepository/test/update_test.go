@@ -42,7 +42,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -52,30 +52,30 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, *did, contractTemplate.DID)
@@ -97,14 +97,14 @@ func TestUpdate_UpdateNonExistingContractTemplate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		UpdatedBy:      "Test User 1",
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -144,7 +144,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -154,7 +154,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -189,7 +189,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -199,7 +199,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -239,7 +239,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -249,30 +249,30 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, *did, contractTemplate.DID)
@@ -312,7 +312,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -322,7 +322,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -357,7 +357,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -367,7 +367,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -402,7 +402,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -412,7 +412,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -447,7 +447,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -457,7 +457,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -492,7 +492,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -502,7 +502,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: context.Background(),
 		DB:  db,
 	}
@@ -538,7 +538,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -548,7 +548,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -596,7 +596,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 	name := "Updated Contract Template"
 	description := "Updated Description"
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -606,7 +606,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 		Description:    &description,
 		TemplateData:   &jsonTemplateData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -621,7 +621,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := reviewtask.ExistTasksInStates(ctx, tx, *did, 1, 1, reviewtaskstate.Approved, reviewtaskstate.Verified, reviewtaskstate.Rejected)
+	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Approved, reviewtaskstate.Verified, reviewtaskstate.Rejected)
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}

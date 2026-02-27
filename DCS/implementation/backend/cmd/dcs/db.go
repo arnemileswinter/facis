@@ -11,14 +11,14 @@ import (
 )
 
 func NewDatabaseConnection() (*sqlx.DB, error) {
-	databaseUrl := os.Getenv("DATABASE_URL")
-	if databaseUrl == "" {
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
 		return nil, errors.New("DATABASE_URL isn't set")
 	}
 
 	log.Printf("Connecting to database")
 
-	db, err := sqlx.Connect("postgres", databaseUrl)
+	db, err := sqlx.Connect("postgres", databaseURL)
 	if err != nil {
 		log.Fatalln(err)
 	}

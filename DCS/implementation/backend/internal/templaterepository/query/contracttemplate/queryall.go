@@ -19,11 +19,11 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllMetaDataQuery struct {
+type GetAllMetadataQry struct {
 	RetrievedBy string
 }
 
-type MetaDataItem struct {
+type MetadataItem struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -54,18 +54,18 @@ type ApprovalTaskItem struct {
 	CreatedAt      time.Time
 }
 
-type GetAllMetaDataResult struct {
-	ContractTemplates []MetaDataItem
+type GetAllMetadataResult struct {
+	ContractTemplates []MetadataItem
 	ReviewerTasks     []ReviewTaskItem
 	ApprovalTasks     []ApprovalTaskItem
 }
 
-type GetAllMetaDataHandler struct {
+type GetAllMetadataHandler struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *GetAllMetaDataHandler) Handle(query GetAllMetaDataQuery) (*GetAllMetaDataResult, error) {
+func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadataResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -81,7 +81,7 @@ func (h *GetAllMetaDataHandler) Handle(query GetAllMetaDataQuery) (*GetAllMetaDa
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
 
-	evt := templateevents.RetrieveAllContractTemplatesEvent{
+	evt := templateevents.RetrieveAllEvent{
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}
@@ -105,9 +105,9 @@ func (h *GetAllMetaDataHandler) Handle(query GetAllMetaDataQuery) (*GetAllMetaDa
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
-	var contractTemplatesItems []MetaDataItem
+	var contractTemplatesItems []MetadataItem
 	for _, data := range contractTemplates {
-		contractTemplatesItems = append(contractTemplatesItems, MetaDataItem{
+		contractTemplatesItems = append(contractTemplatesItems, MetadataItem{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
@@ -144,7 +144,7 @@ func (h *GetAllMetaDataHandler) Handle(query GetAllMetaDataQuery) (*GetAllMetaDa
 		})
 	}
 
-	return &GetAllMetaDataResult{
+	return &GetAllMetadataResult{
 		ContractTemplates: contractTemplatesItems,
 		ReviewerTasks:     reviewTaskItems,
 		ApprovalTasks:     approvalTasksItems,

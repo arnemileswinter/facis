@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// CreateContractTemplateEvent is emitted when a new contract template is created.
+// CreateEvent is emitted when a new contract template is created.
 // This event signals initial template creation with metadata.
-type CreateContractTemplateEvent struct {
+type CreateEvent struct {
 	DID            string         `json:"did"`
 	DocumentNumber int            `json:"document_number"`
 	Version        int            `json:"version"`
@@ -23,28 +23,28 @@ type CreateContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e CreateContractTemplateEvent) EventType() string {
-	return eventtype.CreateContractTemplate.String()
+func (e CreateEvent) EventType() string {
+	return eventtype.Create.String()
 }
 
 // GetDID implements the Event interface.
-func (e CreateContractTemplateEvent) GetDID() string {
+func (e CreateEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e CreateContractTemplateEvent) GetDocumentNumber() int {
+func (e CreateEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e CreateContractTemplateEvent) GetVersion() int {
+func (e CreateEvent) GetVersion() int {
 	return e.Version
 }
 
-// SubmitContractTemplateEvent is emitted when a template is submitted for review.
+// SubmitEvent is emitted when a template is submitted for review.
 // This event signals state transition and includes reviewer comments.
-type SubmitContractTemplateEvent struct {
+type SubmitEvent struct {
 	DID            string                      `json:"did"`
 	DocumentNumber int                         `json:"document_number"`
 	Version        int                         `json:"version"`
@@ -57,28 +57,28 @@ type SubmitContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e SubmitContractTemplateEvent) EventType() string {
-	return eventtype.SubmitContractTemplate.String()
+func (e SubmitEvent) EventType() string {
+	return eventtype.Submit.String()
 }
 
 // GetDID implements the Event interface.
-func (e SubmitContractTemplateEvent) GetDID() string {
+func (e SubmitEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e SubmitContractTemplateEvent) GetDocumentNumber() int {
+func (e SubmitEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e SubmitContractTemplateEvent) GetVersion() int {
+func (e SubmitEvent) GetVersion() int {
 	return e.Version
 }
 
-// ApproveContractTemplateEvent is emitted when a template is approved.
+// ApproveEvent is emitted when a template is approved.
 // This event signals successful approval with optional decision notes.
-type ApproveContractTemplateEvent struct {
+type ApproveEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
 	UpdatedAt      time.Time `json:"updated_at"`
@@ -89,28 +89,28 @@ type ApproveContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e ApproveContractTemplateEvent) EventType() string {
-	return eventtype.ApproveContractTemplate.String()
+func (e ApproveEvent) EventType() string {
+	return eventtype.Approve.String()
 }
 
 // GetDID implements the Event interface.
-func (e ApproveContractTemplateEvent) GetDID() string {
+func (e ApproveEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e ApproveContractTemplateEvent) GetDocumentNumber() int {
+func (e ApproveEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e ApproveContractTemplateEvent) GetVersion() int {
+func (e ApproveEvent) GetVersion() int {
 	return e.Version
 }
 
-// RejectContractTemplateEvent is emitted when a template is rejected.
+// RejectEvent is emitted when a template is rejected.
 // This event includes rejection reason and rejector information.
-type RejectContractTemplateEvent struct {
+type RejectEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
 	Version        int       `json:"version"`
@@ -121,28 +121,28 @@ type RejectContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e RejectContractTemplateEvent) EventType() string {
-	return eventtype.RejectContractTemplate.String()
+func (e RejectEvent) EventType() string {
+	return eventtype.Reject.String()
 }
 
 // GetDID implements the Event interface.
-func (e RejectContractTemplateEvent) GetDID() string {
+func (e RejectEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e RejectContractTemplateEvent) GetDocumentNumber() int {
+func (e RejectEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e RejectContractTemplateEvent) GetVersion() int {
+func (e RejectEvent) GetVersion() int {
 	return e.Version
 }
 
-// VerifyContractTemplateEvent is emitted when a template is approved.
+// VerifyEvent is emitted when a template is approved.
 // This event signals successful approval with optional decision notes.
-type VerifyContractTemplateEvent struct {
+type VerifyEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
 	UpdatedAt      time.Time `json:"updated_at"`
@@ -152,28 +152,28 @@ type VerifyContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e VerifyContractTemplateEvent) EventType() string {
+func (e VerifyEvent) EventType() string {
 	return eventtype.VerifyContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
-func (e VerifyContractTemplateEvent) GetDID() string {
+func (e VerifyEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e VerifyContractTemplateEvent) GetDocumentNumber() int {
+func (e VerifyEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e VerifyContractTemplateEvent) GetVersion() int {
+func (e VerifyEvent) GetVersion() int {
 	return e.Version
 }
 
-// UpdateContractTemplateEvent is emitted when template metadata is updated.
+// UpdateEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
-type UpdateContractTemplateEvent struct {
+type UpdateEvent struct {
 	DID             string         `json:"did"`
 	DocumentNumber  int            `json:"document_number"`
 	Version         int            `json:"version"`
@@ -188,28 +188,66 @@ type UpdateContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e UpdateContractTemplateEvent) EventType() string {
-	return eventtype.UpdateContractTemplate.String()
+func (e UpdateEvent) EventType() string {
+	return eventtype.Update.String()
 }
 
 // GetDID implements the Event interface.
-func (e UpdateContractTemplateEvent) GetDID() string {
+func (e UpdateEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e UpdateContractTemplateEvent) GetDocumentNumber() int {
+func (e UpdateEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e UpdateContractTemplateEvent) GetVersion() int {
+func (e UpdateEvent) GetVersion() int {
 	return e.Version
 }
 
-// SearchContractTemplateEvent is emitted when template metadata is updated.
+// UpdateManageEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
-type SearchContractTemplateEvent struct {
+type UpdateManageEvent struct {
+	DID             string                       `json:"did"`
+	DocumentNumber  int                          `json:"document_number"`
+	Version         int                          `json:"version"`
+	UpdatedBy       string                       `json:"updated_by"`
+	OldState        *templatestate.TemplateState `json:"old_state"`
+	NewState        *templatestate.TemplateState `json:"new_state"`
+	OldName         *string                      `json:"old_name,omitempty"`
+	NewName         *string                      `json:"new_name,omitempty"`
+	OldDescription  *string                      `json:"old_description,omitempty"`
+	NewDescription  *string                      `json:"new_description,omitempty"`
+	OldTemplateData *datatype.JSON               `json:"old_template_data,omitempty"`
+	NewTemplateData *datatype.JSON               `json:"new_metadata,omitempty"`
+	OccurredAt      time.Time                    `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e UpdateManageEvent) EventType() string {
+	return eventtype.Update.String()
+}
+
+// GetDID implements the Event interface.
+func (e UpdateManageEvent) GetDID() string {
+	return e.DID
+}
+
+// GetDocumentNumber implements the Event interface.
+func (e UpdateManageEvent) GetDocumentNumber() int {
+	return e.DocumentNumber
+}
+
+// GetVersion implements the Event interface.
+func (e UpdateManageEvent) GetVersion() int {
+	return e.Version
+}
+
+// SearchEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type SearchEvent struct {
 	RetrievedBy    string    `json:"updated_by"`
 	DocumentNumber int       `json:"document_number"`
 	Version        int       `json:"version"`
@@ -217,55 +255,55 @@ type SearchContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e SearchContractTemplateEvent) EventType() string {
+func (e SearchEvent) EventType() string {
 	return eventtype.SearchContractTemplate.String()
 }
 
 // GetDID implements the Event interface.
-func (e SearchContractTemplateEvent) GetDID() string {
+func (e SearchEvent) GetDID() string {
 	return "*"
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e SearchContractTemplateEvent) GetDocumentNumber() int {
+func (e SearchEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e SearchContractTemplateEvent) GetVersion() int {
+func (e SearchEvent) GetVersion() int {
 	return e.Version
 }
 
-// RetrieveAllContractTemplatesEvent is emitted when template metadata is updated.
+// RetrieveAllEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
-type RetrieveAllContractTemplatesEvent struct {
+type RetrieveAllEvent struct {
 	RetrievedBy string    `json:"updated_by"`
 	OccurredAt  time.Time `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
-func (e RetrieveAllContractTemplatesEvent) EventType() string {
-	return eventtype.RetrieveAllContractTemplates.String()
+func (e RetrieveAllEvent) EventType() string {
+	return eventtype.RetrieveAll.String()
 }
 
 // GetDID implements the Event interface.
-func (e RetrieveAllContractTemplatesEvent) GetDID() string {
+func (e RetrieveAllEvent) GetDID() string {
 	return "*"
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e RetrieveAllContractTemplatesEvent) GetDocumentNumber() int {
+func (e RetrieveAllEvent) GetDocumentNumber() int {
 	return 0
 }
 
 // GetVersion implements the Event interface.
-func (e RetrieveAllContractTemplatesEvent) GetVersion() int {
+func (e RetrieveAllEvent) GetVersion() int {
 	return 0
 }
 
-// RetrieveContractTemplateByIdEvent is emitted when template metadata is updated.
+// RetrieveByIDEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
-type RetrieveContractTemplateByIdEvent struct {
+type RetrieveByIDEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
 	Version        int       `json:"version"`
@@ -274,28 +312,28 @@ type RetrieveContractTemplateByIdEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e RetrieveContractTemplateByIdEvent) EventType() string {
-	return eventtype.RetrieveContractTemplateById.String()
+func (e RetrieveByIDEvent) EventType() string {
+	return eventtype.RetrieveByID.String()
 }
 
 // GetDID implements the Event interface.
-func (e RetrieveContractTemplateByIdEvent) GetDID() string {
+func (e RetrieveByIDEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e RetrieveContractTemplateByIdEvent) GetDocumentNumber() int {
+func (e RetrieveByIDEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e RetrieveContractTemplateByIdEvent) GetVersion() int {
+func (e RetrieveByIDEvent) GetVersion() int {
 	return e.Version
 }
 
-// ArchiveContractTemplateEvent is emitted when template metadata is updated.
+// ArchiveEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
-type ArchiveContractTemplateEvent struct {
+type ArchiveEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
 	Version        int       `json:"version"`
@@ -304,28 +342,28 @@ type ArchiveContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e ArchiveContractTemplateEvent) EventType() string {
-	return eventtype.ArchiveContractTemplate.String()
+func (e ArchiveEvent) EventType() string {
+	return eventtype.Archive.String()
 }
 
 // GetDID implements the Event interface.
-func (e ArchiveContractTemplateEvent) GetDID() string {
+func (e ArchiveEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e ArchiveContractTemplateEvent) GetDocumentNumber() int {
+func (e ArchiveEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e ArchiveContractTemplateEvent) GetVersion() int {
+func (e ArchiveEvent) GetVersion() int {
 	return e.Version
 }
 
-// RegisterContractTemplateEvent is emitted when template metadata is updated.
+// RegisterEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
-type RegisterContractTemplateEvent struct {
+type RegisterEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber int       `json:"document_number"`
 	Version        int       `json:"version"`
@@ -334,21 +372,21 @@ type RegisterContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e RegisterContractTemplateEvent) EventType() string {
-	return eventtype.RegisterContractTemplate.String()
+func (e RegisterEvent) EventType() string {
+	return eventtype.Register.String()
 }
 
 // GetDID implements the Event interface.
-func (e RegisterContractTemplateEvent) GetDID() string {
+func (e RegisterEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e RegisterContractTemplateEvent) GetDocumentNumber() int {
+func (e RegisterEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e RegisterContractTemplateEvent) GetVersion() int {
+func (e RegisterEvent) GetVersion() int {
 	return e.Version
 }

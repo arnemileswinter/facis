@@ -37,23 +37,23 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
-	verifyCmd := command.VerifyCommand{
+	verifyCmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     approver,
 	}
-	verifyHandler := command.VerifyHandler{
+	verifyHandler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -61,28 +61,28 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		ApprovedBy:     approver,
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, templatestate.Approved, contractTemplate.State)
@@ -112,7 +112,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -120,7 +120,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 		ApprovedBy:     approver,
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -142,7 +142,7 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
@@ -150,7 +150,7 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 		ApprovedBy:     "Test User 1",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -181,7 +181,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 1")
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -189,7 +189,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 		ApprovedBy:     "Test User 2",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -215,7 +215,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -223,7 +223,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 		ApprovedBy:     "Test User 1",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -249,7 +249,7 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -257,7 +257,7 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 		ApprovedBy:     "Test User 1",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -283,7 +283,7 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -291,7 +291,7 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 		ApprovedBy:     "Test User 1",
 		DecisionNotes:  []string{},
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}

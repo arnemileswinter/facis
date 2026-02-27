@@ -29,35 +29,35 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit template contract: %v", err)
+		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIdQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RetrievedBy:    creator,
 	}
-	queryHandler := contracttemplate.GetByIdHandler{
+	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx: ctx,
 		DB:  db,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
-		t.Fatalf("Failed to query template contract: %v", err)
+		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
@@ -77,14 +77,14 @@ func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		RegisteredBy:   "Test User 1",
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -110,14 +110,14 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -143,14 +143,14 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -176,14 +176,14 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -209,14 +209,14 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -242,14 +242,14 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -275,14 +275,14 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  db,
 	}

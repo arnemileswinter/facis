@@ -17,7 +17,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type UpdateCommand struct {
+type UpdateCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -29,12 +29,12 @@ type UpdateCommand struct {
 	TemplateData   *datatype.JSON
 }
 
-type UpdateHandler struct {
+type Updater struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
+func (h *Updater) Handle(cmd UpdateCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -45,7 +45,7 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 	}
 	defer tx.Rollback()
 
-	oldData, err := templaterepository.ReadDataById(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	oldData, err := templaterepository.ReadDataByID(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
@@ -62,7 +62,7 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 	if oldData.State == templatestate.Draft && oldData.CreatedBy == cmd.UpdatedBy {
 		isValidUser = true
 	} else if oldData.State == templatestate.Submitted {
-		valid, err := reviewtask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
+		valid, err := reviewtask.IsValidReviewer(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 		return fmt.Errorf("could not reopen tasks: %w", err)
 	}
 
-	newData := templaterepository.ContractTemplateUpdateData{
+	newData := templaterepository.UpdateData{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
@@ -87,12 +87,12 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 		Description:    cmd.Description,
 		TemplateData:   cmd.TemplateData,
 	}
-	err = templaterepository.UpdateData(ctx, tx, newData)
+	err = templaterepository.Update(ctx, tx, newData)
 	if err != nil {
 		return fmt.Errorf("could not update template data: %w", err)
 	}
 
-	evt := templateevents.UpdateContractTemplateEvent{
+	evt := templateevents.UpdateEvent{
 		DID:             cmd.DID,
 		DocumentNumber:  cmd.DocumentNumber,
 		Version:         cmd.Version,
