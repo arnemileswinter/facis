@@ -27,12 +27,21 @@ RUN chmod 0777 /home/${DOCKER_USER}
 RUN mkdir -p /app
 RUN chown $DOCKER_USER:$DOCKER_USER /app
 
+# Create directory for custom CA certificates
+RUN mkdir -p /usr/local/share/ca-certificates/custom
+RUN chmod 755 /usr/local/share/ca-certificates/custom
+
 WORKDIR /app
 
 USER $DOCKER_USER
 
 COPY --chown=$DOCKER_USER:$DOCKER_USER ./ /app/
 
+# Copy entrypoint script
+COPY --chown=$DOCKER_USER:$DOCKER_USER docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
 EXPOSE 8991
 
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["go",  "run" , "./cmd/dcs"]

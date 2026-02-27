@@ -1,45 +1,80 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-#----------------------------------------
-# Functions
-#----------------------------------------
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
 
 usage() {
-  echo "Usage: $0 <kubeconfig> <private_key_path> <crt_path> <domain> <path> <keycloak_url> <realm> <admin_user> <admin_pass> <new_user> <new_pass> <client_role>"
+  echo "Usage: $0 <kubeconfig> <private_key_path> <crt_path> <domain> <path> <oidc_issuer_url> <oidc_client_id>"
+  echo "Example: $0 ~/.kube/config ./certs/dev.key ./certs/dev.crt xfsc.local dcs https://keycloak.xfsc.local/realms/dcs digital-contracting-service"
+  echo ""
+  echo "Optional environment variables:"
+  echo "  OIDC_REDIRECT_URI - Redirect URI for OIDC flow (default: http://localhost:8991)"
   exit 1
 }
 
-#----------------------------------------
 # Input validation
-#----------------------------------------
-[ "$#" -ne 12 ] && usage
+[ "$#" -ne 7 ] && usage
 export KUBECONFIG="$1"
 KEY_FILE="$2"
 CRT_FILE="$3"
 DOMAIN="$4"
 URL_PATH="$5"
-KEYCLOAK_URL="$6"
-REALM="$7"
-ADMIN_USER="$8"
-ADMIN_PASS="$9"
-NEW_USER="${10}"
-NEW_PASS="${11}"
-CLIENT_ROLE="${12}"
+OIDC_ISSUER_URL="$6"
+OIDC_CLIENT_ID="$7"
+OIDC_REDIRECT_URI="${OIDC_REDIRECT_URI:-http://localhost:8991}"
 
-# Check if kubeconfig file exists
+# Image Registry Configuration
+DOCKER_REGISTRY="${DOCKER_REGISTRY:-}"
+DOCKER_REPO="${DOCKER_REPO:-}"
+DOCKER_TAG="${DOCKER_TAG:-latest}"
+
+IMAGE_NAME="digital-contracting-service"
+if [[ -n "$DOCKER_REGISTRY" && -n "$DOCKER_REPO" ]]; then
+  IMAGE_NAME="$DOCKER_REGISTRY/$DOCKER_REPO/digital-contracting-service"
+fi
+log "ℹ️ Image: $IMAGE_NAME:$DOCKER_TAG"
+
+#----------------------------------------
+# Custom CA Configuration
+#----------------------------------------
+CUSTOM_CA_ENABLED="${CUSTOM_CA_ENABLED:-false}"
+CUSTOM_CA_CONFIGMAP="${CUSTOM_CA_CONFIGMAP:-dev-ca-cert}"
+CUSTOM_CA_CERT_FILE="${CUSTOM_CA_CERT_FILE:-}"
+
+# Host Aliases Configuration for local Keycloak access
+# Extract hostname from OIDC_ISSUER_URL if it uses HTTPS
+KEYCLOAK_HOSTNAME=""
+if [[ "${OIDC_ISSUER_URL:-}" =~ ^https://([^/]+) ]]; then
+  KEYCLOAK_HOSTNAME="${BASH_REMATCH[1]}"
+  log "ℹ️ Detected HTTPS OIDC issuer, will configure host alias for: $KEYCLOAK_HOSTNAME"
+  
+  # Get Traefik ClusterIP for in-cluster resolution
+  TRAEFIK_CLUSTER_IP=$(kubectl get svc -n kube-system traefik -o jsonpath='{.spec.clusterIP}' --kubeconfig "$KUBECONFIG" 2>/dev/null || echo "")
+  if [[ -n "$TRAEFIK_CLUSTER_IP" ]]; then
+    log "ℹ️ Traefik ClusterIP: $TRAEFIK_CLUSTER_IP"
+    HOST_ALIAS_ENABLED="true"
+  else
+    log "⚠️ Could not detect Traefik ClusterIP, skipping host alias configuration"
+    HOST_ALIAS_ENABLED="false"
+  fi
+else
+  HOST_ALIAS_ENABLED="false"
+fi
+
+log "ℹ️ OIDC Configuration:"
+log "  - Issuer URL (for backend): $OIDC_ISSUER_URL"
+log "  - Client ID: $OIDC_CLIENT_ID"
+log "  - Redirect URI: $OIDC_REDIRECT_URI"
+
 if [[ ! -f "$KUBECONFIG" ]]; then
   log "❌ Kubeconfig file not found: $KUBECONFIG"
   exit 1
 fi
 
 
-#----------------------------------------
 # Cleanup local helm artifacts
-#----------------------------------------
 if [ -f Chart.lock ]; then
   rm Chart.lock
   log "✅ Removed Chart.lock"
@@ -50,9 +85,7 @@ if [ -d charts ]; then
   log "✅ Removed charts/ directory"
 fi
 
-#----------------------------------------
 # Check dependencies
-#----------------------------------------
 for cmd in kubectl helm jq curl sed trap; do
   if ! command -v "$cmd" &>/dev/null; then
     log "❌ '$cmd' is not installed. Please install it and retry."
@@ -62,9 +95,7 @@ for cmd in kubectl helm jq curl sed trap; do
   fi
 done
 
-#----------------------------------------
 # Verify ingress class traefik is installed
-#----------------------------------------
 log "ℹ Checking for ingressClass traefik..."
 if ! kubectl get ingressclass traefik &>/dev/null; then
   log "❌ Ingress class traefik not found"
@@ -73,95 +104,68 @@ else
     log "✅ Ingress class traefik found"
 fi
 
-#----------------------------------------
-# Wait for ingress External-IP
-#----------------------------------------
-log "ℹ️ Waiting for ingress-nginx External-IP..."
-while true; do
-  EX_IP=$(kubectl get svc traefik -n kube-system \
-    -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
-  if [[ -n "$EX_IP" && "$EX_IP" != "<pending>" ]]; then
-    log "✅ ingress External-IP: $EX_IP"
-    break
-  fi
-  log "⏳ External-IP pending, retrying in 5s..."
-  sleep 5
-done
-
-#----------------------------------------
 # Generate and validate namespace from path
-#----------------------------------------
 NAMESPACE="digital-contracting-service-${URL_PATH}"
 log "ℹ️ Using namespace: $NAMESPACE"
 
-if kubectl get ns "$NAMESPACE" &>/dev/null; then
-  log "⚠ Namespace '$NAMESPACE' already exists. Showing existing deployment info and exiting."
+# Create namespace first
+kubectl create namespace "$NAMESPACE" --kubeconfig "$KUBECONFIG" 2>/dev/null || true
+log "✅ Namespace created or already exists"
 
-  # 1. External‐IP
-  EX_IP=$(kubectl get svc traefik -n kube-system \
-    -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-  echo "🔹 ingress External-IP: $EX_IP"
-
-  # 2. URLs
-  echo "🔹 DCS URL:             https://${DOMAIN}/${URL_PATH}"
-
-  # 3. Try to get client secret from Keycloak (if permissions allow)
-  TOKEN_URL="${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token"
-  ACCESS_TOKEN=$(curl -k -s \
-    -X POST "$TOKEN_URL" \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "client_id=admin-cli" \
-    -d "username=${ADMIN_USER}" \
-    -d "password=${ADMIN_PASS}" \
-    -d "grant_type=password" | jq -r .access_token)
-
-  REALM_API="${KEYCLOAK_URL}/admin/realms/${REALM}"
-  CLIENT_RESPONSE=$(curl -k -s \
-    -X GET "${REALM_API}/clients?clientId=digital-contracting-service" \
-    -H "Authorization: Bearer $ACCESS_TOKEN")
-  
-  if echo "$CLIENT_RESPONSE" | grep -q "error"; then
-    log "⚠ Cannot retrieve client details (Keycloak Admin API not accessible with current credentials)"
-    log "ℹ️ To fix: Ensure 'admin-cli' client has realm-admin role in Keycloak"
-    exit 0
+#----------------------------------------
+# Create Custom CA ConfigMap if enabled
+#----------------------------------------
+if [[ "$CUSTOM_CA_ENABLED" == "true" ]]; then
+  if [[ -z "$CUSTOM_CA_CERT_FILE" ]]; then
+    log "❌ CUSTOM_CA_ENABLED is true but CUSTOM_CA_CERT_FILE is not set"
+    exit 1
   fi
-  
-  if ! echo "$CLIENT_RESPONSE" | jq -e 'length > 0' > /dev/null 2>&1; then
-    log "⚠ Client 'digital-contracting-service' not found in realm '$REALM' (may not be created yet)"
-    exit 0
+  if [[ ! -f "$CUSTOM_CA_CERT_FILE" ]]; then
+    log "❌ CA certificate file not found: $CUSTOM_CA_CERT_FILE"
+    exit 1
   fi
-
-  CLIENT_ID=$(echo "$CLIENT_RESPONSE" | jq -r '.[0].id')
-  EXISTING_SECRET=$(curl -k -s \
-    -X GET "${REALM_API}/clients/${CLIENT_ID}/client-secret" \
-    -H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.value' | xargs)
-
-  echo "🔹 Client Secret:       $EXISTING_SECRET"
-
-  exit 0
+  log "ℹ️ Creating ConfigMap '$CUSTOM_CA_CONFIGMAP' with CA certificate"
+  kubectl create configmap "$CUSTOM_CA_CONFIGMAP" \
+    --from-file=dev-ca.crt="$CUSTOM_CA_CERT_FILE" \
+    -n "$NAMESPACE" \
+    --kubeconfig "$KUBECONFIG" \
+    --dry-run=client -o yaml | kubectl apply -f - --kubeconfig "$KUBECONFIG"
+  log "✅ ConfigMap created or updated"
 fi
 
-#----------------------------------------
 # Prepare temporary values file
-#----------------------------------------
 TMP_VALUES="$(mktemp -t values.XXXXXX.yaml)" || TMP_VALUES="/tmp/values-$$.yaml"
-cp values.yaml "$TMP_VALUES"
-
 cp values.yaml "$TMP_VALUES"
 log "ℹ️ Replacing placeholders in $TMP_VALUES"
 sed -i \
   -e "s|\[domain-name\]|${DOMAIN}|g" \
   -e "s|\[path\]|${URL_PATH}|g" \
   -e "s|\[namespace\]|${NAMESPACE}|g" \
-  -e "s|\[Admin_Username\]|${ADMIN_USER}|g" \
-  -e "s|\[Admin_Password\]|${ADMIN_PASS}|g" \
+  -e "s|\[oidc-issuer-url\]|${OIDC_ISSUER_URL}|g" \
+  -e "s|\[oidc-client-id\]|${OIDC_CLIENT_ID}|g" \
+  -e "s|\[oidc-redirect-uri\]|${OIDC_REDIRECT_URI}|g" \
+  -e "s|\[registry\]|${IMAGE_NAME}|g" \
+  -e "s|tag: \"latest\"|tag: \"${DOCKER_TAG}\"|g" \
+  -e "s|enabled: false|enabled: ${CUSTOM_CA_ENABLED}|g" \
+  -e "s|configMapName: \"\"|configMapName: \"${CUSTOM_CA_CONFIGMAP}\"|g" \
   "$TMP_VALUES"
+
+# Add hostAliases if HTTPS OIDC is configured
+if [[ "$HOST_ALIAS_ENABLED" == "true" ]]; then
+  log "ℹ️ Adding hostAlias: $KEYCLOAK_HOSTNAME -> $TRAEFIK_CLUSTER_IP"
+  cat >> "$TMP_VALUES" <<EOF
+
+# Auto-configured host alias for in-cluster OIDC access
+hostAliases:
+  - ip: "${TRAEFIK_CLUSTER_IP}"
+    hostnames:
+      - "${KEYCLOAK_HOSTNAME}"
+EOF
+fi
+
 log "✅ Placeholders replaced in $TMP_VALUES"
 
-#----------------------------------------
 # Helm dependency build & install
-#----------------------------------------
-
 log "ℹ️ Running: helm dependency build"
 helm dependency build . --kubeconfig "$KUBECONFIG"
 
@@ -173,9 +177,7 @@ helm install digital-contracting-service . \
   -f "$TMP_VALUES"
 log "✅ digital-contracting-service Helm release deployed"
 
-#----------------------------------------
 # Create TLS secret
-#----------------------------------------
 log "ℹ️ Creating TLS secret 'certificates'"
 kubectl create secret tls certificates \
   --namespace "$NAMESPACE" \
@@ -184,126 +186,36 @@ kubectl create secret tls certificates \
   --kubeconfig "$KUBECONFIG"
 log "✅ TLS secret created"
 
-#----------------------------------------
-# Keycloak API: Check if realm is ready
-#----------------------------------------
-if ! curl -k -s -o /dev/null -w "%{http_code}" "${KEYCLOAK_URL}/realms/${REALM}" | grep -q '^200$'; then
-  log "❌ ${REALM} realm is not ready in Keycloak..."
-  exit 1
-fi
-log "✅ ${REALM} realm is ready in Keycloak"
+# Create shared TLS secret for ingress (dev-wildcard-tls)
+log "ℹ️ Creating shared TLS secret 'dev-wildcard-tls' for ingress"
+kubectl create secret tls dev-wildcard-tls \
+  --cert="$CRT_FILE" \
+  --key="$KEY_FILE" \
+  -n "$NAMESPACE" \
+  --kubeconfig "$KUBECONFIG" \
+  --dry-run=client -o yaml | kubectl apply -f - --kubeconfig "$KUBECONFIG"
+log "✅ Shared TLS secret created or updated"
 
-#----------------------------------------
-# Keycloak API: client ID & secret
-#----------------------------------------
-TOKEN_URL="${KEYCLOAK_URL}/realms/${REALM}/protocol/openid-connect/token"
-ACCESS_TOKEN=$(curl -k -s \
-  -X POST "$TOKEN_URL" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=admin-cli" \
-  -d "username=${ADMIN_USER}" \
-  -d "password=${ADMIN_PASS}" \
-  -d "grant_type=password" | jq -r .access_token)
-
-REALM_API="${KEYCLOAK_URL}/admin/realms/${REALM}"
-CLIENT_RESPONSE=$(curl -k -s -X GET \
-  "${REALM_API}/clients?clientId=digital-contracting-service" \
-  -H "Authorization: Bearer $ACCESS_TOKEN")
-
-# Check for errors in response
-if echo "$CLIENT_RESPONSE" | grep -q "error"; then
-  log "❌ Keycloak API Error: $CLIENT_RESPONSE"
-  log "ℹ️ Ensure the 'admin-cli' client has proper admin roles in Keycloak"
-  exit 1
-fi
-
-if ! echo "$CLIENT_RESPONSE" | jq -e 'length > 0' > /dev/null 2>&1; then
-  log "❌ Client 'digital-contracting-service' not found in realm '$REALM'"
-  exit 1
-fi
-
-CLIENT_ID=$(echo "$CLIENT_RESPONSE" | jq -r '.[0].id')
-NEW_SECRET=$(curl -k -s -X POST \
-  "${REALM_API}/clients/${CLIENT_ID}/client-secret" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.value' | xargs)
-log "✅ New client secret generated"
-
-#----------------------------------------
-# Keycloak API: create user & assign role
-#----------------------------------------
-CREATE_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" -X POST \
-  "${REALM_API}/users" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "{
-        \"username\":\"${NEW_USER}\",
-        \"enabled\":true,
-        \"credentials\":[{\"type\":\"password\",\"value\":\"${NEW_PASS}\",\"temporary\":false}]
-     }")
-if [[ "$CREATE_STATUS" != "201" ]]; then
-  log "❌ User creation failed (HTTP $CREATE_STATUS)"; exit 1
-else
-  log "✅ User '${NEW_USER}' created"
-fi
-
-USER_ID=$(curl -k -s -X GET \
-  "${REALM_API}/users?username=${NEW_USER}" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.[0].id')
-
-if [[ -z "$USER_ID" || "$USER_ID" == "null" ]]; then
-  log "❌ User '${NEW_USER}' not found"; exit 1
-fi
-log "ℹ️ User ID: $USER_ID"
-
-ROLE_ID=$(curl -k -s -X GET \
-  "${REALM_API}/clients/${CLIENT_ID}/roles" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" | jq -r ".[]|select(.name==\"${CLIENT_ROLE}\")|.id")
-
-log "ℹ️ Role ID: $ROLE_ID"
-
-# Check if role exists
-if [[ -z "$ROLE_ID" || "$ROLE_ID" == "null" ]]; then
-  log "❌ Role '${CLIENT_ROLE}' not found in client"
-  log "ℹ️ Available roles:"
-  curl -k -s -X GET \
-    "${REALM_API}/clients/${CLIENT_ID}/roles" \
-    -H "Authorization: Bearer $ACCESS_TOKEN" | jq -r '.[] | "\(.name) (ID: \(.id))"'
-  exit 1
-fi
-
-# Assign role to user
-ASSIGN_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" -X POST \
-  "${REALM_API}/users/${USER_ID}/role-mappings/clients/${CLIENT_ID}" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "[{\"id\":\"${ROLE_ID}\",\"name\":\"${CLIENT_ROLE}\"}]")
-
-if [[ "$ASSIGN_STATUS" == "204" ]]; then
-  log "✅ Role '${CLIENT_ROLE}' assigned to '${NEW_USER}'"
-else
-  log "❌ Failed to assign role (HTTP $ASSIGN_STATUS)"; exit 1
-fi
-
-
-#----------------------------------------
-# Wait for digital-contracting-service Deployment to be ready (max 5m)
-#----------------------------------------
+# Wait for Deployment to be ready
 log "ℹ️ Waiting for digital-contracting-service deployment to be ready (max 2m)..."
 if ! kubectl rollout status deployment/digital-contracting-service \
      -n "$NAMESPACE" \
      --timeout=300s \
      --kubeconfig "$KUBECONFIG"; then
   log "❌ Timeout waiting for digital-contracting-service. Pod statuses:"
-  kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=digital-contracting-service -o wide
+  kubectl get pods -n "$NAMESPACE" -o wide --kubeconfig "$KUBECONFIG"
   exit 1
 fi
 log "✅ digital-contracting-service deployment is ready"
 
-#----------------------------------------
 # Final output
-#----------------------------------------
 log "🎉 All operations completed successfully!"
 echo
-echo "🔹 ingress External-IP: ${EX_IP}"
-echo "🔹 DCS URL:             https://${DOMAIN}/${URL_PATH}"
-echo "🔹 Client Secret:       ${NEW_SECRET}"
+echo "🔹 DCS URL: https://${DOMAIN}/${URL_PATH}"
+echo ""
+log "ℹ️ Before accessing the service, ensure Keycloak is configured:"
+log "   1. OIDC Issuer: ${OIDC_ISSUER_URL}"
+log "   2. Client ID: ${OIDC_CLIENT_ID}"
+log "   3. Create users and assign roles in Keycloak admin console"
+log ""
+log "ℹ️ See README.md for detailed Keycloak setup instructions"

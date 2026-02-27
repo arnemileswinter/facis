@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	templaterepository "digital-contracting-service/gen/template_repository"
+	"digital-contracting-service/internal/auth"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
@@ -20,12 +21,14 @@ import (
 // The example methods log the requests and return zero values.
 type templateRepositorysrvc struct {
 	DB *sqlx.DB
+	auth.JWTAuthenticator
 }
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
-func NewTemplateRepository(ctx context.Context, db *sqlx.DB) (templaterepository.Service, error) {
+func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator) (templaterepository.Service, error) {
 	return &templateRepositorysrvc{
-		DB: db,
+		DB:               db,
+		JWTAuthenticator: jwtAuth,
 	}, nil
 }
 
@@ -517,5 +520,5 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 // retrieve audit history of template actions.
 func (s *templateRepositorysrvc) Audit(ctx context.Context, req *templaterepository.AuditRequest) (res *templaterepository.AuditResponse, err error) {
 	log.Printf(ctx, "templateRepository.audit")
-	return
+	return nil, nil
 }
