@@ -146,6 +146,22 @@ func TaskExistsInState(ctx context.Context, tx *sqlx.Tx, did string, documentNum
 	return count > 0, nil
 }
 
+func TaskExists(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (bool, error) {
+	query := `
+        SELECT COUNT(*) 
+        FROM contract_templates_approval_task 
+        WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	var count int
+	err := tx.GetContext(ctx, &count, query, did, documentNumber, version)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 func Delete(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) error {
 	statement := `
         DELETE FROM contract_templates_approval_task

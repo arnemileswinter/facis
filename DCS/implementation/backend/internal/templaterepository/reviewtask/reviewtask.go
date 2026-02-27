@@ -94,6 +94,21 @@ func ReadAll(ctx context.Context, tx *sqlx.Tx, did string) ([]TaskData, error) {
 	return reviewTasks, nil
 }
 
+func ReadAllByID(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) ([]TaskData, error) {
+	query := `
+        SELECT id, did, document_number, version, state, reviewer,
+               created_by, created_at
+        FROM contract_templates_review_task WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	var reviewTasks []TaskData
+	err := tx.SelectContext(ctx, &reviewTasks, query, did, documentNumber, version)
+	if err != nil {
+		return nil, err
+	}
+	return reviewTasks, nil
+}
+
 func ReadAllByReviewer(ctx context.Context, tx *sqlx.Tx, reviewer string) ([]TaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
@@ -165,6 +180,22 @@ func TaskExistsInState(ctx context.Context, tx *sqlx.Tx, did string, documentNum
 
 	var count int
 	err := tx.GetContext(ctx, &count, query, did, documentNumber, version, reviewer, state)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func TaskExist(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int) (bool, error) {
+	query := `
+        SELECT COUNT(*) 
+        FROM contract_templates_review_task 
+        WHERE did = $1 AND document_number = $2 AND version = $3
+    `
+
+	var count int
+	err := tx.GetContext(ctx, &count, query, did, documentNumber, version)
 	if err != nil {
 		return false, err
 	}

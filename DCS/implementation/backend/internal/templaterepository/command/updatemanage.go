@@ -6,9 +6,11 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository"
+	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
+	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -27,6 +29,7 @@ type UpdateManageCmd struct {
 	Name           *string
 	Description    *string
 	TemplateData   *datatype.JSON
+	IsManager      bool
 }
 
 type UpdateManager struct {
@@ -54,9 +57,32 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
+	if oldData.State == templatestate.Approved || oldData.State == templatestate.Registered || oldData.State == templatestate.Archived {
+		return errors.New("invalid contract template state")
+	}
+
+	if cmd.State != nil {
+		isValidState := *cmd.State == templatestate.Draft || *cmd.State == templatestate.Archived
+		if oldData.State == templatestate.Draft && !isValidState {
+			reviewTasksExist, err := reviewtask.TaskExist(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			if err != nil {
+				return fmt.Errorf("could not check existing review tasks: %w", err)
+			}
+
+			approvalTaskExists, err := approvaltask.TaskExists(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			if err != nil {
+				return fmt.Errorf("could not check existing approval tasks: %w", err)
+			}
+
+			if !reviewTasksExist || !approvalTaskExists {
+				return errors.New("invalid state change")
+			}
+		}
+	}
+
 	newState := oldData.State
 	if cmd.State != nil {
-		if *cmd.State == templatestate.Draft {
+		if *cmd.State == templatestate.Draft || *cmd.State == templatestate.Archived {
 			err = templaterepository.CleanupTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
 				return fmt.Errorf("could not cleanup tasks: %w", err)
@@ -67,7 +93,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 				return fmt.Errorf("could not reopen tasks: %w", err)
 			}
 		} else {
-			return errors.New("invalid state")
+			return errors.New("contract invalid state")
 		}
 
 		newState = *cmd.State
