@@ -1,6 +1,6 @@
 <template>
   <div :class="[
-    'flex items-start gap-2 w-full rounded-lg border bg-base-100',
+    'flex items-start gap-2 w-full rounded-lg border bg-base-100 group',
     'transition-[border-color,opacity] duration-200',
     borderClass
   ]" :data-block-id="item.blockId" @click="emit('select')" @focusin="emit('select')">
@@ -30,7 +30,10 @@
         </p>
       </template>
     </div>
-    <div class="pt-2 pr-2 pb-2">
+    <div :class="[
+      'pt-2 pr-2 pb-2 flex-shrink-0 transition-opacity',
+      toolbarVisibilityClass,
+    ]">
       <BlockToolbar :item="item" :is-dirty="isDirty" @insert-above="emit('insertAbove')"
         @insert-below="emit('insertBelow')" @insert-nest="emit('insertNest')" @confirm="onConfirm"
         @cancel="revertToSaved" @move-up="emit('moveUp')" @move-down="emit('moveDown')"
@@ -99,6 +102,11 @@ const borderClass = computed(() => {
   if (isSwapPreviewTargetForThis.value) return 'border border-dashed border-primary'
   if (isSelected.value) return 'border border-primary'
   return 'border border-base-300'
+})
+
+const toolbarVisibilityClass = computed(() => {
+  if (isSelected.value) return 'opacity-100'
+  return 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
 })
 
 const block = computed(() => props.item.block)
