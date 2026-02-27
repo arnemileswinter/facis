@@ -10,13 +10,20 @@
           </tr>
         </thead>
         <tbody>
-          <MetaDataRow v-for="(meta, index) in customMetaData" :key="index" :initial-name="meta.name"
-            :initial-value="meta.value" :all-names="allNames" :index="index" :is-active="activeIndex === index"
-            @confirm="updateMeta(index, $event)" @delete="deleteMeta(index)" @row-focus="setActiveIndex(index)" />
-
+          <!-- Add row -->
           <MetaDataRow :key="addRowKey" :initial-name="draft.name" :initial-value="draft.value" :all-names="allNames"
             :is-new="true" :is-active="activeIndex === -1" @confirm="createMeta" @cancel="resetDraft"
             @delete="resetDraft" @row-focus="setActiveIndex(-1)" />
+
+          <!-- Small visual gap between add row and existing rows -->
+          <tr v-if="customMetaData.length">
+            <td colspan="3" class="h-1"></td>
+          </tr>
+
+          <!-- Existing rows -->
+          <MetaDataRow v-for="(meta, index) in customMetaData" :key="index" :initial-name="meta.name"
+            :initial-value="meta.value" :all-names="allNames" :index="index" :is-active="activeIndex === index"
+            @confirm="updateMeta(index, $event)" @delete="deleteMeta(index)" @row-focus="setActiveIndex(index)" />
         </tbody>
       </table>
     </div>

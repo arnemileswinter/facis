@@ -24,7 +24,7 @@
       <div v-if="isNew" class="flex justify-end gap-1">
         <button v-if="isEditing" type="button" class="btn btn-primary btn-xs" :disabled="!canConfirm"
           @click="onConfirm">
-          Confirm
+          Add
         </button>
         <button v-if="isEditing" type="button" class="btn btn-ghost btn-xs" @click="onCancel">
           Cancel
