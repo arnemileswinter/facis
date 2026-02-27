@@ -15,6 +15,12 @@ export default defineConfig(({mode}) => {
         '@core': fileURLToPath(new URL('./src/core/', import.meta.url)),
         '@template-repository': fileURLToPath(new URL('./src/modules/template-repository/', import.meta.url)),
       },
+          proxy: {
+      '/api': {
+        target: "http://localhost:8991",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
     },
     server: {
       proxy: {
@@ -25,5 +31,6 @@ export default defineConfig(({mode}) => {
         },
       },
     },
+
   }
 })

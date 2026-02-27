@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/stores/auth-store'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
 import LoginView from '@/views/login/LoginView.vue'
-import NewContractTemplateView from '@/views/new-contract-template/NewContractTemplateView.vue'
+import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import TableView from '@/views/TableView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import { storeToRefs } from 'pinia'
