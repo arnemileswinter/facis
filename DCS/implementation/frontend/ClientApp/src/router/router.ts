@@ -1,12 +1,12 @@
 import { useAuthStore } from '@/stores/auth-store'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
-import LoginView from '@/views/login/LoginView.vue'
+import LoginView from '@/views/auth/LoginView.vue'
 import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import TableView from '@/views/TableView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import { storeToRefs } from 'pinia'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import AuthCallback from '@/components/AuthCallback.vue'
+import AuthCallbackView from '@/views/auth/AuthCallbackView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
     path: '/templates',
     name: 'templates.list',
     component: ContractTemplateListView,
-    meta: { name: 'Contract Templates', icon: DocumentTextIcon, requiresAuth: false, title: 'DCS - Templates' },
+    meta: { name: 'Contract Templates', icon: DocumentTextIcon, requiresAuth: true, title: 'DCS - Templates' },
   },
   {
     path: '/templates/new',
@@ -62,7 +62,7 @@ const routes: RouteRecordRaw[] = [
     path: '/auth/callback',
     name: 'auth.callback',
     meta: { hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS - Auth Callback' },
-    component: AuthCallback,
+    component: AuthCallbackView,
   },
 ]
 

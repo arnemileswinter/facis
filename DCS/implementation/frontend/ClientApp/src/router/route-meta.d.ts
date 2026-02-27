@@ -11,5 +11,6 @@ declare module 'vue-router' {
     requiresAuth: boolean
     /** This is used for setting the page title in useSyncPageTitle composable */
     title: string
+    layout?: 'blank'
   }
 }

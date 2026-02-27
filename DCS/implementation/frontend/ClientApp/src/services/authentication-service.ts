@@ -11,7 +11,7 @@ const http = axios.create({
 export const AuthenticationService = {
   async getLoginPath() {
     return await http
-      .get<{ auth_url: string} >('/auth/login')
+      .get<{ auth_url: string }>('/auth/login')
       .then((res) => res.data.auth_url)
       .catch((err) => {
         console.error('Login Error:', err)
@@ -20,15 +20,35 @@ export const AuthenticationService = {
   },
 
   async callback(request: AuthCallbackRequest) {
-    return http.get<AuthCallbackResponse>('/auth/callback', {params: {...request}}).then(res => {
-      const resp = res.data
-      localStorage.setItem('access_token', resp.access_token)
-      localStorage.setItem('token_type', resp.token_type)
-      return res.data
-    })
+    return http
+      .get<AuthCallbackResponse>('/auth/callback', { params: { ...request } })
+      .then((res) => {
+        const resp = res.data
+        localStorage.setItem('access_token', resp.access_token)
+        localStorage.setItem('token_type', resp.token_type)
+        const authStore = useAuthStore()
+        authStore.setUser(resp.access_token)
+        return res.data
+      })
+      .catch((err) => {
+        if (err && err.status === 401) {
+          console.log(err)
+          this.refresh()
+        }
+      })
   },
 
   async refresh() {
-    return http.post('/auth/refresh').then(res => res.data)
+    return http
+      .post<AuthCallbackResponse>('/auth/refresh')
+      .then((res) => {
+        return res.data
+      })
+      .catch((err) => {
+        if (err && err.status === 401) {
+          const authStore = useAuthStore()
+          authStore.remove()
+        }
+      })
   },
 }
