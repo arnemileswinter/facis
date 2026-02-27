@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    meta: { name: 'DCS', hideInSidebar: true, requiresAuth: false, title: 'DCS' },
+    meta: { name: 'DCS', hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS' },
     component: LoginView,
   },
   {
@@ -61,8 +61,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/auth/callback',
     name: 'auth.callback',
-    meta: { hideInSidebar: true, requiresAuth: false, title: 'DCS - Auth Callback'},
-    component: AuthCallback
+    meta: { hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS - Auth Callback' },
+    component: AuthCallback,
   },
 ]
 
@@ -71,12 +71,12 @@ const router = createRouter({
   routes: routes,
 })
 
-router.beforeEach((to, _from) => {
-  const authStore = useAuthStore()
-  const { isAuthenticated } = storeToRefs(authStore)
-  if (to.meta.requiresAuth && !isAuthenticated.value) {
-    return { name: 'home' }
-  }
-})
+// router.beforeEach((to, _from) => {
+//   const authStore = useAuthStore()
+//   const { isAuthenticated } = storeToRefs(authStore)
+//   if (to.meta.requiresAuth && !isAuthenticated.value) {
+//     return { name: 'home' }
+//   }
+// })
 
 export { router }

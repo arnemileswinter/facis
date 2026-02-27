@@ -1,10 +1,28 @@
 <script setup lang="ts">
-import LoginForm from '@/components/LoginForm.vue'
+import { AuthenticationService } from '@/services/authentication-service'
+import { onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
+const route = useRoute()
+const router = useRouter()
+
+onMounted(async () => {
+  // Keycloak kann je nach Konfiguration auch auf '/' zurückleiten.
+  // In dem Fall direkt zu auth.callback forwarden, ohne beforeEach zu involvieren.
+  if (route.query.session_state && route.query.code && route.query.iss) {
+    router.replace({ name: 'auth.callback', query: route.query })
+    return
+  }
+
+  const loginUrl = await AuthenticationService.getLoginPath()
+  if (loginUrl) {
+    window.location.href = loginUrl
+  }
+})
 </script>
 
 <template>
-  <div class="flex justify-center">
-    <LoginForm />
+  <div class="min-h-screen flex items-center justify-center bg-base-200">
+    <span class="loading loading-spinner loading-lg" />
   </div>
 </template>

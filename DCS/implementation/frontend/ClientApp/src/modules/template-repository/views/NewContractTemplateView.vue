@@ -97,7 +97,7 @@
                 <button class="btn btn-ghost md:w-32" @click="router.back()">Cancel</button>
                 <button @click="submit" class="btn btn-primary flex-1" :disabled="isSubmitting">
                     <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
-                    {{ isEditMode ? 'Update Template' : 'Publish to Repository' }}
+                    {{ isEditMode ? 'Update Template' : 'Create' }}
                 </button>
             </div>
         </div>

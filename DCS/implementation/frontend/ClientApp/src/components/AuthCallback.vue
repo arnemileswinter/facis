@@ -6,7 +6,6 @@ import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
-console.log(route.query)
 const query = route.query
 
 const callbackQuery: Ref<AuthCallbackRequest | null> = ref(null)
@@ -26,12 +25,15 @@ if (
 }
 
 onMounted(async () => {
-    if (callbackQuery.value)
-  await AuthenticationService.callback(callbackQuery.value)
-router.replace({ name: 'home' })
+  if (callbackQuery.value) {
+    await AuthenticationService.callback(callbackQuery.value)
+  }
+  router.replace({ name: 'templates.list' })
 })
-
 </script>
+
 <template>
-  <!-- <RouterLink :to="{ name: 'home' }">Back</RouterLink> -->
+  <div class="min-h-screen flex items-center justify-center bg-base-200">
+    <span class="loading loading-spinner loading-lg" />
+  </div>
 </template>
