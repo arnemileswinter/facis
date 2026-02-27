@@ -37,6 +37,8 @@ interface TemplateEditorUiState {
   selectedBlockId: string | null
   /** When non-null: clause legal-text editor highlights matching placeholder chips */
   clausePlaceholderHighlight: ClausePlaceholderHighlight
+  /** When true: builder preview dialog is open */
+  isPreviewDialogOpen: boolean
 }
 
 export type { TemplateEditorUiState }

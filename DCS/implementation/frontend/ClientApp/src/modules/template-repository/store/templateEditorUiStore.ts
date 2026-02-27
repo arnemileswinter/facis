@@ -20,6 +20,7 @@ const defaultState: Readonly<TemplateEditorUiState> = {
   blockMovementPreview: null,
   selectedBlockId: null,
   clausePlaceholderHighlight: null,
+  isPreviewDialogOpen: false,
 }
 
 export const useTemplateEditorUiStore = defineStore(storeId, {
@@ -45,6 +46,9 @@ export const useTemplateEditorUiStore = defineStore(storeId, {
     },
     setClausePlaceholderHighlight(value: ClausePlaceholderHighlight) {
       this.clausePlaceholderHighlight = value
+    },
+    togglePreviewDialog() {
+      this.isPreviewDialogOpen = !this.isPreviewDialogOpen
     },
     reset() {
       Object.assign(this, getInitialState())

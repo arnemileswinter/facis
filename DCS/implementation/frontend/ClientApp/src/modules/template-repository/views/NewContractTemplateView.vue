@@ -60,11 +60,21 @@
                     <div v-show="activeTab === 'builder'">
                         <div class="card bg-base-100 border border-base-300 shadow-sm">
                             <div class="card-body">
-                                <h2 class="card-title text-sm">Builder</h2>
+                                <div class="flex items-center justify-between mb-2">
+                                    <h2 class="card-title text-sm">Builder</h2>
+                                    <button
+                                      type="button"
+                                      class="btn btn-sm btn-secondary"
+                                      @click="togglePreviewDialog"
+                                    >
+                                      Preview
+                                    </button>
+                                </div>
                                 <BuilderEditor />
                             </div>
                         </div>
                         <AddBlockModal />
+                        <BuilderPreviewDialog />
                     </div>
 
                     <!-- META TAB -->
@@ -104,6 +114,7 @@ import SemanticRulesEditor from '@template-repository/components/SemanticRulesEd
 import ClausesEditor from '@template-repository/components/ClausesEditor.vue'
 import DetailsEditor from '@template-repository/components/DetailsEditor.vue'
 import MetaDataEditor from '@template-repository/components/MetaDataEditor.vue'
+import BuilderPreviewDialog from '@template-repository/components/builder-editor/BuilderPreviewDialog.vue'
 import { storeToRefs } from 'pinia'
 
 const router = useRouter()
@@ -111,7 +122,7 @@ const route = useRoute()
 
 const templateEditorUiStore = useTemplateEditorUiStore()
 const { activeTab, tabs } = storeToRefs(templateEditorUiStore)
-const { setActiveTab } = templateEditorUiStore
+const { setActiveTab, togglePreviewDialog } = templateEditorUiStore
 
 const isEditMode = computed(() => !!route.params.did)
 const isSubmitting = ref(false)
