@@ -278,6 +278,10 @@ func createQuery(data UpdateData) (*string, []interface{}, error) {
 		params = append(params, value)
 	}
 
+	if data.State != nil {
+		addParam("state", data.State)
+	}
+
 	if data.Name != nil {
 		addParam("name", data.Name)
 	}
@@ -310,14 +314,14 @@ func createQuery(data UpdateData) (*string, []interface{}, error) {
 }
 
 type UpdateData struct {
-	DID            string `db:"did"`
-	DocumentNumber int    `db:"document_number"`
-	Version        int    `db:"version"`
-
-	TemplateType *templatetype.TemplateType `db:"template_type"`
-	Name         *string                    `db:"name"`
-	Description  *string                    `db:"description"`
-	TemplateData *datatype.JSON             `db:"template_data"`
+	DID            string                       `db:"did"`
+	DocumentNumber int                          `db:"document_number"`
+	Version        int                          `db:"version"`
+	State          *templatestate.TemplateState `db:"state"`
+	TemplateType   *templatetype.TemplateType   `db:"template_type"`
+	Name           *string                      `db:"name"`
+	Description    *string                      `db:"description"`
+	TemplateData   *datatype.JSON               `db:"template_data"`
 }
 
 func Update(ctx context.Context, tx *sqlx.Tx, data UpdateData) error {

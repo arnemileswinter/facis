@@ -19,7 +19,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type SubmitCommand struct {
+type SubmitCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -31,12 +31,12 @@ type SubmitCommand struct {
 	Approver       *string
 }
 
-type SubmitHandler struct {
+type Submitter struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, cmd SubmitCommand) error {
+func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, cmd SubmitCmd) error {
 	for _, reviewer := range cmd.Reviewer {
 		reviewTask := reviewtask.TaskData{
 			DID:            cmd.DID,
@@ -68,7 +68,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 	return nil
 }
 
-func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
+func (h *Submitter) Handle(cmd SubmitCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -128,7 +128,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == actionflag.Approval {
 
-				valid, err := reviewtask.IsValidTaskUser(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				valid, err := reviewtask.IsValidReviewer(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
@@ -137,7 +137,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 					return errors.New("invalid user")
 				}
 
-				exist, err := reviewtask.HasTaskInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Open)
+				exist, err := reviewtask.TaskExistsInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Open)
 				if err != nil {
 					return err
 				}
@@ -151,7 +151,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 					return fmt.Errorf("could not update approval task: %w", err)
 				}
 
-				existOpenTasks, err := reviewtask.ExistTasksInStates(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open, reviewtaskstate.Verified)
+				existOpenTasks, err := reviewtask.AnyTasksInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open, reviewtaskstate.Verified)
 				if err != nil {
 					return fmt.Errorf("could not check if review task exists: %w", err)
 				}
@@ -162,7 +162,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 
 			} else if *cmd.ActionFlag == actionflag.Draft {
 
-				isValid, err := reviewtask.IsValidTaskUser(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				isValid, err := reviewtask.IsValidReviewer(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
@@ -184,7 +184,7 @@ func (h *SubmitHandler) Handle(cmd SubmitCommand) error {
 
 	} else if processData.State == templatestate.Reviewed {
 
-		isValid, err := approvaltask.IsValidTaskUser(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+		isValid, err := approvaltask.IsValidApprover(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 		if err != nil {
 			return err
 		}

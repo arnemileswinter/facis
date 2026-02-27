@@ -29,14 +29,14 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -45,7 +45,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -77,14 +77,14 @@ func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		ArchivedBy:     "Test User 1",
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -110,14 +110,14 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -126,7 +126,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -162,14 +162,14 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -178,7 +178,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -214,14 +214,14 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -230,7 +230,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -266,14 +266,14 @@ func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -299,14 +299,14 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  db,
 	}

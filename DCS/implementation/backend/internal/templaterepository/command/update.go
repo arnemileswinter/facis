@@ -17,7 +17,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type UpdateCommand struct {
+type UpdateCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -29,12 +29,12 @@ type UpdateCommand struct {
 	TemplateData   *datatype.JSON
 }
 
-type UpdateHandler struct {
+type Updater struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
+func (h *Updater) Handle(cmd UpdateCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -62,7 +62,7 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 	if oldData.State == templatestate.Draft && oldData.CreatedBy == cmd.UpdatedBy {
 		isValidUser = true
 	} else if oldData.State == templatestate.Submitted {
-		valid, err := reviewtask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
+		valid, err := reviewtask.IsValidReviewer(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (h *UpdateHandler) Handle(cmd UpdateCommand) error {
 		return fmt.Errorf("could not update template data: %w", err)
 	}
 
-	evt := templateevents.UpdateContractTemplateEvent{
+	evt := templateevents.UpdateEvent{
 		DID:             cmd.DID,
 		DocumentNumber:  cmd.DocumentNumber,
 		Version:         cmd.Version,

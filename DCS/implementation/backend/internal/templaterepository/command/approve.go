@@ -16,7 +16,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type ApproveCommand struct {
+type ApproveCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -25,12 +25,12 @@ type ApproveCommand struct {
 	DecisionNotes  []string
 }
 
-type ApproveHandler struct {
+type Approver struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *ApproveHandler) Handle(cmd ApproveCommand) error {
+func (h *Approver) Handle(cmd ApproveCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -54,7 +54,7 @@ func (h *ApproveHandler) Handle(cmd ApproveCommand) error {
 		return errors.New("invalid contract template state")
 	}
 
-	valid, err := approvaltask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.ApprovedBy)
+	valid, err := approvaltask.IsValidApprover(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.ApprovedBy)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (h *ApproveHandler) Handle(cmd ApproveCommand) error {
 		return errors.New("invalid user")
 	}
 
-	exist, err := approvaltask.HasTaskInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.ApprovedBy, approvaltaskstate.Open)
+	exist, err := approvaltask.TaskExistsInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.ApprovedBy, approvaltaskstate.Open)
 	if err != nil {
 		return err
 	}

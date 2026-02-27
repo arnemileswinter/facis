@@ -46,7 +46,7 @@ func Create(ctx context.Context, tx *sqlx.Tx, data TaskData) (*time.Time, error)
 	return &createdAt, nil
 }
 
-func IsValidTaskUser(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string) (bool, error) {
+func IsValidReviewer(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_review_task
 		WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
@@ -132,7 +132,7 @@ func Update(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, ve
 	return err
 }
 
-func ExistTasksInStates(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, states ...reviewtaskstate.ReviewTaskState) (bool, error) {
+func AnyTasksInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, states ...reviewtaskstate.ReviewTaskState) (bool, error) {
 	placeholders := make([]string, len(states))
 	args := []interface{}{did, documentNumber, version}
 
@@ -156,7 +156,7 @@ func ExistTasksInStates(ctx context.Context, tx *sqlx.Tx, did string, documentNu
 	return count > 0, nil
 }
 
-func HasTaskInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) (bool, error) {
+func TaskExistsInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) (bool, error) {
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_review_task 

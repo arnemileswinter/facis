@@ -15,7 +15,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetByIDQuery struct {
+type GetByIDQry struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -41,7 +41,7 @@ type GetByIDHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetByIDHandler) Handle(query GetByIDQuery) (*GetByIDResult, error) {
+func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()

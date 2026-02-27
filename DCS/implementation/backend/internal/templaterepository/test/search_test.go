@@ -40,7 +40,7 @@ func TestSearch_SearchContractTemplatesWithoutSearchValue(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
@@ -79,7 +79,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.CreateCommand{
+	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    creator,
 		TemplateType: templatetype.FrameContract,
@@ -87,7 +87,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 		Description:  &description,
 		TemplateData: &jsonMetaData,
 	}
-	createHandler := command.CreateHandler{
+	createHandler := command.Creator{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -96,7 +96,7 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 		t.Fatalf("Failed to create contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		DID:         did,
 	}
@@ -150,7 +150,7 @@ func TestSearch_SearchContractTemplatesByDocumentNumberAndVersion(t *testing.T) 
 
 	documentNumber := 3
 	version := 2
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy:    creator,
 		DocumentNumber: &documentNumber,
 		Version:        &version,
@@ -204,7 +204,7 @@ func TestSearch_SearchContractTemplatesByName(t *testing.T) {
 	ctx := context.Background()
 
 	searchName := "Test 2." // The search is case-insensitive
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		Name:        &searchName,
 	}
@@ -251,7 +251,7 @@ func TestSearch_SearchContractTemplatesByDescript(t *testing.T) {
 	ctx := context.Background()
 
 	searchDescription := "Test2." // The search is case-insensitive
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		Description: &searchDescription,
 	}
@@ -320,7 +320,7 @@ func TestSearch_SearchContractTemplatesByTemplateData(t *testing.T) {
 	ctx := context.Background()
 
 	filter := "Test2.2" // The search is case-insensitive
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 		Filter:      &filter,
 	}

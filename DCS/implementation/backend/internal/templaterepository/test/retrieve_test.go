@@ -29,7 +29,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -65,7 +65,7 @@ func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
@@ -101,10 +101,10 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 
 	ctx := context.Background()
 
-	qry := contracttemplate.GetAllMetaDataQuery{
+	qry := contracttemplate.GetAllMetadataQry{
 		RetrievedBy: creator,
 	}
-	queryHandler := contracttemplate.GetAllMetaDataHandler{
+	queryHandler := contracttemplate.GetAllMetadataHandler{
 		Ctx: ctx,
 		DB:  db,
 	}

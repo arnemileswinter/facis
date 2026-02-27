@@ -9,7 +9,6 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -17,7 +16,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type UpdateManageCommand struct {
+type UpdateManageCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -30,12 +29,12 @@ type UpdateManageCommand struct {
 	TemplateData   *datatype.JSON
 }
 
-type UpdateManageHandler struct {
+type UpdateManager struct {
 	Ctx context.Context
 	DB  *sqlx.DB
 }
 
-func (h *UpdateManageHandler) Handle(cmd UpdateManageCommand) error {
+func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
@@ -55,34 +54,30 @@ func (h *UpdateManageHandler) Handle(cmd UpdateManageCommand) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if oldData.State != templatestate.Draft && oldData.State != templatestate.Submitted {
-		return errors.New("invalid contract template state")
-	}
-
-	isValidUser := false
-	if oldData.State == templatestate.Draft && oldData.CreatedBy == cmd.UpdatedBy {
-		isValidUser = true
-	} else if oldData.State == templatestate.Submitted {
-		valid, err := reviewtask.IsValidTaskUser(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
-		if err != nil {
-			return err
+	newState := oldData.State
+	if cmd.State != nil {
+		if *cmd.State == templatestate.Draft {
+			err = templaterepository.CleanupTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			if err != nil {
+				return fmt.Errorf("could not cleanup tasks: %w", err)
+			}
+		} else if *cmd.State == templatestate.Rejected || *cmd.State == templatestate.Submitted || *cmd.State == templatestate.Reviewed {
+			err = templaterepository.ReopenTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			if err != nil {
+				return fmt.Errorf("could not reopen tasks: %w", err)
+			}
+		} else {
+			return errors.New("invalid state")
 		}
-		isValidUser = valid
-	}
 
-	if !isValidUser {
-		return fmt.Errorf("invalid user")
-	}
-
-	err = templaterepository.ReopenTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
-	if err != nil {
-		return fmt.Errorf("could not reopen tasks: %w", err)
+		newState = *cmd.State
 	}
 
 	newData := templaterepository.UpdateData{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
+		State:          cmd.State,
 		TemplateType:   cmd.TemplateType,
 		Name:           cmd.Name,
 		Description:    cmd.Description,
@@ -93,10 +88,12 @@ func (h *UpdateManageHandler) Handle(cmd UpdateManageCommand) error {
 		return fmt.Errorf("could not update template data: %w", err)
 	}
 
-	evt := templateevents.UpdateContractTemplateEvent{
+	evt := templateevents.UpdateManageEvent{
 		DID:             cmd.DID,
 		DocumentNumber:  cmd.DocumentNumber,
 		Version:         cmd.Version,
+		OldState:        &oldData.State,
+		NewState:        &newState,
 		OldName:         oldData.Name,
 		NewName:         cmd.Name,
 		OldDescription:  oldData.Description,

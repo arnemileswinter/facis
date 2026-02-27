@@ -171,9 +171,9 @@ func (e VerifyEvent) GetVersion() int {
 	return e.Version
 }
 
-// UpdateContractTemplateEvent is emitted when template metadata is updated.
+// UpdateEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
-type UpdateContractTemplateEvent struct {
+type UpdateEvent struct {
 	DID             string         `json:"did"`
 	DocumentNumber  int            `json:"document_number"`
 	Version         int            `json:"version"`
@@ -188,22 +188,60 @@ type UpdateContractTemplateEvent struct {
 }
 
 // EventType implements the Event interface.
-func (e UpdateContractTemplateEvent) EventType() string {
+func (e UpdateEvent) EventType() string {
 	return eventtype.Update.String()
 }
 
 // GetDID implements the Event interface.
-func (e UpdateContractTemplateEvent) GetDID() string {
+func (e UpdateEvent) GetDID() string {
 	return e.DID
 }
 
 // GetDocumentNumber implements the Event interface.
-func (e UpdateContractTemplateEvent) GetDocumentNumber() int {
+func (e UpdateEvent) GetDocumentNumber() int {
 	return e.DocumentNumber
 }
 
 // GetVersion implements the Event interface.
-func (e UpdateContractTemplateEvent) GetVersion() int {
+func (e UpdateEvent) GetVersion() int {
+	return e.Version
+}
+
+// UpdateManageEvent is emitted when template metadata is updated.
+// This event is used for audit and synchronization purposes.
+type UpdateManageEvent struct {
+	DID             string                       `json:"did"`
+	DocumentNumber  int                          `json:"document_number"`
+	Version         int                          `json:"version"`
+	UpdatedBy       string                       `json:"updated_by"`
+	OldState        *templatestate.TemplateState `json:"old_state"`
+	NewState        *templatestate.TemplateState `json:"new_state"`
+	OldName         *string                      `json:"old_name,omitempty"`
+	NewName         *string                      `json:"new_name,omitempty"`
+	OldDescription  *string                      `json:"old_description,omitempty"`
+	NewDescription  *string                      `json:"new_description,omitempty"`
+	OldTemplateData *datatype.JSON               `json:"old_template_data,omitempty"`
+	NewTemplateData *datatype.JSON               `json:"new_metadata,omitempty"`
+	OccurredAt      time.Time                    `json:"occurred_at"`
+}
+
+// EventType implements the Event interface.
+func (e UpdateManageEvent) EventType() string {
+	return eventtype.Update.String()
+}
+
+// GetDID implements the Event interface.
+func (e UpdateManageEvent) GetDID() string {
+	return e.DID
+}
+
+// GetDocumentNumber implements the Event interface.
+func (e UpdateManageEvent) GetDocumentNumber() int {
+	return e.DocumentNumber
+}
+
+// GetVersion implements the Event interface.
+func (e UpdateManageEvent) GetVersion() int {
 	return e.Version
 }
 

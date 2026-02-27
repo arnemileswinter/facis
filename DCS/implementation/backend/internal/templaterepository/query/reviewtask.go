@@ -11,7 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllReviewTasksForDID struct {
+type GetAllReviewTasksForDIDQry struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -34,7 +34,7 @@ type GetAllReviewTasksForDIDHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDID) ([]GetAllReviewTasksForDIDResult, error) {
+func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDIDQry) ([]GetAllReviewTasksForDIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()

@@ -77,7 +77,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templa
 
 	ctx := context.Background()
 
-	cmd := command.CreateCommand{
+	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    createdBy,
 		TemplateType: templatetype.FrameContract,
@@ -85,7 +85,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, did *string, state templa
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
 	}
-	createHandler := command.CreateHandler{
+	createHandler := command.Creator{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -113,7 +113,7 @@ func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, did *string, 
 
 	ctx := context.Background()
 
-	cmd := command.CreateCommand{
+	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    createdBy,
 		TemplateType: templatetype.FrameContract,
@@ -121,7 +121,7 @@ func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, did *string, 
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
 	}
-	createHandler := command.CreateHandler{
+	createHandler := command.Creator{
 		Ctx: ctx,
 		DB:  db,
 	}

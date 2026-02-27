@@ -35,7 +35,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	ctx := context.Background()
 
 	approver := "Test User 5"
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -50,7 +50,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		},
 		Approver: &approver,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -59,7 +59,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -76,7 +76,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
-	queryReviewTasks := query.GetAllReviewTasksForDID{
+	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -124,7 +124,7 @@ func TestSubmit_SubmitContractTemplateInDraftStateWithInvalidUser(t *testing.T) 
 		"Test User 3",
 	}
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -135,7 +135,7 @@ func TestSubmit_SubmitContractTemplateInDraftStateWithInvalidUser(t *testing.T) 
 		Reviewer:       reviewers,
 		Approver:       &approver,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -185,14 +185,14 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to commit transaction: %v", err)
 	}
 
-	verifyCmd := command.VerifyCommand{
+	verifyCmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
 	}
-	verifyHandler := command.VerifyHandler{
+	verifyHandler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -203,7 +203,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 
 	actionFlag := actionflag.Approval
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -212,7 +212,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -221,7 +221,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -280,7 +280,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testin
 
 	actionFlag := actionflag.Approval
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -289,7 +289,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testin
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -339,7 +339,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithoutVerifying(t *testi
 
 	actionFlag := actionflag.Approval
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -348,7 +348,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithoutVerifying(t *testi
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -398,7 +398,7 @@ func TestSubmit_RejectContractTemplateInSubmittedStateWithInvalidUser(t *testing
 
 	actionFlag := actionflag.Draft
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -407,7 +407,7 @@ func TestSubmit_RejectContractTemplateInSubmittedStateWithInvalidUser(t *testing
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -461,14 +461,14 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	All reviewers verify contract template
 	*/
 	for _, reviewer := range reviewers {
-		verifyCmd := command.VerifyCommand{
+		verifyCmd := command.VerifyCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
 		}
-		verifyHandler := command.VerifyHandler{
+		verifyHandler := command.Verifier{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -481,7 +481,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	actionFlag := actionflag.Approval
 
 	for _, reviewer := range reviewers {
-		cmd := command.SubmitCommand{
+		cmd := command.SubmitCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -490,7 +490,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
 		}
-		handler := command.SubmitHandler{
+		handler := command.Submitter{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -500,7 +500,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		}
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -561,7 +561,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	actionFlag := actionflag.Draft
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -570,7 +570,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -581,7 +581,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -612,14 +612,14 @@ func TestSubmit_SubmitNonExistingContractTemplate(t *testing.T) {
 
 	ctx := context.Background()
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 2,
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 1",
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -645,7 +645,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 
 	ctx := context.Background()
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -654,7 +654,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 		ActionFlag:     nil,
 		Comments:       []string{},
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -687,14 +687,14 @@ func TestSubmit_SubmitContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 2",
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -736,7 +736,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithApproverUser(t *testin
 	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
 
 	aFlag := actionflag.Approval
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -744,7 +744,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithApproverUser(t *testin
 		SubmittedBy:    approver,
 		ActionFlag:     &aFlag,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -780,7 +780,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		"Test User 3",
 	}
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -791,7 +791,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		Reviewer:       reviewers,
 		Approver:       &approver,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -800,7 +800,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -817,7 +817,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
-	queryReviewTasks := query.GetAllReviewTasksForDID{
+	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -842,7 +842,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 	}
 
-	queryApprovalTasks := query.GetAllApprovalTasksForDID{
+	queryApprovalTasks := query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -863,14 +863,14 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	/**
 	First reviewer verifies contract template
 	*/
-	verifyCmd := command.VerifyCommand{
+	verifyCmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
 	}
-	verifyHandler := command.VerifyHandler{
+	verifyHandler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -884,7 +884,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	*/
 	actionFlag := actionflag.Approval
 
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -893,7 +893,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -902,7 +902,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -919,7 +919,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
-	queryReviewTasks = query.GetAllReviewTasksForDID{
+	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -936,7 +936,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	assert.Equal(t, len(reviewTasks), 3)
 
-	queryApprovalTasks = query.GetAllApprovalTasksForDID{
+	queryApprovalTasks = query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -958,7 +958,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	*/
 	actionFlag = actionflag.Draft
 
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -967,7 +967,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -976,7 +976,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -996,7 +996,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	/**
 	contract template creator submits it again
 	*/
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1007,7 +1007,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		Approver:       &approver,
 		Reviewer:       reviewers,
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1016,7 +1016,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1037,14 +1037,14 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	All reviewers verify contract template
 	*/
 	for _, reviewer := range reviewers {
-		verifyCmd := command.VerifyCommand{
+		verifyCmd := command.VerifyCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
 		}
-		verifyHandler := command.VerifyHandler{
+		verifyHandler := command.Verifier{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1060,7 +1060,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	actionFlag = actionflag.Approval
 
 	for _, reviewer := range reviewers {
-		cmd := command.SubmitCommand{
+		cmd := command.SubmitCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -1069,7 +1069,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
 		}
-		handler := command.SubmitHandler{
+		handler := command.Submitter{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1079,7 +1079,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1099,7 +1099,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	/**
 	Approver resubmits reviewed contract template
 	*/
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1109,7 +1109,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		Comments:       []string{"Test Comment"},
 		Reviewer:       nil,
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1118,7 +1118,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1139,14 +1139,14 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	All reviewers verify contract template
 	*/
 	for _, reviewer := range reviewers {
-		verifyCmd := command.VerifyCommand{
+		verifyCmd := command.VerifyCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
 		}
-		verifyHandler := command.VerifyHandler{
+		verifyHandler := command.Verifier{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1162,7 +1162,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	actionFlag = actionflag.Approval
 
 	for _, reviewer := range reviewers {
-		cmd := command.SubmitCommand{
+		cmd := command.SubmitCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -1171,7 +1171,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
 		}
-		handler := command.SubmitHandler{
+		handler := command.Submitter{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1181,7 +1181,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1201,7 +1201,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	/**
 	Approver resubmits reviewed contract template
 	*/
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1211,7 +1211,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		Comments:       []string{"Test Comment"},
 		Reviewer:       nil,
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1220,7 +1220,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1265,7 +1265,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		"Test User 3",
 	}
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1276,7 +1276,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		Reviewer:       reviewers,
 		Approver:       &approver,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1285,7 +1285,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1302,7 +1302,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
-	queryReviewTasks := query.GetAllReviewTasksForDID{
+	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1327,7 +1327,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 	}
 
-	queryApprovalTasks := query.GetAllApprovalTasksForDID{
+	queryApprovalTasks := query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1348,14 +1348,14 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	First reviewer verifies contract template
 	*/
-	verifyCmd := command.VerifyCommand{
+	verifyCmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
 	}
-	verifyHandler := command.VerifyHandler{
+	verifyHandler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1369,7 +1369,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	actionFlag := actionflag.Approval
 
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1378,7 +1378,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1387,7 +1387,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1404,7 +1404,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
-	queryReviewTasks = query.GetAllReviewTasksForDID{
+	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1421,7 +1421,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	assert.Equal(t, len(reviewTasks), 3)
 
-	queryApprovalTasks = query.GetAllApprovalTasksForDID{
+	queryApprovalTasks = query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1443,7 +1443,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	actionFlag = actionflag.Draft
 
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1452,7 +1452,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1461,7 +1461,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1481,7 +1481,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	contract template creator submits it again
 	*/
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1492,7 +1492,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		Approver:       &approver,
 		Reviewer:       reviewers,
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1501,7 +1501,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1522,14 +1522,14 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	All reviewers verify contract template
 	*/
 	for _, reviewer := range reviewers {
-		verifyCmd := command.VerifyCommand{
+		verifyCmd := command.VerifyCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
 		}
-		verifyHandler := command.VerifyHandler{
+		verifyHandler := command.Verifier{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1545,7 +1545,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	actionFlag = actionflag.Approval
 
 	for _, reviewer := range reviewers {
-		cmd := command.SubmitCommand{
+		cmd := command.SubmitCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -1554,7 +1554,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
 		}
-		handler := command.SubmitHandler{
+		handler := command.Submitter{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1564,7 +1564,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1584,7 +1584,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	Approver resubmits reviewed contract template
 	*/
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1594,7 +1594,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		Comments:       []string{"Test Comment"},
 		Reviewer:       nil,
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1603,7 +1603,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1624,14 +1624,14 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	All reviewers verify contract template
 	*/
 	for _, reviewer := range reviewers {
-		verifyCmd := command.VerifyCommand{
+		verifyCmd := command.VerifyCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
 		}
-		verifyHandler := command.VerifyHandler{
+		verifyHandler := command.Verifier{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1647,7 +1647,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	actionFlag = actionflag.Approval
 
 	for _, reviewer := range reviewers {
-		cmd := command.SubmitCommand{
+		cmd := command.SubmitCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -1656,7 +1656,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
 		}
-		handler := command.SubmitHandler{
+		handler := command.Submitter{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -1666,7 +1666,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		}
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1686,14 +1686,14 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	Approver verifies reviewed contract template
 	*/
-	verifyCmd = command.VerifyCommand{
+	verifyCmd = command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     approver,
 	}
-	verifyHandler = command.VerifyHandler{
+	verifyHandler = command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1705,7 +1705,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	Approver approves reviewed contract template
 	*/
-	approveCmd := command.ApproveCommand{
+	approveCmd := command.ApproveCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1713,7 +1713,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		ApprovedBy:     approver,
 		DecisionNotes:  []string{"Test"},
 	}
-	approveHandler := command.ApproveHandler{
+	approveHandler := command.Approver{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1722,7 +1722,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to submit contract template: %v", err)
 	}
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1765,7 +1765,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		"Test User 3",
 	}
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1776,7 +1776,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		Reviewer:       reviewers,
 		Approver:       &approver,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1787,7 +1787,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy := "Test User"
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1804,7 +1804,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
-	queryReviewTasks := query.GetAllReviewTasksForDID{
+	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1829,7 +1829,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		}
 	}
 
-	queryApprovalTasks := query.GetAllApprovalTasksForDID{
+	queryApprovalTasks := query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1850,14 +1850,14 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	/**
 	First reviewer verifies contract template
 	*/
-	verifyCmd := command.VerifyCommand{
+	verifyCmd := command.VerifyCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
 	}
-	verifyHandler := command.VerifyHandler{
+	verifyHandler := command.Verifier{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1871,7 +1871,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	*/
 	actionFlag := actionflag.Approval
 
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1880,7 +1880,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1891,7 +1891,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1908,7 +1908,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
 
-	queryReviewTasks = query.GetAllReviewTasksForDID{
+	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1925,7 +1925,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	assert.Equal(t, len(reviewTasks), 3)
 
-	queryApprovalTasks = query.GetAllApprovalTasksForDID{
+	queryApprovalTasks = query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1947,7 +1947,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	*/
 	actionFlag = actionflag.Draft
 
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1956,7 +1956,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		ActionFlag:     &actionFlag,
 		Comments:       []string{},
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -1967,7 +1967,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -1995,7 +1995,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 
 	submittedBy = "Test User"
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2006,7 +2006,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		Approver:       &approver,
 		Reviewer:       reviewers,
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2017,7 +2017,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2038,14 +2038,14 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	All reviewers verify contract template
 	*/
 	for _, reviewer := range reviewers {
-		verifyCmd := command.VerifyCommand{
+		verifyCmd := command.VerifyCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
 		}
-		verifyHandler := command.VerifyHandler{
+		verifyHandler := command.Verifier{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -2061,7 +2061,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	actionFlag = actionflag.Approval
 
 	for _, reviewer := range reviewers {
-		cmd := command.SubmitCommand{
+		cmd := command.SubmitCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -2070,7 +2070,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
 		}
-		handler := command.SubmitHandler{
+		handler := command.Submitter{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -2082,7 +2082,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2102,7 +2102,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	/**
 	Approver resubmits reviewed contract template
 	*/
-	cmd = command.SubmitCommand{
+	cmd = command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2112,7 +2112,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		Comments:       []string{"Test Comment"},
 		Reviewer:       nil,
 	}
-	handler = command.SubmitHandler{
+	handler = command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2123,7 +2123,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2144,14 +2144,14 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	All reviewers verify contract template
 	*/
 	for _, reviewer := range reviewers {
-		verifyCmd := command.VerifyCommand{
+		verifyCmd := command.VerifyCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
 		}
-		verifyHandler := command.VerifyHandler{
+		verifyHandler := command.Verifier{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -2167,7 +2167,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	actionFlag = actionflag.Approval
 
 	for _, reviewer := range reviewers {
-		cmd := command.SubmitCommand{
+		cmd := command.SubmitCmd{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
@@ -2176,7 +2176,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 			ActionFlag:     &actionFlag,
 			Comments:       []string{},
 		}
-		handler := command.SubmitHandler{
+		handler := command.Submitter{
 			Ctx: ctx,
 			DB:  db,
 		}
@@ -2188,7 +2188,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2208,7 +2208,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	/**
 	Approver rejects reviewed contract template
 	*/
-	rejectCmd := command.RejectCommand{
+	rejectCmd := command.RejectCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2216,7 +2216,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		RejectedBy:     approver,
 		Reason:         "Test",
 	}
-	rejectHandler := command.RejectHandler{
+	rejectHandler := command.Rejecter{
 		Ctx: ctx,
 		DB:  db,
 	}
@@ -2227,7 +2227,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	retrievedBy = "Test User"
 
-	qry = contracttemplate.GetByIDQuery{
+	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2261,7 +2261,7 @@ func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
 	ctx := context.Background()
 	submittedBy := "Test User"
 	approver := "Test User 5"
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -2276,7 +2276,7 @@ func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
 		},
 		Approver: &approver,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		Ctx: ctx,
 		DB:  db,
 	}

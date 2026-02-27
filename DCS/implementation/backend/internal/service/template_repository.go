@@ -47,7 +47,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	cmd := command.CreateCommand{
+	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    "Test User",
 		TemplateType: templateType,
@@ -55,7 +55,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 		Description:  req.Description,
 		TemplateData: &jsonMetaData,
 	}
-	createHandler := command.CreateHandler{
+	createHandler := command.Creator{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -89,7 +89,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		actionFlag = &flag
 	}
 
-	cmd := command.SubmitCommand{
+	cmd := command.SubmitCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -98,7 +98,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		ActionFlag:     actionFlag,
 		Comments:       req.Comments,
 	}
-	handler := command.SubmitHandler{
+	handler := command.Submitter{
 		DB: s.DB,
 	}
 	err = handler.Handle(cmd)
@@ -135,7 +135,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		templateType = &tType
 	}
 
-	cmd := command.UpdateCommand{
+	cmd := command.UpdateCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -145,7 +145,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		Description:    req.Description,
 		TemplateData:   &metaData,
 	}
-	handler := command.UpdateHandler{
+	handler := command.Updater{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -192,7 +192,7 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 		templateType = &tType
 	}
 
-	cmd := command.UpdateManageCommand{
+	cmd := command.UpdateManageCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -203,7 +203,7 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 		Description:    req.Description,
 		TemplateData:   &metaData,
 	}
-	handler := command.UpdateManageHandler{
+	handler := command.UpdateManager{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -232,7 +232,7 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 		state = &tState
 	}
 
-	qry := contracttemplate.GetAllMetaDataByFilterQuery{
+	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy:    "Test User",
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
@@ -271,10 +271,10 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 // retrieve templates
 func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.RetrieveRequest) (res *templaterepository.RetrieveResponse, err error) {
 
-	qry := contracttemplate.GetAllMetaDataQuery{
+	qry := contracttemplate.GetAllMetadataQry{
 		RetrievedBy: "Test User",
 	}
-	queryHandler := contracttemplate.GetAllMetaDataHandler{
+	queryHandler := contracttemplate.GetAllMetadataHandler{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -331,7 +331,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 // Retrieve a template by template id.
 func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.RetrieveByIDRequest) (res *templaterepository.RetrieveByIDResponse, err error) {
 
-	qry := contracttemplate.GetByIDQuery{
+	qry := contracttemplate.GetByIDQry{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -368,13 +368,13 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	cmd := command.VerifyCommand{
+	cmd := command.VerifyCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
 	}
-	handler := command.VerifyHandler{
+	handler := command.Verifier{
 		DB: s.DB,
 	}
 	err = handler.Handle(cmd)
@@ -397,7 +397,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	cmd := command.ApproveCommand{
+	cmd := command.ApproveCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -405,7 +405,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		ApprovedBy:     "Test User",
 		DecisionNotes:  req.DecisionNotes,
 	}
-	handler := command.ApproveHandler{
+	handler := command.Approver{
 		DB: s.DB,
 	}
 	err = handler.Handle(cmd)
@@ -428,7 +428,7 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	cmd := command.RejectCommand{
+	cmd := command.RejectCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -436,7 +436,7 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		RejectedBy:     "Test User",
 		Reason:         req.Reason,
 	}
-	handler := command.RejectHandler{
+	handler := command.Rejecter{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -460,14 +460,14 @@ func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepo
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	cmd := command.RegisterCommand{
+	cmd := command.RegisterCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
 		RegisteredBy:   "Test User",
 	}
-	handler := command.RegisterHandler{
+	handler := command.Registrar{
 		Ctx: ctx,
 		DB:  s.DB,
 	}
@@ -491,14 +491,14 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	cmd := command.ArchiveCommand{
+	cmd := command.ArchiveCmd{
 		DID:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
 		UpdatedAt:      updatedAt,
 		ArchivedBy:     "Test User",
 	}
-	handler := command.ArchiveHandler{
+	handler := command.Archiver{
 		Ctx: ctx,
 		DB:  s.DB,
 	}

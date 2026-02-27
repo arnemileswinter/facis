@@ -111,7 +111,7 @@ func Update(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, ve
 	return err
 }
 
-func IsValidTaskUser(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string) (bool, error) {
+func IsValidApprover(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string) (bool, error) {
 	selectQuery := `
         SELECT COUNT(*) FROM contract_templates_approval_task
 		WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
@@ -130,7 +130,7 @@ func IsValidTaskUser(ctx context.Context, tx *sqlx.Tx, did string, documentNumbe
 	return false, nil
 }
 
-func HasTaskInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) (bool, error) {
+func TaskExistsInState(ctx context.Context, tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) (bool, error) {
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_approval_task 

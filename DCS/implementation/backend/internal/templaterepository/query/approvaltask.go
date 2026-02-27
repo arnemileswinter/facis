@@ -11,7 +11,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type GetAllApprovalTasksForDID struct {
+type GetAllApprovalTasksForDIDQry struct {
 	DID            string
 	DocumentNumber int
 	Version        int
@@ -35,7 +35,7 @@ type GetAllApprovalTasksForDIDHandler struct {
 	DB  *sqlx.DB
 }
 
-func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDID) ([]GetAllApprovalTasksForDIDResult, error) {
+func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDIDQry) ([]GetAllApprovalTasksForDIDResult, error) {
 
 	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
 	defer cancel()
