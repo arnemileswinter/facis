@@ -35,21 +35,21 @@ func (a JWTAuthenticator) JWTAuth(ctx context.Context, token string, scheme *sec
 		return ctx, goa.PermanentError("unauthorized", "missing JWT token")
 	}
 
-	// Validate the token and extract Keycloak realm_access.roles.
-	roles, err := a.Validator.ValidateToken(ctx, token)
+	// Validate the token, check azp, and extract roles + username.
+	info, err := a.Validator.ValidateToken(ctx, token)
 	if err != nil {
 		return ctx, goa.PermanentError("unauthorized", "invalid token: %s", err)
 	}
 
 	// If the endpoint declares required scopes, enforce at least one match.
 	if len(scheme.RequiredScopes) > 0 {
-		if !hasAnyRole(roles, scheme.RequiredScopes) {
+		if !hasAnyRole(info.Roles, scheme.RequiredScopes) {
 			return ctx, goa.PermanentError("forbidden", "insufficient permissions: requires one of %v", scheme.RequiredScopes)
 		}
 	}
 
-	// Inject the validated roles into the context for downstream use.
-	ctx = middleware.InjectAuthContext(ctx, roles)
+	// Inject the validated identity into the context for downstream use.
+	ctx = middleware.InjectAuthContext(ctx, info.Roles, info.Username)
 	return ctx, nil
 }
 
