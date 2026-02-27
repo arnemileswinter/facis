@@ -163,7 +163,7 @@
                         <div class="card bg-base-100 border border-base-300 shadow-sm">
                             <div class="card-body">
                                 <h2 class="card-title text-sm">Meta Data</h2>
-                                <p class="text-sm text-base-content/60">TODO</p>
+                                <MetaDataEditor />
                             </div>
                         </div>
                     </div>
@@ -193,6 +193,7 @@ import BuilderEditor from '@template-repository/components/BuilderEditor.vue'
 import AddBlockModal from '@template-repository/components/builder-editor/AddBlockModal.vue'
 import SemanticRulesEditor from '@template-repository/components/SemanticRulesEditor.vue'
 import ClausesEditor from '@template-repository/components/ClausesEditor.vue'
+import MetaDataEditor from '@template-repository/components/MetaDataEditor.vue'
 import { storeToRefs } from 'pinia'
 import { TemplateType } from '@template-repository/models/contract-templace'
 

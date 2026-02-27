@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@template-repository/models/template-draft-store"
-import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition } from "@template-repository/models/contract-templace"
+import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition, MetaData } from "@template-repository/models/contract-templace"
 import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock } from "@template-repository/models/contract-templace"
 
 const storeId = "templateDraft"
@@ -106,8 +106,36 @@ export const useTemplateDraftStore = defineStore(storeId, {
     updateClause(blockId: string, payload: { title?: string; text?: string; conditionIds?: string[] }): void {
       this.updateBlock(blockId, payload)
     },
-    // TBD: MetaData operations: add, delete, update
-    // TBD: Basic info operations: name, description, templateType...
+    // MetaData operations: add, delete, update
+    addMetaData(payload: MetaData): boolean {
+      const name = payload.name.trim()
+      const value = payload.value
+      if (!name) return false
+      const lower = name.toLowerCase()
+      const hasDuplicate = this.customMetaData.some((m) => m.name.trim().toLowerCase() === lower)
+      if (hasDuplicate) return false
+      this.customMetaData.push({ name, value })
+      return true
+    },
+    deleteMetaData(index: number): void {
+      if (index < 0 || index >= this.customMetaData.length) return
+      this.customMetaData.splice(index, 1)
+    },
+    updateMetaData(index: number, payload: MetaData): boolean {
+      if (index < 0 || index >= this.customMetaData.length) return false
+      const name = payload.name.trim()
+      const value = payload.value
+      if (!name) return false
+      const lower = name.toLowerCase()
+      const hasDuplicate = this.customMetaData.some((m, idx) => {
+        if (idx === index) return false
+        return m.name.trim().toLowerCase() === lower
+      })
+      if (hasDuplicate) return false
+      this.customMetaData[index] = { name, value }
+      return true
+    },
+    // TBD: Basic info operations: name, description...
     updateTemplateType(templateType: TemplateTypeValue): void {
       if (this.did !== null && this.did !== undefined) {
         throw new Error('Cannot change template type after template is created')
