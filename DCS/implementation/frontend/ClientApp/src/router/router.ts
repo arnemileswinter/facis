@@ -6,6 +6,7 @@ import TableView from '@/views/TableView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import { storeToRefs } from 'pinia'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import AuthCallback from '@/components/AuthCallback.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -56,6 +57,12 @@ const routes: RouteRecordRaw[] = [
     name: 'table',
     component: TableView,
     meta: { name: 'Table', requiresAuth: false, title: 'DCS - Table' },
+  },
+  {
+    path: '/auth/callback',
+    name: 'auth.callback',
+    meta: { hideInSidebar: true, requiresAuth: false, title: 'DCS - Auth Callback'},
+    component: AuthCallback
   },
 ]
 

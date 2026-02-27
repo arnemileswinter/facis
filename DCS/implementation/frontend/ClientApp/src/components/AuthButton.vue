@@ -17,16 +17,13 @@ onMounted(async () => {
 })
 
 function logout() {
-  AuthenticationService.logout()
   router.push({ name: 'login' })
 }
 </script>
 
 <template>
   <div>
-    <button v-if="!isAuthenticated" class="btn btn-block btn-accent flex-1 text-center">
-      <a :href="loginPath">Single Sign On</a>
-    </button>
+    <a v-if="!isAuthenticated" :href="loginPath" class="btn btn-block btn-accent flex-1 text-center">Single Sign On</a>
     <button v-else class="btn btn-block btn-accent flex-1 text-center" @click="logout">Logout</button>
   </div>
 </template>

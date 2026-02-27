@@ -1,3 +1,5 @@
+import type { AuthCallbackRequest } from '@/models/requests/auth-callback-request'
+import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
 import { useAuthStore } from '@/stores/auth-store'
 import axios from 'axios'
 
@@ -8,39 +10,25 @@ const http = axios.create({
 
 export const AuthenticationService = {
   async getLoginPath() {
-     const login = 'https://keycloak.xfsc.local/realms/dcs/protocol/openid-connect/auth?client_id=digital-contracting-service&redirect_uri=http%3A%2F%2Flocalhost%3A8991%2Fauth%2Fcallback&response_type=code&scope=openid'
-    const result = await http
-      .get<{ auth_url: string }>('/auth/login')
+    return await http
+      .get<{ auth_url: string} >('/auth/login')
       .then((res) => res.data.auth_url)
       .catch((err) => {
         console.error('Login Error:', err)
         return ''
       })
-    return result ? result : login
   },
 
-  async callback(code: string) {
-    return http.get('/auth/callback', {params: {code: code}}).then(res => res.data)
+  async callback(request: AuthCallbackRequest) {
+    return http.get<AuthCallbackResponse>('/auth/callback', {params: {...request}}).then(res => {
+      const resp = res.data
+      localStorage.setItem('access_token', resp.access_token)
+      localStorage.setItem('token_type', resp.token_type)
+      return res.data
+    })
   },
 
   async refresh() {
     return http.post('/auth/refresh').then(res => res.data)
-  },
-
-  async login(username: string, password: string) {
-    console.log('Signing in...')
-    const success = Math.ceil(Math.random() * 3) > 1
-
-    if (success) {
-      const authStore = useAuthStore()
-      authStore.setUser(username)
-    }
-    return success
-  },
-
-  async logout() {
-    console.log('Signing out...')
-    const authStore = useAuthStore()
-    authStore.remove()
   },
 }

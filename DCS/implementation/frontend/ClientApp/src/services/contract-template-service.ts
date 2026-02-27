@@ -23,9 +23,13 @@ import type {
 
 const API_BASE_URL = import.meta.env.DCS_API_BASE_URL
 
+const token_type = localStorage.getItem('token_type')
+const access_token = localStorage.getItem('access_token')
+console.log(token_type, access_token)
+
 const http = axios.create({
   baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'application/json', Authorization: `${token_type} ${access_token}` },
 })
 
 export const ContractTemplateService = {
