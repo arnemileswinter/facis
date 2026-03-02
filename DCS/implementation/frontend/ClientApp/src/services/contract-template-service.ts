@@ -20,17 +20,38 @@ import type {
   ContractTemplateSubmitResponse,
   ContractTemplateUpdateResponse,
 } from '../models/responses/template-response'
+import { AuthenticationService } from './authentication-service'
 
 const API_BASE_URL = import.meta.env.DCS_API_BASE_URL
 
 const token_type = localStorage.getItem('token_type')
 const access_token = localStorage.getItem('access_token')
-console.log(token_type, access_token)
 
 const http = axios.create({
   baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json', Authorization: `${token_type} ${access_token}` },
+  headers: { 'Content-Type': 'application/json' },
 })
+
+if (token_type && access_token) {
+  http.defaults.headers.common.Authorization = `${token_type} ${access_token}`
+}
+
+http.interceptors.request.use((config) => {
+  const token_type = localStorage.getItem('token_type')
+  const access_token = localStorage.getItem('access_token')
+  if (token_type && access_token) {
+    config.headers.setAuthorization(`${token_type} ${access_token}`)
+  }
+  return config
+})
+
+http.interceptors.response.use(
+  (resp) => resp,
+  (err) => {
+    console.log('Reject:', err)
+    AuthenticationService.refresh()
+  },
+)
 
 export const ContractTemplateService = {
   async create(request: ContractTemplateCreateRequest) {
