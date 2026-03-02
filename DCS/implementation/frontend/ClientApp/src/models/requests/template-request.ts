@@ -11,6 +11,7 @@ interface ContractTemplateBaseRequest {
 export interface ContractTemplateCreateRequest {
   name?: string
   description?: string
+  template_type?: TemplateType
   /** The template data of the contract template */
   template_data?: any
 }
