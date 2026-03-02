@@ -1,5 +1,6 @@
 import type { AuthCallbackRequest } from '@/models/requests/auth-callback-request'
 import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
+import type { LoginResponse } from '@/models/responses/login-response'
 import { useAuthStore } from '@/stores/auth-store'
 import axios from 'axios'
 
@@ -11,7 +12,7 @@ const http = axios.create({
 export const AuthenticationService = {
   async getLoginPath() {
     return await http
-      .get<{ auth_url: string }>('/auth/login')
+      .get<LoginResponse>('/auth/login')
       .then((res) => res.data.auth_url)
       .catch((err) => {
         console.error('Login Error:', err)
