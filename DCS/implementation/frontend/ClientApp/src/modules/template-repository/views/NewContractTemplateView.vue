@@ -1,5 +1,17 @@
 <template>
     <div class="flex flex-col min-h-full -mx-4 md:-mx-8 -my-4 md:-my-8">
+        <!-- Create flow: show only type selection until user chooses -->
+        <div v-if="showTypeSelectionOnly" class="max-w-4xl mx-auto px-6 py-12 flex flex-col gap-6">
+            <h1 class="text-2xl font-bold text-base-content">Choose contract type</h1>
+            <TemplateTypeSelect
+                :model-value="templateType"
+                @update:model-value="onTemplateTypeChosen($event)"
+            />
+            <div class="flex justify-end pt-4">
+                <button type="button" class="btn btn-ghost" @click="router.back()">Cancel</button>
+            </div>
+        </div>
+        <template v-else>
         <div class="sticky top-0 z-10 shrink-0 bg-base-200 border-b border-base-300">
             <div class="max-w-4xl mx-auto px-6 pt-3">
                 <p class="text-xs font-black uppercase tracking-widest text-base-content/40 mb-2">
@@ -101,13 +113,15 @@
                 </button>
             </div>
         </div>
+        </template>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
+import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import BuilderEditor from '@template-repository/components/BuilderEditor.vue'
 import AddBlockModal from '@template-repository/components/builder-editor/AddBlockModal.vue'
 import SemanticRulesEditor from '@template-repository/components/SemanticRulesEditor.vue'
@@ -115,16 +129,32 @@ import ClausesEditor from '@template-repository/components/ClausesEditor.vue'
 import DetailsEditor from '@template-repository/components/DetailsEditor.vue'
 import MetaDataEditor from '@template-repository/components/MetaDataEditor.vue'
 import BuilderPreviewDialog from '@template-repository/components/builder-editor/BuilderPreviewDialog.vue'
+import TemplateTypeSelect from '@template-repository/components/TemplateTypeSelect.vue'
 import { storeToRefs } from 'pinia'
 
 const router = useRouter()
 const route = useRoute()
 
 const templateEditorUiStore = useTemplateEditorUiStore()
+const draftStore = useTemplateDraftStore()
 const { activeTab, tabs } = storeToRefs(templateEditorUiStore)
+const { templateType } = storeToRefs(draftStore)
 const { setActiveTab, togglePreviewDialog } = templateEditorUiStore
 
 const isEditMode = computed(() => !!route.params.did)
+const hasChosenType = ref(false)
+const showTypeSelectionOnly = computed(() => !isEditMode.value && !hasChosenType.value)
+
+function onTemplateTypeChosen(value: typeof templateType.value) {
+    draftStore.reset({ templateType: value })
+    hasChosenType.value = true
+}
+
+watch(isEditMode, (isEdit) => {
+    if (isEdit) hasChosenType.value = true
+    else { draftStore.reset(); hasChosenType.value = false }
+}, { immediate: true })
+
 const isSubmitting = ref(false)
 
 const detailsEditorRef = ref<InstanceType<typeof DetailsEditor> | null>(null)

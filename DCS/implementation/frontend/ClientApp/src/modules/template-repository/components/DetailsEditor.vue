@@ -4,28 +4,24 @@
         <fieldset class="fieldset p-0 border-none">
             <legend class="fieldset-legend">Contract Type</legend>
             <div class="grid grid-cols-2 gap-3 mt-1">
-                <label class="card border-2 cursor-pointer transition-all"
+                <div class="card border-2 transition-all pointer-events-none"
                     :class="templateType === TemplateType.frameContract
                         ? 'border-primary bg-primary/5'
-                        : 'border-base-300 hover:border-base-content/20'">
-                    <input type="radio" v-model="templateType" :value="TemplateType.frameContract" class="hidden"
-                        @change="store.updateTemplateType(TemplateType.frameContract)" />
+                        : 'border-base-300'">
                     <div class="card-body p-4 gap-1">
                         <span class="card-title text-sm">Frame Contract</span>
                         <p class="text-xs text-base-content/60 font-normal">Top-level agreement that groups subcontracts</p>
                     </div>
-                </label>
-                <label class="card border-2 cursor-pointer transition-all"
+                </div>
+                <div class="card border-2 transition-all pointer-events-none"
                     :class="templateType === TemplateType.subContract
                         ? 'border-primary bg-primary/5'
-                        : 'border-base-300 hover:border-base-content/20'">
-                    <input type="radio" v-model="templateType" :value="TemplateType.subContract" class="hidden"
-                        @change="store.updateTemplateType(TemplateType.subContract)" />
+                        : 'border-base-300'">
                     <div class="card-body p-4 gap-1">
                         <span class="card-title text-sm">Subcontract</span>
                         <p class="text-xs text-base-content/60 font-normal">Scoped agreement under a frame contract</p>
                     </div>
-                </label>
+                </div>
             </div>
         </fieldset>
 

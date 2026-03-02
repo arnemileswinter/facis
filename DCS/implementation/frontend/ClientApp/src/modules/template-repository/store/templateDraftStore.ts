@@ -146,8 +146,9 @@ export const useTemplateDraftStore = defineStore(storeId, {
        * to subContract, the APPROVED_TEMPLATE blocks should be removed. */
     },
 
-    reset() {
+    reset(overrides?: Partial<TemplateDraftState>) {
       Object.assign(this, getInitialState())
+      if (overrides) Object.assign(this, overrides)
     }
   }
 })
