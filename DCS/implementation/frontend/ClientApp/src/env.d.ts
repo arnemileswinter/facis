@@ -14,3 +14,7 @@ interface ImportMetaEnv {
   readonly DCS_API_BASE_URL: string
   readonly DCS_API_URL: string
 }
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

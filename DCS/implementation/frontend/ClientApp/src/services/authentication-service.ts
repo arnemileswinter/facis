@@ -1,17 +1,13 @@
+import authHttp from '@/api/auth-http'
 import type { AuthCallbackRequest } from '@/models/requests/auth-callback-request'
 import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
 import type { LoginResponse } from '@/models/responses/login-response'
 import { useAuthStore } from '@/stores/auth-store'
-import axios from 'axios'
-
-const http = axios.create({
-  baseURL: import.meta.env.DCS_API_URL,
-  headers: { 'Content-Type': 'application/json' },
-})
+import { useAuthTokenStore } from '@/stores/auth-token-store'
 
 export const AuthenticationService = {
   async getLoginPath() {
-    return await http
+    return await authHttp
       .get<LoginResponse>('/auth/login')
       .then((res) => res.data.auth_url)
       .catch((err) => {
@@ -21,12 +17,12 @@ export const AuthenticationService = {
   },
 
   async callback(request: AuthCallbackRequest) {
-    return http
+    return authHttp
       .get<AuthCallbackResponse>('/auth/callback', { params: { ...request } })
       .then((res) => {
+        const authTokenStore = useAuthTokenStore()
         const resp = res.data
-        localStorage.setItem('access_token', resp.access_token)
-        localStorage.setItem('token_type', resp.token_type)
+        authTokenStore.setTokens(resp.token_type, resp.access_token)
         const authStore = useAuthStore()
         authStore.setUser(resp.access_token)
         return res.data
@@ -40,7 +36,7 @@ export const AuthenticationService = {
   },
 
   async refresh() {
-    return http
+    return authHttp
       .post<AuthCallbackResponse>('/auth/refresh')
       .then((res) => {
         return res.data
@@ -49,6 +45,8 @@ export const AuthenticationService = {
         if (err && err.status === 401) {
           const authStore = useAuthStore()
           authStore.remove()
+          const authTokenStore = useAuthTokenStore()
+          authTokenStore.remove()
         }
       })
   },
