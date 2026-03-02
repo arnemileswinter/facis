@@ -62,8 +62,7 @@ func main() {
 
 	_, err = nats.Connect(nats.DefaultURL)
 	if err != nil {
-		log.Fatalf(ctx, err, "Could not connect to nats service")
-		os.Exit(1)
+		log.Printf(ctx, "Nats support will be deactivated: Could not connect to nats service: %v", err)
 	}
 
 	// Initialize OIDC validator and JWT authenticator.
