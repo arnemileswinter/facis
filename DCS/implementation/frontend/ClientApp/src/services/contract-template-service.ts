@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { ContractTemplate } from '../models/contract-template'
+import type { ContractTemplate } from '@/models/contract-template'
 import type {
   ContractTemplateApproveRequest,
   ContractTemplateCreateRequest,
@@ -9,7 +9,7 @@ import type {
   ContractTemplateSearchRequest,
   ContractTemplateSubmitRequest,
   ContractTemplateUpdateRequest,
-} from '../models/requests/template-request'
+} from '@/models/requests/template-request'
 import type {
   ContractTemplateApproveResponse,
   ContractTemplateCreateResponse,
@@ -19,7 +19,7 @@ import type {
   ContractTemplateSearchResponse,
   ContractTemplateSubmitResponse,
   ContractTemplateUpdateResponse,
-} from '../models/responses/template-response'
+} from '@/models/responses/template-response'
 import { AuthenticationService } from './authentication-service'
 
 const API_BASE_URL = import.meta.env.DCS_API_BASE_URL
@@ -49,7 +49,9 @@ http.interceptors.response.use(
   (resp) => resp,
   (err) => {
     console.log('Reject:', err)
-    AuthenticationService.refresh()
+    if (err.status === 401) {
+      AuthenticationService.refresh()
+    }
   },
 )
 
