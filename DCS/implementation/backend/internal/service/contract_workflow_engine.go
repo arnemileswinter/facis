@@ -16,7 +16,7 @@ func NewContractWorkflowEngine(jwtAuth auth.JWTAuthenticator) contractworkflowen
 	return &contractWorkflowEnginesrvc{JWTAuthenticator: jwtAuth}
 }
 
-func (s *contractWorkflowEnginesrvc) Create(ctx context.Context, p *contractworkflowengine.CreatePayload) (res string, err error) {
+func (s *contractWorkflowEnginesrvc) Create(ctx context.Context, p *contractworkflowengine.ContractCreateRequest) (res *contractworkflowengine.ContractCreateResponse, err error) {
 	log.Printf(ctx, "contractWorkflowEngine.create")
 	return
 }

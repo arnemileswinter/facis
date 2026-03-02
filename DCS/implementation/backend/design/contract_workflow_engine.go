@@ -4,6 +4,30 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
+var ContractCreateRequest = Type("ContractCreateRequest", func() {
+	Description("Contract create request")
+
+	Token("token", String, "JWT token")
+
+	Attribute("contract_type", String, "The type of the template")
+
+	Attribute("name", String, "The name of the contract")
+	Attribute("description", String, "A description for that contract")
+	Attribute("contract_data", Any, "The template data of the contract")
+
+	Required("contract_type")
+})
+
+var ContractCreateResponse = Type("ContractCreateResponse", func() {
+	Description("Result for creating a contract")
+
+	Attribute("did", String, "Decentralized Identifier of the contract")
+	Attribute("document_number", Int, "The number of the contract")
+	Attribute("version", Int, "The version of the contract")
+
+	Required("did", "document_number", "version")
+})
+
 // Contract Workflow Engine Service  (/contract/...)
 var _ = Service("ContractWorkflowEngine", func() {
 	Description("Contract Workflow Engine APIs (/contract/...)")
@@ -13,13 +37,18 @@ var _ = Service("ContractWorkflowEngine", func() {
 		Meta("dcs:requirements", "DCS-IR-CWE-01", "DCS-IR-CWE-02")
 		Meta("dcs:cwe:components", "Contract Assembling")
 		Meta("dcs:ui", "Contract Creation")
+
 		Security(JWTAuth, func() {
 			Scope("Contract Creator")
 			Scope("Sys. Contract Creator")
 		})
-		Payload(func() {
-			Token("token", String, "JWT token")
-		})
+
+		Payload(ContractCreateRequest)
+		Result(ContractCreateResponse)
+
+		Error("bad_request", ErrorResult, "Bad request")
+		Error("internal_error", ErrorResult, "Internal server error")
+
 		HTTP(func() {
 			POST("/contract/create")
 			Response(StatusOK)
