@@ -18,7 +18,7 @@ type CreateEvent struct {
 	UpdatedAt      time.Time      `json:"updated_at"`
 	Name           *string        `json:"name"`
 	Description    *string        `json:"description"`
-	TemplateData   *datatype.JSON `json:"templatedata"`
+	TemplateData   *datatype.JSON `json:"template_data"`
 	OccurredAt     time.Time      `json:"occurred_at"`
 }
 
@@ -51,7 +51,7 @@ type SubmitEvent struct {
 	PreviousState  templatestate.TemplateState `json:"previous_state"`
 	NewState       templatestate.TemplateState `json:"new_state"`
 	SubmittedBy    string                      `json:"submitted_by"`
-	ActionFlag     *actionflag.ActionFlag      `json:"actionflag"`
+	ActionFlag     *actionflag.ActionFlag      `json:"action_flag"`
 	Comments       []string                    `json:"comments,omitempty"`
 	OccurredAt     time.Time                   `json:"occurred_at"`
 }
