@@ -54,7 +54,8 @@ type keycloakTokenResponse struct {
 }
 
 // Callback exchanges the authorization code for tokens.
-// The refresh_token cookie is set by a custom response encoder wrapper in http.go.
+// The refresh_token cookie is set by SetRefreshTokenInContext.
+// After setting the cookie, it redirects to /auth/success.
 func (s *authSvc) Callback(ctx context.Context, p *genauth.CallbackPayload) (*genauth.CallbackResult, error) {
 	log.Printf(ctx, "auth.callback")
 
@@ -64,13 +65,13 @@ func (s *authSvc) Callback(ctx context.Context, p *genauth.CallbackPayload) (*ge
 	}
 
 	// Stash the refresh token in context so the response encoder can set the cookie.
-	// This is picked up by the custom encoder wrapper in http.go.
+	// This is picked up by SetRefreshTokenInContext which sets the cookie immediately.
 	SetRefreshTokenInContext(ctx, tokenResp.RefreshToken)
 
+	// Redirect to frontend /auth/success
+	// The frontend will then call /auth/refresh to get the access token
 	return &genauth.CallbackResult{
-		AccessToken: tokenResp.AccessToken,
-		TokenType:   tokenResp.TokenType,
-		ExpiresIn:   tokenResp.ExpiresIn,
+		Location: "/auth/success",
 	}, nil
 }
 

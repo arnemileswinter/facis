@@ -1,5 +1,4 @@
 import authHttp from '@/api/auth-http'
-import type { AuthCallbackRequest } from '@/models/requests/auth-callback-request'
 import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
 import type { LoginResponse } from '@/models/responses/login-response'
 import { useAuthStore } from '@/stores/auth-store'
@@ -16,29 +15,15 @@ export const AuthenticationService = {
       })
   },
 
-  async callback(request: AuthCallbackRequest) {
+  async refresh() {
     return authHttp
-      .get<AuthCallbackResponse>('/auth/callback', { params: { ...request } })
+      .post<AuthCallbackResponse>('/auth/refresh')
       .then((res) => {
         const authTokenStore = useAuthTokenStore()
         const resp = res.data
         authTokenStore.setTokens(resp.token_type, resp.access_token)
         const authStore = useAuthStore()
         authStore.setUser(resp.access_token)
-        return res.data
-      })
-      .catch((err) => {
-        if (err && err.status === 401) {
-          console.log(err)
-          this.refresh()
-        }
-      })
-  },
-
-  async refresh() {
-    return authHttp
-      .post<AuthCallbackResponse>('/auth/refresh')
-      .then((res) => {
         return res.data
       })
       .catch((err) => {

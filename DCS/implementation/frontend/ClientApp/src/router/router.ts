@@ -1,12 +1,10 @@
-import { useAuthStore } from '@/stores/auth-store'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import TableView from '@/views/TableView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
-import { storeToRefs } from 'pinia'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import AuthCallbackView from '@/views/auth/AuthCallbackView.vue'
+import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -59,10 +57,10 @@ const routes: RouteRecordRaw[] = [
     meta: { name: 'Table', requiresAuth: false, title: 'DCS - Table' },
   },
   {
-    path: '/auth/callback',
-    name: 'auth.callback',
-    meta: { hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS - Auth Callback' },
-    component: AuthCallbackView,
+    path: '/auth/success',
+    name: 'auth.success',
+    meta: { hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS - Auth Success' },
+    component: AuthSuccessView,
   },
 ]
 
@@ -70,13 +68,5 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: routes,
 })
-
-// router.beforeEach((to, _from) => {
-//   const authStore = useAuthStore()
-//   const { isAuthenticated } = storeToRefs(authStore)
-//   if (to.meta.requiresAuth && !isAuthenticated.value) {
-//     return { name: 'home' }
-//   }
-// })
 
 export { router }
