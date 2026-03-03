@@ -11,6 +11,7 @@ usage() {
   echo ""
   echo "Optional environment variables:"
   echo "  OIDC_REDIRECT_URI - Redirect URI for OIDC flow (default: http://localhost:8991)"
+  echo "  API_PATH_PREFIX - API path prefix forwarded by reverse proxy (default: empty)"
   exit 1
 }
 
@@ -24,6 +25,7 @@ URL_PATH="$5"
 OIDC_ISSUER_URL="$6"
 OIDC_CLIENT_ID="$7"
 OIDC_REDIRECT_URI="${OIDC_REDIRECT_URI:-http://localhost:8991}"
+API_PATH_PREFIX="${API_PATH_PREFIX:-}"
 
 # Image Registry Configuration
 DOCKER_REGISTRY="${DOCKER_REGISTRY:-}"
@@ -67,6 +69,7 @@ log "ℹ️ OIDC Configuration:"
 log "  - Issuer URL (for backend): $OIDC_ISSUER_URL"
 log "  - Client ID: $OIDC_CLIENT_ID"
 log "  - Redirect URI: $OIDC_REDIRECT_URI"
+log "  - API Path Prefix: ${API_PATH_PREFIX:-<empty>}"
 
 if [[ ! -f "$KUBECONFIG" ]]; then
   log "❌ Kubeconfig file not found: $KUBECONFIG"
@@ -144,6 +147,7 @@ sed -i \
   -e "s|\[oidc-issuer-url\]|${OIDC_ISSUER_URL}|g" \
   -e "s|\[oidc-client-id\]|${OIDC_CLIENT_ID}|g" \
   -e "s|\[oidc-redirect-uri\]|${OIDC_REDIRECT_URI}|g" \
+  -e "s|\[api-path-prefix\]|${API_PATH_PREFIX}|g" \
   -e "s|\[registry\]|${IMAGE_NAME}|g" \
   -e "s|tag: \"latest\"|tag: \"${DOCKER_TAG}\"|g" \
   -e "s|enabled: false|enabled: ${CUSTOM_CA_ENABLED}|g" \

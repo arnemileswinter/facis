@@ -149,3 +149,7 @@ oidc:
   issuerURL: "[oidc-issuer-url]"
   clientID: "[oidc-client-id]"
   redirectURI: "[oidc-redirect-uri]"
+
+# Backend API routing configuration
+api:
+  pathPrefix: "[api-path-prefix]"

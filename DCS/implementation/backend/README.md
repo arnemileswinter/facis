@@ -63,6 +63,7 @@ go test -v ./...
 ### Environment Variables
 ```
 export DATABASE_URL="user=username password=password dbname=postgres sslmode=disable"
+export API_PATH_PREFIX="/api"
 ```
 
 ```

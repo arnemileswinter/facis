@@ -3,7 +3,12 @@ package service
 import (
 	"context"
 	"net/http"
+	"os"
 )
+
+const refreshCookiePath = "/auth/refresh"
+const apiPathPrefixEnv = "API_PATH_PREFIX"
+const defaultAPIPathPrefix = ""
 
 // contextKey is a private type for context keys in this package.
 type contextKey int
@@ -46,13 +51,18 @@ func SetRefreshTokenInContext(ctx context.Context, refreshToken string) {
 	if !ok || refreshToken == "" {
 		return
 	}
+	apiPathPrefix := defaultAPIPathPrefix
+	if configuredPrefix, ok := os.LookupEnv(apiPathPrefixEnv); ok {
+		apiPathPrefix = configuredPrefix
+	}
+	cookiePath := apiPathPrefix + refreshCookiePath
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
-		Path:     "/auth/refresh",
+		Path:     cookiePath,
 		MaxAge:   7 * 24 * 60 * 60, // 7 days
 	})
 }

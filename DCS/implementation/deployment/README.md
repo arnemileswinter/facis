@@ -521,6 +521,11 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
   - Used by the login and callback handlers to build the authorization and token exchange URLs
   - Note: `deploy.sh` defaults to `http://localhost:8991` if unset, but the backend requires it explicitly
 
+- **`API_PATH_PREFIX`** - Optional API base path prefix added by reverse proxies
+  - Default: empty
+  - Example: `/api` or `/gateway/dcs`
+  - Used e.g. by backend cookie path construction: `<API_PATH_PREFIX>/auth/refresh`
+
 **Example:**
 ```bash
 # Development deployment with shared hostname
