@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@template-repository/models/template-draft-store"
 import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition, MetaData } from "@template-repository/models/contract-templace"
 import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock } from "@template-repository/models/contract-templace"
-import type { ContractTemplateCreateRequest } from '@/models/requests/template-request'
+import type { ContractTemplateCreateRequest, ContractTemplateUpdateRequest } from '@/models/requests/template-request'
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -14,7 +14,9 @@ const defaultState: Readonly<TemplateDraftState> = {
   semanticConditions: [],
   customMetaData: [],
   templateType: TemplateType.subContract,
-  state: null
+  state: null,
+  document_number: null,
+  version: null,
 }
 
 export const useTemplateDraftStore = defineStore(storeId, {
@@ -37,6 +39,23 @@ export const useTemplateDraftStore = defineStore(storeId, {
           semanticConditions: this.semanticConditions,
           customMetaData: this.customMetaData,
         }
+      }
+    },
+    templateUpdateRequestData(): ContractTemplateUpdateRequest | null {
+      if (!this.did || this.version === null || this.document_number === null) return null
+      return {
+        name: this.name,
+        description: this.description,
+        template_data: {
+          documentOutline: this.documentOutline,
+          documentBlocks: this.documentBlocks,
+          semanticConditions: this.semanticConditions,
+          customMetaData: this.customMetaData,
+        },
+        updated_at: new Date().toISOString(),
+        version: this.version,
+        document_number: this.document_number,
+        did: this.did,
       }
     }
   },

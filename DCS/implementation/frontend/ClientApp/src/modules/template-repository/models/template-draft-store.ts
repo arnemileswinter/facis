@@ -18,6 +18,8 @@ interface TemplateDraftState {
   customMetaData: MetaData[]
   templateType: TemplateTypeValue
   state: ContractTemplateState | null
+  document_number: number | null
+  version: number | null
 }
 
 /** Payload for adding a new block. */
