@@ -132,6 +132,7 @@ import BuilderPreviewDialog from '@template-repository/components/builder-editor
 import TemplateTypeSelect from '@template-repository/components/TemplateTypeSelect.vue'
 import { storeToRefs } from 'pinia'
 import { ContractTemplateService } from '@/services/contract-template-service'
+import { useToNumber } from '@vueuse/core'
 
 const router = useRouter()
 const route = useRoute()
@@ -155,32 +156,32 @@ watch(isEditMode, (isEdit) => {
     if (isEdit) {
         hasChosenType.value = true
         // load template data into draftStore
-        const did = route.params.did
-        const version = route.query.version
-        const document_number = route.query.document_number
-        if (typeof did === 'string' && typeof version === 'number' && typeof document_number === 'number') {
-            ContractTemplateService.retrieveById({ did, version, document_number })
-                .then(template => {
-                    if (!template) draftStore.reset()
-                    else {
-                        draftStore.reset({
-                            did: template.did,
-                            name: template.name,
-                            description: template.description,
-                            documentOutline: template.template_data?.documentOutline ?? [],
-                            documentBlocks: template.template_data?.documentBlocks ?? [],
-                            semanticConditions: template.template_data?.semanticConditions ?? [],
-                            customMetaData: template.template_data?.customMetaData ?? [],
-                            templateType: template.template_type,
-                            state: template.state
-
-                        })
-                    }
-                })
-                .catch(error => {
-                    console.error('Failed to load template for editing', error)
-                })
-        }
+        const did = `${route.params.did}`
+        const version = useToNumber(`${route.query.version}`).value
+        const document_number = useToNumber(`${route.query.document_number}`).value
+        ContractTemplateService.retrieveById({ did, version, document_number })
+            .then(template => {
+                if (!template) draftStore.reset()
+                else {
+                    draftStore.reset({
+                        did: template.did,
+                        name: template.name,
+                        description: template.description,
+                        documentOutline: template.template_data?.documentOutline ?? [],
+                        documentBlocks: template.template_data?.documentBlocks ?? [],
+                        semanticConditions: template.template_data?.semanticConditions ?? [],
+                        customMetaData: template.template_data?.customMetaData ?? [],
+                        templateType: template.template_type,
+                        state: template.state,
+                        version: template.version,
+                        document_number: template.document_number
+                    })
+                }
+            })
+            .catch(error => {
+                console.error('Failed to load template for editing', error)
+            })
+        
     }
     else { draftStore.reset(); hasChosenType.value = false }
 }, { immediate: true })
@@ -192,11 +193,12 @@ const submit = async () => {
     try {
         if (!draftStore.hasTemplateId) {
             const data = draftStore.templateCreateRequestData
-            console.log('Publishing Template to Repository...', data)
-            const response = await ContractTemplateService.create(data)
-            console.log('Template created:', response)
+            await ContractTemplateService.create(data)
         } else {
-            // TODO
+            const data = draftStore.templateUpdateRequestData
+            if (data) {
+                await ContractTemplateService.update(data)
+            }
         }
         router.push({ name: 'templates.list' })
     } catch (error) {
