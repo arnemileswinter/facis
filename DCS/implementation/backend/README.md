@@ -72,7 +72,7 @@ export API_PATH_PREFIX="/api"
 export OIDC_ISSUER_URL="https://keycloak.example.com/realms/yourrealm"
 export OIDC_CLIENT_ID="digital-contracting-service"
 export OIDC_REDIRECT_URI="http://localhost:5173/api/auth/callback"
-export OIDC_LOGOUT_REDIRECT_URI="http://localhost:5173/auth/logout-complete"
+export OIDC_LOGOUT_REDIRECT_URI="http://localhost:8991/api/auth/logout-complete"
 ```
 
 ### Start the DCS backend service

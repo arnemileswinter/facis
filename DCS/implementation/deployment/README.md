@@ -389,12 +389,12 @@ For production deployments:
 ### Keycloak Configuration
 - Use a properly secured external Keycloak instance (not the quickstart)
 - Configure valid redirect URIs in your client settings:
-  - **Valid Redirect URIs**: Add your login callback URI
+  - **Valid Redirect URIs**: For login callback (backend)
     - Add: `https://<your-domain>/<path>/api/auth/callback`
     - Example: `https://example.com/dcs/api/auth/callback`
-  - **Valid Post Logout Redirect URIs**: Add your logout completion URI
-    - Add: `https://<your-domain>/<path>/auth/logout-complete`
-    - Example: `https://example.com/dcs/auth/logout-complete`
+  - **Valid Post Logout Redirect URIs**: For logout callback (backend)
+    - Add: `https://<your-domain>/<path>/api/auth/logout-complete`
+    - Example: `https://example.com/dcs/api/auth/logout-complete`
 - Enable **Client authentication**, **Authorization**, **Standard flow enabled**
 - Consider using a service account with proper RBAC for automation
 
@@ -526,13 +526,13 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
   - Note: `deploy.sh` defaults to `http://localhost:8991` if unset, but the backend requires it explicitly
 
 - **`OIDC_LOGOUT_REDIRECT_URI`** - The post-logout redirect URI when user logs out
-  - **Optional** - if not set, defaults to `https://<domain>/<path>/auth/logout-complete`
-  - Example: `https://xfsc.local/dcs/auth/logout-complete` or `http://localhost:5173/auth/logout-complete`
+  - **Optional** - if not set, defaults to `https://<domain>/<path>/api/auth/logout-complete`
+  - This is a **backend URL** where Keycloak redirects after logout
+  - Example: `https://example.com/api/dcs/auth/logout-complete` or `http://localhost:8991/api/auth/logout-complete`
   - Must be registered as a valid post-logout redirect URI in your Keycloak client configuration
-  - This is where Keycloak redirects after the user confirms logout
-  - The frontend will then call the backend to finalize cleanup (revoke token, clear cookie)
-  - **In development**: Add both to Keycloak - the login redirect URI and the logout redirect URI
-  - **In production**: Ensure both URIs are registered in the Keycloak client settings
+  - The backend's `/api/auth/logout-complete` endpoint receives this redirect, clears the cookie, and redirects to frontend home
+  - **In development**: Add the backend logout URL to Keycloak
+  - **In production**: Ensure the backend logout URL is registered in the Keycloak client settings
 
 - **`API_PATH_PREFIX`** - Optional API base path prefix added by reverse proxies
   - Default: empty

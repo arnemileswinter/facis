@@ -104,8 +104,7 @@ func (s *authSvc) Refresh(ctx context.Context) (*genauth.RefreshResult, error) {
 	}, nil
 }
 
-// Logout returns the Keycloak logout URL without clearing anything yet.
-// The cookie will be cleared when the user returns from Keycloak logout.
+// Logout redirects to the Keycloak logout endpoint.
 func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
 	log.Printf(ctx, "auth.logout")
 
@@ -121,7 +120,7 @@ func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
 	logoutURL := s.oidcIssuerURL + "/protocol/openid-connect/logout?" + params.Encode()
 
 	return &genauth.LogoutResult{
-		LogoutURL: logoutURL,
+		Location: logoutURL,
 	}, nil
 }
 
@@ -223,25 +222,28 @@ func (s *authSvc) revokeToken(ctx context.Context, refreshToken string) error {
 }
 
 // LogoutComplete finalizes logout by revoking the refresh token and clearing the cookie.
-// This is called after the user returns from Keycloak logout.
-func (s *authSvc) LogoutComplete(ctx context.Context) error {
-log.Printf(ctx, "auth.logout-complete")
+// This endpoint is called by Keycloak after the user confirms logout.
+func (s *authSvc) LogoutComplete(ctx context.Context) (*genauth.LogoutCompleteResult, error) {
+	log.Printf(ctx, "auth.logout-complete")
 
-// Extract *http.Request from context
-r, ok := HTTPRequestFromContext(ctx)
-if !ok {
-return fmt.Errorf("missing HTTP request in context")
-}
+	// Extract *http.Request from context
+	r, ok := HTTPRequestFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("missing HTTP request in context")
+	}
 
-// Try to get and revoke the refresh token
-cookie, err := r.Cookie("refresh_token")
-if err == nil && cookie.Value != "" {
-// Best effort: revoke the token with Keycloak
-_ = s.revokeToken(ctx, cookie.Value)
-}
+	// Try to get and revoke the refresh token
+	cookie, err := r.Cookie("refresh_token")
+	if err == nil && cookie.Value != "" {
+		// Best effort: revoke the token with Keycloak
+		_ = s.revokeToken(ctx, cookie.Value)
+	}
 
-// Clear the refresh token cookie
-ClearRefreshTokenCookie(ctx)
+	// Clear the refresh token cookie
+	ClearRefreshTokenCookie(ctx)
 
-return nil
+	// Redirect to home
+	return &genauth.LogoutCompleteResult{
+		Location: "/",
+	}, nil
 }
