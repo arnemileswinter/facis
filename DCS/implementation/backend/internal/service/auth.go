@@ -17,17 +17,19 @@ import (
 
 // authSvc implements the generated auth.Service interface.
 type authSvc struct {
-	oidcIssuerURL string
-	oidcClientID  string
-	redirectURI   string
+	oidcIssuerURL     string
+	oidcClientID      string
+	redirectURI       string
+	logoutRedirectURI string
 }
 
 // NewAuth returns the Auth service implementation.
 func NewAuth() genauth.Service {
 	return &authSvc{
-		oidcIssuerURL: os.Getenv("OIDC_ISSUER_URL"),
-		oidcClientID:  os.Getenv("OIDC_CLIENT_ID"),
-		redirectURI:   os.Getenv("OIDC_REDIRECT_URI"),
+		oidcIssuerURL:     os.Getenv("OIDC_ISSUER_URL"),
+		oidcClientID:      os.Getenv("OIDC_CLIENT_ID"),
+		redirectURI:       os.Getenv("OIDC_REDIRECT_URI"),
+		logoutRedirectURI: os.Getenv("OIDC_LOGOUT_REDIRECT_URI"),
 	}
 }
 
@@ -54,7 +56,8 @@ type keycloakTokenResponse struct {
 }
 
 // Callback exchanges the authorization code for tokens.
-// The refresh_token cookie is set by a custom response encoder wrapper in http.go.
+// The refresh_token cookie is set by SetRefreshTokenInContext.
+// After setting the cookie, it redirects to /auth/success.
 func (s *authSvc) Callback(ctx context.Context, p *genauth.CallbackPayload) (*genauth.CallbackResult, error) {
 	log.Printf(ctx, "auth.callback")
 
@@ -64,13 +67,13 @@ func (s *authSvc) Callback(ctx context.Context, p *genauth.CallbackPayload) (*ge
 	}
 
 	// Stash the refresh token in context so the response encoder can set the cookie.
-	// This is picked up by the custom encoder wrapper in http.go.
+	// This is picked up by SetRefreshTokenInContext which sets the cookie immediately.
 	SetRefreshTokenInContext(ctx, tokenResp.RefreshToken)
 
+	// Redirect to frontend /auth/success
+	// The frontend will then call /auth/refresh to get the access token
 	return &genauth.CallbackResult{
-		AccessToken: tokenResp.AccessToken,
-		TokenType:   tokenResp.TokenType,
-		ExpiresIn:   tokenResp.ExpiresIn,
+		Location: "/auth/success",
 	}, nil
 }
 
@@ -98,6 +101,26 @@ func (s *authSvc) Refresh(ctx context.Context) (*genauth.RefreshResult, error) {
 		AccessToken: tokenResp.AccessToken,
 		TokenType:   tokenResp.TokenType,
 		ExpiresIn:   tokenResp.ExpiresIn,
+	}, nil
+}
+
+// Logout redirects to the Keycloak logout endpoint.
+func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
+	log.Printf(ctx, "auth.logout")
+
+	// Build Keycloak logout URL with configured post-logout redirect
+	postLogoutRedirect := "/"
+	if s.logoutRedirectURI != "" {
+		postLogoutRedirect = s.logoutRedirectURI
+	}
+
+	params := url.Values{}
+	params.Set("client_id", s.oidcClientID)
+	params.Set("post_logout_redirect_uri", postLogoutRedirect)
+	logoutURL := s.oidcIssuerURL + "/protocol/openid-connect/logout?" + params.Encode()
+
+	return &genauth.LogoutResult{
+		Location: logoutURL,
 	}, nil
 }
 
@@ -170,4 +193,57 @@ func (s *authSvc) refreshAccessToken(ctx context.Context, refreshToken string) (
 		return nil, fmt.Errorf("%s: %s", tokenResp.Error, tokenResp.ErrorDesc)
 	}
 	return &tokenResp, nil
+}
+
+// revokeToken revokes a refresh token with Keycloak.
+func (s *authSvc) revokeToken(ctx context.Context, refreshToken string) error {
+	revokeEndpoint := s.oidcIssuerURL + "/protocol/openid-connect/revoke"
+	data := url.Values{}
+	data.Set("token", refreshToken)
+	data.Set("client_id", s.oidcClientID)
+	data.Set("token_type_hint", "refresh_token")
+
+	req, err := http.NewRequestWithContext(ctx, "POST", revokeEndpoint, strings.NewReader(data.Encode()))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("revoke failed with status %d", resp.StatusCode)
+	}
+	return nil
+}
+
+// LogoutComplete finalizes logout by revoking the refresh token and clearing the cookie.
+// This endpoint is called by Keycloak after the user confirms logout.
+func (s *authSvc) LogoutComplete(ctx context.Context) (*genauth.LogoutCompleteResult, error) {
+	log.Printf(ctx, "auth.logout-complete")
+
+	// Extract *http.Request from context
+	r, ok := HTTPRequestFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("missing HTTP request in context")
+	}
+
+	// Try to get and revoke the refresh token
+	cookie, err := r.Cookie("refresh_token")
+	if err == nil && cookie.Value != "" {
+		// Best effort: revoke the token with Keycloak
+		_ = s.revokeToken(ctx, cookie.Value)
+	}
+
+	// Clear the refresh token cookie
+	ClearRefreshTokenCookie(ctx)
+
+	// Redirect to home
+	return &genauth.LogoutCompleteResult{
+		Location: "/",
+	}, nil
 }

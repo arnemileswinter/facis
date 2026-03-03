@@ -55,6 +55,10 @@ spec:
               value: {{ .Values.oidc.clientID | quote }}
             - name: OIDC_REDIRECT_URI
               value: {{ .Values.oidc.redirectURI | quote }}
+            - name: OIDC_LOGOUT_REDIRECT_URI
+              value: {{ .Values.oidc.logoutRedirectURI | quote }}
+            - name: API_PATH_PREFIX
+              value: {{ .Values.api.pathPrefix | quote }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

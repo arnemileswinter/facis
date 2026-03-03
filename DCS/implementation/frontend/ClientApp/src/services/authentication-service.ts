@@ -1,5 +1,4 @@
 import authHttp from '@/api/auth-http'
-import type { AuthCallbackRequest } from '@/models/requests/auth-callback-request'
 import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
 import type { LoginResponse } from '@/models/responses/login-response'
 import { useAuthStore } from '@/stores/auth-store'
@@ -16,9 +15,9 @@ export const AuthenticationService = {
       })
   },
 
-  async callback(request: AuthCallbackRequest) {
+  async refresh() {
     return authHttp
-      .get<AuthCallbackResponse>('/auth/callback', { params: { ...request } })
+      .post<AuthCallbackResponse>('/auth/refresh')
       .then((res) => {
         const authTokenStore = useAuthTokenStore()
         const resp = res.data
@@ -29,25 +28,23 @@ export const AuthenticationService = {
       })
       .catch((err) => {
         if (err && err.status === 401) {
-          console.log(err)
-          this.refresh()
-        }
-      })
-  },
-
-  async refresh() {
-    return authHttp
-      .post<AuthCallbackResponse>('/auth/refresh')
-      .then((res) => {
-        return res.data
-      })
-      .catch((err) => {
-        if (err && err.status === 401) {
           const authStore = useAuthStore()
           authStore.remove()
           const authTokenStore = useAuthTokenStore()
           authTokenStore.remove()
         }
       })
+  },
+
+  logout() {
+    // Clear local state first
+    const authStore = useAuthStore()
+    authStore.remove()
+    const authTokenStore = useAuthTokenStore()
+    authTokenStore.remove()
+
+    // Redirect to backend logout - backend handles Keycloak redirect
+    // and will eventually redirect back to home after clearing cookie
+    window.location.href = '/api/auth/logout'
   },
 }

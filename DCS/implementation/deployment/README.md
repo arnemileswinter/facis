@@ -389,8 +389,12 @@ For production deployments:
 ### Keycloak Configuration
 - Use a properly secured external Keycloak instance (not the quickstart)
 - Configure valid redirect URIs in your client settings:
-  - Add: `https://<your-domain>/<path>/*`
-  - Example: `https://example.com/dcs/*`
+  - **Valid Redirect URIs**: For login callback (backend)
+    - Add: `https://<your-domain>/<path>/api/auth/callback`
+    - Example: `https://example.com/dcs/api/auth/callback`
+  - **Valid Post Logout Redirect URIs**: For logout callback (backend)
+    - Add: `https://<your-domain>/<path>/api/auth/logout-complete`
+    - Example: `https://example.com/dcs/api/auth/logout-complete`
 - Enable **Client authentication**, **Authorization**, **Standard flow enabled**
 - Consider using a service account with proper RBAC for automation
 
@@ -520,6 +524,20 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
   - Must be registered as a valid redirect URI in your Keycloak client configuration
   - Used by the login and callback handlers to build the authorization and token exchange URLs
   - Note: `deploy.sh` defaults to `http://localhost:8991` if unset, but the backend requires it explicitly
+
+- **`OIDC_LOGOUT_REDIRECT_URI`** - The post-logout redirect URI when user logs out
+  - **Optional** - if not set, defaults to `https://<domain>/<path>/api/auth/logout-complete`
+  - This is a **backend URL** where Keycloak redirects after logout
+  - Example: `https://example.com/api/dcs/auth/logout-complete` or `http://localhost:8991/api/auth/logout-complete`
+  - Must be registered as a valid post-logout redirect URI in your Keycloak client configuration
+  - The backend's `/api/auth/logout-complete` endpoint receives this redirect, clears the cookie, and redirects to frontend home
+  - **In development**: Add the backend logout URL to Keycloak
+  - **In production**: Ensure the backend logout URL is registered in the Keycloak client settings
+
+- **`API_PATH_PREFIX`** - Optional API base path prefix added by reverse proxies
+  - Default: empty
+  - Example: `/api` or `/gateway/dcs`
+  - Used e.g. by backend cookie path construction: `<API_PATH_PREFIX>/auth/refresh`
 
 **Example:**
 ```bash

@@ -23,22 +23,22 @@ var _ = Service("Auth", func() {
 	})
 
 	Method("callback", func() {
-		Description("Handles the OIDC callback, exchanges authorization code for tokens.")
+		Description("Handles the OIDC callback, exchanges authorization code for tokens, sets refresh token cookie, and redirects to /auth/success.")
 		NoSecurity()
 		Payload(func() {
 			Attribute("code", String, "Authorization code from OIDC provider")
 			Required("code")
 		})
 		Result(func() {
-			Attribute("access_token", String, "JWT access token")
-			Attribute("token_type", String, "Token type (Bearer)")
-			Attribute("expires_in", Int, "Token expiry in seconds")
-			Required("access_token", "token_type", "expires_in")
+			Attribute("location", String, "Redirect location")
+			Required("location")
 		})
 		HTTP(func() {
 			GET("/auth/callback")
 			Param("code")
-			Response(StatusOK)
+			Response(StatusFound, func() {
+				Header("location:Location")
+			})
 		})
 	})
 
@@ -54,6 +54,36 @@ var _ = Service("Auth", func() {
 		HTTP(func() {
 			POST("/auth/refresh")
 			Response(StatusOK)
+		})
+	})
+
+	Method("logout", func() {
+		Description("Initiates logout by redirecting to Keycloak logout endpoint.")
+		NoSecurity()
+		Result(func() {
+			Attribute("location", String, "Redirect location")
+			Required("location")
+		})
+		HTTP(func() {
+			GET("/auth/logout")
+			Response(StatusFound, func() {
+				Header("location:Location")
+			})
+		})
+	})
+
+	Method("logoutComplete", func() {
+		Description("Keycloak logout callback. Clears refresh token cookie and redirects to home.")
+		NoSecurity()
+		Result(func() {
+			Attribute("location", String, "Redirect location")
+			Required("location")
+		})
+		HTTP(func() {
+			GET("/auth/logout-complete")
+			Response(StatusFound, func() {
+				Header("location:Location")
+			})
 		})
 	})
 })
