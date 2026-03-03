@@ -62,10 +62,11 @@ func main() {
 	}
 	defer db.Close()
 
-	_, err = nats.Connect(nats.DefaultURL)
+	natsClient, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
 		log.Printf(ctx, "Nats support will be deactivated: Could not connect to nats service: %v", err)
 	}
+	defer natsClient.Close()
 
 	// Initialize OIDC validator and JWT authenticator.
 	oidcIssuerURL := os.Getenv("OIDC_ISSUER_URL")
