@@ -35,6 +35,8 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
+import { AuthenticationService } from '@/services/authentication-service'
+
 const pageStore = usePageStore()
 const { isSidebarCollapsed, pageSidebarId } = storeToRefs(pageStore)
 const { toggleSidebar } = pageStore
@@ -43,7 +45,6 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 function logout() {
-  authStore.remove()
-  router.push({ name: 'home' })
+  AuthenticationService.logout()
 }
 </script>

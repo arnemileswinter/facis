@@ -17,7 +17,7 @@ onMounted(async () => {
 })
 
 function logout() {
-  router.push({ name: 'login' })
+  AuthenticationService.logout()
 }
 </script>
 

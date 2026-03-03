@@ -56,4 +56,26 @@ var _ = Service("Auth", func() {
 			Response(StatusOK)
 		})
 	})
+
+	Method("logout", func() {
+		Description("Returns the Keycloak logout URL and clears the refresh token cookie.")
+		NoSecurity()
+		Result(func() {
+			Attribute("logout_url", String, "Keycloak logout URL")
+			Required("logout_url")
+		})
+		HTTP(func() {
+			GET("/auth/logout")
+			Response(StatusOK)
+		})
+	})
+
+	Method("logoutComplete", func() {
+		Description("Finalizes logout by clearing the refresh token cookie and revoking the token.")
+		NoSecurity()
+		HTTP(func() {
+			GET("/auth/logout-complete")
+			Response(StatusOK)
+		})
+	})
 })

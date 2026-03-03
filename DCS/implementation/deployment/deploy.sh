@@ -11,6 +11,7 @@ usage() {
   echo ""
   echo "Optional environment variables:"
   echo "  OIDC_REDIRECT_URI - Redirect URI for OIDC flow (default: http://localhost:8991)"
+  echo "  OIDC_LOGOUT_REDIRECT_URI - Logout redirect URI (default: same as frontend URL)"
   echo "  API_PATH_PREFIX - API path prefix forwarded by reverse proxy (default: empty)"
   exit 1
 }
@@ -25,7 +26,13 @@ URL_PATH="$5"
 OIDC_ISSUER_URL="$6"
 OIDC_CLIENT_ID="$7"
 OIDC_REDIRECT_URI="${OIDC_REDIRECT_URI:-http://localhost:8991}"
+OIDC_LOGOUT_REDIRECT_URI="${OIDC_LOGOUT_REDIRECT_URI:-}"
 API_PATH_PREFIX="${API_PATH_PREFIX:-}"
+
+# If OIDC_LOGOUT_REDIRECT_URI is not set, derive it from DOMAIN and PATH
+if [[ -z "$OIDC_LOGOUT_REDIRECT_URI" ]]; then
+  OIDC_LOGOUT_REDIRECT_URI="https://${DOMAIN}/${URL_PATH}/auth/logout-complete"
+fi
 
 # Image Registry Configuration
 DOCKER_REGISTRY="${DOCKER_REGISTRY:-}"
@@ -69,6 +76,7 @@ log "ℹ️ OIDC Configuration:"
 log "  - Issuer URL (for backend): $OIDC_ISSUER_URL"
 log "  - Client ID: $OIDC_CLIENT_ID"
 log "  - Redirect URI: $OIDC_REDIRECT_URI"
+log "  - Logout Redirect URI: $OIDC_LOGOUT_REDIRECT_URI"
 log "  - API Path Prefix: ${API_PATH_PREFIX:-<empty>}"
 
 if [[ ! -f "$KUBECONFIG" ]]; then
@@ -147,6 +155,7 @@ sed -i \
   -e "s|\[oidc-issuer-url\]|${OIDC_ISSUER_URL}|g" \
   -e "s|\[oidc-client-id\]|${OIDC_CLIENT_ID}|g" \
   -e "s|\[oidc-redirect-uri\]|${OIDC_REDIRECT_URI}|g" \
+  -e "s|\[oidc-logout-redirect-uri\]|${OIDC_LOGOUT_REDIRECT_URI}|g" \
   -e "s|\[api-path-prefix\]|${API_PATH_PREFIX}|g" \
   -e "s|\[registry\]|${IMAGE_NAME}|g" \
   -e "s|tag: \"latest\"|tag: \"${DOCKER_TAG}\"|g" \
@@ -220,6 +229,8 @@ echo ""
 log "ℹ️ Before accessing the service, ensure Keycloak is configured:"
 log "   1. OIDC Issuer: ${OIDC_ISSUER_URL}"
 log "   2. Client ID: ${OIDC_CLIENT_ID}"
-log "   3. Create users and assign roles in Keycloak admin console"
+log "   3. Valid Redirect URI: ${OIDC_REDIRECT_URI}"
+log "   4. Valid post logout redirect URI: ${OIDC_LOGOUT_REDIRECT_URI}"
+log "   5. Create users and assign roles in Keycloak admin console"
 log ""
 log "ℹ️ See README.md for detailed Keycloak setup instructions"

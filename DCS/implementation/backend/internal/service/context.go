@@ -66,3 +66,25 @@ func SetRefreshTokenInContext(ctx context.Context, refreshToken string) {
 		MaxAge:   7 * 24 * 60 * 60, // 7 days
 	})
 }
+
+// ClearRefreshTokenCookie clears the refresh token cookie by setting MaxAge to -1.
+func ClearRefreshTokenCookie(ctx context.Context) {
+w, ok := ResponseWriterFromContext(ctx)
+if !ok {
+return
+}
+apiPathPrefix := defaultAPIPathPrefix
+if configuredPrefix, ok := os.LookupEnv(apiPathPrefixEnv); ok {
+apiPathPrefix = configuredPrefix
+}
+cookiePath := apiPathPrefix + refreshCookiePath
+http.SetCookie(w, &http.Cookie{
+Name:     "refresh_token",
+Value:    "",
+HttpOnly: true,
+Secure:   true,
+SameSite: http.SameSiteLaxMode,
+Path:     cookiePath,
+MaxAge:   -1, // Delete the cookie
+})
+}

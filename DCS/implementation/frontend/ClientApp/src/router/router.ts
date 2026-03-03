@@ -5,6 +5,7 @@ import TableView from '@/views/TableView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
+import LogoutCompleteView from '@/views/auth/LogoutCompleteView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -61,6 +62,12 @@ const routes: RouteRecordRaw[] = [
     name: 'auth.success',
     meta: { hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS - Auth Success' },
     component: AuthSuccessView,
+  },
+  {
+    path: '/auth/logout-complete',
+    name: 'auth.logout-complete',
+    meta: { hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS - Logout Complete' },
+    component: LogoutCompleteView,
   },
 ]
 

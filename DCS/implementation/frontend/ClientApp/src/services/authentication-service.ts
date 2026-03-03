@@ -35,4 +35,36 @@ export const AuthenticationService = {
         }
       })
   },
+
+  async logout() {
+    try {
+      const response = await authHttp.get<{ logout_url: string }>('/auth/logout')
+      const logoutUrl = response.data.logout_url
+      
+      // Clear local state first (but keep cookie for now)
+      const authStore = useAuthStore()
+      authStore.remove()
+      const authTokenStore = useAuthTokenStore()
+      authTokenStore.remove()
+      
+      // Redirect to Keycloak logout
+      window.location.href = logoutUrl
+    } catch (err) {
+      console.error('Logout Error:', err)
+      // Fallback: clear local state and redirect to home
+      const authStore = useAuthStore()
+      authStore.remove()
+      const authTokenStore = useAuthTokenStore()
+      authTokenStore.remove()
+      window.location.href = '/'
+    }
+  },
+
+  async logoutComplete() {
+    try {
+      await authHttp.get('/auth/logout-complete')
+    } catch (err) {
+      console.error('Logout complete error:', err)
+    }
+  },
 }
