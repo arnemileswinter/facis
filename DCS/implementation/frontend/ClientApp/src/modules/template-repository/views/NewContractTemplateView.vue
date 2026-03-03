@@ -152,7 +152,36 @@ function onTemplateTypeChosen(value: typeof templateType.value) {
 }
 
 watch(isEditMode, (isEdit) => {
-    if (isEdit) hasChosenType.value = true
+    if (isEdit) {
+        hasChosenType.value = true
+        // load template data into draftStore
+        const did = route.params.did
+        const version = route.query.version
+        const document_number = route.query.document_number
+        if (typeof did === 'string' && typeof version === 'number' && typeof document_number === 'number') {
+            ContractTemplateService.retrieveById({ did, version, document_number })
+                .then(template => {
+                    if (!template) draftStore.reset()
+                    else {
+                        draftStore.reset({
+                            did: template.did,
+                            name: template.name,
+                            description: template.description,
+                            documentOutline: template.template_data?.documentOutline ?? [],
+                            documentBlocks: template.template_data?.documentBlocks ?? [],
+                            semanticConditions: template.template_data?.semanticConditions ?? [],
+                            customMetaData: template.template_data?.customMetaData ?? [],
+                            templateType: template.template_type,
+                            state: template.state
+
+                        })
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load template for editing', error)
+                })
+        }
+    }
     else { draftStore.reset(); hasChosenType.value = false }
 }, { immediate: true })
 
