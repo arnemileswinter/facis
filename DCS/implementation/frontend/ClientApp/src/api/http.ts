@@ -16,6 +16,8 @@ http.interceptors.request.use(
     const { isAuthSet, getAuthenticationHeader } = storeToRefs(tokenStore)
     if (isAuthSet.value) {
       config.headers.Authorization = getAuthenticationHeader.value
+    } else {
+      delete config.headers.Authorization
     }
     return config
   },
@@ -24,9 +26,12 @@ http.interceptors.request.use(
 
 http.interceptors.response.use(
   (resp) => resp,
-  (err) => {
+  async (err) => {
     if (err.status === 401) {
-      AuthenticationService.refresh()
+      const res = await AuthenticationService.refresh()
+      if (res) {
+        return http(err.config)
+      }
     }
     return Promise.reject(err)
   },
