@@ -9,6 +9,8 @@ import type {
 
 interface TemplateDraftState {
   did: string | null
+  name: string
+  description: string
   documentOutline: DocumentOutline
   documentBlocks: DocumentBlock[]
   semanticConditions: SemanticCondition[]

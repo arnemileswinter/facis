@@ -103,10 +103,18 @@ interface SubcontractTemplate {
 const store = useTemplateDraftStore()
 const { templateType } = storeToRefs(store)
 
+const name = computed({
+  get: () => store.name,
+  set: (value: string) => store.updateName(value.trim())
+})
+
+const description = computed({
+  get: () => store.description,
+  set: (value: string) => store.updateDescription(value)
+})
+
 const route = useRoute()
 
-const name = ref('')
-const description = ref('')
 const selectedSubcontractDids = ref<string[]>([])
 const showSubcontractPicker = ref(false)
 const subcontractSearchQuery = ref('')

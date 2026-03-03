@@ -6,6 +6,8 @@ import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock } from "
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
   did: null,
+  name: '',
+  description: '',
   documentOutline: [],
   documentBlocks: [],
   semanticConditions: [],
@@ -135,7 +137,7 @@ export const useTemplateDraftStore = defineStore(storeId, {
       this.customMetaData[index] = { name, value }
       return true
     },
-    // TBD: Basic info operations: name, description...
+    // Basic info operations
     updateTemplateType(templateType: TemplateTypeValue): void {
       if (this.did !== null && this.did !== undefined) {
         throw new Error('Cannot change template type after template is created')
@@ -145,7 +147,12 @@ export const useTemplateDraftStore = defineStore(storeId, {
        * template type should be removed. For example, if changing from frameContract 
        * to subContract, the APPROVED_TEMPLATE blocks should be removed. */
     },
-
+    updateName(name: string): void {
+      this.name = name
+    },
+    updateDescription(description: string): void {
+      this.description = description
+    },
     reset(overrides?: Partial<TemplateDraftState>) {
       Object.assign(this, getInitialState())
       if (overrides) Object.assign(this, overrides)
