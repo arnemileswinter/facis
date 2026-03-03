@@ -59,7 +59,6 @@ func main() {
 	db, err := NewDatabaseConnection()
 	if err != nil {
 		log.Fatalf(ctx, err, "Could not connect to database")
-		os.Exit(1)
 	}
 	defer db.Close()
 
