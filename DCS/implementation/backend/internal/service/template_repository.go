@@ -30,15 +30,15 @@ type templateRepositorysrvc struct {
 }
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
-func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator, CTRepo db.TemplateRepository,
-	RTRepo db.ReviewTaskRepo, ATRepo db.ApprovalTaskRepo) (templaterepository.Service, error) {
+func NewTemplateRepository(db *sqlx.DB, jwtAuth auth.JWTAuthenticator, CTRepo db.TemplateRepository,
+	RTRepo db.ReviewTaskRepo, ATRepo db.ApprovalTaskRepo) templaterepository.Service {
 	return &templateRepositorysrvc{
 		DB:               db,
 		JWTAuthenticator: jwtAuth,
 		CTRepo:           CTRepo,
 		RTRepo:           RTRepo,
 		ATRepo:           ATRepo,
-	}, nil
+	}
 }
 
 // Create a new template.

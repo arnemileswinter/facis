@@ -85,11 +85,6 @@ func main() {
 	ctRepo := templaterepository2.PostgresContractTemplateRepo{}
 	rtRepo := reviewtask.PostgresReviewTaskRepo{}
 	atRepo := approvaltask.PostgresApprovalTaskRepo{}
-	templateRepositorySrv, err := service.NewTemplateRepository(ctx, db, jwtAuth, &ctRepo, &rtRepo, &atRepo)
-	if err != nil {
-		log.Fatalf(ctx, err, "Could not create template repository")
-		os.Exit(1)
-	}
 
 	// Initialize the service.
 	var (
@@ -114,7 +109,7 @@ func main() {
 		processAuditAndComplianceSvc = service.NewProcessAuditAndCompliance(jwtAuth)
 		signatureManagementSvc = service.NewSignatureManagement(jwtAuth)
 		templateCatalogueIntegrationSvc = service.NewTemplateCatalogueIntegration(jwtAuth)
-		templateRepositorySvc = templateRepositorySrv
+		templateRepositorySvc = service.NewTemplateRepository(db, jwtAuth, &ctRepo, &rtRepo, &atRepo)
 	}
 
 	// Wrap the service in endpoints that can be invoked from other service
