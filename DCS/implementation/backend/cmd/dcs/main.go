@@ -62,6 +62,8 @@ func main() {
 	}
 	defer db.Close()
 
+	log.Printf(ctx, "Connecting to database")
+
 	natsClient, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
 		log.Printf(ctx, "Nats support will be deactivated: Could not connect to nats service: %v", err)
