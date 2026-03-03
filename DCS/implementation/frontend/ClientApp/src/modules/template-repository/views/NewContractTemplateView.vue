@@ -38,7 +38,7 @@
                                 <h2 class="card-title text-sm">
                                     <span class="badge badge-primary">01</span> Template Details
                                 </h2>
-                                <DetailsEditor ref="detailsEditorRef" />
+                                <DetailsEditor />
                             </div>
                         </div>
                     </div>
@@ -131,6 +131,7 @@ import MetaDataEditor from '@template-repository/components/MetaDataEditor.vue'
 import BuilderPreviewDialog from '@template-repository/components/builder-editor/BuilderPreviewDialog.vue'
 import TemplateTypeSelect from '@template-repository/components/TemplateTypeSelect.vue'
 import { storeToRefs } from 'pinia'
+import { ContractTemplateService } from '@/services/contract-template-service'
 
 const router = useRouter()
 const route = useRoute()
@@ -157,14 +158,17 @@ watch(isEditMode, (isEdit) => {
 
 const isSubmitting = ref(false)
 
-const detailsEditorRef = ref<InstanceType<typeof DetailsEditor> | null>(null)
-
 const submit = async () => {
     isSubmitting.value = true
     try {
-        const formData = detailsEditorRef.value?.getFormData()
-        console.log('Publishing Template to Repository...', formData)
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        if (!draftStore.hasTemplateId) {
+            const data = draftStore.templateCreateRequestData
+            console.log('Publishing Template to Repository...', data)
+            const response = await ContractTemplateService.create(data)
+            console.log('Template created:', response)
+        } else {
+            // TODO
+        }
         router.push({ name: 'templates.list' })
     } catch (error) {
         console.error('Submission failed', error)

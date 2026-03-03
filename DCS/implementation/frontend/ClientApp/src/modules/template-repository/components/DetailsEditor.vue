@@ -92,7 +92,7 @@ import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { TemplateType } from '@template-repository/models/contract-templace'
-import { ContractTemplateService } from '@template-repository/services/contract-template-service'
+import { ContractTemplateService } from '@/services/contract-template-service'
 
 interface SubcontractTemplate {
     did: string
@@ -152,13 +152,6 @@ const removeSubcontractTemplate = (did: string) => {
     if (idx !== -1) selectedSubcontractDids.value.splice(idx, 1)
 }
 
-const getFormData = () => ({
-    name: name.value,
-    description: description.value,
-    contract_kind: templateType.value,
-    subcontract_template_dids: [...selectedSubcontractDids.value],
-})
-
 onMounted(async () => {
     const did = route.params.did
     const documentNumber = route.query.document_number
@@ -179,6 +172,4 @@ onMounted(async () => {
         }
     }
 })
-
-defineExpose({ getFormData })
 </script>

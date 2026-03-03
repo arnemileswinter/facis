@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@template-repository/models/template-draft-store"
 import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition, MetaData } from "@template-repository/models/contract-templace"
 import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock } from "@template-repository/models/contract-templace"
+import type { ContractTemplateCreateRequest } from '@/models/requests/template-request'
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -13,6 +14,7 @@ const defaultState: Readonly<TemplateDraftState> = {
   semanticConditions: [],
   customMetaData: [],
   templateType: TemplateType.subContract,
+  state: null
 }
 
 export const useTemplateDraftStore = defineStore(storeId, {
@@ -23,6 +25,20 @@ export const useTemplateDraftStore = defineStore(storeId, {
     blockIdsInOutline(): Set<string> {
       return collectBlockIdsInOutline(this.documentOutline)
     },
+    /** Returns the data to create a contract template based on the current draft state. */
+    templateCreateRequestData(): ContractTemplateCreateRequest {
+      return {
+        name: this.name,
+        description: this.description,
+        template_type: this.templateType,
+        template_data: {
+          documentOutline: this.documentOutline,
+          documentBlocks: this.documentBlocks,
+          semanticConditions: this.semanticConditions,
+          customMetaData: this.customMetaData,
+        }
+      }
+    }
   },
   actions: {
     // Block operations: add, delete, update, move
