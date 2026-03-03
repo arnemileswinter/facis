@@ -1,10 +1,11 @@
-import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
+import { useAuthStore } from '@/stores/auth-store'
+import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
-import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
+import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
 import TableView from '@/views/TableView.vue'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
+import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -30,25 +31,6 @@ const routes: RouteRecordRaw[] = [
     name: 'templates.edit',
     component: NewContractTemplateView,
     meta: { name: 'Edit Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Edit Template' },
-    props: (route) => {
-      const did = route.params.did
-      const document_number = route.query.document_number
-      const version = route.query.version
-      if (
-        did &&
-        document_number &&
-        version &&
-        !Array.isArray(did) &&
-        !Array.isArray(document_number) &&
-        !Array.isArray(version)
-      ) {
-        return {
-          did: did,
-          document_number: parseInt(document_number),
-          version: parseInt(version),
-        }
-      }
-    },
   },
   {
     path: '/table',
@@ -67,6 +49,13 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: routes,
+})
+
+router.beforeEach((to) => {
+  const authStore = useAuthStore()
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return { name: 'home' }
+  }
 })
 
 export { router }
