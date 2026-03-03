@@ -25,5 +25,5 @@
 import { useTemplateTable } from './ContractTemplateListController'
 import TemplateList from '../../components/lists/template-list/TemplateList.vue'
 
-const { templates, loading, error, refresh } = useTemplateTable()
+const { templates, loading, error } = useTemplateTable()
 </script>

@@ -26,7 +26,11 @@ export function useTemplateTable() {
 
     const getTemplateById = async (id: string) => {
         try {
-            return await ContractTemplateService.retrieveById(id)
+            return await ContractTemplateService.retrieveById({
+                did: id,
+                document_number: 1,
+                version: 1
+            })
         } catch (err: any) {
             console.error('Template konnte nicht geladen werden:', err)
             return null

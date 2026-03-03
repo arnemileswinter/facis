@@ -2,6 +2,8 @@ import ContractTemplateListView from '@/views/contract-template-list/ContractTem
 import LoginView from '@/views/auth/LoginView.vue'
 import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import TableView from '@/views/TableView.vue'
+import { AuthenticationService } from '@/services/authentication-service'
+import { useAuthStore } from '@/stores/auth-store'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
@@ -10,7 +12,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    meta: { name: 'DCS', hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS' },
+    meta: { name: 'DCS', hideInSidebar: true, requiresAuth: true, layout: 'blank', title: 'DCS' },
     component: LoginView,
   },
   {
@@ -67,6 +69,30 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: routes,
+})
+
+router.beforeEach(async (to) => {
+  if (to.meta.requiresAuth === false) {
+    return true
+  }
+
+  const authStore = useAuthStore()
+  if (authStore.isAuthenticated) {
+    return true
+  }
+
+  await AuthenticationService.refresh()
+  if (authStore.isAuthenticated) {
+    return true
+  }
+
+  const loginUrl = await AuthenticationService.getLoginPath()
+  if (loginUrl) {
+    window.location.href = loginUrl
+    return false
+  }
+
+  return { name: 'home' }
 })
 
 export { router }

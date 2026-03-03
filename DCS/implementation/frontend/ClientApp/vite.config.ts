@@ -7,6 +7,7 @@ import { defineConfig, loadEnv } from 'vite'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'DCS_')
   return {
+    base: env.DCS_UI_BASE || '/ui/',
     plugins: [vue(), tailwindcss()],
     envPrefix: 'DCS',
     resolve: {

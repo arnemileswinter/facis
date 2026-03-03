@@ -108,6 +108,9 @@ func handleHTTPServer(ctx context.Context, u *url.URL, authEndpoints *genauth.En
 	// Mount Swagger UI on /swagger and OpenAPI spec on /openapi3.json.
 	mountSwaggerUI(mux)
 
+	// Mount frontend static file server
+	mountFrontend(mux)
+
 	var handler http.Handler = mux
 	handler = service.RequestContextMiddleware(handler)
 	if dbg {

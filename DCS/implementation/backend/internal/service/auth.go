@@ -70,10 +70,10 @@ func (s *authSvc) Callback(ctx context.Context, p *genauth.CallbackPayload) (*ge
 	// This is picked up by SetRefreshTokenInContext which sets the cookie immediately.
 	SetRefreshTokenInContext(ctx, tokenResp.RefreshToken)
 
-	// Redirect to frontend /auth/success
+	// Redirect to frontend /ui/auth/success
 	// The frontend will then call /auth/refresh to get the access token
 	return &genauth.CallbackResult{
-		Location: "/auth/success",
+		Location: "/ui/auth/success",
 	}, nil
 }
 
@@ -104,7 +104,7 @@ func (s *authSvc) Refresh(ctx context.Context) (*genauth.RefreshResult, error) {
 	}, nil
 }
 
-// Logout redirects to the Keycloak logout endpoint.
+// Logout returns the Keycloak OIDC logout URL.
 func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
 	log.Printf(ctx, "auth.logout")
 
@@ -242,8 +242,8 @@ func (s *authSvc) LogoutComplete(ctx context.Context) (*genauth.LogoutCompleteRe
 	// Clear the refresh token cookie
 	ClearRefreshTokenCookie(ctx)
 
-	// Redirect to home
+	// Redirect to frontend UI
 	return &genauth.LogoutCompleteResult{
-		Location: "/",
+		Location: "/ui",
 	}, nil
 }

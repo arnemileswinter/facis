@@ -1,6 +1,7 @@
 import authHttp from '@/api/auth-http'
 import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
 import type { LoginResponse } from '@/models/responses/login-response'
+import type { LogoutResponse } from '@/models/responses/logout-response'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAuthTokenStore } from '@/stores/auth-token-store'
 
@@ -43,8 +44,17 @@ export const AuthenticationService = {
     const authTokenStore = useAuthTokenStore()
     authTokenStore.remove()
 
-    // Redirect to backend logout - backend handles Keycloak redirect
-    // and will eventually redirect back to home after clearing cookie
-    window.location.href = '/api/auth/logout'
+    // Call backend logout endpoint to get Keycloak logout URL (mirrors login flow)
+    authHttp
+      .get<LogoutResponse>('/auth/logout')
+      .then((res) => {
+        // Browser-native redirect to Keycloak (avoids CORS issues)
+        window.location.href = res.data.location
+      })
+      .catch((err) => {
+        console.error('Logout Error:', err)
+        // Fallback to home if logout fails
+        window.location.href = '/'
+      })
   },
 }
