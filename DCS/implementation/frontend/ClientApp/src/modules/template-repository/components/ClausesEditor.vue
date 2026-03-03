@@ -2,35 +2,16 @@
   <div class="space-y-6">
     <!-- Section 1: New clause -->
     <section class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
-      <h3 class="text-sm font-semibold text-base-content/80 mb-4">New clause</h3>
-      <div class="space-y-4">
-        <div>
-          <label class="label-text text-xs text-base-content/60 block mb-1">Clause title
-            <RequiredIndicator />
-          </label>
-          <input v-model="newClause.title" type="text" class="input input-bordered input-sm w-full" placeholder=""
-            required />
-        </div>
-        <div>
-          <label class="label-text text-xs text-base-content/60 block mb-1">Clause text
-            <RequiredIndicator />
-          </label>
-          <ClauseTextEditor :model-value="newClause.text" :semantic-conditions="semanticConditions"
-            @update:model-value="newClause.text = $event" />
-        </div>
-        <div class="flex justify-end">
-          <button type="button" class="btn btn-secondary btn-sm" :disabled="!canAddClause" @click="addClause">
-            Add clause
-          </button>
-        </div>
-      </div>
+      <ClauseEditorForm mode="create" initial-title="" initial-text="" :semantic-conditions="semanticConditions"
+        @submit="addClause" />
     </section>
 
     <!-- Section 2: Existing clauses -->
     <section class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
       <h3 class="text-sm font-semibold text-base-content/80 mb-4">Existing clauses</h3>
       <ExistingClausesList :clause-blocks="clauseBlocks" :semantic-conditions="semanticConditions"
-        :get-condition-name="getConditionName" @delete="deleteClause" :block-ids-in-outline="store.blockIdsInOutline" />
+        :get-condition-name="getConditionName" @delete="deleteClause" :block-ids-in-outline="store.blockIdsInOutline"
+        :editing-block-id="editingBlockId" @edit="startEditClause" @save="saveEditedClause" @cancel-edit="cancelEdit" />
     </section>
   </div>
 </template>
@@ -40,14 +21,13 @@ import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { isClauseBlock, type ClauseBlock } from '@template-repository/models/contract-templace'
-import RequiredIndicator from '@core/components/RequiredIndicator.vue'
-import ClauseTextEditor from '@template-repository/components/clauses-editor/ClauseTextEditor.vue'
 import ExistingClausesList from '@template-repository/components/clauses-editor/ExistingClausesList.vue'
+import ClauseEditorForm from '@template-repository/components/clauses-editor/ClauseEditorForm.vue'
 
 const store = useTemplateDraftStore()
 const { documentBlocks, semanticConditions } = storeToRefs(store)
 
-const newClause = ref({ title: '', text: '' })
+const editingBlockId = ref<string | null>(null)
 
 /** Extract conditionIds from clause text placeholders {{conditionId.parameterName}}. */
 function conditionIdsFromText(text: string): string[] {
@@ -67,25 +47,43 @@ const clauseBlocks = computed((): ClauseBlock[] =>
   documentBlocks.value.filter((b): b is ClauseBlock => isClauseBlock(b))
 )
 
-const canAddClause = computed(() => !!newClause.value.title?.trim() && !!newClause.value.text?.trim())
-
 function getConditionName(conditionId: string): string {
   const c = semanticConditions.value.find((x) => x.conditionId === conditionId)
   return c?.conditionName ?? conditionId
 }
 
-function addClause() {
-  const text = newClause.value.text?.trim()
+function addClause(payload: { title: string; text: string }) {
+  const text = payload.text.trim()
   if (!text) return
   store.addClause({
-    title: newClause.value.title?.trim() || undefined,
+    title: payload.title.trim(),
     text,
     conditionIds: conditionIdsFromText(text),
   })
-  newClause.value = { title: '', text: '' }
+}
+
+function startEditClause(blockId: string) {
+  editingBlockId.value = blockId
+}
+
+function cancelEdit() {
+  editingBlockId.value = null
+}
+
+function saveEditedClause(payload: { blockId: string; title: string; text: string }) {
+  const text = payload.text.trim()
+  const title = payload.title.trim()
+  if (!text) return
+  store.updateClause(payload.blockId, {
+    title,
+    text,
+    conditionIds: conditionIdsFromText(text),
+  })
+  if (editingBlockId.value === payload.blockId) cancelEdit()
 }
 
 function deleteClause(blockId: string) {
   store.deleteClause(blockId)
+  if (editingBlockId.value === blockId) cancelEdit()
 }
 </script>
