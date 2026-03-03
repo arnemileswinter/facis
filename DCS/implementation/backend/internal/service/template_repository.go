@@ -11,6 +11,7 @@ import (
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"time"
 
@@ -21,15 +22,22 @@ import (
 // TemplateRepository service example implementation.
 // The example methods log the requests and return zero values.
 type templateRepositorysrvc struct {
-	DB *sqlx.DB
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 	auth.JWTAuthenticator
 }
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
-func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator) (templaterepository.Service, error) {
+func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator, CTRepo db.TemplateRepository,
+	RTRepo db.ReviewTaskRepo, ATRepo db.ApprovalTaskRepo) (templaterepository.Service, error) {
 	return &templateRepositorysrvc{
 		DB:               db,
 		JWTAuthenticator: jwtAuth,
+		CTRepo:           CTRepo,
+		RTRepo:           RTRepo,
+		ATRepo:           ATRepo,
 	}, nil
 }
 
@@ -60,8 +68,9 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 		TemplateData: &jsonMetaData,
 	}
 	createHandler := command.Creator{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
@@ -103,7 +112,10 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		Comments:       req.Comments,
 	}
 	handler := command.Submitter{
-		DB: s.DB,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -150,8 +162,10 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		TemplateData:   &metaData,
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -208,8 +222,11 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 		TemplateData:   &metaData,
 	}
 	handler := command.UpdateManager{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -247,8 +264,9 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 		Filter:         req.Filter,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -279,8 +297,11 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 		RetrievedBy: middleware.GetUsername(ctx),
 	}
 	queryHandler := contracttemplate.GetAllMetadataHandler{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -342,8 +363,9 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 		RetrievedBy:    middleware.GetUsername(ctx),
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -379,7 +401,10 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 		UpdatedAt:      updatedAt,
 	}
 	handler := command.Verifier{
-		DB: s.DB,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -410,7 +435,9 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		DecisionNotes:  req.DecisionNotes,
 	}
 	handler := command.Approver{
-		DB: s.DB,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -441,8 +468,10 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		Reason:         req.Reason,
 	}
 	handler := command.Rejecter{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -472,8 +501,11 @@ func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepo
 		RegisteredBy:   middleware.GetUsername(ctx),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -503,8 +535,11 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 		ArchivedBy:     middleware.GetUsername(ctx),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {

@@ -26,16 +26,17 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
-
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
 	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
 
 	approver := "Test User 1"
 
-	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
+	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
 
 	verifyCmd := command.VerifyCmd{
 		DID:            *did,
@@ -45,8 +46,11 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		VerifiedBy:     approver,
 	}
 	verifyHandler := command.Verifier{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
@@ -62,8 +66,10 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		DecisionNotes:  []string{},
 	}
 	handler := command.Approver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -77,8 +83,9 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -101,16 +108,17 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
-
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
 	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
 
 	approver := "Test User 1"
 
-	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, approver)
+	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -121,8 +129,10 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 		DecisionNotes:  []string{},
 	}
 	handler := command.Approver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -140,7 +150,11 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	ctx := context.Background()
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -151,8 +165,10 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 		DecisionNotes:  []string{},
 	}
 	handler := command.Approver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -170,16 +186,17 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
 	defer cancel()
+
+	repo := NewTestRepo(ctx)
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
 
-	createApprovalTasks(t, ctxTx, db, *did, approvaltaskstate.Open, creator, "Test User 1")
+	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, "Test User 1")
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -190,8 +207,10 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 		DecisionNotes:  []string{},
 	}
 	handler := command.Approver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -211,9 +230,13 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -224,8 +247,10 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 		DecisionNotes:  []string{},
 	}
 	handler := command.Approver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -245,9 +270,13 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Approved, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -258,8 +287,10 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 		DecisionNotes:  []string{},
 	}
 	handler := command.Approver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -279,9 +310,13 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -292,8 +327,10 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 		DecisionNotes:  []string{},
 	}
 	handler := command.Approver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 

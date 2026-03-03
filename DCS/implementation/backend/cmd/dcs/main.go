@@ -15,6 +15,9 @@ import (
 	"digital-contracting-service/internal/auth"
 	"digital-contracting-service/internal/middleware"
 	"digital-contracting-service/internal/service"
+	"digital-contracting-service/internal/templaterepository/db/pg/approvaltask"
+	"digital-contracting-service/internal/templaterepository/db/pg/reviewtask"
+	templaterepository2 "digital-contracting-service/internal/templaterepository/db/pg/templaterepository"
 	"flag"
 	"fmt"
 	"net"
@@ -80,7 +83,10 @@ func main() {
 	}
 	jwtAuth := auth.NewJWTAuthenticator(oidcValidator)
 
-	templateRepositorySrv, err := service.NewTemplateRepository(ctx, db, jwtAuth)
+	ctRepo := templaterepository2.PostgresContractTemplateRepo{}
+	rtRepo := reviewtask.PostgresReviewTaskRepo{}
+	atRepo := approvaltask.PostgresApprovalTaskRepo{}
+	templateRepositorySrv, err := service.NewTemplateRepository(ctx, db, jwtAuth, &ctRepo, &rtRepo, &atRepo)
 	if err != nil {
 		log.Fatalf(ctx, err, "Could not create template repository")
 		os.Exit(1)

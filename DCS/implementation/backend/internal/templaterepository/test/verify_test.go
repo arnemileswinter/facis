@@ -3,12 +3,10 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"testing"
 	"time"
 
@@ -28,12 +26,16 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
 
 	reviewers := []string{"Test User 1"}
-	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
+	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
 	cmd := command.VerifyCmd{
 		DID:            *did,
@@ -43,8 +45,11 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Verifier{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -57,7 +62,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Verified)
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Verified)
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}
@@ -81,7 +86,11 @@ func TestVerify_VerifyNonExistingContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	ctx := context.Background()
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
 
 	cmd := command.VerifyCmd{
 		DID:            *did,
@@ -91,8 +100,11 @@ func TestVerify_VerifyNonExistingContractTemplate(t *testing.T) {
 		VerifiedBy:     "Test User 1",
 	}
 	handler := command.Verifier{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -112,12 +124,16 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
 
 	approver := "Test User 1"
-	createApprovalTasks(t, ctx, db, *did, approvaltaskstate.Open, creator, approver)
+	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
 
 	cmd := command.VerifyCmd{
 		DID:            *did,
@@ -127,8 +143,11 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Verifier{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -141,7 +160,7 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := approvaltask.TaskExistsInState(ctx, tx, *did, 1, 1, approver, approvaltaskstate.Verified)
+	exists, err := repo.ATRepo.TaskExistsInState(tx, *did, 1, 1, approver, approvaltaskstate.Verified)
 	if err != nil {
 		t.Fatalf("Failed to check existence of approval tasks: %v", err)
 	}
@@ -167,9 +186,13 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
 
 	cmd := command.VerifyCmd{
 		DID:            *did,
@@ -179,8 +202,11 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
 	}
 	handler := command.Verifier{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 

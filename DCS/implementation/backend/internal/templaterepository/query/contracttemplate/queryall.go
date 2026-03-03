@@ -5,14 +5,12 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"fmt"
 	"time"
 
@@ -61,8 +59,11 @@ type GetAllMetadataResult struct {
 }
 
 type GetAllMetadataHandler struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadataResult, error) {
@@ -76,7 +77,7 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 	}
 	defer tx.Rollback()
 
-	contractTemplates, err := templaterepository.ReadAllMetaData(ctx, tx)
+	contractTemplates, err := h.CTRepo.ReadAllMetaData(tx)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
@@ -90,12 +91,12 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 		return nil, fmt.Errorf("could not create event: %w", err)
 	}
 
-	reviewerTasks, err := reviewtask.ReadAllByReviewer(ctx, tx, query.RetrievedBy)
+	reviewerTasks, err := h.RTRepo.ReadAllByReviewer(tx, query.RetrievedBy)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}
 
-	approvalTasks, err := approvaltask.ReadAllByApprover(ctx, tx, query.RetrievedBy)
+	approvalTasks, err := h.ATRepo.ReadAllByApprover(tx, query.RetrievedBy)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}

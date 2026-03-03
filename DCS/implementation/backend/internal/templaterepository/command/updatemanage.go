@@ -5,12 +5,11 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/approvaltask"
+	templaterepository2 "digital-contracting-service/internal/templaterepository/datatype/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -33,8 +32,11 @@ type UpdateManageCmd struct {
 }
 
 type UpdateManager struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
@@ -48,7 +50,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 	}
 	defer tx.Rollback()
 
-	oldData, err := templaterepository.ReadDataByID(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	oldData, err := h.CTRepo.ReadDataByID(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
@@ -64,12 +66,12 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 	if cmd.State != nil {
 		isValidState := *cmd.State == templatestate.Draft || *cmd.State == templatestate.Archived
 		if oldData.State == templatestate.Draft && !isValidState {
-			reviewTasksExist, err := reviewtask.TaskExist(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			reviewTasksExist, err := h.RTRepo.TaskExist(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
 				return fmt.Errorf("could not check existing review tasks: %w", err)
 			}
 
-			approvalTaskExists, err := approvaltask.TaskExists(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			approvalTaskExists, err := h.ATRepo.TaskExists(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
 				return fmt.Errorf("could not check existing approval tasks: %w", err)
 			}
@@ -83,14 +85,26 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 	newState := oldData.State
 	if cmd.State != nil {
 		if *cmd.State == templatestate.Draft || *cmd.State == templatestate.Archived {
-			err = templaterepository.CleanupTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+
+			err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
-				return fmt.Errorf("could not cleanup tasks: %w", err)
+				return fmt.Errorf("could not delete review tasks: %w", err)
 			}
-		} else if *cmd.State == templatestate.Rejected || *cmd.State == templatestate.Submitted || *cmd.State == templatestate.Reviewed {
-			err = templaterepository.ReopenTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+
+			err = h.ATRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
-				return fmt.Errorf("could not reopen tasks: %w", err)
+				return fmt.Errorf("could not delete approval tasks: %w", err)
+			}
+
+		} else if *cmd.State == templatestate.Rejected || *cmd.State == templatestate.Submitted || *cmd.State == templatestate.Reviewed {
+			err = h.RTRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			if err != nil {
+				return err
+			}
+
+			err = h.ATRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+			if err != nil {
+				return err
 			}
 		} else {
 			return errors.New("contract invalid state")
@@ -99,7 +113,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 		newState = *cmd.State
 	}
 
-	newData := templaterepository.UpdateData{
+	newData := templaterepository2.UpdateData{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
@@ -109,7 +123,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 		Description:    cmd.Description,
 		TemplateData:   cmd.TemplateData,
 	}
-	err = templaterepository.Update(ctx, tx, newData)
+	err = h.CTRepo.Update(tx, newData)
 	if err != nil {
 		return fmt.Errorf("could not update template data: %w", err)
 	}

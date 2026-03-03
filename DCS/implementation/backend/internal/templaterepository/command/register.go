@@ -4,8 +4,8 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"errors"
 	"fmt"
@@ -23,8 +23,11 @@ type RegisterCmd struct {
 }
 
 type Registrar struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *Registrar) Handle(cmd RegisterCmd) error {
@@ -38,7 +41,7 @@ func (h *Registrar) Handle(cmd RegisterCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := templaterepository.ReadProcessData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -51,7 +54,7 @@ func (h *Registrar) Handle(cmd RegisterCmd) error {
 		return errors.New("invalid contract template state")
 	}
 
-	err = templaterepository.UpdateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Registered)
+	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Registered)
 	if err != nil {
 		return fmt.Errorf("could not update state: %w", err)
 	}
@@ -68,9 +71,14 @@ func (h *Registrar) Handle(cmd RegisterCmd) error {
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = templaterepository.CleanupTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return fmt.Errorf("could not cleanup tasks: %w", err)
+		return fmt.Errorf("could not delete review tasks: %w", err)
+	}
+
+	err = h.ATRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	if err != nil {
+		return fmt.Errorf("could not delete approval tasks: %w", err)
 	}
 
 	return tx.Commit()

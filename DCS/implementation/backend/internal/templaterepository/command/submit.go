@@ -4,14 +4,15 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltask"
 	aopprovaltaskstate "digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/reviewtask"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
+	templaterepository2 "digital-contracting-service/internal/templaterepository/datatype/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -32,11 +33,14 @@ type SubmitCmd struct {
 }
 
 type Submitter struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 }
 
-func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templaterepository.ProcessData, cmd SubmitCmd) error {
+func createTasks(tx *sqlx.Tx, rtRepo db.ReviewTaskRepo, atRepo db.ApprovalTaskRepo, processData *templaterepository2.ProcessData, cmd SubmitCmd) error {
 	for _, reviewer := range cmd.Reviewer {
 		reviewTask := reviewtask.TaskData{
 			DID:            cmd.DID,
@@ -46,7 +50,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 			State:          reviewtaskstate.Open,
 			CreatedBy:      cmd.SubmittedBy,
 		}
-		_, err := reviewtask.Create(ctx, tx, reviewTask)
+		_, err := rtRepo.Create(tx, reviewTask)
 		if err != nil {
 			return fmt.Errorf("could not create review tasks: %w", err)
 		}
@@ -60,7 +64,7 @@ func createTasks(ctx context.Context, tx *sqlx.Tx, processData *templatereposito
 		Approver:       *cmd.Approver,
 		State:          aopprovaltaskstate.Open,
 	}
-	_, err := approvaltask.Create(ctx, tx, data)
+	_, err := atRepo.Create(tx, data)
 	if err != nil {
 		return fmt.Errorf("could not create approval task: %w", err)
 	}
@@ -79,7 +83,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := templaterepository.ReadProcessData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not process core data: %w", err)
 	}
@@ -103,7 +107,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 			return errors.New("no approver provided")
 		}
 
-		err := createTasks(ctx, tx, processData, cmd)
+		err := createTasks(tx, h.RTRepo, h.ATRepo, processData, cmd)
 		if err != nil {
 			return err
 		}
@@ -116,9 +120,14 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 			return errors.New("invalid user")
 		}
 
-		err := templaterepository.ReopenTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+		err := h.RTRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 		if err != nil {
-			return err
+			return errors.New("could not reopen review tasks")
+		}
+
+		err = h.ATRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+		if err != nil {
+			return errors.New("could not reopen approval tasks")
 		}
 
 		nextTemplateState = templatestate.Submitted
@@ -128,7 +137,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 		if cmd.ActionFlag != nil {
 			if *cmd.ActionFlag == actionflag.Approval {
 
-				valid, err := reviewtask.IsValidReviewer(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				valid, err := h.RTRepo.IsValidReviewer(tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
@@ -137,7 +146,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 					return errors.New("invalid user")
 				}
 
-				exist, err := reviewtask.TaskExistsInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Open)
+				exist, err := h.RTRepo.TaskExistsInState(tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Open)
 				if err != nil {
 					return err
 				}
@@ -146,12 +155,12 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 					return errors.New("contract template needs to be verified before")
 				}
 
-				err = reviewtask.Update(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
+				err = h.RTRepo.Update(tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy, reviewtaskstate.Approved)
 				if err != nil {
 					return fmt.Errorf("could not update approval task: %w", err)
 				}
 
-				existOpenTasks, err := reviewtask.AnyTasksInState(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open, reviewtaskstate.Verified)
+				existOpenTasks, err := h.RTRepo.AnyTasksInState(tx, processData.DID, processData.DocumentNumber, processData.Version, reviewtaskstate.Open, reviewtaskstate.Verified)
 				if err != nil {
 					return fmt.Errorf("could not check if review task exists: %w", err)
 				}
@@ -162,7 +171,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 
 			} else if *cmd.ActionFlag == actionflag.Draft {
 
-				isValid, err := reviewtask.IsValidReviewer(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+				isValid, err := h.RTRepo.IsValidReviewer(tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 				if err != nil {
 					return err
 				}
@@ -171,7 +180,12 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 					return errors.New("invalid user")
 				}
 
-				err = templaterepository.ReopenTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+				err = h.RTRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+				if err != nil {
+					return err
+				}
+
+				err = h.ATRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 				if err != nil {
 					return err
 				}
@@ -184,7 +198,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 
 	} else if processData.State == templatestate.Reviewed {
 
-		isValid, err := approvaltask.IsValidApprover(ctx, tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
+		isValid, err := h.ATRepo.IsValidApprover(tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.SubmittedBy)
 		if err != nil {
 			return err
 		}
@@ -193,11 +207,15 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 			return errors.New("invalid user")
 		}
 
-		err = templaterepository.ReopenTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+		err = h.RTRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 		if err != nil {
 			return err
 		}
 
+		err = h.ATRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+		if err != nil {
+			return err
+		}
 		nextTemplateState = templatestate.Submitted
 
 	} else {
@@ -205,7 +223,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 	}
 
 	if len(nextTemplateState) > 0 && processData.State != nextTemplateState {
-		err = templaterepository.UpdateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, nextTemplateState)
+		err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, nextTemplateState)
 		if err != nil {
 			return fmt.Errorf("could not update contract template state: %w", err)
 		}

@@ -25,9 +25,13 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Approved, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -37,8 +41,11 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -52,8 +59,9 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -75,7 +83,11 @@ func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	ctx := context.Background()
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -85,8 +97,11 @@ func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
 		RegisteredBy:   "Test User 1",
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -106,9 +121,13 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -118,8 +137,11 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
+		CTRepo: repo.CTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -139,9 +161,13 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -151,8 +177,11 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -172,9 +201,13 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Rejected, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Rejected, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -184,8 +217,11 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -205,9 +241,13 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -217,8 +257,11 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -238,9 +281,13 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Registered, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -250,8 +297,11 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -271,9 +321,13 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Archived, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -283,8 +337,11 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 

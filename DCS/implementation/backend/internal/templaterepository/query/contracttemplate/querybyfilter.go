@@ -5,9 +5,10 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
+	templaterepository2 "digital-contracting-service/internal/templaterepository/datatype/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
@@ -42,8 +43,9 @@ type GetAllMetadataByFilterResult struct {
 }
 
 type GetAllMetaDataByFilterHandler struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
 }
 
 func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) ([]GetAllMetadataByFilterResult, error) {
@@ -57,7 +59,7 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) 
 	}
 	defer tx.Rollback()
 
-	searchValues := templaterepository.SearchValues{
+	searchValues := templaterepository2.SearchValues{
 		DID:            query.DID,
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,
@@ -68,7 +70,7 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) 
 		Filter:         query.Filter,
 	}
 
-	contractTemplates, err := templaterepository.ReadAllMetaDataByFilter(ctx, tx, searchValues)
+	contractTemplates, err := h.CTRepo.ReadAllMetaDataByFilter(tx, searchValues)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}

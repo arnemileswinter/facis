@@ -4,12 +4,10 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -26,8 +24,11 @@ type VerifyCmd struct {
 }
 
 type Verifier struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *Verifier) Handle(cmd VerifyCmd) error {
@@ -41,7 +42,7 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := templaterepository.ReadProcessData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -50,25 +51,25 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	hasTask, err := reviewtask.TaskExistsInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open)
+	hasTask, err := h.RTRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open)
 	if err != nil {
 		return err
 	}
 
 	if hasTask {
-		err := reviewtask.Update(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
+		err := h.RTRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
 		if err != nil {
 			return err
 		}
 	}
 
-	hasTask, err = approvaltask.TaskExistsInState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Open)
+	hasTask, err = h.ATRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Open)
 	if err != nil {
 		return err
 	}
 
 	if hasTask {
-		err := approvaltask.Update(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
+		err := h.ATRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
 		if err != nil {
 			return err
 		}

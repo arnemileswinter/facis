@@ -25,9 +25,13 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -37,8 +41,11 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -52,8 +59,9 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -75,7 +83,11 @@ func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	ctx := context.Background()
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -85,8 +97,10 @@ func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
 		ArchivedBy:     "Test User 1",
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -106,9 +120,13 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
-
 	ctx := context.Background()
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctxTx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -118,8 +136,11 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -133,8 +154,9 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -158,9 +180,13 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Rejected, creator)
-
 	ctx := context.Background()
+	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctxTx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Rejected, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -170,8 +196,11 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -185,8 +214,9 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -210,9 +240,13 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Reviewed, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -222,8 +256,11 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -237,8 +274,9 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -262,9 +300,13 @@ func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Archived, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -274,8 +316,11 @@ func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -295,9 +340,13 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Registered, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -307,8 +356,11 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 		UpdatedAt:      time.Now(),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 

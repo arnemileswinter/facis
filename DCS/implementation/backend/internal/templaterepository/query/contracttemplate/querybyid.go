@@ -5,9 +5,9 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
 	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
@@ -37,8 +37,9 @@ type GetByIDResult struct {
 }
 
 type GetByIDHandler struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.TemplateRepository
 }
 
 func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
@@ -52,7 +53,7 @@ func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
 	}
 	defer tx.Rollback()
 
-	data, err := templaterepository.ReadDataByID(ctx, tx, query.DID, query.DocumentNumber, query.Version)
+	data, err := h.CTRepo.ReadDataByID(tx, query.DID, query.DocumentNumber, query.Version)
 	if err != nil {
 		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
