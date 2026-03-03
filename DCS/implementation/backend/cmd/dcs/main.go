@@ -60,7 +60,12 @@ func main() {
 	}
 	defer db.Close()
 
-	_, err = nats.Connect(nats.DefaultURL)
+	// Connect to NATS (use NATS_URL env var or default)
+	natsURL := os.Getenv("NATS_URL")
+	if natsURL == "" {
+		natsURL = nats.DefaultURL
+	}
+	_, err = nats.Connect(natsURL)
 	if err != nil {
 		log.Fatalf(ctx, err, "Could not connect to nats service")
 		os.Exit(1)
