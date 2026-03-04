@@ -83,9 +83,9 @@ func main() {
 	}
 	jwtAuth := auth.NewJWTAuthenticator(oidcValidator)
 
-	ctRepo := pg.PostgresContractTemplateRepo{}
-	rtRepo := pg.PostgresReviewTaskRepo{}
-	atRepo := pg.PostgresApprovalTaskRepo{}
+	ctRepo := pg.PostgresContractTemplateRepo{Ctx: ctx}
+	rtRepo := pg.PostgresReviewTaskRepo{Ctx: ctx}
+	atRepo := pg.PostgresApprovalTaskRepo{Ctx: ctx}
 
 	// Initialize the service.
 	var (

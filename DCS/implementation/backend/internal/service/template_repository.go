@@ -166,6 +166,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		DB:     s.DB,
 		CTRepo: s.CTRepo,
 		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -471,6 +472,7 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		Ctx:    ctx,
 		DB:     s.DB,
 		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
 		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
