@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"slices"
 	"sort"
@@ -31,7 +31,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
@@ -50,7 +50,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, templatestate.Draft, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Draft, contractTemplate.State)
 }
 
 func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
@@ -72,7 +72,7 @@ func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
@@ -111,7 +111,7 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 			t.Fatalf("Failed to get new DID: %v", err)
 		}
 		dids = append(dids, *did)
-		createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+		createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 	}
 	sort.Strings(dids)
 
@@ -131,7 +131,7 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 	}
 
 	for _, ct := range result.ContractTemplates {
-		assert.Equal(t, templatestate.Draft, ct.State)
+		assert.Equal(t, contracttemplatestate.Draft, ct.State)
 
 		if !slices.Contains(dids, ct.DID) {
 			t.Errorf("DID not found in retrieved contract template: %v", ct.DID)

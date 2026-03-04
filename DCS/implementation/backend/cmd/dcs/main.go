@@ -15,9 +15,7 @@ import (
 	"digital-contracting-service/internal/auth"
 	"digital-contracting-service/internal/middleware"
 	"digital-contracting-service/internal/service"
-	"digital-contracting-service/internal/templaterepository/db/pg/approvaltask"
-	"digital-contracting-service/internal/templaterepository/db/pg/reviewtask"
-	templaterepository2 "digital-contracting-service/internal/templaterepository/db/pg/templaterepository"
+	"digital-contracting-service/internal/templaterepository/db/pg"
 	"flag"
 	"fmt"
 	"net"
@@ -85,9 +83,9 @@ func main() {
 	}
 	jwtAuth := auth.NewJWTAuthenticator(oidcValidator)
 
-	ctRepo := templaterepository2.PostgresContractTemplateRepo{}
-	rtRepo := reviewtask.PostgresReviewTaskRepo{}
-	atRepo := approvaltask.PostgresApprovalTaskRepo{}
+	ctRepo := pg.PostgresContractTemplateRepo{}
+	rtRepo := pg.PostgresReviewTaskRepo{}
+	atRepo := pg.PostgresApprovalTaskRepo{}
 
 	// Initialize the service.
 	var (

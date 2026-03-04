@@ -1,10 +1,9 @@
-package templaterepository
+package pg
 
 import (
 	"context"
 	"database/sql"
-	"digital-contracting-service/internal/templaterepository/datatype/templaterepository"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/db"
 	"errors"
 	"fmt"
 	"strconv"
@@ -18,7 +17,7 @@ type PostgresContractTemplateRepo struct {
 	Ctx context.Context
 }
 
-func (r *PostgresContractTemplateRepo) Create(tx *sqlx.Tx, data templaterepository.ContractTemplate) (*time.Time, error) {
+func (r *PostgresContractTemplateRepo) Create(tx *sqlx.Tx, data db.ContractTemplate) (*time.Time, error) {
 	statement := `
         INSERT INTO contract_templates (
             did, created_by, state, name,
@@ -37,13 +36,13 @@ func (r *PostgresContractTemplateRepo) Create(tx *sqlx.Tx, data templatereposito
 	return &createdAt, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadDataByID(tx *sqlx.Tx, did string, documentNumber int, version int) (*templaterepository.ContractTemplate, error) {
+func (r *PostgresContractTemplateRepo) ReadDataByID(tx *sqlx.Tx, did string, documentNumber int, version int) (*db.ContractTemplate, error) {
 	query := `
         SELECT did, document_number, version, state, name, description,
                created_by, created_at, updated_at, template_data, template_type
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
-	var ct templaterepository.ContractTemplate
+	var ct db.ContractTemplate
 	err := tx.GetContext(r.Ctx, &ct, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -54,20 +53,20 @@ func (r *PostgresContractTemplateRepo) ReadDataByID(tx *sqlx.Tx, did string, doc
 	return &ct, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadAllMetaData(tx *sqlx.Tx) ([]templaterepository.MetaData, error) {
+func (r *PostgresContractTemplateRepo) ReadAllMetaData(tx *sqlx.Tx) ([]db.ContractTemplateMetadata, error) {
 	query := `
         SELECT did, document_number, version, state, template_type, name, description, created_by, created_at, updated_at
         FROM contract_templates
     `
-	var cts []templaterepository.MetaData
+	var cts []db.ContractTemplateMetadata
 	err := tx.SelectContext(r.Ctx, &cts, query)
 	if err != nil {
-		return []templaterepository.MetaData{}, err
+		return []db.ContractTemplateMetadata{}, err
 	}
 	return cts, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadAllMetaDataByFilter(tx *sqlx.Tx, values templaterepository.SearchValues) ([]templaterepository.MetaData, error) {
+func (r *PostgresContractTemplateRepo) ReadAllMetaDataByFilter(tx *sqlx.Tx, values db.SearchValues) ([]db.ContractTemplateMetadata, error) {
 	query := `
         SELECT did, document_number, version, state, name, template_type, description, created_by, created_at, updated_at
         FROM contract_templates
@@ -80,20 +79,20 @@ func (r *PostgresContractTemplateRepo) ReadAllMetaDataByFilter(tx *sqlx.Tx, valu
 		query += " WHERE " + *conditions
 	}
 
-	var cts []templaterepository.MetaData
+	var cts []db.ContractTemplateMetadata
 	err = tx.SelectContext(r.Ctx, &cts, query, params...)
 	if err != nil {
-		return []templaterepository.MetaData{}, err
+		return []db.ContractTemplateMetadata{}, err
 	}
 	return cts, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string, documentNumber int, version int) (*templaterepository.ProcessData, error) {
+func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string, documentNumber int, version int) (*db.ContractTemplateProcessData, error) {
 	query := `
         SELECT did, document_number, version, state, updated_at, created_by
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
     `
-	var processData templaterepository.ProcessData
+	var processData db.ContractTemplateProcessData
 	err := tx.GetContext(r.Ctx, &processData, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -104,7 +103,7 @@ func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string, 
 	return &processData, nil
 }
 
-func (r *PostgresContractTemplateRepo) UpdateState(tx *sqlx.Tx, did string, documentNumber int, version int, state templatestate.TemplateState) error {
+func (r *PostgresContractTemplateRepo) UpdateState(tx *sqlx.Tx, did string, documentNumber int, version int, state string) error {
 	statement := `
         UPDATE contract_templates SET state = $4
         WHERE did = $1 AND document_number = $2 AND version = $3
@@ -113,7 +112,7 @@ func (r *PostgresContractTemplateRepo) UpdateState(tx *sqlx.Tx, did string, docu
 	return err
 }
 
-func (r *PostgresContractTemplateRepo) Update(tx *sqlx.Tx, data templaterepository.UpdateData) error {
+func (r *PostgresContractTemplateRepo) Update(tx *sqlx.Tx, data db.ContractTemplateUpdateData) error {
 	query, params, err := createQuery(data)
 	if err != nil {
 		return err
@@ -124,7 +123,7 @@ func (r *PostgresContractTemplateRepo) Update(tx *sqlx.Tx, data templatereposito
 
 // --- Hilfsfunktionen (package-intern, keine Methoden) ---
 
-func createSearchConditions(values templaterepository.SearchValues) (*string, []interface{}, error) {
+func createSearchConditions(values db.SearchValues) (*string, []interface{}, error) {
 	conditions := ""
 	var params []interface{}
 	paramIndex := 1
@@ -144,14 +143,14 @@ func createSearchConditions(values templaterepository.SearchValues) (*string, []
 		params = append(params, *values.Version)
 		paramIndex++
 	}
-	if values.State != nil {
+	if len(values.State) > 0 {
 		conditions += ` state = $` + strconv.Itoa(paramIndex) + ` AND`
-		params = append(params, *values.State)
+		params = append(params, values.State)
 		paramIndex++
 	}
-	if values.TemplateType != nil {
+	if len(values.TemplateType) > 0 {
 		conditions += ` template_type = $` + strconv.Itoa(paramIndex) + ` AND`
-		params = append(params, "%"+*values.TemplateType+"%")
+		params = append(params, "%"+values.TemplateType+"%")
 		paramIndex++
 	}
 	if values.Name != nil {
@@ -178,7 +177,7 @@ func createSearchConditions(values templaterepository.SearchValues) (*string, []
 	return &conditions, params, nil
 }
 
-func createQuery(data templaterepository.UpdateData) (*string, []interface{}, error) {
+func createQuery(data db.ContractTemplateUpdateData) (*string, []interface{}, error) {
 	queryBase := `UPDATE contract_templates SET `
 	var columns []string
 	var params []interface{}
@@ -188,7 +187,7 @@ func createQuery(data templaterepository.UpdateData) (*string, []interface{}, er
 		params = append(params, value)
 	}
 
-	if data.State != nil {
+	if len(data.State) > 0 {
 		addParam("state", data.State)
 	}
 	if data.Name != nil {
@@ -200,7 +199,7 @@ func createQuery(data templaterepository.UpdateData) (*string, []interface{}, er
 	if data.TemplateData != nil && data.TemplateData.IsNotNullValue() {
 		addParam("template_data", data.TemplateData)
 	}
-	if data.TemplateType != nil && data.TemplateData.IsNotNullValue() {
+	if len(data.TemplateType) > 0 && data.TemplateData.IsNotNullValue() {
 		addParam("template_type", data.TemplateType)
 	}
 	if len(columns) == 0 {

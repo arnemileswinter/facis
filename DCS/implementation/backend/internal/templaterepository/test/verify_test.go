@@ -5,8 +5,8 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"testing"
 	"time"
 
@@ -32,7 +32,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{"Test User 1"}
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
@@ -62,7 +62,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Verified)
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Verified.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}
@@ -130,7 +130,7 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	approver := "Test User 1"
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
@@ -160,7 +160,7 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := repo.ATRepo.TaskExistsInState(tx, *did, 1, 1, approver, approvaltaskstate.Verified)
+	exists, err := repo.ATRepo.TaskExistsInState(tx, *did, 1, 1, approver, reviewtaskstate.Verified.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of approval tasks: %v", err)
 	}
@@ -192,7 +192,7 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	cmd := command.VerifyCmd{
 		DID:            *did,

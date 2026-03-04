@@ -1,9 +1,8 @@
-package approvaltask
+package pg
 
 import (
 	"context"
-	"digital-contracting-service/internal/templaterepository/datatype/approvaltask"
-	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/db"
 	"errors"
 	"time"
 
@@ -14,7 +13,7 @@ type PostgresApprovalTaskRepo struct {
 	Ctx context.Context
 }
 
-func (r *PostgresApprovalTaskRepo) Create(tx *sqlx.Tx, data approvaltask.TaskData) (*time.Time, error) {
+func (r *PostgresApprovalTaskRepo) Create(tx *sqlx.Tx, data db.ApprovalTaskData) (*time.Time, error) {
 	statement := `
         INSERT INTO contract_templates_approval_task (
             did, document_number, version, state, approver, created_by
@@ -41,13 +40,13 @@ func (r *PostgresApprovalTaskRepo) ReopenTasks(tx *sqlx.Tx, did string, document
 	return err
 }
 
-func (r *PostgresApprovalTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]approvaltask.TaskData, error) {
+func (r *PostgresApprovalTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]db.ApprovalTaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, approver,
                created_by, created_at
         FROM contract_templates_approval_task WHERE did = $1
     `
-	var approvalTasks []approvaltask.TaskData
+	var approvalTasks []db.ApprovalTaskData
 	err := tx.SelectContext(r.Ctx, &approvalTasks, query, did)
 	if err != nil {
 		return nil, err
@@ -55,13 +54,13 @@ func (r *PostgresApprovalTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]approvalt
 	return approvalTasks, nil
 }
 
-func (r *PostgresApprovalTaskRepo) ReadAllByApprover(tx *sqlx.Tx, approver string) ([]approvaltask.TaskData, error) {
+func (r *PostgresApprovalTaskRepo) ReadAllByApprover(tx *sqlx.Tx, approver string) ([]db.ApprovalTaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, approver,
                created_by, created_at
         FROM contract_templates_approval_task WHERE approver = $1
     `
-	var approvalTasks []approvaltask.TaskData
+	var approvalTasks []db.ApprovalTaskData
 	err := tx.SelectContext(r.Ctx, &approvalTasks, query, approver)
 	if err != nil {
 		return nil, err
@@ -69,7 +68,7 @@ func (r *PostgresApprovalTaskRepo) ReadAllByApprover(tx *sqlx.Tx, approver strin
 	return approvalTasks, nil
 }
 
-func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) error {
+func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state string) error {
 	statement := `
         UPDATE contract_templates_approval_task SET state = $5
         WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
@@ -101,7 +100,7 @@ func (r *PostgresApprovalTaskRepo) IsValidApprover(tx *sqlx.Tx, did string, docu
 	return count > 0, nil
 }
 
-func (r *PostgresApprovalTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state approvaltaskstate.ApprovalTaskState) (bool, error) {
+func (r *PostgresApprovalTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_approval_task
         WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4 AND state = $5

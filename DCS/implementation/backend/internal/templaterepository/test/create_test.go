@@ -5,7 +5,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 
@@ -42,7 +42,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    creator,
-		TemplateType: templatetype.FrameContract,
+		TemplateType: contracttemplatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonMetaData,

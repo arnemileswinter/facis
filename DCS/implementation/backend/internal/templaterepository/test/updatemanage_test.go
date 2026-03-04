@@ -6,8 +6,8 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 	"time"
@@ -34,7 +34,7 @@ func TestUpdateManage_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -113,7 +113,7 @@ func TestUpdateManage_UpdateContractTemplateDataInSubmitState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -191,7 +191,7 @@ func TestUpdateManage_UpdateContractTemplateDataInRejectedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Rejected, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Rejected, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -269,7 +269,7 @@ func TestUpdateManage_UpdateContractTemplateDataInReviewedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -347,7 +347,7 @@ func TestUpdateManage_UpdateContractTemplateDataInApproveState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -401,7 +401,7 @@ func TestUpdateManage_UpdateContractTemplateDataInRegisteredState(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -455,7 +455,7 @@ func TestUpdateManage_UpdateContractTemplateDataInArchiveState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -545,8 +545,8 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToDraft(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
-	newState := templatestate.Draft
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+	newState := contracttemplatestate.Draft
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -623,8 +623,8 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToSubmitted(t *testing.T)
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
-	newState := templatestate.Submitted
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+	newState := contracttemplatestate.Submitted
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -679,8 +679,8 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToRejected(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
-	newState := templatestate.Rejected
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+	newState := contracttemplatestate.Rejected
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -735,8 +735,8 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToReviewed(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
-	newState := templatestate.Reviewed
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+	newState := contracttemplatestate.Reviewed
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -791,8 +791,8 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToApproved(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
-	newState := templatestate.Approved
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+	newState := contracttemplatestate.Approved
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -847,8 +847,8 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToRegistered(t *testing.T
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
-	newState := templatestate.Registered
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+	newState := contracttemplatestate.Registered
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -903,8 +903,8 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToArchive(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
-	newState := templatestate.Archived
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+	newState := contracttemplatestate.Archived
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -981,8 +981,8 @@ func TestUpdateManage_SetContractTemplateStateFromSubmittedToDraft(t *testing.T)
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
-	newState := templatestate.Draft
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
+	newState := contracttemplatestate.Draft
 
 	reviewers := []string{"Test User 1", "Test User 2", "Test User 3"}
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
@@ -1086,8 +1086,8 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToDraft(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
-	newState := templatestate.Draft
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
+	newState := contracttemplatestate.Draft
 
 	reviewers := []string{"Test User 1", "Test User 2", "Test User 3"}
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
@@ -1191,8 +1191,8 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToDraft(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
-	newState := templatestate.Draft
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
+	newState := contracttemplatestate.Draft
 
 	reviewers := []string{"Test User 1", "Test User 2", "Test User 3"}
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
@@ -1251,8 +1251,8 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToSubmitted(t *testing
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
-	newState := templatestate.Submitted
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
+	newState := contracttemplatestate.Submitted
 
 	reviewers := []string{"Test User 1", "Test User 2", "Test User 3"}
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Approved, creator, reviewers)
@@ -1323,7 +1323,7 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToSubmitted(t *testing
 
 	tasksAreOpen := true
 	for _, reviewTask := range reviewTasksExist {
-		if reviewTask.State != reviewtaskstate.Open {
+		if reviewTask.State != reviewtaskstate.Open.String() {
 			tasksAreOpen = false
 		}
 	}
@@ -1357,8 +1357,8 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToSubmitted(t *testing
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
-	newState := templatestate.Submitted
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
+	newState := contracttemplatestate.Submitted
 
 	reviewers := []string{"Test User 1", "Test User 2", "Test User 3"}
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Approved, creator, reviewers)
@@ -1419,8 +1419,8 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToReviewed(t *testing.
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
-	newState := templatestate.Reviewed
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
+	newState := contracttemplatestate.Reviewed
 
 	reviewers := []string{"Test User 1", "Test User 2", "Test User 3"}
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Approved, creator, reviewers)
@@ -1481,8 +1481,8 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToDraft(t *testing.T
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
-	newState := templatestate.Submitted
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
+	newState := contracttemplatestate.Submitted
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -1537,8 +1537,8 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToSubmitted(t *testi
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
-	newState := templatestate.Submitted
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
+	newState := contracttemplatestate.Submitted
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -1593,8 +1593,8 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToApproved(t *testin
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
-	newState := templatestate.Approved
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
+	newState := contracttemplatestate.Approved
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -1649,8 +1649,8 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToArchived(t *testin
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
-	newState := templatestate.Archived
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
+	newState := contracttemplatestate.Archived
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -1705,8 +1705,8 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToDraft(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
-	newState := templatestate.Submitted
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	newState := contracttemplatestate.Submitted
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -1761,8 +1761,8 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToSubmitted(t *testing
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
-	newState := templatestate.Submitted
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	newState := contracttemplatestate.Submitted
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -1817,8 +1817,8 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToApproved(t *testing.
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
-	newState := templatestate.Approved
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	newState := contracttemplatestate.Approved
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -1873,8 +1873,8 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToRegistered(t *testin
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
-	newState := templatestate.Registered
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	newState := contracttemplatestate.Registered
 
 	templateData := map[string]interface{}{
 		"test": "update",

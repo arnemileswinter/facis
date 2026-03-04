@@ -4,7 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/command"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 	"time"
@@ -31,7 +31,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -69,7 +69,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, templatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
 }
 
 func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
@@ -126,7 +126,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	repo := NewTestRepo(ctxTx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -164,7 +164,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, templatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
 }
 
 func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
@@ -186,7 +186,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 
 	repo := NewTestRepo(ctxTx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Rejected, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Rejected, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -224,7 +224,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, templatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
 }
 
 func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
@@ -246,7 +246,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -284,7 +284,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, templatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
 }
 
 func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
@@ -306,7 +306,7 @@ func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -346,7 +346,7 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,

@@ -5,7 +5,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 	"time"
@@ -32,7 +32,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	approver := "Test User 1"
 
@@ -92,7 +92,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Approved, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Approved, contractTemplate.State)
 }
 
 func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testing.T) {
@@ -114,7 +114,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	approver := "Test User 1"
 
@@ -194,7 +194,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, "Test User 1")
 
@@ -236,7 +236,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -276,7 +276,7 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
@@ -316,7 +316,7 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,

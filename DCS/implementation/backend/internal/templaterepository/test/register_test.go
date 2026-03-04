@@ -4,7 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/command"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 	"time"
@@ -31,7 +31,7 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Approved, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -69,7 +69,7 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, templatestate.Registered, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Registered, contractTemplate.State)
 }
 
 func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
@@ -127,7 +127,7 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -167,7 +167,7 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -207,7 +207,7 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Rejected, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Rejected, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -247,7 +247,7 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -287,7 +287,7 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Registered, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
@@ -327,7 +327,7 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Archived, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,

@@ -59,11 +59,17 @@ func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDI
 
 	result := make([]GetAllApprovalTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
+
+		state, err := aopprovaltaskstate.NewApprovalTaskState(data.State)
+		if err != nil {
+			return nil, fmt.Errorf("could not create approval task state: %w", err)
+		}
+
 		result[i] = GetAllApprovalTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
-			State:          data.State,
+			State:          state,
 			Approver:       data.Approver,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,

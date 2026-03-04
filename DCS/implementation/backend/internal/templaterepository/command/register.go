@@ -4,7 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"errors"
@@ -25,7 +25,7 @@ type RegisterCmd struct {
 type Registrar struct {
 	Ctx    context.Context
 	DB     *sqlx.DB
-	CTRepo db.TemplateRepository
+	CTRepo db.ContractTemplateRepo
 	RTRepo db.ReviewTaskRepo
 	ATRepo db.ApprovalTaskRepo
 }
@@ -50,11 +50,11 @@ func (h *Registrar) Handle(cmd RegisterCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if processData.State != templatestate.Approved {
+	if processData.State != contracttemplatestate.Approved.String() {
 		return errors.New("invalid contract template state")
 	}
 
-	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Registered)
+	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Registered.String())
 	if err != nil {
 		return fmt.Errorf("could not update state: %w", err)
 	}

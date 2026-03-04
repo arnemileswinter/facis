@@ -4,7 +4,6 @@ import (
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/datatype/eventtype"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"time"
 )
 
@@ -45,15 +44,15 @@ func (e CreateEvent) GetVersion() int {
 // SubmitEvent is emitted when a template is submitted for review.
 // This event signals state transition and includes reviewer comments.
 type SubmitEvent struct {
-	DID            string                      `json:"did"`
-	DocumentNumber int                         `json:"document_number"`
-	Version        int                         `json:"version"`
-	PreviousState  templatestate.TemplateState `json:"previous_state"`
-	NewState       templatestate.TemplateState `json:"new_state"`
-	SubmittedBy    string                      `json:"submitted_by"`
-	ActionFlag     *actionflag.ActionFlag      `json:"action_flag"`
-	Comments       []string                    `json:"comments,omitempty"`
-	OccurredAt     time.Time                   `json:"occurred_at"`
+	DID            string                 `json:"did"`
+	DocumentNumber int                    `json:"document_number"`
+	Version        int                    `json:"version"`
+	PreviousState  string                 `json:"previous_state"`
+	NewState       string                 `json:"new_state"`
+	SubmittedBy    string                 `json:"submitted_by"`
+	ActionFlag     *actionflag.ActionFlag `json:"action_flag"`
+	Comments       []string               `json:"comments,omitempty"`
+	OccurredAt     time.Time              `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.
@@ -210,19 +209,19 @@ func (e UpdateEvent) GetVersion() int {
 // UpdateManageEvent is emitted when template metadata is updated.
 // This event is used for audit and synchronization purposes.
 type UpdateManageEvent struct {
-	DID             string                       `json:"did"`
-	DocumentNumber  int                          `json:"document_number"`
-	Version         int                          `json:"version"`
-	UpdatedBy       string                       `json:"updated_by"`
-	OldState        *templatestate.TemplateState `json:"old_state"`
-	NewState        *templatestate.TemplateState `json:"new_state"`
-	OldName         *string                      `json:"old_name,omitempty"`
-	NewName         *string                      `json:"new_name,omitempty"`
-	OldDescription  *string                      `json:"old_description,omitempty"`
-	NewDescription  *string                      `json:"new_description,omitempty"`
-	OldTemplateData *datatype.JSON               `json:"old_template_data,omitempty"`
-	NewTemplateData *datatype.JSON               `json:"new_metadata,omitempty"`
-	OccurredAt      time.Time                    `json:"occurred_at"`
+	DID             string         `json:"did"`
+	DocumentNumber  int            `json:"document_number"`
+	Version         int            `json:"version"`
+	UpdatedBy       string         `json:"updated_by"`
+	OldState        *string        `json:"old_state"`
+	NewState        *string        `json:"new_state"`
+	OldName         *string        `json:"old_name,omitempty"`
+	NewName         *string        `json:"new_name,omitempty"`
+	OldDescription  *string        `json:"old_description,omitempty"`
+	NewDescription  *string        `json:"new_description,omitempty"`
+	OldTemplateData *datatype.JSON `json:"old_template_data,omitempty"`
+	NewTemplateData *datatype.JSON `json:"new_metadata,omitempty"`
+	OccurredAt      time.Time      `json:"occurred_at"`
 }
 
 // EventType implements the Event interface.

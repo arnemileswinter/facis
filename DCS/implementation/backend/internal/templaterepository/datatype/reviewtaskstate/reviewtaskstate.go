@@ -15,7 +15,7 @@ const (
 	Approved ReviewTaskState = "APPROVED"
 )
 
-var validStates = map[ReviewTaskState]bool{
+var validState = map[ReviewTaskState]bool{
 	Open:     true,
 	Rejected: true,
 	Verified: true,
@@ -33,7 +33,7 @@ func NewReviewTaskState(s string) (ReviewTaskState, error) {
 // IsValid checks if the ReviewTaskState is a valid role
 func (s ReviewTaskState) IsValid() bool {
 	upper := ReviewTaskState(strings.ToUpper(string(s)))
-	return validStates[upper]
+	return validState[upper]
 }
 
 // String returns the string representation of the ReviewTaskState

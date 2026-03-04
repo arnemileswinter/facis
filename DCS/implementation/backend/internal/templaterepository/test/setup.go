@@ -4,16 +4,12 @@ import (
 	"context"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
-	approvaltask3 "digital-contracting-service/internal/templaterepository/datatype/approvaltask"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
-	reviewtask3 "digital-contracting-service/internal/templaterepository/datatype/reviewtask"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
-	"digital-contracting-service/internal/templaterepository/db"
-	"digital-contracting-service/internal/templaterepository/db/pg/approvaltask"
-	"digital-contracting-service/internal/templaterepository/db/pg/reviewtask"
-	"digital-contracting-service/internal/templaterepository/db/pg/templaterepository"
+	database "digital-contracting-service/internal/templaterepository/db"
+	"digital-contracting-service/internal/templaterepository/db/pg"
 	"log"
 	"os"
 	"testing"
@@ -23,9 +19,9 @@ import (
 )
 
 type TestRepo struct {
-	CTRepo db.TemplateRepository
-	RTRepo db.ReviewTaskRepo
-	ATRepo db.ApprovalTaskRepo
+	CTRepo database.ContractTemplateRepo
+	RTRepo database.ReviewTaskRepo
+	ATRepo database.ApprovalTaskRepo
 }
 
 func setupTestDB(t *testing.T) *sqlx.DB {
@@ -46,9 +42,9 @@ func setupTestDB(t *testing.T) *sqlx.DB {
 
 func NewTestRepo(ctx context.Context) *TestRepo {
 	return &TestRepo{
-		CTRepo: &templaterepository.PostgresContractTemplateRepo{Ctx: ctx},
-		RTRepo: &reviewtask.PostgresReviewTaskRepo{Ctx: ctx},
-		ATRepo: &approvaltask.PostgresApprovalTaskRepo{Ctx: ctx},
+		CTRepo: &pg.PostgresContractTemplateRepo{Ctx: ctx},
+		RTRepo: &pg.PostgresReviewTaskRepo{Ctx: ctx},
+		ATRepo: &pg.PostgresApprovalTaskRepo{Ctx: ctx},
 	}
 }
 
@@ -81,7 +77,7 @@ func cleanupContractTemplateTable(t *testing.T, db *sqlx.DB) {
 	}
 }
 
-func createContractTemplate(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state templatestate.TemplateState, createdBy string) {
+func createContractTemplate(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state contracttemplatestate.ContractTemplateState, createdBy string) {
 	name := "Test Contract Template"
 	description := "Test Description"
 
@@ -98,7 +94,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, repo *TestRepo, did *stri
 	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    createdBy,
-		TemplateType: templatetype.FrameContract,
+		TemplateType: contracttemplatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
@@ -124,7 +120,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, repo *TestRepo, did *stri
 	}
 }
 
-func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state templatestate.TemplateState, createdBy string, documentNumber int, version int, name string, description string, templateData map[string]interface{}) {
+func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state contracttemplatestate.ContractTemplateState, createdBy string, documentNumber int, version int, name string, description string, templateData map[string]interface{}) {
 	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
 		t.Fatalf("Failed to create JSON template data: %v", err)
@@ -135,7 +131,7 @@ func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRep
 	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    createdBy,
-		TemplateType: templatetype.FrameContract,
+		TemplateType: contracttemplatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonTemplateData,
@@ -169,12 +165,12 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *Tes
 	}
 
 	for _, reviewer := range reviewers {
-		reviewTask := reviewtask3.TaskData{
+		reviewTask := database.ReviewTaskData{
 			DID:            did,
 			DocumentNumber: 1,
 			Version:        1,
 			Reviewer:       reviewer,
-			State:          state,
+			State:          state.String(),
 			CreatedBy:      submittedBy,
 		}
 		_, err = repo.RTRepo.Create(tx, reviewTask)
@@ -196,12 +192,12 @@ func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *T
 		t.Fatalf("Failed to begin transaction: %v", err)
 	}
 
-	approvalTask := approvaltask3.TaskData{
+	approvalTask := database.ApprovalTaskData{
 		DID:            did,
 		DocumentNumber: 1,
 		Version:        1,
 		Approver:       approver,
-		State:          state,
+		State:          state.String(),
 		CreatedBy:      submittedBy,
 	}
 	_, err = repo.ATRepo.Create(tx, approvalTask)

@@ -6,8 +6,8 @@ import (
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"slices"
@@ -36,7 +36,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	approver := "Test User 5"
 	cmd := command.SubmitCmd{
@@ -82,7 +82,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
@@ -128,7 +128,7 @@ func TestSubmit_SubmitContractTemplateInDraftStateWithInvalidUser(t *testing.T) 
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	approver := "Test User 5"
 	reviewers := []string{
@@ -179,7 +179,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -260,7 +260,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 }
 
 func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testing.T) {
@@ -282,7 +282,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testin
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -345,7 +345,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithoutVerifying(t *testi
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -408,7 +408,7 @@ func TestSubmit_RejectContractTemplateInSubmittedStateWithInvalidUser(t *testing
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -471,7 +471,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -559,7 +559,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Reviewed, contractTemplate.State)
 }
 
 func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T) {
@@ -581,7 +581,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -645,7 +645,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Rejected, contractTemplate.State)
 }
 
 func TestSubmit_SubmitNonExistingContractTemplate(t *testing.T) {
@@ -703,7 +703,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
@@ -745,7 +745,7 @@ func TestSubmit_SubmitContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	approver := "Test User 1"
 
@@ -789,7 +789,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithApproverUser(t *testin
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -846,7 +846,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	/**
 	Create and Submit the Draft
 	*/
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	approver := "Test User 4"
 	reviewers := []string{
@@ -894,7 +894,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
@@ -1005,7 +1005,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
@@ -1085,7 +1085,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Rejected, contractTemplate.State)
 
 	/**
 	contract template creator submits it again
@@ -1129,7 +1129,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	/**
 	All reviewers verify contract template
@@ -1199,7 +1199,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Reviewed, contractTemplate.State)
 
 	/**
 	Approver resubmits reviewed contract template
@@ -1242,7 +1242,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	/**
 	All reviewers verify contract template
@@ -1312,7 +1312,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Reviewed, contractTemplate.State)
 
 	/**
 	Approver resubmits reviewed contract template
@@ -1355,7 +1355,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 }
 
 func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
@@ -1380,7 +1380,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	/**
 	Create and Submit the Draft
 	*/
-	createContractTemplate(t, db, repo, did, templatestate.Draft, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	approver := "Test User 4"
 	reviewers := []string{
@@ -1428,7 +1428,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
@@ -1539,7 +1539,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
@@ -1619,7 +1619,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Rejected, contractTemplate.State)
 
 	/**
 	contract template creator submits it again
@@ -1663,7 +1663,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	/**
 	All reviewers verify contract template
@@ -1733,7 +1733,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Reviewed, contractTemplate.State)
 
 	/**
 	Approver resubmits reviewed contract template
@@ -1776,7 +1776,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	/**
 	All reviewers verify contract template
@@ -1846,7 +1846,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Reviewed, contractTemplate.State)
 
 	/**
 	Approver verifies reviewed contract template
@@ -1908,7 +1908,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Approved, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Approved, contractTemplate.State)
 }
 
 func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
@@ -1931,7 +1931,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	/**
 	Create and Submit the Draft
 	*/
-	createContractTemplate(t, db, repo, did, templatestate.Draft, "Test User")
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, "Test User")
 
 	submittedBy := "Test User"
 	approver := "Test User 4"
@@ -1982,7 +1982,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
@@ -2095,7 +2095,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
@@ -2177,7 +2177,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Rejected, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Rejected, contractTemplate.State)
 
 	/**
 	contract template creator submits it again
@@ -2231,7 +2231,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	/**
 	All reviewers verify contract template
@@ -2303,7 +2303,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Reviewed, contractTemplate.State)
 
 	/**
 	Approver resubmits reviewed contract template
@@ -2348,7 +2348,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Submitted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Submitted, contractTemplate.State)
 
 	/**
 	All reviewers verify contract template
@@ -2420,7 +2420,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Reviewed, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Reviewed, contractTemplate.State)
 
 	/**
 	Approver rejects reviewed contract template
@@ -2463,7 +2463,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Draft, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Draft, contractTemplate.State)
 }
 
 func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
@@ -2483,7 +2483,7 @@ func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, "Test User")
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, "Test User")
 
 	submittedBy := "Test User"
 	approver := "Test User 5"

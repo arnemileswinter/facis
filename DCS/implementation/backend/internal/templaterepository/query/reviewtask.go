@@ -58,11 +58,17 @@ func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDIDQry
 
 	result := make([]GetAllReviewTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
+
+		state, err := reviewtaskstate.NewReviewTaskState(data.State)
+		if err != nil {
+			return nil, fmt.Errorf("could not create review task state: %w", err)
+		}
+
 		result[i] = GetAllReviewTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
-			State:          data.State,
+			State:          state,
 			Reviewer:       data.Reviewer,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,

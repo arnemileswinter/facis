@@ -3,9 +3,9 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	reviewtask3 "digital-contracting-service/internal/templaterepository/datatype/reviewtask"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	db2 "digital-contracting-service/internal/templaterepository/db"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	assignees := []string{
 		"Test User 1",
@@ -45,12 +45,12 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 	}
 
 	for _, assignee := range assignees {
-		reviewTask := reviewtask3.TaskData{
+		reviewTask := db2.ReviewTaskData{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			Reviewer:       assignee,
-			State:          reviewtaskstate.Open,
+			State:          reviewtaskstate.Open.String(),
 			CreatedBy:      creator,
 		}
 		_, err = repo.RTRepo.Create(tx, reviewTask)
@@ -59,7 +59,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 		}
 	}
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open.String())
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}
@@ -91,7 +91,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Submitted, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	assignees := []string{
 		"Test User 1",
@@ -106,12 +106,12 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 	}
 
 	for _, assignee := range assignees {
-		reviewTask := reviewtask3.TaskData{
+		reviewTask := db2.ReviewTaskData{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			Reviewer:       assignee,
-			State:          reviewtaskstate.Open,
+			State:          reviewtaskstate.Open.String(),
 			CreatedBy:      creator,
 		}
 		_, err = repo.RTRepo.Create(tx, reviewTask)
@@ -121,13 +121,13 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 	}
 
 	for _, assignee := range assignees {
-		err := repo.RTRepo.Update(tx, *did, 1, 1, assignee, reviewtaskstate.Approved)
+		err := repo.RTRepo.Update(tx, *did, 1, 1, assignee, contracttemplatestate.Approved.String())
 		if err != nil {
 			t.Fatalf("Failed to approve review task: %v", err)
 		}
 	}
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open.String())
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}

@@ -9,8 +9,8 @@ import (
 	"digital-contracting-service/internal/middleware"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
 	"digital-contracting-service/internal/templaterepository/db"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"time"
@@ -23,14 +23,14 @@ import (
 // The example methods log the requests and return zero values.
 type templateRepositorysrvc struct {
 	DB     *sqlx.DB
-	CTRepo db.TemplateRepository
+	CTRepo db.ContractTemplateRepo
 	RTRepo db.ReviewTaskRepo
 	ATRepo db.ApprovalTaskRepo
 	auth.JWTAuthenticator
 }
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
-func NewTemplateRepository(db *sqlx.DB, jwtAuth auth.JWTAuthenticator, CTRepo db.TemplateRepository,
+func NewTemplateRepository(db *sqlx.DB, jwtAuth auth.JWTAuthenticator, CTRepo db.ContractTemplateRepo,
 	RTRepo db.ReviewTaskRepo, ATRepo db.ApprovalTaskRepo) templaterepository.Service {
 	return &templateRepositorysrvc{
 		DB:               db,
@@ -44,7 +44,7 @@ func NewTemplateRepository(db *sqlx.DB, jwtAuth auth.JWTAuthenticator, CTRepo db
 // Create a new template.
 func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.ContractTemplateCreateRequest) (*templaterepository.ContractTemplateCreateResponse, error) {
 
-	templateType, err := templatetype.NewTemplateType(req.TemplateType)
+	templateType, err := contracttemplatetype.NewContractTemplateType(req.TemplateType)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
@@ -142,9 +142,9 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	var templateType *templatetype.TemplateType
+	var templateType *contracttemplatetype.ContractTemplateType
 	if req.TemplateType != nil {
-		tType, err := templatetype.NewTemplateType(*req.TemplateType)
+		tType, err := contracttemplatetype.NewContractTemplateType(*req.TemplateType)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
@@ -192,18 +192,18 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	var state *templatestate.TemplateState
+	var state *contracttemplatestate.ContractTemplateState
 	if req.State != nil {
-		ts, err := templatestate.NewTemplateState(*req.State)
+		ts, err := contracttemplatestate.NewContractTemplateState(*req.State)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
 		state = &ts
 	}
 
-	var templateType *templatetype.TemplateType
+	var templateType *contracttemplatetype.ContractTemplateType
 	if req.TemplateType != nil {
-		tType, err := templatetype.NewTemplateType(*req.TemplateType)
+		tType, err := contracttemplatetype.NewContractTemplateType(*req.TemplateType)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
@@ -243,9 +243,9 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 // perform filtered searches.
 func (s *templateRepositorysrvc) Search(ctx context.Context, req *templaterepository.ContractTemplateSearchRequest) (res []*templaterepository.ContractTemplateSearchResponse, err error) {
 
-	var state *templatestate.TemplateState
+	var state *contracttemplatestate.ContractTemplateState
 	if req.State != nil {
-		tState, err := templatestate.NewTemplateState(*req.State)
+		tState, err := contracttemplatestate.NewContractTemplateState(*req.State)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}

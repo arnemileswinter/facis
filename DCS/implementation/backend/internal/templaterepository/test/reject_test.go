@@ -5,7 +5,7 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 	"time"
@@ -32,7 +32,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	approver := "Test User 1"
 
@@ -76,7 +76,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.Equal(t, templatestate.Draft, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Draft, contractTemplate.State)
 }
 
 func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.T) {
@@ -98,7 +98,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, "Test User 1")
 
@@ -175,7 +175,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Draft, "Test User")
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, "Test User")
 
 	rejectedBy := "Test User"
 
@@ -216,7 +216,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Approved, "Test User")
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, "Test User")
 
 	rejectedBy := "Test User"
 
@@ -257,7 +257,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, templatestate.Reviewed, "Test User")
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, "Test User")
 
 	rejectedBy := "Test User"
 

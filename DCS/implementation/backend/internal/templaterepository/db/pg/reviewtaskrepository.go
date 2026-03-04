@@ -1,9 +1,8 @@
-package reviewtask
+package pg
 
 import (
 	"context"
-	"digital-contracting-service/internal/templaterepository/datatype/reviewtask"
-	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
+	"digital-contracting-service/internal/templaterepository/db"
 	"errors"
 	"fmt"
 	"strings"
@@ -16,7 +15,7 @@ type PostgresReviewTaskRepo struct {
 	Ctx context.Context
 }
 
-func (r *PostgresReviewTaskRepo) Create(tx *sqlx.Tx, data reviewtask.TaskData) (*time.Time, error) {
+func (r *PostgresReviewTaskRepo) Create(tx *sqlx.Tx, data db.ReviewTaskData) (*time.Time, error) {
 	statement := `
         INSERT INTO contract_templates_review_task (
             did, document_number, version, state, reviewer, created_by
@@ -56,13 +55,13 @@ func (r *PostgresReviewTaskRepo) ReopenTasks(tx *sqlx.Tx, did string, documentNu
 	return err
 }
 
-func (r *PostgresReviewTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]reviewtask.TaskData, error) {
+func (r *PostgresReviewTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]db.ReviewTaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
                created_by, created_at
         FROM contract_templates_review_task WHERE did = $1
     `
-	var reviewTasks []reviewtask.TaskData
+	var reviewTasks []db.ReviewTaskData
 	err := tx.SelectContext(r.Ctx, &reviewTasks, query, did)
 	if err != nil {
 		return nil, err
@@ -70,13 +69,13 @@ func (r *PostgresReviewTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]reviewtask.
 	return reviewTasks, nil
 }
 
-func (r *PostgresReviewTaskRepo) ReadAllByID(tx *sqlx.Tx, did string, documentNumber int, version int) ([]reviewtask.TaskData, error) {
+func (r *PostgresReviewTaskRepo) ReadAllByID(tx *sqlx.Tx, did string, documentNumber int, version int) ([]db.ReviewTaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
                created_by, created_at
         FROM contract_templates_review_task WHERE did = $1 AND document_number = $2 AND version = $3
     `
-	var reviewTasks []reviewtask.TaskData
+	var reviewTasks []db.ReviewTaskData
 	err := tx.SelectContext(r.Ctx, &reviewTasks, query, did, documentNumber, version)
 	if err != nil {
 		return nil, err
@@ -84,13 +83,13 @@ func (r *PostgresReviewTaskRepo) ReadAllByID(tx *sqlx.Tx, did string, documentNu
 	return reviewTasks, nil
 }
 
-func (r *PostgresReviewTaskRepo) ReadAllByReviewer(tx *sqlx.Tx, reviewer string) ([]reviewtask.TaskData, error) {
+func (r *PostgresReviewTaskRepo) ReadAllByReviewer(tx *sqlx.Tx, reviewer string) ([]db.ReviewTaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
                created_by, created_at
         FROM contract_templates_review_task WHERE reviewer = $1
     `
-	var reviewTasks []reviewtask.TaskData
+	var reviewTasks []db.ReviewTaskData
 	err := tx.SelectContext(r.Ctx, &reviewTasks, query, reviewer)
 	if err != nil {
 		return nil, err
@@ -98,7 +97,7 @@ func (r *PostgresReviewTaskRepo) ReadAllByReviewer(tx *sqlx.Tx, reviewer string)
 	return reviewTasks, nil
 }
 
-func (r *PostgresReviewTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) error {
+func (r *PostgresReviewTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state string) error {
 	statement := `
         UPDATE contract_templates_review_task SET state = $5
         WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
@@ -117,7 +116,7 @@ func (r *PostgresReviewTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber 
 	return nil
 }
 
-func (r *PostgresReviewTaskRepo) AnyTasksInState(tx *sqlx.Tx, did string, documentNumber int, version int, states ...reviewtaskstate.ReviewTaskState) (bool, error) {
+func (r *PostgresReviewTaskRepo) AnyTasksInState(tx *sqlx.Tx, did string, documentNumber int, version int, states ...string) (bool, error) {
 	placeholders := make([]string, len(states))
 	args := []interface{}{did, documentNumber, version}
 
@@ -140,7 +139,7 @@ func (r *PostgresReviewTaskRepo) AnyTasksInState(tx *sqlx.Tx, did string, docume
 	return count > 0, nil
 }
 
-func (r *PostgresReviewTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state reviewtaskstate.ReviewTaskState) (bool, error) {
+func (r *PostgresReviewTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state string) (bool, error) {
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_review_task 

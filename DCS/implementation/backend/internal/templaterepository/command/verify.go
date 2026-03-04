@@ -4,7 +4,6 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
@@ -26,7 +25,7 @@ type VerifyCmd struct {
 type Verifier struct {
 	Ctx    context.Context
 	DB     *sqlx.DB
-	CTRepo db.TemplateRepository
+	CTRepo db.ContractTemplateRepo
 	RTRepo db.ReviewTaskRepo
 	ATRepo db.ApprovalTaskRepo
 }
@@ -51,25 +50,25 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	hasTask, err := h.RTRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open)
+	hasTask, err := h.RTRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open.String())
 	if err != nil {
 		return err
 	}
 
 	if hasTask {
-		err := h.RTRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified)
+		err := h.RTRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified.String())
 		if err != nil {
 			return err
 		}
 	}
 
-	hasTask, err = h.ATRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Open)
+	hasTask, err = h.ATRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open.String())
 	if err != nil {
 		return err
 	}
 
 	if hasTask {
-		err := h.ATRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, approvaltaskstate.Verified)
+		err := h.ATRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified.String())
 		if err != nil {
 			return err
 		}
