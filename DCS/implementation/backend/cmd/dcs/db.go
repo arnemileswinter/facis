@@ -16,8 +16,6 @@ func NewDatabaseConnection() (*sqlx.DB, error) {
 		return nil, errors.New("DATABASE_URL isn't set")
 	}
 
-	log.Printf("Connecting to database")
-
 	db, err := sqlx.Connect("postgres", databaseURL)
 	if err != nil {
 		log.Fatalln(err)

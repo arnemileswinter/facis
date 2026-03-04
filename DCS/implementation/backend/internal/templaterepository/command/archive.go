@@ -4,8 +4,8 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"errors"
 	"fmt"
@@ -23,8 +23,11 @@ type ArchiveCmd struct {
 }
 
 type Archiver struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.ContractTemplateRepo
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *Archiver) Handle(cmd ArchiveCmd) error {
@@ -38,7 +41,7 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := templaterepository.ReadProcessData(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -47,11 +50,11 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if processData.State == templatestate.Registered || processData.State == templatestate.Archived {
+	if processData.State == contracttemplatestate.Registered.String() || processData.State == contracttemplatestate.Archived.String() {
 		return errors.New("invalid contract template state")
 	}
 
-	err = templaterepository.UpdateState(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, templatestate.Archived)
+	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Archived.String())
 	if err != nil {
 		return fmt.Errorf("could not update state: %w", err)
 	}
@@ -68,9 +71,14 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = templaterepository.CleanupTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return fmt.Errorf("could not cleanup tasks: %w", err)
+		return fmt.Errorf("could not delete review tasks: %w", err)
+	}
+
+	err = h.ATRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	if err != nil {
+		return fmt.Errorf("could not delete approval tasks: %w", err)
 	}
 
 	return tx.Commit()

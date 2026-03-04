@@ -9,8 +9,9 @@ import (
 	"digital-contracting-service/internal/middleware"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"time"
 
@@ -21,22 +22,29 @@ import (
 // TemplateRepository service example implementation.
 // The example methods log the requests and return zero values.
 type templateRepositorysrvc struct {
-	DB *sqlx.DB
+	DB     *sqlx.DB
+	CTRepo db.ContractTemplateRepo
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 	auth.JWTAuthenticator
 }
 
 // NewTemplateRepository returns the TemplateRepository service implementation.
-func NewTemplateRepository(ctx context.Context, db *sqlx.DB, jwtAuth auth.JWTAuthenticator) (templaterepository.Service, error) {
+func NewTemplateRepository(db *sqlx.DB, jwtAuth auth.JWTAuthenticator, CTRepo db.ContractTemplateRepo,
+	RTRepo db.ReviewTaskRepo, ATRepo db.ApprovalTaskRepo) templaterepository.Service {
 	return &templateRepositorysrvc{
 		DB:               db,
 		JWTAuthenticator: jwtAuth,
-	}, nil
+		CTRepo:           CTRepo,
+		RTRepo:           RTRepo,
+		ATRepo:           ATRepo,
+	}
 }
 
 // Create a new template.
-func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.CreateRequest) (*templaterepository.CreateResponse, error) {
+func (s *templateRepositorysrvc) Create(ctx context.Context, req *templaterepository.ContractTemplateCreateRequest) (*templaterepository.ContractTemplateCreateResponse, error) {
 
-	templateType, err := templatetype.NewTemplateType(req.TemplateType)
+	templateType, err := contracttemplatetype.NewContractTemplateType(req.TemplateType)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
@@ -60,15 +68,16 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 		TemplateData: &jsonMetaData,
 	}
 	createHandler := command.Creator{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.CreateResponse{
+	return &templaterepository.ContractTemplateCreateResponse{
 		Did:            *did,
 		DocumentNumber: 1,
 		Version:        1,
@@ -77,7 +86,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 // with action flag { forwardTo: "approval" | "draft" } and optional
 // reviewComments. allow resubmission path with approver comments.
-func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templaterepository.SubmitRequest) (res *templaterepository.SubmitResponse, err error) {
+func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templaterepository.ContractTemplateSubmitRequest) (res *templaterepository.ContractTemplateSubmitResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -103,14 +112,17 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		Comments:       req.Comments,
 	}
 	handler := command.Submitter{
-		DB: s.DB,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.SubmitResponse{
+	return &templaterepository.ContractTemplateSubmitResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -118,7 +130,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 }
 
 // persist reviewer edits (metadata/clauses/semantics).
-func (s *templateRepositorysrvc) Update(ctx context.Context, req *templaterepository.UpdateRequest) (res *templaterepository.UpdateResponse, err error) {
+func (s *templateRepositorysrvc) Update(ctx context.Context, req *templaterepository.ContractTemplateUpdateRequest) (res *templaterepository.ContractTemplateUpdateResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -130,9 +142,9 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	var templateType *templatetype.TemplateType
+	var templateType *contracttemplatetype.ContractTemplateType
 	if req.TemplateType != nil {
-		tType, err := templatetype.NewTemplateType(*req.TemplateType)
+		tType, err := contracttemplatetype.NewContractTemplateType(*req.TemplateType)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
@@ -150,15 +162,18 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		TemplateData:   &metaData,
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.UpdateResponse{
+	return &templaterepository.ContractTemplateUpdateResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -166,7 +181,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 }
 
 // update metadata or status.
-func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *templaterepository.UpdateManageRequest) (res *templaterepository.UpdateManageResponse, err error) {
+func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *templaterepository.ContractTemplateUpdateManageRequest) (res *templaterepository.ContractTemplateUpdateManageResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -178,18 +193,18 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	var state *templatestate.TemplateState
+	var state *contracttemplatestate.ContractTemplateState
 	if req.State != nil {
-		ts, err := templatestate.NewTemplateState(*req.State)
+		ts, err := contracttemplatestate.NewContractTemplateState(*req.State)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
 		state = &ts
 	}
 
-	var templateType *templatetype.TemplateType
+	var templateType *contracttemplatetype.ContractTemplateType
 	if req.TemplateType != nil {
-		tType, err := templatetype.NewTemplateType(*req.TemplateType)
+		tType, err := contracttemplatetype.NewContractTemplateType(*req.TemplateType)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
@@ -208,15 +223,18 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 		TemplateData:   &metaData,
 	}
 	handler := command.UpdateManager{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.UpdateManageResponse{
+	return &templaterepository.ContractTemplateUpdateManageResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -224,11 +242,11 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 }
 
 // perform filtered searches.
-func (s *templateRepositorysrvc) Search(ctx context.Context, req *templaterepository.SearchRequest) (res []*templaterepository.SearchResponse, err error) {
+func (s *templateRepositorysrvc) Search(ctx context.Context, req *templaterepository.ContractTemplateSearchRequest) (res []*templaterepository.ContractTemplateSearchResponse, err error) {
 
-	var state *templatestate.TemplateState
+	var state *contracttemplatestate.ContractTemplateState
 	if req.State != nil {
-		tState, err := templatestate.NewTemplateState(*req.State)
+		tState, err := contracttemplatestate.NewContractTemplateState(*req.State)
 		if err != nil {
 			return nil, templaterepository.MakeInternalError(err)
 		}
@@ -247,17 +265,18 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 		Filter:         req.Filter,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	var contractTemplates []*templaterepository.SearchResponse
+	var contractTemplates []*templaterepository.ContractTemplateSearchResponse
 	for _, item := range result {
-		contractTemplates = append(contractTemplates, &templaterepository.SearchResponse{
+		contractTemplates = append(contractTemplates, &templaterepository.ContractTemplateSearchResponse{
 			Did:            item.DID,
 			DocumentNumber: item.DocumentNumber,
 			Version:        item.Version,
@@ -273,14 +292,17 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 }
 
 // retrieve templates
-func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.RetrieveRequest) (res *templaterepository.RetrieveResponse, err error) {
+func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepository.ContractTemplateRetrieveRequest) (res *templaterepository.ContractTemplateRetrieveResponse, err error) {
 
 	qry := contracttemplate.GetAllMetadataQry{
 		RetrievedBy: middleware.GetUsername(ctx),
 	}
 	queryHandler := contracttemplate.GetAllMetadataHandler{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -325,7 +347,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 		})
 	}
 
-	return &templaterepository.RetrieveResponse{
+	return &templaterepository.ContractTemplateRetrieveResponse{
 		ContractTemplates: contractTemplates,
 		ReviewTasks:       reviewTasks,
 		ApprovalTasks:     approvalTasks,
@@ -333,7 +355,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 }
 
 // Retrieve a template by template id.
-func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.RetrieveByIDRequest) (res *templaterepository.RetrieveByIDResponse, err error) {
+func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            req.Did,
@@ -342,15 +364,16 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 		RetrievedBy:    middleware.GetUsername(ctx),
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.RetrieveByIDResponse{
+	return &templaterepository.ContractTemplateRetrieveByIDResponse{
 		Did:            contractTemplate.DID,
 		DocumentNumber: contractTemplate.DocumentNumber,
 		Version:        contractTemplate.Version,
@@ -365,7 +388,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 }
 
 // run policy, schema, and semantic validations; return findings.
-func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templaterepository.VerifyRequest) (res *templaterepository.VerifyResponse, err error) {
+func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templaterepository.ContractTemplateVerifyRequest) (res *templaterepository.ContractTemplateVerifyResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -379,14 +402,17 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 		UpdatedAt:      updatedAt,
 	}
 	handler := command.Verifier{
-		DB: s.DB,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.VerifyResponse{
+	return &templaterepository.ContractTemplateVerifyResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -394,7 +420,7 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 }
 
 // mark template as approved, with optional decision notes.
-func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepository.ApproveRequest) (res *templaterepository.ApproveResponse, err error) {
+func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepository.ContractTemplateApproveRequest) (res *templaterepository.ContractTemplateApproveResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -410,14 +436,16 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		DecisionNotes:  req.DecisionNotes,
 	}
 	handler := command.Approver{
-		DB: s.DB,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.ApproveResponse{
+	return &templaterepository.ContractTemplateApproveResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -425,7 +453,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 }
 
 // mark template as rejected, requiring reason field.
-func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templaterepository.RejectRequest) (res *templaterepository.RejectResponse, err error) {
+func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templaterepository.ContractTemplateRejectRequest) (res *templaterepository.ContractTemplateRejectResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -441,15 +469,18 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 		Reason:         req.Reason,
 	}
 	handler := command.Rejecter{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.RejectResponse{
+	return &templaterepository.ContractTemplateRejectResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -457,7 +488,7 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 }
 
 // register new template into the repository.
-func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepository.RegisterRequest) (res *templaterepository.RegisterResponse, err error) {
+func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepository.ContractTemplateRegisterRequest) (res *templaterepository.ContractTemplateRegisterResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -472,15 +503,18 @@ func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepo
 		RegisteredBy:   middleware.GetUsername(ctx),
 	}
 	handler := command.Registrar{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.RegisterResponse{
+	return &templaterepository.ContractTemplateRegisterResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -488,7 +522,7 @@ func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepo
 }
 
 // archive obsolete template.
-func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepository.ArchiveRequest) (res *templaterepository.ArchiveResponse, err error) {
+func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepository.ContractTemplateArchiveRequest) (res *templaterepository.ContractTemplateArchiveResponse, err error) {
 
 	updatedAt, err := time.Parse(time.RFC3339, req.UpdatedAt)
 	if err != nil {
@@ -503,15 +537,18 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 		ArchivedBy:     middleware.GetUsername(ctx),
 	}
 	handler := command.Archiver{
-		Ctx: ctx,
-		DB:  s.DB,
+		Ctx:    ctx,
+		DB:     s.DB,
+		CTRepo: s.CTRepo,
+		RTRepo: s.RTRepo,
+		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
 		return nil, templaterepository.MakeInternalError(err)
 	}
 
-	return &templaterepository.ArchiveResponse{
+	return &templaterepository.ContractTemplateArchiveResponse{
 		Did:            req.Did,
 		DocumentNumber: req.DocumentNumber,
 		Version:        req.Version,
@@ -519,7 +556,7 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 }
 
 // retrieve audit history of template actions.
-func (s *templateRepositorysrvc) Audit(ctx context.Context, req *templaterepository.AuditRequest) (res *templaterepository.AuditResponse, err error) {
+func (s *templateRepositorysrvc) Audit(ctx context.Context, req *templaterepository.ContractTemplateAuditRequest) (res *templaterepository.ContractTemplateAuditResponse, err error) {
 	log.Printf(ctx, "templateRepository.audit")
 	return nil, nil
 }

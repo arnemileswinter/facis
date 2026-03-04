@@ -5,10 +5,9 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"testing"
 	"time"
 
@@ -28,9 +27,14 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+
 	templateData := map[string]interface{}{
 		"test": "update",
 	}
@@ -53,8 +57,11 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -70,8 +77,9 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 		RetrievedBy:    retrievedBy,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -95,7 +103,11 @@ func TestUpdate_UpdateNonExistingContractTemplate(t *testing.T) {
 		t.Fatalf("Failed to get new DID: %v", err)
 	}
 
-	ctx := context.Background()
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
@@ -105,8 +117,11 @@ func TestUpdate_UpdateNonExistingContractTemplate(t *testing.T) {
 		UpdatedBy:      "Test User 1",
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -126,12 +141,17 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	reviewers := []string{"Test User 2"}
 
-	ctx := context.Background()
-	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
+	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -155,8 +175,11 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -176,7 +199,13 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -200,8 +229,11 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: context.Background(),
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -221,12 +253,17 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{"Test User 2"}
 
-	ctx := context.Background()
-	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
+	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -250,8 +287,11 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -267,8 +307,9 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 		RetrievedBy:    retrievedBy,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -294,12 +335,17 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{"Test User 2"}
 
-	ctx := context.Background()
-	createReviewTasks(t, ctx, db, *did, reviewtaskstate.Open, creator, reviewers)
+	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -323,8 +369,11 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: context.Background(),
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -344,7 +393,13 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Approved, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -368,8 +423,11 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: context.Background(),
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -389,7 +447,13 @@ func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Registered, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -413,8 +477,11 @@ func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: context.Background(),
-		DB:  db,
+		Ctx:    context.Background(),
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -434,7 +501,13 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Archived, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -458,8 +531,11 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: context.Background(),
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -479,7 +555,13 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Approved, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -503,8 +585,11 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: context.Background(),
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -524,9 +609,14 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+
 	templateData := map[string]interface{}{
 		"test": "update",
 	}
@@ -549,8 +639,11 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 
@@ -570,12 +663,13 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
-
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
 	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	reviewers := []string{
 		"Test User 1",
@@ -583,7 +677,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 		"Test User 3",
 	}
 
-	createReviewTasks(t, ctxTx, db, *did, reviewtaskstate.Approved, creator, reviewers)
+	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Approved, creator, reviewers)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -607,8 +701,11 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 		TemplateData:   &jsonTemplateData,
 	}
 	handler := command.Updater{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -621,7 +718,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Approved, reviewtaskstate.Verified, reviewtaskstate.Rejected)
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, contracttemplatestate.Approved.String(), reviewtaskstate.Verified.String(), contracttemplatestate.Rejected.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}

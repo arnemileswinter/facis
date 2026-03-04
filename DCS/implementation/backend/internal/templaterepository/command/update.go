@@ -5,11 +5,10 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
 	"errors"
 	"fmt"
 	"time"
@@ -21,7 +20,7 @@ type UpdateCmd struct {
 	DID            string
 	DocumentNumber int
 	Version        int
-	TemplateType   *templatetype.TemplateType
+	TemplateType   *contracttemplatetype.ContractTemplateType
 	UpdatedAt      time.Time
 	UpdatedBy      string
 	Name           *string
@@ -30,8 +29,11 @@ type UpdateCmd struct {
 }
 
 type Updater struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.ContractTemplateRepo
+	RTRepo db.ReviewTaskRepo
+	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *Updater) Handle(cmd UpdateCmd) error {
@@ -45,7 +47,7 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 	}
 	defer tx.Rollback()
 
-	oldData, err := templaterepository.ReadDataByID(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	oldData, err := h.CTRepo.ReadDataByID(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
@@ -54,15 +56,15 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if oldData.State != templatestate.Draft && oldData.State != templatestate.Submitted {
+	if oldData.State != contracttemplatestate.Draft.String() && oldData.State != contracttemplatestate.Submitted.String() {
 		return errors.New("invalid contract template state")
 	}
 
 	isValidUser := false
-	if oldData.State == templatestate.Draft && oldData.CreatedBy == cmd.UpdatedBy {
+	if oldData.State == contracttemplatestate.Draft.String() && oldData.CreatedBy == cmd.UpdatedBy {
 		isValidUser = true
-	} else if oldData.State == templatestate.Submitted {
-		valid, err := reviewtask.IsValidReviewer(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
+	} else if oldData.State == contracttemplatestate.Submitted.String() {
+		valid, err := h.RTRepo.IsValidReviewer(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
 		if err != nil {
 			return err
 		}
@@ -73,21 +75,31 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 		return fmt.Errorf("invalid user")
 	}
 
-	err = templaterepository.ReopenTasks(ctx, tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.RTRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 	if err != nil {
-		return fmt.Errorf("could not reopen tasks: %w", err)
+		return err
 	}
 
-	newData := templaterepository.UpdateData{
+	err = h.ATRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	if err != nil {
+		return err
+	}
+
+	var templateType string
+	if cmd.TemplateType != nil {
+		templateType = cmd.TemplateType.String()
+	}
+
+	newData := db.ContractTemplateUpdateData{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
 		Version:        cmd.Version,
-		TemplateType:   cmd.TemplateType,
+		TemplateType:   templateType,
 		Name:           cmd.Name,
 		Description:    cmd.Description,
 		TemplateData:   cmd.TemplateData,
 	}
-	err = templaterepository.Update(ctx, tx, newData)
+	err = h.CTRepo.Update(tx, newData)
 	if err != nil {
 		return fmt.Errorf("could not update template data: %w", err)
 	}

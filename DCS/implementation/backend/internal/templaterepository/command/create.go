@@ -5,9 +5,9 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 
@@ -17,15 +17,16 @@ import (
 type CreateCmd struct {
 	DID          string
 	CreatedBy    string
-	TemplateType templatetype.TemplateType
+	TemplateType contracttemplatetype.ContractTemplateType
 	Name         *string
 	Description  *string
 	TemplateData *datatype.JSON
 }
 
 type Creator struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.ContractTemplateRepo
 }
 
 func (h *Creator) Handle(cmd CreateCmd) error {
@@ -39,16 +40,16 @@ func (h *Creator) Handle(cmd CreateCmd) error {
 	}
 	defer tx.Rollback()
 
-	data := templaterepository.ContractTemplate{
+	data := db.ContractTemplate{
 		DID:          cmd.DID,
 		CreatedBy:    cmd.CreatedBy,
-		State:        templatestate.Draft,
-		TemplateType: cmd.TemplateType,
+		State:        contracttemplatestate.Draft.String(),
+		TemplateType: cmd.TemplateType.String(),
 		Name:         cmd.Name,
 		Description:  cmd.Description,
 		TemplateData: cmd.TemplateData,
 	}
-	createdAt, err := templaterepository.Create(ctx, tx, data)
+	createdAt, err := h.CTRepo.Create(tx, data)
 	if err != nil {
 		return fmt.Errorf("could not create contract template: %w", err)
 	}

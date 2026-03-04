@@ -1,17 +1,15 @@
 module digital-contracting-service
 
-go 1.25.6
+go 1.25.7
 
 require (
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.11.1
+	github.com/nats-io/nats.go v1.49.0
+	github.com/stretchr/testify v1.11.1
 	goa.design/clue v1.2.4
 	goa.design/goa/v3 v3.24.2
-	goa.design/plugins/v3 v3.24.2
-	github.com/stretchr/testify v1.11.1
-	goa.design/clue v1.2.3
-	goa.design/goa/v3 v3.24.1
 )
 
 require (
@@ -25,14 +23,15 @@ require (
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/manveru/faker v0.0.0-20171103152722-9fbc68a78c4d // indirect
-	github.com/nats-io/nkeys v0.4.11 // indirect
+	github.com/nats-io/nkeys v0.4.12 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	go.opentelemetry.io/otel v1.38.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/stretchr/testify v1.11.1 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	go.opentelemetry.io/otel v1.39.0 // indirect
+	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	golang.org/x/crypto v0.47.0 // indirect
 	go.opentelemetry.io/otel v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
@@ -47,5 +46,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260114163908-3f89685c29c3 // indirect
 	google.golang.org/grpc v1.78.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -5,8 +5,8 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"testing"
 
@@ -21,31 +21,36 @@ func TestSearch_SearchContractTemplatesWithoutSearchValue(t *testing.T) {
 
 	creator := "Test User"
 
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
 	templateData := map[string]interface{}{}
 
 	did, _ := base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 1, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 1, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
-
-	ctx := context.Background()
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
 
 	qry := contracttemplate.GetAllMetadataByFilterQry{
 		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -77,19 +82,24 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 
 	creator := "Test User"
 
-	ctx := context.Background()
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
 
 	cmd := command.CreateCmd{
 		DID:          *did,
 		CreatedBy:    creator,
-		TemplateType: templatetype.FrameContract,
+		TemplateType: contracttemplatetype.FrameContract,
 		Name:         &name,
 		Description:  &description,
 		TemplateData: &jsonMetaData,
 	}
 	createHandler := command.Creator{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	err = createHandler.Handle(cmd)
 	if err != nil {
@@ -101,8 +111,9 @@ func TestSearch_SearchContractTemplatesByDID(t *testing.T) {
 		DID:         did,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -120,33 +131,37 @@ func TestSearch_SearchContractTemplatesByDocumentNumberAndVersion(t *testing.T) 
 
 	creator := "Test User"
 
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
 	templateData := map[string]interface{}{}
 
 	did, _ := base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 1, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 1, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "Test1", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 1, "Test1", "Test1", templateData)
-
-	ctx := context.Background()
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 1, "Test1", "Test1", templateData)
 
 	documentNumber := 3
 	version := 2
@@ -156,8 +171,9 @@ func TestSearch_SearchContractTemplatesByDocumentNumberAndVersion(t *testing.T) 
 		Version:        &version,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -175,33 +191,37 @@ func TestSearch_SearchContractTemplatesByName(t *testing.T) {
 
 	creator := "Test User"
 
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
 	templateData := map[string]interface{}{}
 
 	did, _ := base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 1, 3, "-- test 1 --", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 1, 3, "-- test 1 --", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test 1.2 --", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test 1.2 --", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test 1.3 --", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test 1.3 --", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test 2 --", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test 2 --", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "-- test 2.2 --", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "-- test 2.2 --", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "-- test 2.3 --", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "-- test 2.3 --", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "-- test 3 --", "Test1", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "-- test 3 --", "Test1", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 1, "-- test 3.2 --", "Test1", templateData)
-
-	ctx := context.Background()
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 1, "-- test 3.2 --", "Test1", templateData)
 
 	searchName := "Test 2." // The search is case-insensitive
 	qry := contracttemplate.GetAllMetadataByFilterQry{
@@ -209,8 +229,9 @@ func TestSearch_SearchContractTemplatesByName(t *testing.T) {
 		Name:        &searchName,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -228,27 +249,31 @@ func TestSearch_SearchContractTemplatesByDescript(t *testing.T) {
 
 	creator := "Test User"
 
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
 	templateData := map[string]interface{}{}
 
 	did, _ := base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 1, 3, "-- test 1 --", "a long test1 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 1, 3, "-- test 1 --", "a long test1 description", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test 1.2 --", "a long test2 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test 1.2 --", "a long test2 description", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test 1.3 --", "a long test2.2 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test 1.3 --", "a long test2.2 description", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test 2 --", "a long test2.3 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test 2 --", "a long test2.3 description", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "-- test 2.2 --", "a long test3 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "-- test 2.2 --", "a long test3 description", templateData)
 
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "-- test 2.3 --", "a long test4 description", templateData)
-
-	ctx := context.Background()
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "-- test 2.3 --", "a long test4 description", templateData)
 
 	searchDescription := "Test2." // The search is case-insensitive
 	qry := contracttemplate.GetAllMetadataByFilterQry{
@@ -256,8 +281,9 @@ func TestSearch_SearchContractTemplatesByDescript(t *testing.T) {
 		Description: &searchDescription,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -275,49 +301,53 @@ func TestSearch_SearchContractTemplatesByTemplateData(t *testing.T) {
 
 	creator := "Test User"
 
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
 	templateData := map[string]interface{}{
 		"name":        "-- test1 --",
 		"description": "a long test1 description",
 	}
 	did, _ := base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 1, 3, "-- test1 --", "a long test1 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 1, 3, "-- test1 --", "a long test1 description", templateData)
 
 	templateData = map[string]interface{}{
 		"name":        "-- test1.2 --",
 		"description": "a long test2 description",
 	}
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test1.2 --", "a long test2 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test1.2 --", "a long test2 description", templateData)
 
 	templateData = map[string]interface{}{
 		"name":        "-- test1.3 --",
 		"description": "a long test2.2 description",
 	}
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test1.3 --", "a long test2.2 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test1.3 --", "a long test2.2 description", templateData)
 
 	templateData = map[string]interface{}{
 		"name":        "-- test2 --",
 		"description": "a long test2.3 description",
 	}
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 2, 3, "-- test2 --", "a long test2.3 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 2, 3, "-- test2 --", "a long test2.3 description", templateData)
 
 	templateData = map[string]interface{}{
 		"name":        "-- test2.2 --",
 		"description": "a long test3 description",
 	}
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "-- test2.2 --", "a long test3 description", templateData)
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "-- test2.2 --", "a long test3 description", templateData)
 
 	templateData = map[string]interface{}{
 		"name":        "-- test2.3 --",
 		"description": "a long test4 description",
 	}
 	did, _ = base.GetDID()
-	createTestContractTemplateWithData(t, db, did, templatestate.Reviewed, creator, 3, 2, "-- test2.3 --", "a long test4 description", templateData)
-
-	ctx := context.Background()
+	createTestContractTemplateWithData(t, db, repo, did, contracttemplatestate.Reviewed, creator, 3, 2, "-- test2.3 --", "a long test4 description", templateData)
 
 	filter := "Test2.2" // The search is case-insensitive
 	qry := contracttemplate.GetAllMetadataByFilterQry{
@@ -325,8 +355,9 @@ func TestSearch_SearchContractTemplatesByTemplateData(t *testing.T) {
 		Filter:      &filter,
 	}
 	queryHandler := contracttemplate.GetAllMetaDataByFilterHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
