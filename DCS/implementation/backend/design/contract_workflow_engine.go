@@ -53,7 +53,6 @@ var _ = Service("ContractWorkflowEngine", func() {
 			POST("/contract/create")
 			Response(StatusOK)
 		})
-		Result(String)
 	})
 
 	Method("submit", func() {
