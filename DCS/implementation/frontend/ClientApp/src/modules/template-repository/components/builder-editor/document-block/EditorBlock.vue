@@ -29,6 +29,39 @@
           </template>
         </p>
       </template>
+      <!-- Approved sub-template: read-only -->
+      <template v-else-if="block && isApprovedTemplateBlock(block)">
+        <label class="text-[10px] uppercase font-bold opacity-60">Sub template</label>
+        <div class="mt-1 flex items-start gap-2">
+          <!-- Collapse button -->
+          <button type="button"
+            class="flex items-center justify-center w-8 h-8 text-base-content/60 hover:text-base-content hover:bg-base-200/70 rounded-md transition-colors cursor-pointer flex-shrink-0"
+            @click.stop="toggleApprovedPreview">
+            <svg class="w-3 h-3 transition-transform duration-200" :class="isApprovedPreviewOpen ? 'rotate-180' : ''"
+              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+              aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-base-content truncate">{{ approvedTemplateName }}</p>
+            <p class="text-xs text-base-content/70 mt-0.5 line-clamp-2">{{ approvedTemplateDescription }}</p>
+          </div>
+        </div>
+        <!-- Preview sub-template -->
+        <div v-if="isApprovedPreviewOpen" class="mt-2 bg-base-200/60 px-3 py-3 rounded-md">
+          <p class="text-xs font-medium text-base-content/70 mb-1.5">Preview template</p>
+          <div class="max-h-64 overflow-auto bg-base-100 rounded-md border border-base-300 px-3 py-2">
+            <TemplatePreview v-if="approvedTemplate?.template_data"
+              :document-outline="approvedTemplate.template_data.documentOutline"
+              :document-blocks="approvedTemplate.template_data.documentBlocks"
+              :semantic-conditions="approvedTemplate.template_data.semanticConditions" />
+            <p v-else class="text-xs text-base-content/60 italic">
+              No template data available.
+            </p>
+          </div>
+        </div>
+      </template>
     </div>
     <div :class="[
       'pt-2 pr-2 pb-2 flex-shrink-0 transition-opacity',
@@ -46,13 +79,21 @@
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import type { EnrichedBlockItem } from '@template-repository/models/enriched-block-item'
-import { isSectionBlock, isTextBlock, isClauseBlock } from '@template-repository/models/contract-templace'
+import {
+  isSectionBlock,
+  isTextBlock,
+  isClauseBlock,
+  isApprovedTemplateBlock,
+} from '@template-repository/models/contract-templace'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore'
 import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
 import BlockToolbar from '@template-repository/components/builder-editor/toolbar/BlockToolbar.vue'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { parseSegments, isText, isPlaceholder, type Segment } from '@template-repository/composables/useClauseTextChips'
 import ClausePlaceholderSpan from '@template-repository/components/clauses-editor/ClausePlaceholderSpan.vue'
+import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
+import TemplatePreview from '@template-repository/components/builder-editor/preview/TemplatePreview.vue'
+import type { ContractTemplate } from '@/models/contract-template'
 
 const props = defineProps<{
   item: EnrichedBlockItem
@@ -73,6 +114,7 @@ const emit = defineEmits<{
 
 const uiStore = useTemplateEditorUiStore()
 const draftStore = useTemplateDraftStore()
+const subTemplateStore = useApprovedSubTemplateStore()
 const { selectedBlockId } = storeToRefs(uiStore)
 const { semanticConditions } = storeToRefs(draftStore)
 const { isSwapPreviewTarget } = useBlockMovementPreview()
@@ -110,6 +152,20 @@ const toolbarVisibilityClass = computed(() => {
 })
 
 const block = computed(() => props.item.block)
+
+const approvedTemplate = computed<ContractTemplate | undefined>(() => {
+  const b = block.value
+  if (!b || !isApprovedTemplateBlock(b)) return undefined
+  return subTemplateStore.templates.find((t) => t.did === b.templateId)
+})
+
+const approvedTemplateName = computed(() => approvedTemplate.value?.name ?? '')
+const approvedTemplateDescription = computed(() => approvedTemplate.value?.description ?? '')
+const isApprovedPreviewOpen = ref(false)
+
+function toggleApprovedPreview() {
+  isApprovedPreviewOpen.value = !isApprovedPreviewOpen.value
+}
 
 const savedTitle = computed(() => {
   const b = block.value

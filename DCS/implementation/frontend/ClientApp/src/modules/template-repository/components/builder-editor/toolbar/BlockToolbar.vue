@@ -9,7 +9,7 @@
         @click="onInsertBelow">
         <IconInsertBelow :size="20" class="w-5 h-5" />
       </button>
-      <button v-if="isSection" type="button" :class="btnIcon" title="Insert nested" aria-label="Insert block nested"
+      <button v-if="canInsertNest" type="button" :class="btnIcon" title="Insert nested" aria-label="Insert block nested"
         @click="onInsertNest">
         <IconInsertNestBelow :size="20" class="w-5 h-5" />
       </button>
@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { EnrichedBlockItem } from '@template-repository/models/enriched-block-item'
-import { isSectionBlock } from '@template-repository/models/contract-templace'
+import { isApprovedTemplateBlock, isSectionBlock } from '@template-repository/models/contract-templace'
 import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
 import IconInsertAbove from './icons/IconInsertAbove.vue'
 import IconInsertBelow from './icons/IconInsertBelow.vue'
@@ -85,7 +85,8 @@ const emit = defineEmits<{
   delete: []
 }>()
 
-const isSection = computed(() => !!(props.item.block && isSectionBlock(props.item.block)))
+const canInsertNest = computed(() => !!props.item.block
+  && (isSectionBlock(props.item.block) || isApprovedTemplateBlock(props.item.block)))
 const canMoveUp = computed(() => props.item.siblingIndex > 0)
 const canMoveDown = computed(() => props.item.siblingIndex < props.item.siblingCount - 1)
 const canOutdent = computed(() => props.item.canOutdent)

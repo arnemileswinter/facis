@@ -14,7 +14,6 @@ export interface ContractTemplate {
     description?: string
     template_data?: ContractTemplateData
     updated_at: string
-    clauses?: []
 }
 
 export interface ContractTemplateData {

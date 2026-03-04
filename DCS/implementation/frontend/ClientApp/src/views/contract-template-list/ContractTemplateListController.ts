@@ -3,7 +3,7 @@ import type { ContractTemplate } from '../../models/contract-template'
 import { ContractTemplateService } from '../../services/contract-template-service'
 
 export function useTemplateTable() {
-    const templates: Ref<ContractTemplate[]> = ref([])
+    const templates: Ref<Omit<ContractTemplate, 'template_data' | 'created_by'>[]> = ref([])
     const loading = ref(true)
     const error = ref('')
 
@@ -24,9 +24,9 @@ export function useTemplateTable() {
 
     const refresh = () => loadTemplates()  // Für manuelles Refresh
 
-    const getTemplateById = async (id: string) => {
+    const getTemplateById = async (did: string, version: number, document_number: number) => {
         try {
-            return await ContractTemplateService.retrieveById(id)
+            return await ContractTemplateService.retrieveById({ did, version, document_number })
         } catch (err: any) {
             console.error('Template konnte nicht geladen werden:', err)
             return null

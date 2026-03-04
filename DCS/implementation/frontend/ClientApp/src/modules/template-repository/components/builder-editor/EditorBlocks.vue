@@ -35,7 +35,7 @@ import {
 } from '@template-repository/composables/useFlattenedOutline'
 import type { DocumentBlock, DocumentOutline, DocumentOutlineBlock } from '@template-repository/models/contract-templace'
 import type { EnrichedBlockItem } from '@template-repository/models/enriched-block-item'
-import { isSectionBlock } from '@template-repository/models/contract-templace'
+import { isSectionBlock, isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
 import EditorBlock from '@template-repository/components/builder-editor/document-block/EditorBlock.vue'
 import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
 
@@ -130,8 +130,8 @@ function enrichFlatItem(
   const prevSiblingBlockId = parentNode?.children?.[item.siblingIndex - 1]
   const nextSiblingBlockId = parentNode?.children?.[item.siblingIndex + 1]
   const prevSiblingBlock = prevSiblingBlockId ? blockById.get(prevSiblingBlockId) : undefined
-  const prevSiblingIsSection = !!prevSiblingBlock && isSectionBlock(prevSiblingBlock)
-  const canIndent = item.siblingIndex > 0 && prevSiblingIsSection
+  const prevSiblingIsContainer = !!prevSiblingBlock && (isSectionBlock(prevSiblingBlock) || isApprovedTemplateBlock(prevSiblingBlock))
+  const canIndent = item.siblingIndex > 0 && prevSiblingIsContainer
   const prevSiblingOutlineNode = prevSiblingBlockId ? outline.find((b) => b.blockId === prevSiblingBlockId) : undefined
   const indentInsertIndex = prevSiblingOutlineNode?.children?.length ?? 0
 

@@ -25,7 +25,7 @@ export interface ContractTemplateSearchResponse extends ContractTemplateBaseResp
 }
 
 export interface ContractTemplateRetrieveResponse {
-  contract_templates: ContractTemplate[]
+  contract_templates: Omit<ContractTemplate, 'template_data' | 'created_by'>[]
   review_tasks: ContractTemplateReviewTask[]
   approval_tasks: ContractTemplateApprovalTask[]
 }

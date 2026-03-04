@@ -5,6 +5,7 @@ import type {
   BlockMovementPreview,
   ClausePlaceholderHighlight,
 } from '@template-repository/models/template-editor-ui-store'
+import { TemplateType, type TemplateTypeValue } from '../models/contract-templace'
 
 const storeId = 'templateEditorUi'
 const defaultState: Readonly<TemplateEditorUiState> = {
@@ -49,6 +50,10 @@ export const useTemplateEditorUiStore = defineStore(storeId, {
     },
     togglePreviewDialog() {
       this.isPreviewDialogOpen = !this.isPreviewDialogOpen
+    },
+    availableTabs(templateType: TemplateTypeValue) {
+      if (templateType === TemplateType.subContract) return this.tabs
+      return this.tabs.filter(tab => !['semantic', 'clauses'].includes(tab.id))
     },
     reset() {
       Object.assign(this, getInitialState())

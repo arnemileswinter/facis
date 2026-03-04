@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@template-repository/models/template-draft-store"
 import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition, MetaData } from "@template-repository/models/contract-templace"
-import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock } from "@template-repository/models/contract-templace"
+import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock, isApprovedTemplateBlock } from "@template-repository/models/contract-templace"
 import type { ContractTemplateCreateRequest, ContractTemplateUpdateRequest } from '@/models/requests/template-request'
 
 const storeId = "templateDraft"
@@ -261,7 +261,7 @@ function addBlock(
     throw new Error(`addBlock: parent not found: ${parentBlockId}`)
   }
   parent.children.splice(insertIndex, 0, blockId)
-  if (isSectionBlock(block)) {
+  if (isSectionBlock(block) || isApprovedTemplateBlock(block)) {
     outline.push(createOutlineItem({ blockId, isRoot: false, children: [] }))
   }
   blocks.push(block)
@@ -336,7 +336,14 @@ function createBlockFromPayload(blockId: string, payload: AddBlockPayload): Docu
     case DocumentBlockType.Clause:
       return { blockId, type: DocumentBlockType.Clause, text, title: payload.title, conditionIds: payload.conditionIds ?? [] }
     case DocumentBlockType.ApprovedTemplate:
-      return { blockId, type: DocumentBlockType.ApprovedTemplate, text, templateId: payload.templateId ?? '' }
+      return {
+        blockId,
+        type: DocumentBlockType.ApprovedTemplate,
+        text,
+        templateId: payload.templateId ?? '',
+        version: payload.version ?? 1,
+        document_number: payload.document_number ?? 1,
+      }
     default:
       throw new Error(`Unknown blockType: ${payload.blockType}`)
   }

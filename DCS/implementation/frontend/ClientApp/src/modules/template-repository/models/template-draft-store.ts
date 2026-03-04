@@ -32,6 +32,8 @@ export interface AddBlockPayload {
   conditionIds?: string[]
   // #### For ApprovedTemplate ####
   templateId?: string
+  version?: number
+  document_number?: number
 }
 
 export interface AddBlockOptions {

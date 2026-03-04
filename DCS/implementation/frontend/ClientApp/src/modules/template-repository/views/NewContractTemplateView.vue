@@ -133,19 +133,23 @@ import TemplateTypeSelect from '@template-repository/components/TemplateTypeSele
 import { storeToRefs } from 'pinia'
 import { ContractTemplateService } from '@/services/contract-template-service'
 import { useToNumber } from '@vueuse/core'
+import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
+import { isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
 
 const router = useRouter()
 const route = useRoute()
 
 const templateEditorUiStore = useTemplateEditorUiStore()
+const approvedSubTemplateStore = useApprovedSubTemplateStore()
 const draftStore = useTemplateDraftStore()
-const { activeTab, tabs } = storeToRefs(templateEditorUiStore)
+const { activeTab } = storeToRefs(templateEditorUiStore)
 const { templateType } = storeToRefs(draftStore)
 const { setActiveTab, togglePreviewDialog } = templateEditorUiStore
 
 const isEditMode = computed(() => !!route.params.did)
 const hasChosenType = ref(false)
 const showTypeSelectionOnly = computed(() => !isEditMode.value && !hasChosenType.value)
+const tabs = computed(() => templateEditorUiStore.availableTabs(templateType.value))
 
 function onTemplateTypeChosen(value: typeof templateType.value) {
     draftStore.reset({ templateType: value })
@@ -153,6 +157,8 @@ function onTemplateTypeChosen(value: typeof templateType.value) {
 }
 
 watch(isEditMode, (isEdit) => {
+    approvedSubTemplateStore.resetTemplates()
+    templateEditorUiStore.reset()
     if (isEdit) {
         hasChosenType.value = true
         // load template data into draftStore
@@ -160,22 +166,37 @@ watch(isEditMode, (isEdit) => {
         const version = useToNumber(`${route.query.version}`).value
         const document_number = useToNumber(`${route.query.document_number}`).value
         ContractTemplateService.retrieveById({ did, version, document_number })
-            .then(template => {
-                if (!template) draftStore.reset()
-                else {
-                    draftStore.reset({
-                        did: template.did,
-                        name: template.name,
-                        description: template.description,
-                        documentOutline: template.template_data?.documentOutline ?? [],
-                        documentBlocks: template.template_data?.documentBlocks ?? [],
-                        semanticConditions: template.template_data?.semanticConditions ?? [],
-                        customMetaData: template.template_data?.customMetaData ?? [],
-                        templateType: template.template_type,
-                        state: template.state,
-                        version: template.version,
-                        document_number: template.document_number
+            .then(async template => {
+                if (!template) {
+                    draftStore.reset()
+                    return
+                }
+
+                draftStore.reset({
+                    did: template.did,
+                    name: template.name,
+                    description: template.description,
+                    documentOutline: template.template_data?.documentOutline ?? [],
+                    documentBlocks: template.template_data?.documentBlocks ?? [],
+                    semanticConditions: template.template_data?.semanticConditions ?? [],
+                    customMetaData: template.template_data?.customMetaData ?? [],
+                    templateType: template.template_type,
+                    state: template.state,
+                    version: template.version,
+                    document_number: template.document_number
+                })
+
+                const approvedBlocks = draftStore.documentBlocks.filter((b) => isApprovedTemplateBlock(b))
+
+                for (const block of approvedBlocks) {
+                    const template = await ContractTemplateService.retrieveById({
+                        did: block.templateId,
+                        version: block.version,
+                        document_number: block.document_number,
                     })
+                    if (template) {
+                        approvedSubTemplateStore.addTemplate(template)
+                    }
                 }
             })
             .catch(error => {

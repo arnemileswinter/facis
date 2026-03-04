@@ -100,6 +100,8 @@ export interface ClauseBlock extends BaseBlock {
 export interface ApprovedTemplateBlock extends BaseBlock {
     type: (typeof DocumentBlockType)['ApprovedTemplate']
     templateId: string
+    version: number
+    document_number: number
 }
 
 export function isSectionBlock(block: DocumentBlock): block is SectionBlock {
