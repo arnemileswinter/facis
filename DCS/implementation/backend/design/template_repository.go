@@ -517,6 +517,13 @@ var _ = Service("TemplateRepository", func() {
 
 		HTTP(func() {
 			GET("/template/search")
+			Param("did")
+			Param("document_number")
+			Param("version")
+			Param("template_type")
+			Param("state")
+			Param("name")
+			Param("description")
 			Param("filter")
 			Response(StatusOK)
 			Response("bad_request", StatusBadRequest)
