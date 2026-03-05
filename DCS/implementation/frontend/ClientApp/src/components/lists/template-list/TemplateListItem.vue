@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { ContractTemplate } from '../../../models/contract-template'
+import type { PartialContractTemplate } from '../../../models/contract-template'
 
 const props = defineProps<{
-  item: ContractTemplate
+  item: PartialContractTemplate
 }>()
 </script>
 

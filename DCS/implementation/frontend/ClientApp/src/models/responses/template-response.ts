@@ -1,6 +1,6 @@
 import type { ContractTemplateState } from '@/types/contract-template-state'
 import type { TemplateType } from '@/types/template-type'
-import type { ContractTemplate } from '../contract-template'
+import type { PartialContractTemplate } from '../contract-template'
 import type { ContractTemplateReviewTask } from '../contract-template-review-task'
 import type { ContractTemplateApprovalTask } from '../contract-template-approval-task'
 
@@ -25,7 +25,7 @@ export interface ContractTemplateSearchResponse extends ContractTemplateBaseResp
 }
 
 export interface ContractTemplateRetrieveResponse {
-  contract_templates: Omit<ContractTemplate, 'template_data' | 'created_by'>[]
+  contract_templates: PartialContractTemplate[]
   review_tasks: ContractTemplateReviewTask[]
   approval_tasks: ContractTemplateApprovalTask[]
 }

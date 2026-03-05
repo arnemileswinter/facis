@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContractTemplate } from '@/models/contract-template'
+import type { PartialContractTemplate } from '@/models/contract-template'
 import { useContractTemplateStateFilterStore } from '@/stores/contract-template-state-filter-store'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
@@ -8,7 +8,7 @@ import ListSort from '../ListSort.vue'
 import TemplateListItem from './TemplateListItem.vue'
 
 const props = defineProps<{
-  items: ContractTemplate[]
+  items: PartialContractTemplate[]
 }>()
 
 const sorter = new Map([
@@ -27,12 +27,14 @@ const sortedItems = computed(() => {
     return props.items
   }
   return props.items.slice().sort((a, b) => {
-    let aSortValue = a[sortBy.value as keyof ContractTemplate]
-    let bSortValue = b[sortBy.value as keyof ContractTemplate]
-    if (sortBy.value === defaultSort) {
+    let aSortValue = a[sortBy.value as keyof PartialContractTemplate]
+    let bSortValue = b[sortBy.value as keyof PartialContractTemplate]
+    if (sortBy.value === defaultSort && sortBy.value === 'created_at' 
+      && typeof aSortValue === 'string' && typeof bSortValue === 'string') {
       aSortValue = new Date(aSortValue).getTime()
       bSortValue = new Date(bSortValue).getTime()
     }
+    if (aSortValue === undefined || bSortValue === undefined) return sortOrder.value * 1
     const result = aSortValue > bSortValue ? 1 : -1
     return sortOrder.value * result
   })

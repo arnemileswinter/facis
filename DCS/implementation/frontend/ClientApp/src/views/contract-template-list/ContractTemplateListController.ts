@@ -1,9 +1,9 @@
 import { onMounted, ref, type Ref } from 'vue'
-import type { ContractTemplate } from '../../models/contract-template'
+import type { PartialContractTemplate } from '../../models/contract-template'
 import { ContractTemplateService } from '../../services/contract-template-service'
 
 export function useTemplateTable() {
-    const templates: Ref<Omit<ContractTemplate, 'template_data' | 'created_by'>[]> = ref([])
+    const templates: Ref<PartialContractTemplate[]> = ref([])
     const loading = ref(true)
     const error = ref('')
 

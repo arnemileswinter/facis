@@ -16,6 +16,8 @@ export interface ContractTemplate {
     updated_at: string
 }
 
+export type PartialContractTemplate = Omit<ContractTemplate, 'template_data' | 'created_by'>
+
 export interface ContractTemplateData {
     documentOutline: DocumentOutline
     semanticConditions: SemanticCondition[]
