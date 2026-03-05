@@ -27,12 +27,12 @@
 
         <fieldset class="fieldset p-0 border-none">
             <legend class="fieldset-legend">Global Name</legend>
-            <input v-model="name" class="input input-bordered w-full" type="text" required />
+            <input v-model="name" class="input input-bordered w-full" type="text" required :disabled="!store.isEditable"/>
         </fieldset>
 
         <fieldset class="fieldset p-0 border-none">
             <legend class="fieldset-legend">Base Description</legend>
-            <textarea v-model="description" class="textarea textarea-bordered w-full h-24" required></textarea>
+            <textarea v-model="description" class="textarea textarea-bordered w-full h-24" required :disabled="!store.isEditable"></textarea>
         </fieldset>
 
         <!-- Subcontracts (only for frame contracts) -->

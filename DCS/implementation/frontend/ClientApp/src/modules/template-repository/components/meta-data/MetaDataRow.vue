@@ -4,7 +4,8 @@
     <!-- Name -->
     <td class="align-top">
       <div v-if="isEditing" class="flex flex-col gap-1">
-        <input v-model="localName" type="text" class="input input-bordered input-xs w-full" placeholder="Name" />
+        <input v-model="localName" type="text" class="input input-bordered input-xs w-full" placeholder="Name"
+          :disabled="!isEditable" />
         <p v-if="isDuplicate" class="text-[11px] text-error"> Name already exists. </p>
       </div>
       <div v-else class="truncate font-mono text-xs"> {{ initialName }} </div>
@@ -13,13 +14,14 @@
     <!-- Value -->
     <td class="align-top">
       <div v-if="isEditing">
-        <input v-model="localValue" type="text" class="input input-bordered input-xs w-full" placeholder="Value" />
+        <input v-model="localValue" type="text" class="input input-bordered input-xs w-full" placeholder="Value"
+          :disabled="!isEditable" />
       </div>
       <div v-else class="truncate text-xs"> {{ initialValue }} </div>
     </td>
 
     <!-- Actions -->
-    <td class="align-top text-right w-32">
+    <td v-if="isEditable" class="align-top text-right w-32">
       <!-- Add row: actions always visible -->
       <div v-if="isNew" class="flex justify-end gap-1">
         <button v-if="isEditing" type="button" class="btn btn-primary btn-xs" :disabled="!canConfirm"
@@ -63,14 +65,18 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-const props = defineProps<{
-  initialName: string
-  initialValue: string
-  allNames: string[]
-  index?: number
-  isNew?: boolean
-  isActive?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    initialName: string
+    initialValue: string
+    allNames: string[]
+    index?: number
+    isNew?: boolean
+    isActive?: boolean
+    isEditable?: boolean
+  }>(),
+  { isEditable: true }
+)
 
 const emit = defineEmits<{
   confirm: [{ name: string; value: string }]

@@ -104,7 +104,7 @@
         </div>
 
         <!-- Pinned Footer -->
-        <div class="sticky bottom-0 shrink-0 border-t border-base-300 bg-base-100">
+        <div v-if="draftStore.isEditable" class="sticky bottom-0 shrink-0 border-t border-base-300 bg-base-100">
             <div class="max-w-4xl mx-auto px-6 py-3 flex flex-col md:flex-row gap-3">
                 <button class="btn btn-ghost md:w-32" @click="router.back()">Cancel</button>
                 <button @click="submit" class="btn btn-primary flex-1" :disabled="isSubmitting">

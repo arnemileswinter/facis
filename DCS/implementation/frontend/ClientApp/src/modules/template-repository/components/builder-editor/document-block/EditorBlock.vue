@@ -9,12 +9,12 @@
       <template v-if="block && isSectionBlock(block)">
         <label class="text-[10px] uppercase font-bold opacity-60">Section</label>
         <input v-model="localTitle" type="text" class="input input-sm input-ghost w-full font-semibold mt-0.5"
-          placeholder="Section title" />
+          placeholder="Section title" :disabled="!draftStore.isEditable" />
       </template>
       <!-- Text: textarea -->
       <template v-else-if="block && isTextBlock(block)">
         <label class="text-[10px] uppercase font-bold opacity-60">Text</label>
-        <textarea v-model="localText"
+        <textarea v-model="localText" :disabled="!draftStore.isEditable"
           class="textarea textarea-ghost textarea-sm w-full mt-0.5 text-sm min-h-[2.5rem] resize-y"
           placeholder="Text content" rows="2" />
       </template>
@@ -63,7 +63,7 @@
         </div>
       </template>
     </div>
-    <div :class="[
+    <div v-if="draftStore.isEditable" :class="[
       'pt-2 pr-2 pb-2 flex-shrink-0 transition-opacity',
       toolbarVisibilityClass,
     ]">

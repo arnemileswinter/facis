@@ -3,6 +3,7 @@ import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@temp
 import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition, MetaData } from "@template-repository/models/contract-templace"
 import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock, isApprovedTemplateBlock } from "@template-repository/models/contract-templace"
 import type { ContractTemplateCreateRequest, ContractTemplateUpdateRequest } from '@/models/requests/template-request'
+import { TemplateState } from '@/types/contract-template-state'
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -57,6 +58,11 @@ export const useTemplateDraftStore = defineStore(storeId, {
         document_number: this.document_number,
         did: this.did,
       }
+    },
+    isEditable(): boolean {
+      if (!this.state) return true
+      const uneditableStates = [TemplateState.approved].map((s) => s.toLowerCase())
+      return !(uneditableStates.includes(this.state.toLowerCase()))
     }
   },
   actions: {

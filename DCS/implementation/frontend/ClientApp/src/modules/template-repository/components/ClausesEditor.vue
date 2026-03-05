@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Section 1: New clause -->
-    <section class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
+    <section v-if="store.isEditable" class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
       <ClauseEditorForm mode="create" initial-title="" initial-text="" :semantic-conditions="semanticConditions"
         @submit="addClause" />
     </section>
@@ -11,7 +11,8 @@
       <h3 class="text-sm font-semibold text-base-content/80 mb-4">Existing clauses</h3>
       <ExistingClausesList :clause-blocks="clauseBlocks" :semantic-conditions="semanticConditions"
         :get-condition-name="getConditionName" @delete="deleteClause" :block-ids-in-outline="store.blockIdsInOutline"
-        :editing-block-id="editingBlockId" @edit="startEditClause" @save="saveEditedClause" @cancel-edit="cancelEdit" />
+        :editing-block-id="editingBlockId" @edit="startEditClause" @save="saveEditedClause" @cancel-edit="cancelEdit"
+        :editable="store.isEditable" />
     </section>
   </div>
 </template>

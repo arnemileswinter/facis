@@ -29,7 +29,7 @@
       </div>
       <!-- Actions -->
       <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-        v-if="editingBlockId !== clause.blockId">
+        v-if="editable && editingBlockId !== clause.blockId">
         <button type="button" class="btn btn-ghost btn-xs" aria-label="Edit clause"
           @click="$emit('edit', clause.blockId)">
           <IconEdit class="w-4 h-4" />
@@ -52,13 +52,18 @@ import ClauseEditorForm from '@template-repository/components/clauses-editor/Cla
 import IconEdit from '@/core/components/icons/IconEdit.vue'
 import IconRemove from '@/core/components/icons/IconRemove.vue'
 
-const props = defineProps<{
-  clauseBlocks: ClauseBlock[]
-  semanticConditions: SemanticCondition[]
-  getConditionName: (conditionId: string) => string
-  blockIdsInOutline: Set<string>
-  editingBlockId: string | null
-}>()
+const props =
+  withDefaults(
+    defineProps<{
+      clauseBlocks: ClauseBlock[]
+      semanticConditions: SemanticCondition[]
+      getConditionName: (conditionId: string) => string
+      blockIdsInOutline: Set<string>
+      editingBlockId: string | null
+      editable?: boolean
+    }>(),
+    { editable: true }
+  )
 
 const outlineBlockIds = computed(() => props.blockIdsInOutline)
 
