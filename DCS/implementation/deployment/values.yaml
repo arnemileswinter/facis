@@ -77,6 +77,15 @@ ingress:
   # Optional TLS configuration. Configure per environment if needed.
   tls: []
 
+# Istio VirtualService configuration (use instead of ingress for Istio service mesh)
+istio:
+  enabled: false
+  # Hosts for the VirtualService (must match Gateway hosts)
+  hosts: []
+    # - market.asd-x.eu
+  # External Gateway(s) to attach to (namespace/name format)
+  gateways: []
+    # - core/ingress-gateway-market-asd-x-eu
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
