@@ -79,7 +79,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 	return &templaterepository.ContractTemplateCreateResponse{
 		Did:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 	}, nil
 }

@@ -40,7 +40,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     approver,
@@ -62,7 +62,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -104,7 +104,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     "Test User 2",
@@ -141,7 +141,7 @@ func TestCreate_RejectNonExistingContractTemplate(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     "Test User 1",
@@ -181,7 +181,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     rejectedBy,
@@ -222,7 +222,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     rejectedBy,
@@ -263,7 +263,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
 		RejectedBy:     rejectedBy,

@@ -59,7 +59,7 @@ func TestCreate_CreateNewContractTemplate(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}

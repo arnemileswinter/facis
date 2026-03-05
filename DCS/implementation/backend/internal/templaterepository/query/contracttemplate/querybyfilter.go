@@ -4,6 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
@@ -19,7 +20,7 @@ type GetAllMetadataByFilterQry struct {
 	RetrievedBy string
 
 	DID            *string
-	DocumentNumber *int
+	DocumentNumber *string
 	Version        *int
 	State          *contracttemplatestate.ContractTemplateState
 	TemplateType   *contracttemplatetype.ContractTemplateType
@@ -30,7 +31,7 @@ type GetAllMetadataByFilterQry struct {
 
 type GetAllMetadataByFilterResult struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          contracttemplatestate.ContractTemplateState
 	TemplateType   contracttemplatetype.ContractTemplateType
@@ -88,7 +89,7 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) 
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}
-	err = event.Create(h.Ctx, tx, evt)
+	err = event.Create(h.Ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return nil, fmt.Errorf("could not create event: %w", err)
 	}

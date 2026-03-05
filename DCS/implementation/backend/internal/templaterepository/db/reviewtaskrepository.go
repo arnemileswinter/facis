@@ -9,7 +9,7 @@ import (
 type ReviewTaskData struct {
 	ID             string    `db:"id"`
 	DID            string    `db:"did"`
-	DocumentNumber int       `db:"document_number"`
+	DocumentNumber string    `db:"document_number"`
 	Version        int       `db:"version"`
 	State          string    `db:"state"`
 	Reviewer       string    `db:"reviewer"`
@@ -19,14 +19,14 @@ type ReviewTaskData struct {
 
 type ReviewTaskRepo interface {
 	Create(tx *sqlx.Tx, data ReviewTaskData) (*time.Time, error)
-	IsValidReviewer(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string) (bool, error)
-	ReopenTasks(tx *sqlx.Tx, did string, documentNumber int, version int) error
+	IsValidReviewer(tx *sqlx.Tx, did string, DocumentNumber string, version int, reviewer string) (bool, error)
+	ReopenTasks(tx *sqlx.Tx, did string, DocumentNumber string, version int) error
 	ReadAll(tx *sqlx.Tx, did string) ([]ReviewTaskData, error)
-	ReadAllByID(tx *sqlx.Tx, did string, documentNumber int, version int) ([]ReviewTaskData, error)
+	ReadAllByID(tx *sqlx.Tx, did string, DocumentNumber string, version int) ([]ReviewTaskData, error)
 	ReadAllByReviewer(tx *sqlx.Tx, reviewer string) ([]ReviewTaskData, error)
-	Update(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state string) error
-	AnyTasksInState(tx *sqlx.Tx, did string, documentNumber int, version int, states ...string) (bool, error)
-	TaskExistsInState(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state string) (bool, error)
-	TaskExist(tx *sqlx.Tx, did string, documentNumber int, version int) (bool, error)
-	Delete(tx *sqlx.Tx, did string, documentNumber int, version int) error
+	Update(tx *sqlx.Tx, did string, DocumentNumber string, version int, reviewer string, state string) error
+	AnyTasksInState(tx *sqlx.Tx, did string, DocumentNumber string, version int, states ...string) (bool, error)
+	TaskExistsInState(tx *sqlx.Tx, did string, DocumentNumber string, version int, reviewer string, state string) (bool, error)
+	TaskExist(tx *sqlx.Tx, did string, DocumentNumber string, version int) (bool, error)
+	Delete(tx *sqlx.Tx, did string, DocumentNumber string, version int) error
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
@@ -17,14 +18,14 @@ import (
 
 type GetByIDQry struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	RetrievedBy    string
 }
 
 type GetByIDResult struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          contracttemplatestate.ContractTemplateState
 	TemplateType   contracttemplatetype.ContractTemplateType
@@ -65,7 +66,7 @@ func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
 		RetrievedBy:    query.RetrievedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.Create(h.Ctx, tx, evt)
+	err = event.Create(h.Ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return nil, fmt.Errorf("could not create event: %w", err)
 	}

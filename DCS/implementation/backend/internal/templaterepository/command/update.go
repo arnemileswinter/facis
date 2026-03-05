@@ -4,6 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
@@ -18,7 +19,7 @@ import (
 
 type UpdateCmd struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	TemplateType   *contracttemplatetype.ContractTemplateType
 	UpdatedAt      time.Time
@@ -117,7 +118,7 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 		UpdatedBy:       cmd.UpdatedBy,
 		OccurredAt:      time.Now(),
 	}
-	err = event.Create(ctx, tx, evt)
+	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return fmt.Errorf("could not create event: %w", err)
 	}

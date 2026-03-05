@@ -48,7 +48,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -72,7 +72,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -111,7 +111,7 @@ func TestUpdate_UpdateNonExistingContractTemplate(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		UpdatedBy:      "Test User 1",
@@ -166,7 +166,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      "Test User 1",
 		UpdatedAt:      time.Now(),
@@ -220,7 +220,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -278,7 +278,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      reviewers[0],
 		UpdatedAt:      time.Now(),
@@ -302,7 +302,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -360,7 +360,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      "Test User 1",
 		UpdatedAt:      time.Now(),
@@ -414,7 +414,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -468,7 +468,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -522,7 +522,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -576,7 +576,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      "Test User 1",
 		UpdatedAt:      time.Now(),
@@ -630,7 +630,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
@@ -692,7 +692,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		UpdatedBy:      reviewers[1],
 		UpdatedAt:      time.Now(),
@@ -718,7 +718,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, contracttemplatestate.Approved.String(), reviewtaskstate.Verified.String(), contracttemplatestate.Rejected.String())
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, "", 1, contracttemplatestate.Approved.String(), reviewtaskstate.Verified.String(), contracttemplatestate.Rejected.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}

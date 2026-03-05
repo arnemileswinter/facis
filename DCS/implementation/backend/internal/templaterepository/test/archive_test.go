@@ -35,7 +35,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -54,7 +54,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -91,7 +91,7 @@ func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		ArchivedBy:     "Test User 1",
@@ -130,7 +130,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -149,7 +149,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -190,7 +190,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -209,7 +209,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -250,7 +250,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -269,7 +269,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -310,7 +310,7 @@ func TestArchive_ArchiveContractTemplateDataInApprovedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -329,7 +329,7 @@ func TestArchive_ArchiveContractTemplateDataInApprovedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -370,7 +370,7 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -389,7 +389,7 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -430,7 +430,7 @@ func TestArchive_ArchiveContractTemplateDataInDeletedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -470,7 +470,7 @@ func TestArchive_ArchiveContractTemplateDataInDeprecatedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),

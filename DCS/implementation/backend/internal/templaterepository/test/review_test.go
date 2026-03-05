@@ -47,7 +47,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 	for _, assignee := range assignees {
 		reviewTask := db2.ReviewTaskData{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: "",
 			Version:        1,
 			Reviewer:       assignee,
 			State:          reviewtaskstate.Open.String(),
@@ -59,7 +59,7 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 		}
 	}
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open.String())
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, "", 1, reviewtaskstate.Open.String())
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 	for _, assignee := range assignees {
 		reviewTask := db2.ReviewTaskData{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: "",
 			Version:        1,
 			Reviewer:       assignee,
 			State:          reviewtaskstate.Open.String(),
@@ -121,13 +121,13 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 	}
 
 	for _, assignee := range assignees {
-		err := repo.RTRepo.Update(tx, *did, 1, 1, assignee, contracttemplatestate.Approved.String())
+		err := repo.RTRepo.Update(tx, *did, "", 1, assignee, contracttemplatestate.Approved.String())
 		if err != nil {
 			t.Fatalf("Failed to approve review task: %v", err)
 		}
 	}
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open.String())
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, "", 1, reviewtaskstate.Open.String())
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}

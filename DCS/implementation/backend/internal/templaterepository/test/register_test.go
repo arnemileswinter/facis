@@ -35,7 +35,7 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -54,7 +54,7 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -91,7 +91,7 @@ func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		RegisteredBy:   "Test User 1",
@@ -131,7 +131,7 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -171,7 +171,7 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -211,7 +211,7 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -251,7 +251,7 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -291,7 +291,7 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -331,7 +331,7 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),

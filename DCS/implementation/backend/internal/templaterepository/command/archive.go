@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/db"
@@ -16,7 +17,7 @@ import (
 
 type ArchiveCmd struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	UpdatedAt      time.Time
 	ArchivedBy     string
@@ -76,7 +77,7 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 		ArchivedBy:     cmd.ArchivedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.Create(ctx, tx, evt)
+	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return fmt.Errorf("could not create event: %w", err)
 	}

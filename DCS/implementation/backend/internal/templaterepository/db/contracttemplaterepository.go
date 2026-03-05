@@ -9,7 +9,7 @@ import (
 
 type ContractTemplate struct {
 	DID            string         `db:"did"`
-	DocumentNumber int            `db:"document_number"`
+	DocumentNumber string         `db:"document_number"`
 	Version        int            `db:"version"`
 	State          string         `db:"state"`
 	TemplateType   string         `db:"template_type"`
@@ -23,7 +23,7 @@ type ContractTemplate struct {
 
 type ContractTemplateMetadata struct {
 	DID            string    `db:"did"`
-	DocumentNumber int       `db:"document_number"`
+	DocumentNumber string    `db:"document_number"`
 	Version        int       `db:"version"`
 	State          string    `db:"state"`
 	TemplateType   string    `db:"template_type"`
@@ -36,7 +36,7 @@ type ContractTemplateMetadata struct {
 
 type ContractTemplateProcessData struct {
 	DID            string    `db:"did"`
-	DocumentNumber int       `db:"document_number"`
+	DocumentNumber string    `db:"document_number"`
 	Version        int       `db:"version"`
 	State          string    `db:"state"`
 	CreatedBy      string    `db:"created_by"`
@@ -45,7 +45,7 @@ type ContractTemplateProcessData struct {
 
 type ContractTemplateUpdateData struct {
 	DID            string         `db:"did"`
-	DocumentNumber int            `db:"document_number"`
+	DocumentNumber string         `db:"document_number"`
 	Version        int            `db:"version"`
 	State          string         `db:"state"`
 	TemplateType   string         `db:"template_type"`
@@ -56,7 +56,7 @@ type ContractTemplateUpdateData struct {
 
 type SearchValues struct {
 	DID            *string
-	DocumentNumber *int
+	DocumentNumber *string
 	Version        *int
 	State          string
 	TemplateType   string
@@ -67,10 +67,10 @@ type SearchValues struct {
 
 type ContractTemplateRepo interface {
 	Create(tx *sqlx.Tx, data ContractTemplate) (*time.Time, error)
-	ReadDataByID(tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplate, error)
+	ReadDataByID(tx *sqlx.Tx, did string, DocumentNumber string, version int) (*ContractTemplate, error)
 	ReadAllMetaData(tx *sqlx.Tx) ([]ContractTemplateMetadata, error)
 	ReadAllMetaDataByFilter(tx *sqlx.Tx, values SearchValues) ([]ContractTemplateMetadata, error)
-	ReadProcessData(tx *sqlx.Tx, did string, documentNumber int, version int) (*ContractTemplateProcessData, error)
-	UpdateState(tx *sqlx.Tx, did string, documentNumber int, version int, state string) error
+	ReadProcessData(tx *sqlx.Tx, did string, DocumentNumber string, version int) (*ContractTemplateProcessData, error)
+	UpdateState(tx *sqlx.Tx, did string, DocumentNumber string, version int, state string) error
 	Update(tx *sqlx.Tx, data ContractTemplateUpdateData) error
 }

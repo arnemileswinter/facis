@@ -120,7 +120,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, repo *TestRepo, did *stri
 	}
 }
 
-func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state contracttemplatestate.ContractTemplateState, createdBy string, documentNumber int, version int, name string, description string, templateData map[string]interface{}) {
+func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state contracttemplatestate.ContractTemplateState, createdBy string, documentNumber string, version int, name string, description string, templateData map[string]interface{}) {
 	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
 		t.Fatalf("Failed to create JSON template data: %v", err)
@@ -167,7 +167,7 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *Tes
 	for _, reviewer := range reviewers {
 		reviewTask := database.ReviewTaskData{
 			DID:            did,
-			DocumentNumber: 1,
+			DocumentNumber: "",
 			Version:        1,
 			Reviewer:       reviewer,
 			State:          state.String(),
@@ -194,7 +194,7 @@ func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *T
 
 	approvalTask := database.ApprovalTaskData{
 		DID:            did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		Approver:       approver,
 		State:          state.String(),

@@ -35,7 +35,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -76,7 +76,7 @@ func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		RetrievedBy:    creator,
 	}

@@ -13,7 +13,7 @@ import (
 
 type GetAllReviewTasksForDIDQry struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	RetrievedBy    string
 }
@@ -21,7 +21,7 @@ type GetAllReviewTasksForDIDQry struct {
 type GetAllReviewTasksForDIDResult struct {
 	ID             int
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          reviewtaskstate.ReviewTaskState
 	Reviewer       string

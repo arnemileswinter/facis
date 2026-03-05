@@ -13,7 +13,7 @@ import (
 
 type GetAllApprovalTasksForDIDQry struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	RetrievedBy    string
 }
@@ -21,7 +21,7 @@ type GetAllApprovalTasksForDIDQry struct {
 type GetAllApprovalTasksForDIDResult struct {
 	ID             int
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          aopprovaltaskstate.ApprovalTaskState
 	Approver       string

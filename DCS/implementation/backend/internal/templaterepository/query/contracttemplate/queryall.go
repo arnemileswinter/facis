@@ -4,6 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
@@ -23,7 +24,7 @@ type GetAllMetadataQry struct {
 
 type MetadataItem struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          contracttemplatestate.ContractTemplateState
 	TemplateType   contracttemplatetype.ContractTemplateType
@@ -36,7 +37,7 @@ type MetadataItem struct {
 
 type ReviewTaskItem struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          reviewtaskstate.ReviewTaskState
 	Reviewer       string
@@ -45,7 +46,7 @@ type ReviewTaskItem struct {
 
 type ApprovalTaskItem struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          approvaltaskstate.ApprovalTaskState
 	Approver       string
@@ -86,7 +87,7 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 		RetrievedBy: query.RetrievedBy,
 		OccurredAt:  time.Now(),
 	}
-	err = event.Create(h.Ctx, tx, evt)
+	err = event.Create(h.Ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return nil, fmt.Errorf("could not create event: %w", err)
 	}
