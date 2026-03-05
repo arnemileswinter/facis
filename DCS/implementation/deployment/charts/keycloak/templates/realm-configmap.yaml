@@ -4,7 +4,8 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-keycloak-realm
   labels:
-    {{- include "keycloak.labels" . | nindent 4 }}
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: {{ .Release.Name }}
 data:
   dcs-realm.json: |-
 {{ .Files.Get "files/dcs-realm.json" | indent 4 }}
