@@ -28,6 +28,28 @@ Thanks to ORCE’s orchestration features, deploying a Digital Contracting Servi
 
 ---
 
+## Helm Chart Composition (Bundled + Optional Dependencies)
+
+The chart bundles `postgresql`, `keycloak`, and `nats` as dependencies, but each can be enabled or disabled independently.
+
+- Enable bundled dependencies when needed:
+  - `postgresql.enabled=true`
+  - `keycloak.enabled=true`
+  - `nats.enabled=true`
+- Or disable them and point DCS to external services:
+  - `serviceDiscovery.postgresqlHost`
+  - `serviceDiscovery.keycloakHost`
+  - `serviceDiscovery.natsHost`
+
+For DCS routing paths, configure:
+
+- `route.basePath` for a single base route (example: `/tenant-a/dcs`)
+- `paths.api` and `paths.ui` for explicit API/UI path overrides
+
+Ingress is disabled by default and uses standard Kubernetes Ingress resources.
+
+---
+
 ## ⚡️ Click-to-Deploy
 
 ---
@@ -47,11 +69,7 @@ The following CLI tools must be installed and accessible in your PATH:
 
 ### Kubernetes Cluster
 - A working Kubernetes cluster
-- **Traefik ingress controller** installed in the cluster (`kube-system` namespace)
-  ```bash
-  # Install Traefik (if not already installed)
-  kubectl apply -f https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/templates/deployment.yaml
-  ```
+- An ingress controller installed in the cluster (for example NGINX or Traefik) when `ingress.enabled=true`
 
 ### Files & Credentials
 - **Kubeconfig file**: Path to your Kubernetes cluster configuration (e.g., `~/.kube/config`)

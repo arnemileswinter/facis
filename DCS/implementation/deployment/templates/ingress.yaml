@@ -1,4 +1,7 @@
 {{- if .Values.ingress.enabled -}}
+{{- if eq (len .Values.ingress.hosts) 0 -}}
+{{- fail "ingress.enabled=true requires at least one entry in ingress.hosts" -}}
+{{- end -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -28,16 +31,34 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
+          {{- if .paths }}
           {{- range .paths }}
           - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
+            pathType: {{ default $.Values.ingress.pathType .pathType }}
             backend:
               service:
                 name: {{ include "digital-contracting-service.fullname" $ }}
                 port:
                   number: {{ $.Values.service.port | int }}
+          {{- end }}
+          {{- else }}
+          - path: {{ include "digital-contracting-service.baseRoutePath" $ }}
+            pathType: {{ default "Prefix" $.Values.ingress.pathType }}
+            backend:
+              service:
+                name: {{ include "digital-contracting-service.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port | int }}
+          {{- end }}
+          {{- /* Keycloak route on same host when enabled with route.path */}}
+          {{- if and $.Values.keycloak.enabled $.Values.keycloak.route.path }}
+          - path: {{ include "digital-contracting-service.keycloakRoutePath" $ }}
+            pathType: {{ default "Prefix" $.Values.ingress.pathType }}
+            backend:
+              service:
+                name: {{ $.Release.Name }}-keycloak
+                port:
+                  number: {{ $.Values.keycloak.service.port | int }}
           {{- end }}
     {{- end }}
 {{- end }}

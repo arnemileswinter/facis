@@ -50,17 +50,49 @@ spec:
               protocol: TCP
           env:
             - name: OIDC_ISSUER_URL
-              value: {{ .Values.oidc.issuerURL | quote }}
+              {{- if .Values.oidc.issuerURLSecretRef.name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.oidc.issuerURLSecretRef.name | quote }}
+                  key: {{ .Values.oidc.issuerURLSecretRef.key | quote }}
+              {{- else }}
+              value: {{ include "digital-contracting-service.oidcIssuerURL" . | quote }}
+              {{- end }}
             - name: OIDC_CLIENT_ID
               value: {{ .Values.oidc.clientID | quote }}
             - name: OIDC_REDIRECT_URI
               value: {{ .Values.oidc.redirectURI | quote }}
             - name: OIDC_LOGOUT_REDIRECT_URI
               value: {{ .Values.oidc.logoutRedirectURI | quote }}
+            - name: DATABASE_URL
+              {{- if .Values.database.secretRef.name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretRef.name | quote }}
+                  key: {{ .Values.database.secretRef.key | quote }}
+              {{- else }}
+              value: {{ include "digital-contracting-service.databaseURL" . | quote }}
+              {{- end }}
+            - name: NATS_URL
+              {{- if .Values.messaging.secretRef.name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.messaging.secretRef.name | quote }}
+                  key: {{ .Values.messaging.secretRef.key | quote }}
+              {{- else }}
+              value: {{ include "digital-contracting-service.natsURL" . | quote }}
+              {{- end }}
             - name: DCS_API_PATH
-              value: {{ .Values.paths.api | quote }}
+              value: {{ include "digital-contracting-service.apiPath" . | quote }}
             - name: DCS_UI_PATH
-              value: {{ .Values.paths.ui | quote }}
+              value: {{ include "digital-contracting-service.uiPath" . | quote }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -73,6 +105,7 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if or .Values.customCA.enabled .Values.volumeMounts }}
           volumeMounts:
           {{- if .Values.customCA.enabled }}
             - name: custom-ca-certs
@@ -82,6 +115,8 @@ spec:
           {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- end }}
+      {{- if or .Values.customCA.enabled .Values.volumes }}
       volumes:
       {{- if .Values.customCA.enabled }}
         - name: custom-ca-certs
@@ -90,6 +125,7 @@ spec:
       {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
