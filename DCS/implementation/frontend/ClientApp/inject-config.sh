@@ -3,8 +3,8 @@
 
 CONFIG_FILE="${CONFIG_FILE:-/app/web/dist/config.js}"
 INDEX_FILE="${INDEX_FILE:-/app/web/dist/index.html}"
-BASE_PATH="${DCS_UI_BASE_PATH:-/ui/}"
-API_BASE_URL="${DCS_API_BASE_URL:-/}"
+BASE_PATH="${DCS_UI_PATH:-/ui/}"
+API_BASE_URL="${DCS_API_PATH:-/}"
 
 if [ "${BASE_PATH#"/"}" = "$BASE_PATH" ]; then
   BASE_PATH="/${BASE_PATH}"

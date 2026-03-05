@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-const apiPathPrefixEnv = "API_PATH_PREFIX"
+const apiPathPrefixEnv = "DCS_API_PATH"
 const defaultAPIPathPrefix = ""
 
 // contextKey is a private type for context keys in this package.

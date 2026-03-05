@@ -16,7 +16,7 @@ export function getConfig(): DCSConfig {
   }
 
   return {
-    API_BASE_URL: import.meta.env.DCS_API_URL || '/api',
+    API_BASE_URL: import.meta.env.DCS_API_PATH || '/api',
   }
 }
 
@@ -27,7 +27,7 @@ export function getUIBasePath(): string {
     return fromBase
   }
 
-  return normalizeBasePath(import.meta.env.DCS_UI_BASE_PATH) || '/ui/'
+  return normalizeBasePath(import.meta.env.DCS_UI_PATH) || '/ui/'
 }
 
 function normalizeBasePath(value?: string | null): string {

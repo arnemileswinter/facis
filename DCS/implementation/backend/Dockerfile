@@ -74,6 +74,10 @@ COPY --from=go-builder /build/gen/http/openapi3.json /app/gen/http/openapi3.json
 # Copy built frontend from frontend-builder stage
 COPY --from=frontend-builder --chown=$DOCKER_USER:$DOCKER_USER /frontend/dist /app/web/dist
 
+# Copy frontend config injection script
+COPY --chown=$DOCKER_USER:$DOCKER_USER frontend/ClientApp/inject-config.sh /app/web/
+RUN chmod +x /app/web/inject-config.sh
+
 # Copy entrypoint script
 COPY --chown=$DOCKER_USER:$DOCKER_USER backend/docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
@@ -85,11 +89,10 @@ ENV OIDC_ISSUER_URL=""
 ENV OIDC_CLIENT_ID=""
 ENV OIDC_REDIRECT_URI=""
 ENV OIDC_LOGOUT_REDIRECT_URI=""
-ENV API_PATH_PREFIX=""
 
-# Frontend runtime configuration (production defaults)
-ENV DCS_UI_BASE_PATH="/ui/"
-ENV DCS_API_BASE_URL="/"
+# Frontend and Backend path configuration (production defaults)
+ENV DCS_UI_PATH="/ui/"
+ENV DCS_API_PATH="/"
 
 EXPOSE 8991
 

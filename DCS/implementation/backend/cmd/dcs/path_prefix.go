@@ -35,5 +35,5 @@ func (p *prefixedMuxer) Vars(r *http.Request) map[string]string {
 }
 
 func getAPIPathPrefix() string {
-	return os.Getenv("API_PATH_PREFIX")
+	return os.Getenv("DCS_API_PATH")
 }

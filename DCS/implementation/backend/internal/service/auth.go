@@ -32,7 +32,7 @@ func NewAuth() genauth.Service {
 		oidcClientID:      os.Getenv("OIDC_CLIENT_ID"),
 		redirectURI:       os.Getenv("OIDC_REDIRECT_URI"),
 		logoutRedirectURI: os.Getenv("OIDC_LOGOUT_REDIRECT_URI"),
-		uiBasePath:        pathutil.NormalizePath(os.Getenv("DCS_UI_BASE_PATH"), "/ui/", true),
+		uiBasePath:        pathutil.NormalizePath(os.Getenv("DCS_UI_PATH"), "/ui/", true),
 	}
 }
 

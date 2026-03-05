@@ -159,11 +159,9 @@ oidc:
   redirectURI: "[oidc-redirect-uri]"
   logoutRedirectURI: "[oidc-logout-redirect-uri]"
 
-# Backend API routing configuration
-api:
-  pathPrefix: "/[path]/digital-contracting-service"
-
-# Frontend runtime configuration
-frontend:
-  basePath: "/[path]/digital-contracting-service/ui/"
-  apiBaseUrl: "/[path]/digital-contracting-service/"
+# Path configuration (both backend and frontend use these)
+paths:
+  # API path where backend routes are mounted
+  api: "/[path]/digital-contracting-service/api"
+  # UI path where frontend is served
+  ui: "/[path]/digital-contracting-service/ui"

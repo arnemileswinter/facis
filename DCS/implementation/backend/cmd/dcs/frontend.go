@@ -18,8 +18,8 @@ func mountFrontend(mux goahttp.Muxer) {
 		return
 	}
 
-	apiPathPrefix := pathutil.NormalizePath(os.Getenv("API_PATH_PREFIX"), "", false)
-	uiBasePath := pathutil.NormalizePath(os.Getenv("DCS_UI_BASE_PATH"), "/ui/", true)
+	apiPathPrefix := pathutil.NormalizePath(os.Getenv("DCS_API_PATH"), "", false)
+	uiBasePath := pathutil.NormalizePath(os.Getenv("DCS_UI_PATH"), "/ui/", true)
 	apiPrefixPath := strings.TrimSuffix(apiPathPrefix, "/")
 	if apiPrefixPath == "" {
 		apiPrefixPath = "/"
