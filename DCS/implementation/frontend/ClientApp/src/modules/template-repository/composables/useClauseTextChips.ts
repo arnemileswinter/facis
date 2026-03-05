@@ -5,6 +5,7 @@ import type { ClausePlaceholderHighlight } from '@template-repository/models/tem
 export type Segment =
   | { type: 'text'; value: string }
   | { type: 'placeholder'; conditionId: string; parameterName: string; displayText: string }
+  | { type: 'newline' }
 
 export function isText(seg: Segment): seg is Extract<Segment, { type: 'text' }> {
   return seg.type === 'text'
@@ -17,6 +18,7 @@ export function isPlaceholder(seg: Segment): seg is Extract<Segment, { type: 'pl
 export const CHIP_HIGHLIGHT_CLASS = 'clause-chip-highlight'
 
 const PLACEHOLDER_REGEX = /\{\{([^}]+)\}\}/g
+const NEWLINE = '\n'
 
 function toPlaceholderString(conditionId: string, parameterName: string): string {
   return `{{${conditionId}.${parameterName}}}`
@@ -29,18 +31,25 @@ function matchHighlight(conditionId: string, parameterName: string, h: NonNullab
 }
 
 /**
- * Splits clause text into text and placeholder segments. Resolves {{conditionId.parameterName}} via conditions for displayText.
+ * Splits clause text into text, placeholder, and newline segments.
+ * Resolves {{conditionId.parameterName}} via conditions for displayText.
  * @example
- * parseSegments('From {{c1.start}} to {{c1.end}}.', conditions)
+ * parseSegments('From {{c1.start}} to {{c1.end}}.\n', conditions)
  * // => [
  * //   { type: 'text', value: 'From ' },
  * //   { type: 'placeholder', conditionId: 'c1', parameterName: 'start', displayText: 'start (Validity)' },
  * //   { type: 'text', value: ' to ' },
  * //   { type: 'placeholder', conditionId: 'c1', parameterName: 'end', displayText: 'end (Validity)' },
- * //   { type: 'text', value: '.' }
+ * //   { type: 'text', value: '.' },
+ * //   { type: 'newline' }
  * // ]
  */
 export function parseSegments(text: string, conditions: SemanticCondition[]): Segment[] {
+  const base = parsePlaceholders(text, conditions)
+  return splitNewlines(base)
+}
+
+function parsePlaceholders(text: string, conditions: SemanticCondition[]): Segment[] {
   const segments: Segment[] = []
   let lastEnd = 0
   let m: RegExpExecArray | null
@@ -67,6 +76,23 @@ export function parseSegments(text: string, conditions: SemanticCondition[]): Se
     segments.push({ type: 'text', value: text.slice(lastEnd) })
   }
   return segments
+}
+
+function splitNewlines(segments: Segment[]): Segment[] {
+  const withNewlines: Segment[] = []
+  for (const seg of segments) {
+    if (isText(seg)) {
+      const parts = seg.value.split(NEWLINE)
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i]
+        if (part) withNewlines.push({ type: 'text', value: part })
+        if (i < parts.length - 1) withNewlines.push({ type: 'newline' })
+      }
+    } else {
+      withNewlines.push(seg)
+    }
+  }
+  return withNewlines
 }
 
 /**
@@ -111,8 +137,12 @@ export function useClauseTextChips(
       }
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement
-        if (el.dataset.conditionId != null && el.dataset.parameterName != null) {
+        if (isPlaceholderElement(el)) {
           result += toPlaceholderString(el.dataset.conditionId, el.dataset.parameterName)
+          return
+        }
+        if (isLineBreakElement(el)) {
+          result += NEWLINE
           return
         }
       }
@@ -127,8 +157,9 @@ export function useClauseTextChips(
     if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? '').length
     if (node.nodeType === Node.ELEMENT_NODE) {
       const el = node as HTMLElement
-      if (el.dataset.conditionId != null && el.dataset.parameterName != null)
+      if (isPlaceholderElement(el))
         return toPlaceholderString(el.dataset.conditionId, el.dataset.parameterName).length
+      if (isLineBreakElement(el)) return 1
     }
     let len = 0
     node.childNodes.forEach((child) => { len += getNodeLength(child) })
@@ -152,7 +183,7 @@ export function useClauseTextChips(
       }
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement
-        if (el.dataset.conditionId != null && el.dataset.parameterName != null) {
+        if (isPlaceholderElement(el) || isLineBreakElement(el)) {
           index += getNodeLength(node)
           return false
         }
@@ -252,8 +283,20 @@ export function useClauseTextChips(
       }
       if (node.nodeType === Node.ELEMENT_NODE) {
         const el = node as HTMLElement
-        if (el.dataset.conditionId != null && el.dataset.parameterName != null) {
+        if (isPlaceholderElement(el)) {
           const len = toPlaceholderString(el.dataset.conditionId, el.dataset.parameterName).length
+          if (offset + len >= targetOffset) {
+            range.setStartAfter(node)
+            range.collapse(true)
+            selection.removeAllRanges()
+            selection.addRange(range)
+            return true
+          }
+          offset += len
+          return false
+        }
+        if (isLineBreakElement(el)) {
+          const len = 1
           if (offset + len >= targetOffset) {
             range.setStartAfter(node)
             range.collapse(true)
@@ -297,6 +340,10 @@ export function useClauseTextChips(
     for (const seg of segments) {
       if (isText(seg)) {
         el.appendChild(document.createTextNode(seg.value))
+      } else if (seg.type === 'newline') {
+        const br = document.createElement('br')
+        br.dataset.line = 'true'
+        el.appendChild(br)
       } else {
         // Chip span for placeholder
         const span = document.createElement('span')
@@ -346,6 +393,17 @@ export function useClauseTextChips(
     return { newValue, newCursorPos }
   }
 
+  /** Inserts a logical newline at the current selection and returns new value and cursor position. */
+  function insertNewlineAtSelection(): { newValue: string; newCursorPos: number } {
+    const current = getTemplateText()
+    const { start, end } = getSelectionRange()
+    const before = current.slice(0, start)
+    const after = current.slice(end)
+    const newValue = before + NEWLINE + after
+    const newCursorPos = start + 1
+    return { newValue, newCursorPos }
+  }
+
   /** Add space before/after insert unless already space or period. Returns new full value and length of inserted part (for cursor). */
   function wrapSpaces(
     before: string,
@@ -359,11 +417,26 @@ export function useClauseTextChips(
     return { value, insertLength }
   }
 
+  /** Placeholder chip span: <span contenteditable="false" data-condition-id="c1" data-parameter-name="start"> */
+  function isPlaceholderElement(
+    el: HTMLElement
+  ): el is HTMLElement & { dataset: DOMStringMap & { conditionId: string; parameterName: string } } {
+    return el.dataset.conditionId != null && el.dataset.parameterName != null
+  }
+  /** Logical newline: <br data-line="true"> */
+  function isLineBreakElement(
+    el: HTMLElement
+  ): el is HTMLElement & { dataset: DOMStringMap & { line: string } } {
+    return el.dataset.line === 'true'
+  }
+
+
   return {
     parseSegments,
     getTemplateText,
     getCursorIndex,
     handlePaste,
+    insertNewlineAtSelection,
     setCursorAfter,
     setCursorAt,
     syncFromTemplateText,
