@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	genauth "digital-contracting-service/gen/auth"
+	"digital-contracting-service/internal/pathutil"
 
 	"goa.design/clue/log"
 )
@@ -21,6 +22,7 @@ type authSvc struct {
 	oidcClientID      string
 	redirectURI       string
 	logoutRedirectURI string
+	uiBasePath        string
 }
 
 // NewAuth returns the Auth service implementation.
@@ -30,6 +32,7 @@ func NewAuth() genauth.Service {
 		oidcClientID:      os.Getenv("OIDC_CLIENT_ID"),
 		redirectURI:       os.Getenv("OIDC_REDIRECT_URI"),
 		logoutRedirectURI: os.Getenv("OIDC_LOGOUT_REDIRECT_URI"),
+		uiBasePath:        pathutil.NormalizePath(os.Getenv("DCS_UI_BASE_PATH"), "/ui/", true),
 	}
 }
 
@@ -70,10 +73,9 @@ func (s *authSvc) Callback(ctx context.Context, p *genauth.CallbackPayload) (*ge
 	// This is picked up by SetRefreshTokenInContext which sets the cookie immediately.
 	SetRefreshTokenInContext(ctx, tokenResp.RefreshToken)
 
-	// Redirect to frontend /ui/auth/success
-	// The frontend will then call /auth/refresh to get the access token
+	// Redirect to frontend auth success route under configured UI base path.
 	return &genauth.CallbackResult{
-		Location: "/ui/auth/success",
+		Location: s.uiBasePath + "auth/success",
 	}, nil
 }
 
@@ -109,7 +111,7 @@ func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
 	log.Printf(ctx, "auth.logout")
 
 	// Build Keycloak logout URL with configured post-logout redirect
-	postLogoutRedirect := "/"
+	postLogoutRedirect := s.uiBasePath
 	if s.logoutRedirectURI != "" {
 		postLogoutRedirect = s.logoutRedirectURI
 	}
@@ -242,8 +244,8 @@ func (s *authSvc) LogoutComplete(ctx context.Context) (*genauth.LogoutCompleteRe
 	// Clear the refresh token cookie
 	ClearRefreshTokenCookie(ctx)
 
-	// Redirect to frontend UI
+	// Redirect to frontend UI under configured base path
 	return &genauth.LogoutCompleteResult{
-		Location: "/ui",
+		Location: s.uiBasePath,
 	}, nil
 }

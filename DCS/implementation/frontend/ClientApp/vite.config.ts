@@ -4,10 +4,10 @@ import { fileURLToPath } from 'url'
 import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), 'DCS_')
   return {
-    base: env.DCS_UI_BASE || '/ui/',
+    base: command === 'build' ? './' : '/',
     plugins: [vue(), tailwindcss()],
     envPrefix: 'DCS',
     resolve: {

@@ -55,12 +55,14 @@ func handleHTTPServer(ctx context.Context, u *url.URL, authEndpoints *genauth.En
 	{
 		mux = goahttp.NewMuxer()
 		if dbg {
-			// Mount pprof handlers for memory profiling under /debug/pprof.
 			debug.MountPprofHandlers(debug.Adapt(mux))
-			// Mount /debug endpoint to enable or disable debug logs at runtime.
 			debug.MountDebugLogEnabler(debug.Adapt(mux))
 		}
 	}
+
+	// Apply API path prefix if configured
+	apiPrefix := getAPIPathPrefix()
+	apiMux := newPrefixedMuxer(mux, apiPrefix)
 
 	// Wrap the endpoints with the transport specific layers. The generated
 	// server packages contains code generated from the design which maps
@@ -81,34 +83,34 @@ func handleHTTPServer(ctx context.Context, u *url.URL, authEndpoints *genauth.En
 	{
 		eh := errorHandler(ctx)
 		ef := errorFormatter
-		authServer = authsvr.New(authEndpoints, mux, dec, enc, eh, ef)
-		contractStorageArchiveServer = contractstoragearchivesvr.New(contractStorageArchiveEndpoints, mux, dec, enc, eh, ef)
-		contractWorkflowEngineServer = contractworkflowenginesvr.New(contractWorkflowEngineEndpoints, mux, dec, enc, eh, ef)
-		dcsToDcsServer = dcstodcssvr.New(dcsToDcsEndpoints, mux, dec, enc, eh, ef)
-		externalTargetSystemAPIServer = externaltargetsystemapisvr.New(externalTargetSystemAPIEndpoints, mux, dec, enc, eh, ef)
-		orchestrationWebhooksServer = orchestrationwebhookssvr.New(orchestrationWebhooksEndpoints, mux, dec, enc, eh, ef)
-		processAuditAndComplianceServer = processauditandcompliancesvr.New(processAuditAndComplianceEndpoints, mux, dec, enc, eh, ef)
-		signatureManagementServer = signaturemanagementsvr.New(signatureManagementEndpoints, mux, dec, enc, eh, ef)
-		templateCatalogueIntegrationServer = templatecatalogueintegrationsvr.New(templateCatalogueIntegrationEndpoints, mux, dec, enc, eh, ef)
-		templateRepositoryServer = templaterepositorysvr.New(templateRepositoryEndpoints, mux, dec, enc, eh, ef)
+		authServer = authsvr.New(authEndpoints, apiMux, dec, enc, eh, ef)
+		contractStorageArchiveServer = contractstoragearchivesvr.New(contractStorageArchiveEndpoints, apiMux, dec, enc, eh, ef)
+		contractWorkflowEngineServer = contractworkflowenginesvr.New(contractWorkflowEngineEndpoints, apiMux, dec, enc, eh, ef)
+		dcsToDcsServer = dcstodcssvr.New(dcsToDcsEndpoints, apiMux, dec, enc, eh, ef)
+		externalTargetSystemAPIServer = externaltargetsystemapisvr.New(externalTargetSystemAPIEndpoints, apiMux, dec, enc, eh, ef)
+		orchestrationWebhooksServer = orchestrationwebhookssvr.New(orchestrationWebhooksEndpoints, apiMux, dec, enc, eh, ef)
+		processAuditAndComplianceServer = processauditandcompliancesvr.New(processAuditAndComplianceEndpoints, apiMux, dec, enc, eh, ef)
+		signatureManagementServer = signaturemanagementsvr.New(signatureManagementEndpoints, apiMux, dec, enc, eh, ef)
+		templateCatalogueIntegrationServer = templatecatalogueintegrationsvr.New(templateCatalogueIntegrationEndpoints, apiMux, dec, enc, eh, ef)
+		templateRepositoryServer = templaterepositorysvr.New(templateRepositoryEndpoints, apiMux, dec, enc, eh, ef)
 	}
 
 	// Configure the mux.
-	authsvr.Mount(mux, authServer)
-	contractstoragearchivesvr.Mount(mux, contractStorageArchiveServer)
-	contractworkflowenginesvr.Mount(mux, contractWorkflowEngineServer)
-	dcstodcssvr.Mount(mux, dcsToDcsServer)
-	externaltargetsystemapisvr.Mount(mux, externalTargetSystemAPIServer)
-	orchestrationwebhookssvr.Mount(mux, orchestrationWebhooksServer)
-	processauditandcompliancesvr.Mount(mux, processAuditAndComplianceServer)
-	signaturemanagementsvr.Mount(mux, signatureManagementServer)
-	templatecatalogueintegrationsvr.Mount(mux, templateCatalogueIntegrationServer)
-	templaterepositorysvr.Mount(mux, templateRepositoryServer)
+	authsvr.Mount(apiMux, authServer)
+	contractstoragearchivesvr.Mount(apiMux, contractStorageArchiveServer)
+	contractworkflowenginesvr.Mount(apiMux, contractWorkflowEngineServer)
+	dcstodcssvr.Mount(apiMux, dcsToDcsServer)
+	externaltargetsystemapisvr.Mount(apiMux, externalTargetSystemAPIServer)
+	orchestrationwebhookssvr.Mount(apiMux, orchestrationWebhooksServer)
+	processauditandcompliancesvr.Mount(apiMux, processAuditAndComplianceServer)
+	signaturemanagementsvr.Mount(apiMux, signatureManagementServer)
+	templatecatalogueintegrationsvr.Mount(apiMux, templateCatalogueIntegrationServer)
+	templaterepositorysvr.Mount(apiMux, templateRepositoryServer)
 
 	// Mount Swagger UI on /swagger and OpenAPI spec on /openapi3.json.
-	mountSwaggerUI(mux)
+	mountSwaggerUI(apiMux)
 
-	// Mount frontend static file server
+	// Mount frontend static file server (uses base mux, not API mux)
 	mountFrontend(mux)
 
 	var handler http.Handler = mux

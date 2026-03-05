@@ -59,6 +59,10 @@ spec:
               value: {{ .Values.oidc.logoutRedirectURI | quote }}
             - name: API_PATH_PREFIX
               value: {{ .Values.api.pathPrefix | quote }}
+            - name: DCS_UI_BASE_PATH
+              value: {{ .Values.frontend.basePath | quote }}
+            - name: DCS_API_BASE_URL
+              value: {{ .Values.frontend.apiBaseUrl | quote }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

@@ -1,17 +1,26 @@
-{{- if .Values.ingress.enabled -}}
+{{- if and .Values.ingress.enabled .Values.middleware.enabled .Values.middleware.stripPrefix.enabled -}}
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: strip-prefix
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "digital-contracting-service.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": pre-install
+    # ArgoCD sync wave - create middleware before ingress
+    argocd.argoproj.io/sync-wave: {{ .Values.middleware.syncWave | quote }}
 spec:
   stripPrefix:
     prefixes:
+      {{- if .Values.middleware.stripPrefix.prefixes }}
+      {{- range .Values.middleware.stripPrefix.prefixes }}
+      - {{ . }}
+      {{- end }}
+      {{- else }}
       {{- range .Values.ingress.hosts }}
       {{- range .paths }}
       - {{ .path }}
+      {{- end }}
       {{- end }}
       {{- end }}
 {{- end }}

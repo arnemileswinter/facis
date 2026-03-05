@@ -6,78 +6,133 @@ import (
 	"path/filepath"
 	"strings"
 
+	"digital-contracting-service/internal/pathutil"
+
 	goahttp "goa.design/goa/v3/http"
 )
 
-// mountFrontend registers the frontend static file server routes on the given Goa mux.
-// It serves the built Vue.js frontend at /ui and redirects root to /ui.
 func mountFrontend(mux goahttp.Muxer) {
 	const staticDir = "/app/web/dist"
 
-	// Check if the static directory exists
 	if _, err := os.Stat(staticDir); os.IsNotExist(err) {
-		// Frontend not embedded, skip mounting
 		return
 	}
 
-	// Redirect root to /ui
-	mux.Handle("GET", "/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/ui", http.StatusMovedPermanently)
+	apiPathPrefix := pathutil.NormalizePath(os.Getenv("API_PATH_PREFIX"), "", false)
+	uiBasePath := pathutil.NormalizePath(os.Getenv("DCS_UI_BASE_PATH"), "/ui/", true)
+	apiPrefixPath := strings.TrimSuffix(apiPathPrefix, "/")
+	if apiPrefixPath == "" {
+		apiPrefixPath = "/"
+	}
+
+	apiRoot := apiPathPrefix
+	if apiRoot == "" {
+		apiRoot = "/"
+	}
+
+	if uiBasePath != apiRoot {
+		if apiPathPrefix == "" {
+			mux.Handle("GET", "/", func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, uiBasePath, http.StatusMovedPermanently)
+			})
+		} else {
+			mux.Handle("GET", apiPrefixPath, func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, uiBasePath, http.StatusMovedPermanently)
+			})
+			mux.Handle("GET", apiPrefixPath+"/", func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, uiBasePath, http.StatusMovedPermanently)
+			})
+		}
+	}
+
+	uiPrefix := strings.TrimSuffix(uiBasePath, "/")
+	if uiPrefix == "" {
+		uiPrefix = "/"
+	}
+
+	if uiPrefix != "/" {
+		mux.Handle("GET", uiPrefix, func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, uiBasePath, http.StatusMovedPermanently)
+		})
+	}
+
+	pattern := uiPrefix + "/*"
+	if uiPrefix == "/" {
+		pattern = "/*"
+	}
+
+	mux.Handle("GET", pattern, func(w http.ResponseWriter, r *http.Request) {
+		serveFrontend(w, r, staticDir, uiPrefix)
 	})
 
-	// Serve frontend at /ui with SPA routing
-	mux.Handle("GET", "/ui", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/ui/", http.StatusMovedPermanently)
-	})
+	if uiPrefix == "/" {
+		mux.Handle("GET", "/", func(w http.ResponseWriter, r *http.Request) {
+			serveFrontend(w, r, staticDir, uiPrefix)
+		})
+	}
+}
 
-	mux.Handle("GET", "/ui/*", func(w http.ResponseWriter, r *http.Request) {
-		// Strip /ui prefix to get the actual file path
-		path := strings.TrimPrefix(r.URL.Path, "/ui")
-		if path == "" {
-			path = "/"
-		}
+func serveFrontend(w http.ResponseWriter, r *http.Request, staticDir, uiBasePath string) {
+	path := r.URL.Path
+	if uiBasePath != "/" {
+		path = strings.TrimPrefix(path, uiBasePath)
+	}
+	if path == "" {
+		path = "/"
+	}
 
-		// Clean the path to prevent directory traversal
-		path = filepath.Clean(path)
+	path = filepath.Clean(path)
+	path = strings.TrimPrefix(path, "/")
+	fullPath := filepath.Join(staticDir, path)
 
-		// Build the full path
-		fullPath := filepath.Join(staticDir, path)
+	absStaticDir, err := filepath.Abs(staticDir)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 
-		// Resolve to absolute path and verify it's within staticDir
-		absStaticDir, err := filepath.Abs(staticDir)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
+	absFullPath, err := filepath.Abs(fullPath)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 
-		absFullPath, err := filepath.Abs(fullPath)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
-		// Verify the resolved path is still within the static directory
-		relPath, err := filepath.Rel(absStaticDir, absFullPath)
-		if err != nil || strings.HasPrefix(relPath, "..") {
-			http.NotFound(w, r)
-			return
-		}
-
-		// Try to serve the file
-		if info, err := os.Stat(absFullPath); err == nil && !info.IsDir() {
-			// File exists, serve it
-			http.ServeFile(w, r, absFullPath)
-			return
-		}
-
-		// File doesn't exist or path is a directory - serve index.html for SPA routing
-		indexPath := filepath.Join(absStaticDir, "index.html")
-		if _, err := os.Stat(indexPath); err == nil {
-			http.ServeFile(w, r, indexPath)
-			return
-		}
-
-		// index.html not found
+	relPath, err := filepath.Rel(absStaticDir, absFullPath)
+	if err != nil || strings.HasPrefix(relPath, "..") {
 		http.NotFound(w, r)
-	})
+		return
+	}
+
+	if info, err := os.Stat(absFullPath); err == nil && !info.IsDir() {
+		http.ServeFile(w, r, absFullPath)
+		return
+	}
+
+	indexPath := filepath.Join(absStaticDir, "index.html")
+	if _, err := os.Stat(indexPath); err == nil {
+		http.ServeFile(w, r, indexPath)
+		return
+	}
+
+	http.NotFound(w, r)
+}
+
+func normalizeBasePath(value, fallback string) string {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		trimmed = fallback
+	}
+	if trimmed == "" {
+		return ""
+	}
+	if !strings.HasPrefix(trimmed, "/") {
+		trimmed = "/" + trimmed
+	}
+	if trimmed != "/" && !strings.HasSuffix(trimmed, "/") {
+		trimmed += "/"
+	}
+	if trimmed == "/" {
+		return "/"
+	}
+	return trimmed
 }

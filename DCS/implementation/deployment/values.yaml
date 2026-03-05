@@ -65,7 +65,7 @@ ingress:
     kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.allow-http: "true"
     cert-manager.io/cluster-issuer: cert-manager-webhook
-    traefik.ingress.kubernetes.io/router.middlewares: digital-contracting-service-dcs-strip-prefix@kubernetescrd
+    # traefik.ingress.kubernetes.io/router.middlewares: digital-contracting-service-dcs-strip-prefix@kubernetescrd
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
 
   hosts:
@@ -78,6 +78,14 @@ ingress:
     - hosts:
         - [domain-name]
       secretName: dev-wildcard-tls
+
+# Traefik Middleware configuration (Traefik-specific)
+middleware:
+  enabled: false
+  syncWave: "-1"
+  stripPrefix:
+    enabled: true
+    prefixes: []
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -153,4 +161,9 @@ oidc:
 
 # Backend API routing configuration
 api:
-  pathPrefix: "[api-path-prefix]"
+  pathPrefix: "/[path]/digital-contracting-service"
+
+# Frontend runtime configuration
+frontend:
+  basePath: "/[path]/digital-contracting-service/ui/"
+  apiBaseUrl: "/[path]/digital-contracting-service/"

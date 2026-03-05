@@ -87,6 +87,10 @@ ENV OIDC_REDIRECT_URI=""
 ENV OIDC_LOGOUT_REDIRECT_URI=""
 ENV API_PATH_PREFIX=""
 
+# Frontend runtime configuration (production defaults)
+ENV DCS_UI_BASE_PATH="/ui/"
+ENV DCS_API_BASE_URL="/"
+
 EXPOSE 8991
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

@@ -2,11 +2,10 @@ import { AuthenticationService } from '@/services/authentication-service'
 import { useAuthTokenStore } from '@/stores/auth-token-store'
 import axios from 'axios'
 import { storeToRefs } from 'pinia'
-
-const API_BASE_URL = import.meta.env.DCS_API_URL
+import { getConfig } from '@/config'
 
 const http = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getConfig().API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 

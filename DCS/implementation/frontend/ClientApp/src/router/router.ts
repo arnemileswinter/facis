@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
+import { getUIBasePath } from '@/config'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -67,7 +68,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(getUIBasePath()),
   routes: routes,
 })
 
