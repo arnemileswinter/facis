@@ -327,7 +327,7 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Deleted, creator)
 
 	cmd := command.RegisterCmd{
 		DID:            *did,

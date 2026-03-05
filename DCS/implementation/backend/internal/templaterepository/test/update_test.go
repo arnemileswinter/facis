@@ -507,7 +507,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Deleted, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",

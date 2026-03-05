@@ -50,13 +50,23 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if processData.State == contracttemplatestate.Registered.String() || processData.State == contracttemplatestate.Archived.String() {
+	if processData.State == contracttemplatestate.Deprecated.String() || processData.State == contracttemplatestate.Deleted.String() {
 		return errors.New("invalid contract template state")
 	}
 
-	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Archived.String())
-	if err != nil {
-		return fmt.Errorf("could not update state: %w", err)
+	if processData.State == contracttemplatestate.Registered.String() {
+
+		err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Deprecated.String())
+		if err != nil {
+			return fmt.Errorf("could not update state: %w", err)
+		}
+
+	} else {
+
+		err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Deleted.String())
+		if err != nil {
+			return fmt.Errorf("could not update state: %w", err)
+		}
 	}
 
 	evt := templateevents.ArchiveEvent{

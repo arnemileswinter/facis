@@ -58,12 +58,15 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if oldData.State == contracttemplatestate.Approved.String() || oldData.State == contracttemplatestate.Registered.String() || oldData.State == contracttemplatestate.Archived.String() {
+	if oldData.State == contracttemplatestate.Approved.String() ||
+		oldData.State == contracttemplatestate.Registered.String() ||
+		oldData.State == contracttemplatestate.Deleted.String() ||
+		oldData.State == contracttemplatestate.Deprecated.String() {
 		return errors.New("invalid contract template state")
 	}
 
 	if cmd.State != nil {
-		isValidState := *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Archived
+		isValidState := *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Deleted
 		if oldData.State == contracttemplatestate.Draft.String() && !isValidState {
 			reviewTasksExist, err := h.RTRepo.TaskExist(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
@@ -83,7 +86,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 
 	newState := oldData.State
 	if cmd.State != nil {
-		if *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Archived {
+		if *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Deleted {
 
 			err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {

@@ -69,7 +69,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Deleted, contractTemplate.State)
 }
 
 func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
@@ -164,7 +164,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Deleted, contractTemplate.State)
 }
 
 func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
@@ -224,7 +224,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Deleted, contractTemplate.State)
 }
 
 func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
@@ -284,10 +284,10 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, contracttemplatestate.Archived, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Deleted, contractTemplate.State)
 }
 
-func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
+func TestArchive_ArchiveContractTemplateDataInApprovedState(t *testing.T) {
 
 	db := setupTestDB(t)
 
@@ -306,7 +306,7 @@ func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
@@ -323,8 +323,28 @@ func TestArchive_ArchiveContractTemplateDataInArchivedState(t *testing.T) {
 		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit contract template: %v", err)
+	}
 
-	assert.NotNil(t, err)
+	qry := contracttemplate.GetByIDQry{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    creator,
+	}
+	queryHandler := contracttemplate.GetByIDHandler{
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query contract template: %v", err)
+	}
+
+	assert.Equal(t, contractTemplate.DID, *did)
+	assert.Equal(t, contracttemplatestate.Deleted, contractTemplate.State)
 }
 
 func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
@@ -347,6 +367,106 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 	repo := NewTestRepo(ctx)
 
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
+
+	cmd := command.ArchiveCmd{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		ArchivedBy:     creator,
+		UpdatedAt:      time.Now(),
+	}
+	handler := command.Archiver{
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
+	}
+	err = handler.Handle(cmd)
+	if err != nil {
+		t.Fatalf("Failed to submit contract template: %v", err)
+	}
+
+	qry := contracttemplate.GetByIDQry{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		RetrievedBy:    creator,
+	}
+	queryHandler := contracttemplate.GetByIDHandler{
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+	}
+	contractTemplate, err := queryHandler.Handle(qry)
+	if err != nil {
+		t.Fatalf("Failed to query contract template: %v", err)
+	}
+
+	assert.Equal(t, contractTemplate.DID, *did)
+	assert.Equal(t, contracttemplatestate.Deprecated, contractTemplate.State)
+}
+
+func TestArchive_ArchiveContractTemplateDataInDeletedState(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Deleted, creator)
+
+	cmd := command.ArchiveCmd{
+		DID:            *did,
+		DocumentNumber: 1,
+		Version:        1,
+		ArchivedBy:     creator,
+		UpdatedAt:      time.Now(),
+	}
+	handler := command.Archiver{
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		RTRepo: repo.RTRepo,
+		ATRepo: repo.ATRepo,
+	}
+	err = handler.Handle(cmd)
+
+	assert.NotNil(t, err)
+}
+
+func TestArchive_ArchiveContractTemplateDataInDeprecatedState(t *testing.T) {
+
+	db := setupTestDB(t)
+
+	cleanupContractTemplateTable(t, db)
+
+	did, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get new DID: %v", err)
+	}
+
+	creator := "Test User"
+
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Deprecated, creator)
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
