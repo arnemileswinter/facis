@@ -40,9 +40,8 @@ export default defineConfig(({ mode, command }) => {
     server: {
       proxy: {
         '/api': {
-          target: env.DCS_API_PATH || 'http://localhost:8991',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          target: env.DCS_API_TARGET || 'http://localhost:8991',
+          changeOrigin: true
         },
       },
     },
