@@ -22,12 +22,12 @@ const sortOrder = ref(1)
 const stateFilterStore = useContractTemplateStateFilterStore()
 const { stateFilters } = storeToRefs(stateFilterStore)
 
-function valueToComaparable(value: unknown) {
-  if (value === null) return undefined
+function valueToComparable(value: unknown) {
   if (typeof value === 'number') return value
   if (value instanceof Date) return value.getTime()
   if (typeof value === 'string') {
-    return !Number.isNaN(Date.parse(value)) ? new Date(value).getTime() : value
+    const dateTime = new Date(value).getTime()
+    return Number.isNaN(dateTime) ? value : dateTime
   }
   return undefined
 }
@@ -41,8 +41,8 @@ const sortedItems = computed(() => {
   return searchedItems.value.slice().sort((a, b) => {
     let aSortValue = a[sortBy.value as keyof PartialContractTemplate]
     let bSortValue = b[sortBy.value as keyof PartialContractTemplate]
-    const aValue = valueToComaparable(aSortValue)
-    const bValue = valueToComaparable(bSortValue)
+    const aValue = valueToComparable(aSortValue)
+    const bValue = valueToComparable(bSortValue)
     if (!aValue && !bValue) return 0
     if (!aValue) return sortOrder.value
     if (!bValue) return sortOrder.value * -1
