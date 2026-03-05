@@ -17,7 +17,7 @@
             <!-- Display in A4 aspect ratio -->
             <div class="bg-base-100 border border-base-300 shadow-sm rounded-md overflow-hidden w-full max-w-[900px]"
               style="aspect-ratio: 210 / 297">
-              <div class="w-full h-full overflow-auto px-10 py-8">
+              <div :class="previewContainerClasses">
                 <TemplatePreview :document-outline="documentOutline" :document-blocks="documentBlocks"
                   :semantic-conditions="semanticConditions" :approved-sub-templates="approvedSubTemplates" />
               </div>
@@ -43,6 +43,9 @@ const approvedSubTemplateStore = useApprovedSubTemplateStore()
 const { isPreviewDialogOpen } = storeToRefs(uiStore)
 const { documentOutline, documentBlocks, semanticConditions } = storeToRefs(draftStore)
 const { templates: approvedSubTemplates } = storeToRefs(approvedSubTemplateStore)
+
+// This container is block, not flex
+const previewContainerClasses = 'w-full h-full overflow-auto px-10 py-8'
 
 function close() {
   uiStore.togglePreviewDialog()

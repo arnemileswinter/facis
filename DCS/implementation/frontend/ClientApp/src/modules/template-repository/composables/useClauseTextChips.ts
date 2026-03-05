@@ -15,6 +15,10 @@ export function isPlaceholder(seg: Segment): seg is Extract<Segment, { type: 'pl
   return seg.type === 'placeholder'
 }
 
+export function isNewline(seg: Segment): seg is Extract<Segment, { type: 'newline' }> {
+  return seg.type === 'newline'
+}
+
 export const CHIP_HIGHLIGHT_CLASS = 'clause-chip-highlight'
 
 const PLACEHOLDER_REGEX = /\{\{([^}]+)\}\}/g
@@ -112,6 +116,18 @@ export function conditionIdsInText(text: string): Set<string> {
     if (conditionId) set.add(conditionId)
   }
   return set
+}
+
+/** Builds placeholder label like "paramName (type)" from conditions. */
+export function getPlaceholderLabelFromConditions(
+  seg: Segment,
+  conditions: SemanticCondition[]
+): string {
+  if (!isPlaceholder(seg)) return ''
+  const cond = conditions.find((c) => c.conditionId === seg.conditionId)
+  const param = cond?.parameters.find((p) => p.parameterName === seg.parameterName)
+  const type = param?.type ?? 'string'
+  return `${seg.parameterName} (${type})`
 }
 
 export function useClauseTextChips(

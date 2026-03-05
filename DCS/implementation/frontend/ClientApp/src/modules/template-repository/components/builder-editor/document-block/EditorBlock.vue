@@ -23,10 +23,7 @@
         <label class="text-[10px] uppercase font-bold opacity-60">Clause <span
             class="text-[10px] font-semibold mt-0.5 text-base-content">({{ block.title ?? '' }})</span></label>
         <p class="text-xs text-base-content/70 mt-1 leading-relaxed whitespace-pre-wrap">
-          <template v-for="(seg, i) in clauseSegments" :key="i">
-            <template v-if="isText(seg)">{{ seg.value }}</template>
-            <ClausePlaceholderSpan v-else-if="isPlaceholder(seg)" :label="getPlaceholderLabel(seg)" />
-          </template>
+          <ClauseSegmentsPreview :segments="clauseSegments" :get-placeholder-label="getPlaceholderLabel" />
         </p>
       </template>
       <!-- Approved sub-template: read-only -->
@@ -89,8 +86,8 @@ import { useTemplateEditorUiStore } from '@template-repository/store/templateEdi
 import { useBlockMovementPreview } from '@template-repository/composables/useBlockMovementPreview'
 import BlockToolbar from '@template-repository/components/builder-editor/toolbar/BlockToolbar.vue'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
-import { parseSegments, isText, isPlaceholder, type Segment } from '@template-repository/composables/useClauseTextChips'
-import ClausePlaceholderSpan from '@template-repository/components/clauses-editor/ClausePlaceholderSpan.vue'
+import { parseSegments, getPlaceholderLabelFromConditions, type Segment } from '@template-repository/composables/useClauseTextChips'
+import ClauseSegmentsPreview from '@template-repository/components/clauses-editor/ClauseSegmentsPreview.vue'
 import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
 import TemplatePreview from '@template-repository/components/builder-editor/preview/TemplatePreview.vue'
 import type { ContractTemplate } from '@/models/contract-template'
@@ -125,16 +122,8 @@ const clauseSegments = computed(() => {
   return parseSegments(b.text ?? '', semanticConditions.value)
 })
 
-function getParamType(conditionId: string, parameterName: string): string {
-  const cond = semanticConditions.value.find((c) => c.conditionId === conditionId)
-  const param = cond?.parameters.find((p) => p.parameterName === parameterName)
-  return param?.type ?? 'string'
-}
-
 function getPlaceholderLabel(seg: Segment): string {
-  if (!isPlaceholder(seg)) return ''
-  const t = getParamType(seg.conditionId, seg.parameterName)
-  return `${seg.parameterName} (${t})`
+  return getPlaceholderLabelFromConditions(seg, semanticConditions.value)
 }
 
 const isSelected = computed(() => selectedBlockId.value === props.item.blockId)

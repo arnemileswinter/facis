@@ -20,10 +20,7 @@
             </span>
           </div>
           <p class="text-xs text-base-content/70 mt-1 leading-relaxed whitespace-pre-wrap">
-            <template v-for="(seg, i) in getSegments(clause)" :key="i">
-              <template v-if="isText(seg)">{{ seg.value }}</template>
-              <ClausePlaceholderSpan v-else-if="isPlaceholder(seg)" :label="getPlaceholderLabel(seg)" />
-            </template>
+            <ClauseSegmentsPreview :segments="getSegments(clause)" :get-placeholder-label="getPlaceholderLabel" />
           </p>
         </div>
       </div>
@@ -46,8 +43,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ClauseBlock, SemanticCondition } from '@template-repository/models/contract-templace'
-import { parseSegments, isText, isPlaceholder, type Segment } from '@template-repository/composables/useClauseTextChips'
-import ClausePlaceholderSpan from '@template-repository/components/clauses-editor/ClausePlaceholderSpan.vue'
+import { parseSegments, getPlaceholderLabelFromConditions, type Segment } from '@template-repository/composables/useClauseTextChips'
+import ClauseSegmentsPreview from '@template-repository/components/clauses-editor/ClauseSegmentsPreview.vue'
 import ClauseEditorForm from '@template-repository/components/clauses-editor/ClauseEditorForm.vue'
 import IconEdit from '@/core/components/icons/IconEdit.vue'
 import IconRemove from '@/core/components/icons/IconRemove.vue'
@@ -78,15 +75,7 @@ function getSegments(clause: ClauseBlock): Segment[] {
   return parseSegments(clause.text ?? '', props.semanticConditions)
 }
 
-function getParamType(conditionId: string, parameterName: string): string {
-  const cond = props.semanticConditions.find((c) => c.conditionId === conditionId)
-  const param = cond?.parameters.find((p) => p.parameterName === parameterName)
-  return param?.type ?? 'string'
-}
-
 function getPlaceholderLabel(seg: Segment): string {
-  if (!isPlaceholder(seg)) return ''
-  const t = getParamType(seg.conditionId, seg.parameterName)
-  return `${seg.parameterName} (${t})`
+  return getPlaceholderLabelFromConditions(seg, props.semanticConditions)
 }
 </script>

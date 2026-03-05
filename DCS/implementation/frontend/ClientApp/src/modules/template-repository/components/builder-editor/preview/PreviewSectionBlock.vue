@@ -2,18 +2,21 @@
   <h2 class="font-bold border-b border-base-300 pb-1 mb-1 text-base-content" :class="headingClass">
     {{ title }}
   </h2>
-  <div v-if="hasChildren" class="pl-0 flex flex-wrap items-end gap-x-2 gap-y-1 section-children">
+  <div v-if="hasChildren" :class="sectionChildrenClass">
     <slot />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { PREVIEW_SECTION_CHILDREN_CLASS } from './preview-classes'
 const props = defineProps<{
   title: string
   hasChildren?: boolean
   level?: number
 }>()
+
+const sectionChildrenClass = PREVIEW_SECTION_CHILDREN_CLASS
 
 const headingClass = computed(() => {
   const level = Math.max(1, props.level ?? 1)
