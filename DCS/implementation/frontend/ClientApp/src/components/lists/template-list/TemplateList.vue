@@ -2,7 +2,7 @@
 import type { PartialContractTemplate } from '@/models/contract-template'
 import { useContractTemplateStateFilterStore } from '@/stores/contract-template-state-filter-store'
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import ListSearch from '../ListSearch.vue'
 import ListSort from '../ListSort.vue'
 import TemplateListItem from './TemplateListItem.vue'
@@ -22,20 +22,37 @@ const sortOrder = ref(1)
 const stateFilterStore = useContractTemplateStateFilterStore()
 const { stateFilters } = storeToRefs(stateFilterStore)
 
+function valueToComaparable(value: unknown) {
+  if (value === null) return undefined
+  if (typeof value === 'number') return value
+  if (value instanceof Date) return value.getTime()
+  if (typeof value === 'string') {
+    return !Number.isNaN(Date.parse(value)) ? new Date(value).getTime() : value
+  }
+  return undefined
+}
+
+const searchedItems: Ref<PartialContractTemplate[]> = ref(props.items)
+
 const sortedItems = computed(() => {
   if (!sorter.has(sortBy.value)) {
-    return props.items
+    return searchedItems.value
   }
-  return props.items.slice().sort((a, b) => {
+  return searchedItems.value.slice().sort((a, b) => {
     let aSortValue = a[sortBy.value as keyof PartialContractTemplate]
     let bSortValue = b[sortBy.value as keyof PartialContractTemplate]
-    if (sortBy.value === defaultSort && sortBy.value === 'created_at' 
-      && typeof aSortValue === 'string' && typeof bSortValue === 'string') {
-      aSortValue = new Date(aSortValue).getTime()
-      bSortValue = new Date(bSortValue).getTime()
+    const aValue = valueToComaparable(aSortValue)
+    const bValue = valueToComaparable(bSortValue)
+    if (!aValue && !bValue) return 0
+    if (!aValue) return sortOrder.value
+    if (!bValue) return sortOrder.value * -1
+
+    let result: number
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      result = aValue > bValue ? 1 : -1
+    } else {
+      result = String(aValue) > String(bValue) ? 1 : -1
     }
-    if (aSortValue === undefined || bSortValue === undefined) return sortOrder.value * 1
-    const result = aSortValue > bSortValue ? 1 : -1
     return sortOrder.value * result
   })
 })
@@ -47,12 +64,16 @@ const filteredItems = computed(() => {
   }
   return sortedItems.value
 })
+
+function applySearchResult(searchResult: PartialContractTemplate[]) {
+  searchedItems.value = searchResult
+}
 </script>
 
 <template>
   <ul class="list">
     <li class="tracking-wide px-4 flex justify-between">
-      <ListSearch class="grow" />
+      <ListSearch :items="items" class="grow" @search-result="applySearchResult" />
       <ListSort :sorter="sorter" v-model:sort-by="sortBy" v-model:sort-order="sortOrder" />
     </li>
     <TemplateListItem

@@ -34,8 +34,8 @@ export const ContractTemplateService = {
     return http.put<ContractTemplateUpdateResponse>('/template/update', request).then((res) => res.data)
   },
 
-  async search(_request: ContractTemplateSearchRequest) {
-    return http.get<ContractTemplateSearchResponse>('template/search').then((res) => res.data)
+  async search(request: ContractTemplateSearchRequest) {
+    return http.get<ContractTemplateSearchResponse[]>('/template/search', { params: request }).then((res) => res.data)
   },
 
   async retrieve(_request?: ContractTemplateRetrieveRequest) {

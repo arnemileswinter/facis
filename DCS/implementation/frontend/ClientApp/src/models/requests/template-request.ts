@@ -39,7 +39,7 @@ export interface ContractTemplateSearchRequest {
   state?: ContractTemplateState
   name?: string
   description?: string
-  filter?: any
+  filter?: string
 }
 
 export interface ContractTemplateRetrieveRequest {}
