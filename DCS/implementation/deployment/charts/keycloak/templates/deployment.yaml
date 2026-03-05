@@ -18,7 +18,12 @@ spec:
         - name: keycloak
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args: ["start-dev", "--http-port={{ .Values.service.port }}"]
+          args:
+            - "start-dev"
+            - "--http-port={{ .Values.service.port }}"
+            {{- if .Values.realm.import }}
+            - "--import-realm"
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -40,5 +45,17 @@ spec:
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- if .Values.realm.import }}
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.realm.import }}
+      volumes:
+        - name: realm-config
+          configMap:
+            name: {{ .Release.Name }}-keycloak-realm
+      {{- end }}

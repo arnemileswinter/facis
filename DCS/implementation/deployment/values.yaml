@@ -278,6 +278,10 @@ keycloak:
     adminUser: admin
     adminPassword: admin
   extraEnv: []
+  # Import pre-configured DCS realm with client and roles on startup.
+  # Only imports if the realm doesn't already exist.
+  realm:
+    import: false
   resources: {}
 
 nats:
