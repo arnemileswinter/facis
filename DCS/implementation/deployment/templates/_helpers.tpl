@@ -159,20 +159,24 @@ NATS_URL override or derived from nats settings.
 
 {{/*
 OIDC issuer override or derived from keycloak settings.
+Uses external URL (istio/ingress host) for browser-based OIDC flows.
 */}}
 {{- define "digital-contracting-service.oidcIssuerURL" -}}
 {{- if .Values.oidc.issuerURL -}}
 {{- .Values.oidc.issuerURL -}}
-{{- else if include "digital-contracting-service.keycloakHost" . -}}
-{{- $host := include "digital-contracting-service.keycloakHost" . -}}
-{{- $scheme := default "http" .Values.oidc.keycloakScheme -}}
+{{- else if and .Values.keycloak.enabled .Values.keycloak.route.path -}}
+{{- $scheme := default "https" .Values.oidc.keycloakScheme -}}
 {{- $realm := default "dcs" .Values.oidc.realm -}}
-{{- $port := include "digital-contracting-service.keycloakPort" . -}}
-{{- $basePath := "" -}}
-{{- if .Values.keycloak.route.path -}}
-{{- $basePath = printf "/%s" (trimAll "/" .Values.keycloak.route.path) -}}
+{{- $basePath := printf "/%s" (trimAll "/" .Values.keycloak.route.path) -}}
+{{- $host := "" -}}
+{{- if and .Values.istio.enabled (gt (len .Values.istio.hosts) 0) -}}
+{{- $host = index .Values.istio.hosts 0 -}}
+{{- else if and .Values.ingress.enabled (gt (len .Values.ingress.hosts) 0) -}}
+{{- $host = (index .Values.ingress.hosts 0).host -}}
 {{- end -}}
-{{- printf "%s://%s:%v%s/realms/%s" $scheme $host $port $basePath $realm -}}
+{{- if $host -}}
+{{- printf "%s://%s%s/realms/%s" $scheme $host $basePath $realm -}}
+{{- end -}}
 {{- else -}}
 {{- "" -}}
 {{- end -}}

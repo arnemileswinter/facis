@@ -194,9 +194,10 @@ paths:
 database:
   url: ""
   port: 5432
-  user: "dcs"
-  password: "dcs"
-  name: "dcs"
+  # Leave empty to use postgresql.auth values when postgresql.enabled=true
+  user: ""
+  password: ""
+  name: ""
   sslmode: "disable"
   # Optional secret reference for DATABASE_URL.
   # If set, it takes precedence over database.url and derived values.
