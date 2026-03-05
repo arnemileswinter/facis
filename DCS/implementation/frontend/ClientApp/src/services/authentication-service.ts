@@ -48,8 +48,7 @@ export const AuthenticationService = {
     authHttp
       .get<LogoutResponse>('/auth/logout')
       .then((res) => {
-        // Browser-native redirect to Keycloak (avoids CORS issues)
-        window.location.href = res.data.location
+        window.location.href = res.data.logout_url
       })
       .catch((err) => {
         console.error('Logout Error:', err)

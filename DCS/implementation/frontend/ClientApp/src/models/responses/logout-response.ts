@@ -1,3 +1,3 @@
 export interface LogoutResponse {
-  location: string
+  logout_url: string
 }

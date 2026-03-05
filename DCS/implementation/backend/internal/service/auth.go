@@ -120,7 +120,7 @@ func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
 	logoutURL := s.oidcIssuerURL + "/protocol/openid-connect/logout?" + params.Encode()
 
 	return &genauth.LogoutResult{
-		Location: logoutURL,
+		LogoutURL: logoutURL,
 	}, nil
 }
 

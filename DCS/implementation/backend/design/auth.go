@@ -61,8 +61,8 @@ var _ = Service("Auth", func() {
 		Description("Returns the Keycloak OIDC logout URL for initiating the logout flow.")
 		NoSecurity()
 		Result(func() {
-			Attribute("location", String, "Keycloak OIDC logout URL")
-			Required("location")
+			Attribute("logout_url", String, "Keycloak OIDC logout URL")
+			Required("logout_url")
 		})
 		HTTP(func() {
 			GET("/auth/logout")
