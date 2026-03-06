@@ -21,6 +21,12 @@ spec:
           ports:
             - name: postgres
               containerPort: 5432
+          {{- if .Values.auth.additionalDatabases }}
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/bash", "/docker-entrypoint-initdb.d/ensure-dbs.sh"]
+          {{- end }}
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -40,6 +46,10 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+            {{- if .Values.auth.additionalDatabases }}
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -50,3 +60,9 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        {{- if .Values.auth.additionalDatabases }}
+        - name: initdb
+          configMap:
+            name: {{ .Release.Name }}-postgresql-initdb
+            defaultMode: 0755
+        {{- end }}

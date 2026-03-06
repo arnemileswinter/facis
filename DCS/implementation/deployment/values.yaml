@@ -240,6 +240,8 @@ postgresql:
     username: dcs
     password: dcs
     database: dcs
+    # Additional databases to create (add "fc" when federatedCatalogue.enabled=true)
+    additionalDatabases: []
   persistence:
     enabled: false
     size: 1Gi
@@ -282,6 +284,8 @@ keycloak:
   # Only imports if the realm doesn't already exist.
   realm:
     import: false
+    # Import GAIA-X realm for Federated Catalogue. Set to true when federatedCatalogue.enabled=true.
+    importGaiaX: false
   resources: {}
 
 nats:
@@ -293,3 +297,101 @@ nats:
   service:
     port: 4222
   resources: {}
+
+neo4j:
+  enabled: false
+  image:
+    repository: neo4j
+    tag: "5.18-community"
+    pullPolicy: IfNotPresent
+  service:
+    httpPort: 7474
+    boltPort: 7687
+  auth:
+    username: neo4j
+    password: changeme
+  # Neo4j plugins (JSON array) - required for Federated Catalogue
+  plugins: '["apoc", "graph-data-science", "n10s"]'
+  persistence:
+    enabled: false
+    size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# XFSC Federated Catalogue co-deployment (optional)
+# Requires: neo4j.enabled=true, keycloak.enabled=true, keycloak.realm.importGaiaX=true,
+#           postgresql.auth.additionalDatabases=["fc"]
+federatedCatalogue:
+  enabled: false
+  replicaCount: 1
+  image:
+    # Official XFSC fc-service-server image
+    repository: node-654e3bca7fbeeed18f81d7c7.ps-xaas.io/catalogue/fc-service-server
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8081
+  # Route path for VirtualService/Ingress (e.g., "/facis/fc")
+  route:
+    path: ""
+  # Neo4j connection (auto-derived from neo4j.* if not set)
+  neo4j:
+    uri: ""
+    username: ""
+    password: ""
+  # PostgreSQL database for fc-service (uses shared postgresql if enabled)
+  database:
+    url: ""
+    name: "fc"
+    username: ""
+    password: ""
+  # Keycloak config (auto-derived from keycloak.* if not set)
+  keycloak:
+    authServerUrl: ""
+    realm: "gaia-x"
+    clientId: "federated-catalogue"
+    clientSecret: "federated-catalogue-secret"
+  # Disable signature verification for dev (enable in production)
+  verifySignatures: false
+  extraEnv: []
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # FC Demo Portal (UI with OAuth2 login flow)
+  portal:
+    enabled: false
+    replicaCount: 1
+    image:
+      repository: node-654e3bca7fbeeed18f81d7c7.ps-xaas.io/catalogue/fc-demo-portal
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+      port: 8088
+    # Route path for portal UI (e.g., "/facis/fc-portal")
+    route:
+      path: ""
+    # Keycloak OAuth2 client config (uses federatedCatalogue.keycloak if not set)
+    keycloak:
+      clientId: ""
+      clientSecret: ""
+    extraEnv: []
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi

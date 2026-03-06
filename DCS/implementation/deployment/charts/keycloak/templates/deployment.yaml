@@ -21,7 +21,7 @@ spec:
           args:
             - "start-dev"
             - "--http-port={{ .Values.service.port }}"
-            {{- if .Values.realm.import }}
+            {{- if or .Values.realm.import .Values.realm.importGaiaX }}
             - "--import-realm"
             {{- end }}
           ports:
@@ -45,7 +45,7 @@ spec:
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if .Values.realm.import }}
+          {{- if or .Values.realm.import .Values.realm.importGaiaX }}
           volumeMounts:
             - name: realm-config
               mountPath: /opt/keycloak/data/import
@@ -53,7 +53,7 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if .Values.realm.import }}
+      {{- if or .Values.realm.import .Values.realm.importGaiaX }}
       volumes:
         - name: realm-config
           configMap:
