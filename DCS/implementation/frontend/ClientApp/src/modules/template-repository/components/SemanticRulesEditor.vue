@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Section 1: New rule -->
-    <section class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
+    <section v-if="store.isEditable" class="rounded-lg border border-base-300 bg-base-100 p-4 shadow-sm">
       <h3 class="text-sm font-semibold text-base-content/80 mb-4">New rule</h3>
       <div class="space-y-4">
         <div>
@@ -113,7 +113,7 @@
               </div>
             </div>
           </div>
-          <button type="button"
+          <button v-if="store.isEditable" type="button"
             class="btn btn-ghost btn-xs text-error opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
             aria-label="Delete rule" @click="deleteRule(condition.conditionId)">
             ✕

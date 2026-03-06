@@ -27,12 +27,12 @@
 
         <fieldset class="fieldset p-0 border-none">
             <legend class="fieldset-legend">Global Name</legend>
-            <input v-model="name" class="input input-bordered w-full" type="text" required />
+            <input v-model="name" class="input input-bordered w-full" type="text" required :disabled="!store.isEditable"/>
         </fieldset>
 
         <fieldset class="fieldset p-0 border-none">
             <legend class="fieldset-legend">Base Description</legend>
-            <textarea v-model="description" class="textarea textarea-bordered w-full h-24" required></textarea>
+            <textarea v-model="description" class="textarea textarea-bordered w-full h-24" required :disabled="!store.isEditable"></textarea>
         </fieldset>
 
         <!-- Subcontracts (only for frame contracts) -->
@@ -60,7 +60,7 @@
                             {{ subcontractSearchQuery ? 'No results' : 'All templates already selected' }}
                         </span>
                     </li>
-                    <li v-for="t in filteredSubcontractTemplates" :key="t.did">
+                    <li v-for="t in filteredSubcontractTemplates" :key="`${t.did}-${t.version}-${t.document_number}`">
                         <button type="button" @click="addSubcontractTemplate(t)"
                             class="group flex flex-col items-start gap-0">
                             <span class="font-medium text-sm">{{ t.name }}</span>
@@ -73,12 +73,14 @@
             </div>
 
             <!-- Selected templates (always visible) -->
-            <div v-if="selectedSubcontractDids.length" class="flex flex-wrap gap-2 mt-3">
-                <div v-for="did in selectedSubcontractDids" :key="did"
+            <div v-if="selectedSubcontracts.length" class="flex flex-wrap gap-2 mt-3">
+                <div v-for="item in selectedSubcontracts" :key="`${item.did}-${item.version}-${item.document_number}`"
                     class="badge badge-primary badge-outline gap-1 py-3">
-                    <span>{{ getSubcontractTemplateName(did) }}</span>
-                    <button type="button" @click="removeSubcontractTemplate(did)"
-                        class="text-error hover:opacity-70 transition-opacity">✕</button>
+                    <span>{{ getSubcontractTemplateName(item) }}</span>
+                    <button type="button" @click="removeSubcontractTemplate(item)"
+                        :disabled="isSubcontractReferenced(item)"
+                        :title="isSubcontractReferenced(item) ? 'Cannot remove: used in document' : undefined"
+                        class="text-error hover:opacity-70 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed">✕</button>
                 </div>
             </div>
             <p v-else class="fieldset-label mt-2">No subcontract templates selected yet.</p>
@@ -87,21 +89,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
-import { TemplateType } from '@template-repository/models/contract-templace'
-import { ContractTemplateService } from '@template-repository/services/contract-template-service'
+import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
+import { TemplateType, isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
+import { ContractTemplateService } from '@/services/contract-template-service'
+import { useTemplateTable } from '@/views/contract-template-list/ContractTemplateListController'
+import { TemplateState } from '@/types/contract-template-state'
 
-interface SubcontractTemplate {
+interface SubcontractKey {
     did: string
-    name: string
-    description: string
+    version: number
+    document_number: number
 }
 
 const store = useTemplateDraftStore()
-const { templateType } = storeToRefs(store)
+const approvedSubTemplateStore = useApprovedSubTemplateStore()
+const { templates: allTemplates } = useTemplateTable()
+const { templateType, documentBlocks } = storeToRefs(store)
 
 const name = computed({
   get: () => store.name,
@@ -115,70 +122,50 @@ const description = computed({
 
 const route = useRoute()
 
-const selectedSubcontractDids = ref<string[]>([])
+const selectedSubcontracts = ref<SubcontractKey[]>([])
 const showSubcontractPicker = ref(false)
 const subcontractSearchQuery = ref('')
 
-const availableSubcontractTemplates = ref<SubcontractTemplate[]>([
-    { did: 'did:facis:tmpl:sc:001', name: 'IT Services Agreement', description: 'General IT services including consulting, implementation, and technical support.' },
-    { did: 'did:facis:tmpl:sc:002', name: 'Hardware Procurement', description: 'Purchase and delivery of physical hardware components and equipment.' },
-    { did: 'did:facis:tmpl:sc:003', name: 'Software License', description: 'Licensing terms for proprietary or third-party software products.' },
-    { did: 'did:facis:tmpl:sc:004', name: 'Maintenance & Support', description: 'Ongoing maintenance, updates, and technical support services.' },
-    { did: 'did:facis:tmpl:sc:005', name: 'Cloud Infrastructure Services', description: 'Provisioning and management of cloud-based infrastructure resources.' },
-    { did: 'did:facis:tmpl:sc:006', name: 'Data Processing Agreement', description: 'GDPR-compliant data processing terms between controller and processor.' },
-    { did: 'did:facis:tmpl:sc:007', name: 'Consulting Services', description: 'Professional advisory and strategic consulting engagements.' },
-])
+const isSameTemplate = (a: SubcontractKey, b: SubcontractKey) => a.did === b.did && a.version === b.version && a.document_number === b.document_number
+const isSelected = (t: SubcontractKey) =>
+    selectedSubcontracts.value.some(s => isSameTemplate(s, t))
 
 const filteredSubcontractTemplates = computed(() => {
     const q = subcontractSearchQuery.value.toLowerCase()
-    return availableSubcontractTemplates.value.filter(t =>
-        !selectedSubcontractDids.value.includes(t.did) &&
-        (q === '' || t.name.toLowerCase().includes(q) || t.did.toLowerCase().includes(q))
+    return allTemplates.value.filter(t =>
+        !isSelected(t) && t.state === TemplateState.approved && t.template_type === TemplateType.subContract &&
+        (q === '' || (t.name ?? '').toLowerCase().includes(q) || t.did.toLowerCase().includes(q))
     )
 })
 
-const getSubcontractTemplateName = (did: string) =>
-    availableSubcontractTemplates.value.find(t => t.did === did)?.name ?? did
+const getSubcontractTemplateName = (item: SubcontractKey) =>
+    allTemplates.value.find(t => isSameTemplate(t, item))?.name ?? item.did
 
-const addSubcontractTemplate = (template: SubcontractTemplate) => {
-    if (!selectedSubcontractDids.value.includes(template.did)) {
-        selectedSubcontractDids.value.push(template.did)
+const addSubcontractTemplate = async (template: { did: string; version: number; document_number: number }) => {
+    if (!isSelected(template)) {
+        selectedSubcontracts.value.push({
+            did: template.did,
+            version: template.version,
+            document_number: template.document_number,
+        })
     }
+    await ContractTemplateService.retrieveById(template).then(fullTemplate => {
+        if (fullTemplate) approvedSubTemplateStore.addTemplate(fullTemplate)
+    })
     subcontractSearchQuery.value = ''
 }
 
-const removeSubcontractTemplate = (did: string) => {
-    const idx = selectedSubcontractDids.value.indexOf(did)
-    if (idx !== -1) selectedSubcontractDids.value.splice(idx, 1)
+const isSubcontractReferenced = (item: SubcontractKey): boolean => {
+    const inOutline = store.blockIdsInOutline
+    return documentBlocks.value.some(
+        b => isApprovedTemplateBlock(b) && inOutline.has(b.blockId) && b.templateId === item.did
+    )
 }
 
-const getFormData = () => ({
-    name: name.value,
-    description: description.value,
-    contract_kind: templateType.value,
-    subcontract_template_dids: [...selectedSubcontractDids.value],
-})
+const removeSubcontractTemplate = (item: SubcontractKey) => {
+    if (isSubcontractReferenced(item)) return
+    selectedSubcontracts.value = selectedSubcontracts.value.filter(s => !isSameTemplate(s, item))
+    approvedSubTemplateStore.removeTemplate(item)
+}
 
-onMounted(async () => {
-    const did = route.params.did
-    const documentNumber = route.query.document_number
-    const version = route.query.version
-
-    if (
-        did && documentNumber && version &&
-        !Array.isArray(did) && !Array.isArray(documentNumber) && !Array.isArray(version)
-    ) {
-        const response = await ContractTemplateService.retrieveById({
-            did,
-            document_number: parseInt(documentNumber),
-            version: parseInt(version),
-        })
-        if (response) {
-            name.value = response.name ?? ''
-            description.value = response.description ?? ''
-        }
-    }
-})
-
-defineExpose({ getFormData })
 </script>

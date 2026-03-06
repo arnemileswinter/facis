@@ -1,17 +1,18 @@
 <template>
-  <span class="inline-flex items-baseline text-sm text-base-content leading-relaxed">
-    <template v-for="(seg, index) in segments" :key="index">
-      <span v-if="seg.type === 'text'"> {{ seg.value }} </span>
-      <PreviewParamInput v-else :type="seg.paramType" :label="seg.label" />
-    </template>
-  </span>
+  <template v-for="(seg, index) in segments" :key="index">
+    <PreviewTextBlock v-if="seg.type === 'text'" :text="seg.value" />
+    <PreviewParamInput v-else-if="seg.type === 'param'" :type="seg.paramType" :label="seg.label" />
+    <span v-else-if="seg.type === 'newline'" :class="previewNewlineSpanClass" aria-hidden="true" />
+  </template>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { SemanticCondition, SemanticParameterType } from '@template-repository/models/contract-templace'
-import { parseSegments, isText, isPlaceholder, type Segment } from '@template-repository/composables/useClauseTextChips'
+import { parseSegments, isText, isPlaceholder, type Segment, isNewline } from '@template-repository/composables/useClauseTextChips'
 import PreviewParamInput from './PreviewParamInput.vue'
+import PreviewTextBlock from './PreviewTextBlock.vue'
+import { PREVIEW_NEWLINE_SPAN_CLASS } from './preview-classes'
 
 const props = defineProps<{
   text: string
@@ -21,6 +22,9 @@ const props = defineProps<{
 type PreviewSegment =
   | { type: 'text'; value: string }
   | { type: 'param'; paramType: SemanticParameterType; label: string }
+  | { type: 'newline' }
+
+const previewNewlineSpanClass = PREVIEW_NEWLINE_SPAN_CLASS
 
 const segments = computed<PreviewSegment[]>(() => {
   const normalizedText = (props.text ?? '').replace(/^[\s\u00A0]+/, '')
@@ -38,6 +42,8 @@ const segments = computed<PreviewSegment[]>(() => {
         paramType,
         label: seg.parameterName,
       })
+    } else if (isNewline(seg)) {
+      result.push({ type: 'newline' })
     }
   }
   return result

@@ -2,10 +2,11 @@ import authHttp from '@/api/auth-http'
 import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
 import type { LoginResponse } from '@/models/responses/login-response'
 import type { LogoutResponse } from '@/models/responses/logout-response'
+import type { AuthenticationService as AuthService } from '@/models/services/authentication-service'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAuthTokenStore } from '@/stores/auth-token-store'
 
-export const AuthenticationService = {
+export const AuthenticationService: AuthService = {
   async getLoginPath() {
     return await authHttp
       .get<LoginResponse>('/auth/login')
@@ -34,6 +35,7 @@ export const AuthenticationService = {
           const authTokenStore = useAuthTokenStore()
           authTokenStore.remove()
         }
+        return Promise.reject(err)
       })
   },
 

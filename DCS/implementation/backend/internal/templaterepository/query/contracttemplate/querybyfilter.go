@@ -5,9 +5,9 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
@@ -21,8 +21,8 @@ type GetAllMetadataByFilterQry struct {
 	DID            *string
 	DocumentNumber *int
 	Version        *int
-	State          *templatestate.TemplateState
-	TemplateType   *templatetype.TemplateType
+	State          *contracttemplatestate.ContractTemplateState
+	TemplateType   *contracttemplatetype.ContractTemplateType
 	Name           *string
 	Description    *string
 	Filter         *string
@@ -32,8 +32,8 @@ type GetAllMetadataByFilterResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
-	State          templatestate.TemplateState
-	TemplateType   templatetype.TemplateType
+	State          contracttemplatestate.ContractTemplateState
+	TemplateType   contracttemplatetype.ContractTemplateType
 	Name           string
 	Description    string
 	CreatedAt      time.Time
@@ -42,8 +42,9 @@ type GetAllMetadataByFilterResult struct {
 }
 
 type GetAllMetaDataByFilterHandler struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.ContractTemplateRepo
 }
 
 func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) ([]GetAllMetadataByFilterResult, error) {
@@ -57,18 +58,28 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) 
 	}
 	defer tx.Rollback()
 
-	searchValues := templaterepository.SearchValues{
+	var state string
+	if query.State != nil {
+		state = query.State.String()
+	}
+
+	var templateType string
+	if query.TemplateType != nil {
+		templateType = query.TemplateType.String()
+	}
+
+	searchValues := db.SearchValues{
 		DID:            query.DID,
 		DocumentNumber: query.DocumentNumber,
 		Version:        query.Version,
-		State:          query.State,
-		TemplateType:   query.TemplateType,
+		State:          state,
+		TemplateType:   templateType,
 		Name:           query.Name,
 		Description:    query.Description,
 		Filter:         query.Filter,
 	}
 
-	contractTemplates, err := templaterepository.ReadAllMetaDataByFilter(ctx, tx, searchValues)
+	contractTemplates, err := h.CTRepo.ReadAllMetaDataByFilter(tx, searchValues)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all contract templates: %w", err)
 	}
@@ -89,12 +100,23 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) 
 
 	result := make([]GetAllMetadataByFilterResult, len(contractTemplates))
 	for i, data := range contractTemplates {
+
+		state, err := contracttemplatestate.NewContractTemplateState(data.State)
+		if err != nil {
+			return nil, fmt.Errorf("could not create contract template state: %w", err)
+		}
+
+		templateType, err := contracttemplatetype.NewContractTemplateType(data.TemplateType)
+		if err != nil {
+			return nil, fmt.Errorf("could not create contract template type: %w", err)
+		}
+
 		result[i] = GetAllMetadataByFilterResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
-			State:          data.State,
-			TemplateType:   data.TemplateType,
+			State:          state,
+			TemplateType:   templateType,
 			Name:           *data.Name,
 			Description:    *data.Description,
 			CreatedAt:      data.CreatedAt,

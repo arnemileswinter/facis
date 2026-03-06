@@ -5,9 +5,9 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/event"
-	"digital-contracting-service/internal/templaterepository"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatetype"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
+	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"fmt"
 	"time"
@@ -26,8 +26,8 @@ type GetByIDResult struct {
 	DID            string
 	DocumentNumber int
 	Version        int
-	State          templatestate.TemplateState
-	TemplateType   templatetype.TemplateType
+	State          contracttemplatestate.ContractTemplateState
+	TemplateType   contracttemplatetype.ContractTemplateType
 	Name           *string
 	Description    *string
 	CreatedBy      string
@@ -37,8 +37,9 @@ type GetByIDResult struct {
 }
 
 type GetByIDHandler struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	CTRepo db.ContractTemplateRepo
 }
 
 func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
@@ -52,7 +53,7 @@ func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
 	}
 	defer tx.Rollback()
 
-	data, err := templaterepository.ReadDataByID(ctx, tx, query.DID, query.DocumentNumber, query.Version)
+	data, err := h.CTRepo.ReadDataByID(tx, query.DID, query.DocumentNumber, query.Version)
 	if err != nil {
 		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
@@ -74,12 +75,22 @@ func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
+	state, err := contracttemplatestate.NewContractTemplateState(data.State)
+	if err != nil {
+		return nil, fmt.Errorf("could not create contract template state: %w", err)
+	}
+
+	templateType, err := contracttemplatetype.NewContractTemplateType(data.TemplateType)
+	if err != nil {
+		return nil, fmt.Errorf("could not create contract template type: %w", err)
+	}
+
 	return &GetByIDResult{
 		DID:            query.DID,
 		DocumentNumber: data.DocumentNumber,
 		Version:        data.Version,
-		State:          data.State,
-		TemplateType:   data.TemplateType,
+		State:          state,
+		TemplateType:   templateType,
 		Name:           data.Name,
 		Description:    data.Description,
 		CreatedBy:      data.CreatedBy,

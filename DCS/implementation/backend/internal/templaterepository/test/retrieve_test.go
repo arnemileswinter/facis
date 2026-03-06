@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"slices"
 	"sort"
@@ -25,9 +25,13 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
@@ -36,8 +40,9 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	contractTemplate, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -45,7 +50,7 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, templatestate.Draft, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Draft, contractTemplate.State)
 }
 
 func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
@@ -61,9 +66,13 @@ func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Draft, creator)
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
 
-	ctx := context.Background()
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
@@ -72,8 +81,9 @@ func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
 		RetrievedBy:    creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
 	}
 	_, err = queryHandler.Handle(qry)
 
@@ -88,6 +98,12 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 
 	creator := "Test User"
 
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
 	dids := make([]string, 0, 10)
 	for i := 0; i < 10; i++ {
 		did, err := base.GetDID()
@@ -95,18 +111,19 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 			t.Fatalf("Failed to get new DID: %v", err)
 		}
 		dids = append(dids, *did)
-		createContractTemplate(t, db, did, templatestate.Draft, creator)
+		createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 	}
 	sort.Strings(dids)
-
-	ctx := context.Background()
 
 	qry := contracttemplate.GetAllMetadataQry{
 		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetAllMetadataHandler{
-		Ctx: ctx,
-		DB:  db,
+		Ctx:    ctx,
+		DB:     db,
+		CTRepo: repo.CTRepo,
+		ATRepo: repo.ATRepo,
+		RTRepo: repo.RTRepo,
 	}
 	result, err := queryHandler.Handle(qry)
 	if err != nil {
@@ -114,7 +131,7 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 	}
 
 	for _, ct := range result.ContractTemplates {
-		assert.Equal(t, templatestate.Draft, ct.State)
+		assert.Equal(t, contracttemplatestate.Draft, ct.State)
 
 		if !slices.Contains(dids, ct.DID) {
 			t.Errorf("DID not found in retrieved contract template: %v", ct.DID)

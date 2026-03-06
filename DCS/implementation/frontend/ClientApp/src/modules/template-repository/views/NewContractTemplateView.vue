@@ -27,7 +27,7 @@
         </div>
 
         <!-- Tab content -->
-        <div class="flex-grow mt-5">
+        <div class="grow mt-5">
             <div class="max-w-4xl mx-auto p-6">
                 <div class="grid grid-cols-1 gap-4">
 
@@ -38,7 +38,7 @@
                                 <h2 class="card-title text-sm">
                                     <span class="badge badge-primary">01</span> Template Details
                                 </h2>
-                                <DetailsEditor ref="detailsEditorRef" />
+                                <DetailsEditor />
                             </div>
                         </div>
                     </div>
@@ -104,7 +104,7 @@
         </div>
 
         <!-- Pinned Footer -->
-        <div class="sticky bottom-0 shrink-0 border-t border-base-300 bg-base-100">
+        <div v-if="draftStore.isEditable" class="sticky bottom-0 shrink-0 border-t border-base-300 bg-base-100">
             <div class="max-w-4xl mx-auto px-6 py-3 flex flex-col md:flex-row gap-3">
                 <button class="btn btn-ghost md:w-32" @click="router.back()">Cancel</button>
                 <button @click="submit" class="btn btn-primary flex-1" :disabled="isSubmitting">
@@ -131,19 +131,25 @@ import MetaDataEditor from '@template-repository/components/MetaDataEditor.vue'
 import BuilderPreviewDialog from '@template-repository/components/builder-editor/BuilderPreviewDialog.vue'
 import TemplateTypeSelect from '@template-repository/components/TemplateTypeSelect.vue'
 import { storeToRefs } from 'pinia'
+import { ContractTemplateService } from '@/services/contract-template-service'
+import { useToNumber } from '@vueuse/core'
+import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
+import { isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
 
 const router = useRouter()
 const route = useRoute()
 
 const templateEditorUiStore = useTemplateEditorUiStore()
+const approvedSubTemplateStore = useApprovedSubTemplateStore()
 const draftStore = useTemplateDraftStore()
-const { activeTab, tabs } = storeToRefs(templateEditorUiStore)
+const { activeTab } = storeToRefs(templateEditorUiStore)
 const { templateType } = storeToRefs(draftStore)
 const { setActiveTab, togglePreviewDialog } = templateEditorUiStore
 
 const isEditMode = computed(() => !!route.params.did)
 const hasChosenType = ref(false)
 const showTypeSelectionOnly = computed(() => !isEditMode.value && !hasChosenType.value)
+const tabs = computed(() => templateEditorUiStore.availableTabs(templateType.value))
 
 function onTemplateTypeChosen(value: typeof templateType.value) {
     draftStore.reset({ templateType: value })
@@ -151,20 +157,70 @@ function onTemplateTypeChosen(value: typeof templateType.value) {
 }
 
 watch(isEditMode, (isEdit) => {
-    if (isEdit) hasChosenType.value = true
+    approvedSubTemplateStore.resetTemplates()
+    templateEditorUiStore.reset()
+    if (isEdit) {
+        hasChosenType.value = true
+        // load template data into draftStore
+        const did = `${route.params.did}`
+        const version = useToNumber(`${route.query.version}`).value
+        const document_number = useToNumber(`${route.query.document_number}`).value
+        ContractTemplateService.retrieveById({ did, version, document_number })
+            .then(async template => {
+                if (!template) {
+                    draftStore.reset()
+                    return
+                }
+
+                draftStore.reset({
+                    did: template.did,
+                    name: template.name,
+                    description: template.description,
+                    documentOutline: template.template_data?.documentOutline ?? [],
+                    documentBlocks: template.template_data?.documentBlocks ?? [],
+                    semanticConditions: template.template_data?.semanticConditions ?? [],
+                    customMetaData: template.template_data?.customMetaData ?? [],
+                    templateType: template.template_type,
+                    state: template.state,
+                    version: template.version,
+                    document_number: template.document_number
+                })
+
+                const approvedBlocks = draftStore.documentBlocks.filter((b) => isApprovedTemplateBlock(b))
+
+                for (const block of approvedBlocks) {
+                    const template = await ContractTemplateService.retrieveById({
+                        did: block.templateId,
+                        version: block.version,
+                        document_number: block.document_number,
+                    })
+                    if (template) {
+                        approvedSubTemplateStore.addTemplate(template)
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Failed to load template for editing', error)
+            })
+        
+    }
     else { draftStore.reset(); hasChosenType.value = false }
 }, { immediate: true })
 
 const isSubmitting = ref(false)
 
-const detailsEditorRef = ref<InstanceType<typeof DetailsEditor> | null>(null)
-
 const submit = async () => {
     isSubmitting.value = true
     try {
-        const formData = detailsEditorRef.value?.getFormData()
-        console.log('Publishing Template to Repository...', formData)
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        if (!draftStore.hasTemplateId) {
+            const data = draftStore.templateCreateRequestData
+            await ContractTemplateService.create(data)
+        } else {
+            const data = draftStore.templateUpdateRequestData
+            if (data) {
+                await ContractTemplateService.update(data)
+            }
+        }
         router.push({ name: 'templates.list' })
     } catch (error) {
         console.error('Submission failed', error)

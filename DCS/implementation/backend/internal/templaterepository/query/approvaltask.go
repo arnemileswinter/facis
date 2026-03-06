@@ -3,8 +3,8 @@ package query
 import (
 	"context"
 	"digital-contracting-service/internal/base"
-	"digital-contracting-service/internal/templaterepository/approvaltask"
 	aopprovaltaskstate "digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
+	"digital-contracting-service/internal/templaterepository/db"
 	"fmt"
 	"time"
 
@@ -31,8 +31,9 @@ type GetAllApprovalTasksForDIDResult struct {
 }
 
 type GetAllApprovalTasksForDIDHandler struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDIDQry) ([]GetAllApprovalTasksForDIDResult, error) {
@@ -46,7 +47,7 @@ func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDI
 	}
 	defer tx.Rollback()
 
-	reviewTasks, err := approvaltask.ReadAll(ctx, tx, query.DID)
+	reviewTasks, err := h.ATRepo.ReadAll(tx, query.DID)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}
@@ -58,11 +59,17 @@ func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDI
 
 	result := make([]GetAllApprovalTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
+
+		state, err := aopprovaltaskstate.NewApprovalTaskState(data.State)
+		if err != nil {
+			return nil, fmt.Errorf("could not create approval task state: %w", err)
+		}
+
 		result[i] = GetAllApprovalTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
-			State:          data.State,
+			State:          state,
 			Approver:       data.Approver,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,

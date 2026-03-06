@@ -16,6 +16,7 @@ import (
 	"digital-contracting-service/internal/middleware"
 	"digital-contracting-service/internal/service"
 	"digital-contracting-service/migrations"
+	"digital-contracting-service/internal/templaterepository/db/pg"
 	"flag"
 	"fmt"
 	"net"
@@ -57,7 +58,6 @@ func main() {
 	db, err := NewDatabaseConnection()
 	if err != nil {
 		log.Fatalf(ctx, err, "Could not connect to database")
-		os.Exit(1)
 	}
 	defer db.Close()
 
@@ -72,10 +72,12 @@ func main() {
 	if natsURL == "" {
 		natsURL = nats.DefaultURL
 	}
-	_, err = nats.Connect(natsURL)
+	natsClient, err := nats.Connect(natsURL)
 	if err != nil {
-		log.Fatalf(ctx, err, "Could not connect to nats service")
-		os.Exit(1)
+		log.Printf(ctx, "Nats support will be deactivated: Could not connect to nats service: %v", err)
+	}
+	if natsClient != nil {
+		defer natsClient.Close()
 	}
 
 	// Initialize OIDC validator and JWT authenticator.
@@ -93,11 +95,9 @@ func main() {
 	}
 	jwtAuth := auth.NewJWTAuthenticator(oidcValidator)
 
-	templateRepositorySrv, err := service.NewTemplateRepository(ctx, db, jwtAuth)
-	if err != nil {
-		log.Fatalf(ctx, err, "Could not create template repository")
-		os.Exit(1)
-	}
+	ctRepo := pg.PostgresContractTemplateRepo{Ctx: ctx}
+	rtRepo := pg.PostgresReviewTaskRepo{Ctx: ctx}
+	atRepo := pg.PostgresApprovalTaskRepo{Ctx: ctx}
 
 	// Initialize the service.
 	var (
@@ -122,7 +122,7 @@ func main() {
 		processAuditAndComplianceSvc = service.NewProcessAuditAndCompliance(jwtAuth)
 		signatureManagementSvc = service.NewSignatureManagement(jwtAuth)
 		templateCatalogueIntegrationSvc = service.NewTemplateCatalogueIntegration(jwtAuth)
-		templateRepositorySvc = templateRepositorySrv
+		templateRepositorySvc = service.NewTemplateRepository(db, jwtAuth, &ctRepo, &rtRepo, &atRepo)
 	}
 
 	// Wrap the service in endpoints that can be invoked from other service

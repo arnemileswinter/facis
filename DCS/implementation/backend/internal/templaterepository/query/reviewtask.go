@@ -4,7 +4,7 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
+	"digital-contracting-service/internal/templaterepository/db"
 	"fmt"
 	"time"
 
@@ -30,8 +30,9 @@ type GetAllReviewTasksForDIDResult struct {
 }
 
 type GetAllReviewTasksForDIDHandler struct {
-	Ctx context.Context
-	DB  *sqlx.DB
+	Ctx    context.Context
+	DB     *sqlx.DB
+	RTRepo db.ReviewTaskRepo
 }
 
 func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDIDQry) ([]GetAllReviewTasksForDIDResult, error) {
@@ -45,7 +46,7 @@ func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDIDQry
 	}
 	defer tx.Rollback()
 
-	reviewTasks, err := reviewtask.ReadAll(ctx, tx, query.DID)
+	reviewTasks, err := h.RTRepo.ReadAll(tx, query.DID)
 	if err != nil {
 		return nil, fmt.Errorf("could not read all review tasks: %w", err)
 	}
@@ -57,11 +58,17 @@ func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDIDQry
 
 	result := make([]GetAllReviewTasksForDIDResult, len(reviewTasks))
 	for i, data := range reviewTasks {
+
+		state, err := reviewtaskstate.NewReviewTaskState(data.State)
+		if err != nil {
+			return nil, fmt.Errorf("could not create review task state: %w", err)
+		}
+
 		result[i] = GetAllReviewTasksForDIDResult{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
-			State:          data.State,
+			State:          state,
 			Reviewer:       data.Reviewer,
 			CreatedBy:      data.CreatedBy,
 			CreatedAt:      data.CreatedAt,

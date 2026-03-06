@@ -1,3 +1,4 @@
+import type { DocumentBlock, DocumentOutline, MetaData, SemanticCondition } from "@/modules/template-repository/models/contract-templace"
 import type { ContractTemplateState } from "@/types/contract-template-state"
 import type { TemplateType } from "@/types/template-type"
 
@@ -11,7 +12,15 @@ export interface ContractTemplate {
     state: ContractTemplateState
     name?: string
     description?: string
-    template_data?: any
+    template_data?: ContractTemplateData
     updated_at: string
-    clauses?: []
+}
+
+export type PartialContractTemplate = Omit<ContractTemplate, 'template_data' | 'created_by'>
+
+export interface ContractTemplateData {
+    documentOutline: DocumentOutline
+    semanticConditions: SemanticCondition[]
+    documentBlocks: DocumentBlock[]
+    customMetaData: MetaData[]
 }

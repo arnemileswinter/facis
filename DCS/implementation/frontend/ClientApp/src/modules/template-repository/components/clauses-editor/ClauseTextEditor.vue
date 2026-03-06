@@ -69,6 +69,7 @@ const {
   getTemplateText,
   getCursorIndex,
   handlePaste,
+  insertNewlineAtSelection,
   setCursorAfter,
   setCursorAt,
   syncFromTemplateText,
@@ -144,21 +145,7 @@ function insertPlaceholderFromPanel(conditionId: string, parameterName: string) 
   const after = current.slice(insertPos)
   const { value: newValue, insertLength } = wrapSpaces(before, insertText, after)
   const newCursorPos = insertPos + insertLength
-  valueFromEditor = false
-  emit('update:modelValue', newValue)
-  // Wait for DOM update before syncing and setting cursor, to ensure the editor content is up to date and the placeholder elements are rendered.
-  nextTick(() => {
-    if (!isMounted.value) return
-    syncFromTemplateText(newValue, props.semanticConditions)
-    lastCursorIndex.value = newCursorPos
-    // Set cursor after the newly inserted placeholder.
-    nextTick(() => {
-      if (isMounted.value && editorRef.value) {
-        editorRef.value.focus()
-        setCursorAt(editorRef.value, newCursorPos)
-      }
-    })
-  })
+  applyEditorChange(newValue, newCursorPos)
 }
 
 function onEditorBlur() {
@@ -232,18 +219,7 @@ function onEditorClick(e: MouseEvent) {
 
 function onEditorPaste(e: ClipboardEvent) {
   const result = handlePaste(e)
-  valueFromEditor = false
-  emit('update:modelValue', result.newValue)
-  lastCursorIndex.value = result.newCursorPos
-  nextTick(() => {
-    if (!isMounted.value) return
-    syncFromTemplateText(result.newValue, props.semanticConditions)
-    nextTick(() => {
-      if (isMounted.value && editorRef.value) {
-        setCursorAt(editorRef.value, result.newCursorPos)
-      }
-    })
-  })
+  applyEditorChange(result.newValue, result.newCursorPos)
 }
 
 function onEditorInput() {
@@ -274,9 +250,21 @@ function onEditorInput() {
 
 function onEditorKeydown(e: KeyboardEvent) {
   const suggestionsVisible = showPlaceholderSuggestions.value
-  if (e.key === 'Enter' && (!suggestionsVisible || e.shiftKey)) {
-    // globally block Enter / Shift+Enter from creating new lines.
+  if (e.key === 'Enter') {
+    const list = filteredPlaceholderOptions.value
+    // If placeholder suggestions are visible and Enter (without Shift) is pressed, confirm the current suggestion.
+    if (suggestionsVisible && !e.shiftKey && list.length > 0) {
+      e.preventDefault()
+      const idx = Math.min(selectedPlaceholderIndex.value, list.length - 1)
+      const opt = list[idx]
+      if (opt) insertPlaceholder(opt)
+      return
+    }
+
+    // In all other cases, treat Enter as inserting a logical newline.
     e.preventDefault()
+    const { newValue, newCursorPos } = insertNewlineAtSelection()
+    applyEditorChange(newValue, newCursorPos)
     return
   }
 
@@ -286,13 +274,6 @@ function onEditorKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     closePlaceholderSuggestions()
     e.preventDefault()
-    return
-  }
-  if (e.key === 'Enter' && list.length > 0) {
-    e.preventDefault()
-    const idx = Math.min(selectedPlaceholderIndex.value, list.length - 1)
-    const opt = list[idx]
-    if (opt) insertPlaceholder(opt)
     return
   }
   if (e.key === 'ArrowDown' && list.length > 0) {
@@ -322,16 +303,21 @@ function insertPlaceholder(opt: { insertText: string }) {
   const after = value.slice(end)
   const { value: newValue, insertLength } = wrapSpaces(before, opt.insertText, after)
   closePlaceholderSuggestions()
+  const newPos = start + insertLength
+  applyEditorChange(newValue, newPos)
+}
+
+function applyEditorChange(newValue: string, newCursorPos: number) {
   valueFromEditor = false
   emit('update:modelValue', newValue)
+  lastCursorIndex.value = newCursorPos
   nextTick(() => {
     if (!isMounted.value) return
     syncFromTemplateText(newValue, props.semanticConditions)
-    const newPos = start + insertLength
     nextTick(() => {
       if (isMounted.value && editorRef.value) {
         editorRef.value.focus()
-        setCursorAt(editorRef.value, newPos)
+        setCursorAt(editorRef.value, newCursorPos)
       }
     })
   })

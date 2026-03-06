@@ -1,3 +1,12 @@
-const states = ['DRAFT', 'SUBMITTED', 'REJECTED', 'REVIEWED', 'APPROVED', 'REGISTERED', 'ARCHIVED'] as const
-export type ContractTemplateState = typeof states[number]
-export const contractTemplateStates: ContractTemplateState[] = [...states]
+export type ContractTemplateState = (typeof TemplateState)[keyof typeof TemplateState]
+export const TemplateState = {
+    draft: 'DRAFT',
+    submitted: 'SUBMITTED',
+    rejected: 'REJECTED',
+    reviewed: 'REVIEWED',
+    approved: 'APPROVED',
+    registered: 'REGISTERED',
+    archived: 'ARCHIVED',
+} as const
+
+export const contractTemplateStates: ContractTemplateState[] = Object.values(TemplateState)

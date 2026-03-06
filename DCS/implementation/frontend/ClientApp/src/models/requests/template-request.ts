@@ -1,6 +1,7 @@
 import type { TemplateType } from '@/types/template-type'
 import type { ActionFlag } from '../../types/action-flag'
 import type { ContractTemplateState } from '@/types/contract-template-state'
+import type { ContractTemplateData } from '../contract-template'
 
 interface ContractTemplateBaseRequest {
   did: string
@@ -13,7 +14,7 @@ export interface ContractTemplateCreateRequest {
   description?: string
   template_type?: TemplateType
   /** The template data of the contract template */
-  template_data?: any
+  template_data?: ContractTemplateData
 }
 
 export interface ContractTemplateSubmitRequest extends ContractTemplateBaseRequest {
@@ -27,7 +28,7 @@ export interface ContractTemplateUpdateRequest extends ContractTemplateBaseReque
   name?: string
   description?: string
   /** The template data of the contract template */
-  template_data?: any
+  template_data?: ContractTemplateData
 }
 
 export interface ContractTemplateSearchRequest {
@@ -38,7 +39,7 @@ export interface ContractTemplateSearchRequest {
   state?: ContractTemplateState
   name?: string
   description?: string
-  filter?: any
+  filter?: string
 }
 
 export interface ContractTemplateRetrieveRequest {}

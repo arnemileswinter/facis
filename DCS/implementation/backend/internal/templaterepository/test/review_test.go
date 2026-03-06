@@ -3,9 +3,9 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
-	"digital-contracting-service/internal/templaterepository/datatype/templatestate"
-	"digital-contracting-service/internal/templaterepository/reviewtask"
+	db2 "digital-contracting-service/internal/templaterepository/db"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,12 +24,13 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
-
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
 	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	assignees := []string{
 		"Test User 1",
@@ -37,28 +38,28 @@ func TestReview_CreateReviewTasks(t *testing.T) {
 		"Test User 3",
 	}
 
-	tx, err := db.BeginTxx(ctxTx, nil)
+	tx, err := db.BeginTxx(ctx, nil)
 	defer tx.Rollback()
 	if err != nil {
 		t.Fatalf("Failed to begin transaction: %v", err)
 	}
 
 	for _, assignee := range assignees {
-		reviewTask := reviewtask.TaskData{
+		reviewTask := db2.ReviewTaskData{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			Reviewer:       assignee,
-			State:          reviewtaskstate.Open,
+			State:          reviewtaskstate.Open.String(),
 			CreatedBy:      creator,
 		}
-		_, err = reviewtask.Create(ctx, tx, reviewTask)
+		_, err = repo.RTRepo.Create(tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
 	}
 
-	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open.String())
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}
@@ -84,12 +85,13 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 
 	creator := "Test User"
 
-	createContractTemplate(t, db, did, templatestate.Submitted, creator)
-
-	ctx := context.Background()
-
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	tmpCtx := context.Background()
+	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
 	defer cancel()
+
+	repo := NewTestRepo(ctx)
+
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	assignees := []string{
 		"Test User 1",
@@ -97,35 +99,35 @@ func TestReview_CreateReviewTasksAndApproveThem(t *testing.T) {
 		"Test User 3",
 	}
 
-	tx, err := db.BeginTxx(ctxTx, nil)
+	tx, err := db.BeginTxx(ctx, nil)
 	defer tx.Rollback()
 	if err != nil {
 		t.Fatalf("Failed to begin transaction: %v", err)
 	}
 
 	for _, assignee := range assignees {
-		reviewTask := reviewtask.TaskData{
+		reviewTask := db2.ReviewTaskData{
 			DID:            *did,
 			DocumentNumber: 1,
 			Version:        1,
 			Reviewer:       assignee,
-			State:          reviewtaskstate.Open,
+			State:          reviewtaskstate.Open.String(),
 			CreatedBy:      creator,
 		}
-		_, err = reviewtask.Create(ctx, tx, reviewTask)
+		_, err = repo.RTRepo.Create(tx, reviewTask)
 		if err != nil {
 			t.Fatalf("Failed to create review task: %v", err)
 		}
 	}
 
 	for _, assignee := range assignees {
-		err := reviewtask.Update(ctx, tx, *did, 1, 1, assignee, reviewtaskstate.Approved)
+		err := repo.RTRepo.Update(tx, *did, 1, 1, assignee, contracttemplatestate.Approved.String())
 		if err != nil {
 			t.Fatalf("Failed to approve review task: %v", err)
 		}
 	}
 
-	exists, err := reviewtask.AnyTasksInState(ctx, tx, *did, 1, 1, reviewtaskstate.Open)
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, reviewtaskstate.Open.String())
 	if err != nil {
 		t.Fatalf("Failed to check if review task exists: %v", err)
 	}

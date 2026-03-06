@@ -1,3 +1,4 @@
+import type { ContractTemplateState } from "@/types/contract-template-state"
 import type {
   DocumentOutline,
   DocumentBlock,
@@ -16,6 +17,9 @@ interface TemplateDraftState {
   semanticConditions: SemanticCondition[]
   customMetaData: MetaData[]
   templateType: TemplateTypeValue
+  state: ContractTemplateState | null
+  document_number: number | null
+  version: number | null
 }
 
 /** Payload for adding a new block. */
@@ -28,6 +32,8 @@ export interface AddBlockPayload {
   conditionIds?: string[]
   // #### For ApprovedTemplate ####
   templateId?: string
+  version?: number
+  document_number?: number
 }
 
 export interface AddBlockOptions {

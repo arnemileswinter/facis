@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@template-repository/models/template-draft-store"
 import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition, MetaData } from "@template-repository/models/contract-templace"
-import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock } from "@template-repository/models/contract-templace"
+import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock, isApprovedTemplateBlock } from "@template-repository/models/contract-templace"
+import type { ContractTemplateCreateRequest, ContractTemplateUpdateRequest } from '@/models/requests/template-request'
+import { TemplateState } from '@/types/contract-template-state'
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -13,6 +15,9 @@ const defaultState: Readonly<TemplateDraftState> = {
   semanticConditions: [],
   customMetaData: [],
   templateType: TemplateType.subContract,
+  state: null,
+  document_number: null,
+  version: null,
 }
 
 export const useTemplateDraftStore = defineStore(storeId, {
@@ -23,6 +28,42 @@ export const useTemplateDraftStore = defineStore(storeId, {
     blockIdsInOutline(): Set<string> {
       return collectBlockIdsInOutline(this.documentOutline)
     },
+    /** Returns the data to create a contract template based on the current draft state. */
+    templateCreateRequestData(): ContractTemplateCreateRequest {
+      return {
+        name: this.name,
+        description: this.description,
+        template_type: this.templateType,
+        template_data: {
+          documentOutline: this.documentOutline,
+          documentBlocks: this.documentBlocks,
+          semanticConditions: this.semanticConditions,
+          customMetaData: this.customMetaData,
+        }
+      }
+    },
+    templateUpdateRequestData(): ContractTemplateUpdateRequest | null {
+      if (!this.did || this.version === null || this.document_number === null) return null
+      return {
+        name: this.name,
+        description: this.description,
+        template_data: {
+          documentOutline: this.documentOutline,
+          documentBlocks: this.documentBlocks,
+          semanticConditions: this.semanticConditions,
+          customMetaData: this.customMetaData,
+        },
+        updated_at: new Date().toISOString(),
+        version: this.version,
+        document_number: this.document_number,
+        did: this.did,
+      }
+    },
+    isEditable(): boolean {
+      if (!this.state) return true
+      const uneditableStates = [TemplateState.approved].map((s) => s.toLowerCase())
+      return !(uneditableStates.includes(this.state.toLowerCase()))
+    }
   },
   actions: {
     // Block operations: add, delete, update, move
@@ -226,7 +267,7 @@ function addBlock(
     throw new Error(`addBlock: parent not found: ${parentBlockId}`)
   }
   parent.children.splice(insertIndex, 0, blockId)
-  if (isSectionBlock(block)) {
+  if (isSectionBlock(block) || isApprovedTemplateBlock(block)) {
     outline.push(createOutlineItem({ blockId, isRoot: false, children: [] }))
   }
   blocks.push(block)
@@ -301,7 +342,14 @@ function createBlockFromPayload(blockId: string, payload: AddBlockPayload): Docu
     case DocumentBlockType.Clause:
       return { blockId, type: DocumentBlockType.Clause, text, title: payload.title, conditionIds: payload.conditionIds ?? [] }
     case DocumentBlockType.ApprovedTemplate:
-      return { blockId, type: DocumentBlockType.ApprovedTemplate, text, templateId: payload.templateId ?? '' }
+      return {
+        blockId,
+        type: DocumentBlockType.ApprovedTemplate,
+        text,
+        templateId: payload.templateId ?? '',
+        version: payload.version ?? 1,
+        document_number: payload.document_number ?? 1,
+      }
     default:
       throw new Error(`Unknown blockType: ${payload.blockType}`)
   }
