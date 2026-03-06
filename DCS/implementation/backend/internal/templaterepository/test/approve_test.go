@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
@@ -27,7 +28,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -40,7 +41,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	verifyCmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     approver,
@@ -59,7 +60,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		ApprovedBy:     approver,
@@ -78,7 +79,7 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -109,7 +110,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -122,7 +123,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testi
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		ApprovedBy:     approver,
@@ -151,14 +152,14 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		ApprovedBy:     "Test User 1",
@@ -187,7 +188,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -200,7 +201,7 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		ApprovedBy:     "Test User 2",
@@ -231,7 +232,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -240,7 +241,7 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		ApprovedBy:     "Test User 1",
@@ -271,7 +272,7 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -280,7 +281,7 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		ApprovedBy:     "Test User 1",
@@ -311,7 +312,7 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -320,7 +321,7 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 
 	cmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
 		ApprovedBy:     "Test User 1",

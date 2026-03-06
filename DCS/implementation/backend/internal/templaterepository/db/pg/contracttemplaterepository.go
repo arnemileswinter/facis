@@ -20,14 +20,14 @@ type PostgresContractTemplateRepo struct {
 func (r *PostgresContractTemplateRepo) Create(tx *sqlx.Tx, data db.ContractTemplate) (*time.Time, error) {
 	statement := `
         INSERT INTO contract_templates (
-            did, created_by, state, name,
+            did, document_number, created_by, state, name,
             description, template_data, template_type
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING created_at
     `
 	var createdAt time.Time
 	err := tx.GetContext(r.Ctx, &createdAt, statement,
-		data.DID, data.CreatedBy, data.State, data.Name,
+		data.DID, data.DocumentNumber, data.CreatedBy, data.State, data.Name,
 		data.Description, data.TemplateData, data.TemplateType,
 	)
 	if err != nil {
@@ -36,7 +36,7 @@ func (r *PostgresContractTemplateRepo) Create(tx *sqlx.Tx, data db.ContractTempl
 	return &createdAt, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadDataByID(tx *sqlx.Tx, did string, documentNumber int, version int) (*db.ContractTemplate, error) {
+func (r *PostgresContractTemplateRepo) ReadDataByID(tx *sqlx.Tx, did string, documentNumber string, version int) (*db.ContractTemplate, error) {
 	query := `
         SELECT did, document_number, version, state, name, description,
                created_by, created_at, updated_at, template_data, template_type
@@ -87,7 +87,7 @@ func (r *PostgresContractTemplateRepo) ReadAllMetaDataByFilter(tx *sqlx.Tx, valu
 	return cts, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string, documentNumber int, version int) (*db.ContractTemplateProcessData, error) {
+func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string, documentNumber string, version int) (*db.ContractTemplateProcessData, error) {
 	query := `
         SELECT did, document_number, version, state, updated_at, created_by
         FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
@@ -96,14 +96,14 @@ func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string, 
 	err := tx.GetContext(r.Ctx, &processData, query, did, documentNumber, version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("contract template with DID %s, DocumentNumber %d and Version %d not found", did, documentNumber, version)
+			return nil, fmt.Errorf("contract template with DID %s, DocumentNumber %s and Version %d not found", did, documentNumber, version)
 		}
 		return nil, err
 	}
 	return &processData, nil
 }
 
-func (r *PostgresContractTemplateRepo) UpdateState(tx *sqlx.Tx, did string, documentNumber int, version int, state string) error {
+func (r *PostgresContractTemplateRepo) UpdateState(tx *sqlx.Tx, did string, documentNumber string, version int, state string) error {
 	statement := `
         UPDATE contract_templates SET state = $4
         WHERE did = $1 AND document_number = $2 AND version = $3

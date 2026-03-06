@@ -2,8 +2,9 @@ package command
 
 import (
 	"context"
-	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
@@ -31,7 +32,7 @@ type Creator struct {
 
 func (h *Creator) Handle(cmd CreateCmd) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -41,13 +42,14 @@ func (h *Creator) Handle(cmd CreateCmd) error {
 	defer tx.Rollback()
 
 	data := db.ContractTemplate{
-		DID:          cmd.DID,
-		CreatedBy:    cmd.CreatedBy,
-		State:        contracttemplatestate.Draft.String(),
-		TemplateType: cmd.TemplateType.String(),
-		Name:         cmd.Name,
-		Description:  cmd.Description,
-		TemplateData: cmd.TemplateData,
+		DID:            cmd.DID,
+		DocumentNumber: conf.DefaultDocumentNumber(),
+		CreatedBy:      cmd.CreatedBy,
+		State:          contracttemplatestate.Draft.String(),
+		TemplateType:   cmd.TemplateType.String(),
+		Name:           cmd.Name,
+		Description:    cmd.Description,
+		TemplateData:   cmd.TemplateData,
 	}
 	createdAt, err := h.CTRepo.Create(tx, data)
 	if err != nil {
@@ -56,7 +58,7 @@ func (h *Creator) Handle(cmd CreateCmd) error {
 
 	evt := templateevents.CreateEvent{
 		DID:            cmd.DID,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 		CreatedBy:      cmd.CreatedBy,
 		Name:           cmd.Name,
@@ -64,7 +66,7 @@ func (h *Creator) Handle(cmd CreateCmd) error {
 		TemplateData:   cmd.TemplateData,
 		OccurredAt:     *createdAt,
 	}
-	err = event.Create(ctx, tx, evt)
+	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return fmt.Errorf("could not create event: %w", err)
 	}

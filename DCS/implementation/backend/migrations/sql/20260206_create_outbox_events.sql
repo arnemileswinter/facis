@@ -2,14 +2,19 @@
 -- Purpose: Persistent storage of events before publishing to NATS
 -- This ensures events are never lost even if NATS is unavailable
 
+CREATE TYPE delivery_type AS ENUM ('LOCAL', 'EXTERNAL');
+
 CREATE TABLE IF NOT EXISTS outbox_events (
     id BIGSERIAL PRIMARY KEY,
+
+    component VARCHAR(64) NOT NULL,
+    delivery_type delivery_type NOT NULL DEFAULT 'LOCAL',
 
     event_type VARCHAR(64) NOT NULL,
     event_data JSONB NOT NULL,
 
     did VARCHAR(255),
-    document_number int,
+    document_number VARCHAR(128),
     version int,
 
     processed BOOLEAN DEFAULT FALSE,

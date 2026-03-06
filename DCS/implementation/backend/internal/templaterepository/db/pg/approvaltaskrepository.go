@@ -31,7 +31,7 @@ func (r *PostgresApprovalTaskRepo) Create(tx *sqlx.Tx, data db.ApprovalTaskData)
 	return &createdAt, nil
 }
 
-func (r *PostgresApprovalTaskRepo) ReopenTasks(tx *sqlx.Tx, did string, documentNumber int, version int) error {
+func (r *PostgresApprovalTaskRepo) ReopenTasks(tx *sqlx.Tx, did string, documentNumber string, version int) error {
 	statement := `
         UPDATE contract_templates_approval_task SET state = 'OPEN'
         WHERE did = $1 AND document_number = $2 AND version = $3
@@ -68,7 +68,7 @@ func (r *PostgresApprovalTaskRepo) ReadAllByApprover(tx *sqlx.Tx, approver strin
 	return approvalTasks, nil
 }
 
-func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state string) error {
+func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber string, version int, approver string, state string) error {
 	statement := `
         UPDATE contract_templates_approval_task SET state = $5
         WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
@@ -87,7 +87,7 @@ func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, documentNumbe
 	return nil
 }
 
-func (r *PostgresApprovalTaskRepo) IsValidApprover(tx *sqlx.Tx, did string, documentNumber int, version int, approver string) (bool, error) {
+func (r *PostgresApprovalTaskRepo) IsValidApprover(tx *sqlx.Tx, did string, documentNumber string, version int, approver string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_approval_task
         WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
@@ -100,7 +100,7 @@ func (r *PostgresApprovalTaskRepo) IsValidApprover(tx *sqlx.Tx, did string, docu
 	return count > 0, nil
 }
 
-func (r *PostgresApprovalTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber int, version int, approver string, state string) (bool, error) {
+func (r *PostgresApprovalTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber string, version int, approver string, state string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_approval_task
         WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4 AND state = $5
@@ -113,7 +113,7 @@ func (r *PostgresApprovalTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, do
 	return count > 0, nil
 }
 
-func (r *PostgresApprovalTaskRepo) TaskExists(tx *sqlx.Tx, did string, documentNumber int, version int) (bool, error) {
+func (r *PostgresApprovalTaskRepo) TaskExists(tx *sqlx.Tx, did string, documentNumber string, version int) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_approval_task
         WHERE did = $1 AND document_number = $2 AND version = $3
@@ -126,7 +126,7 @@ func (r *PostgresApprovalTaskRepo) TaskExists(tx *sqlx.Tx, did string, documentN
 	return count > 0, nil
 }
 
-func (r *PostgresApprovalTaskRepo) Delete(tx *sqlx.Tx, did string, documentNumber int, version int) error {
+func (r *PostgresApprovalTaskRepo) Delete(tx *sqlx.Tx, did string, documentNumber string, version int) error {
 	statement := `
         DELETE FROM contract_templates_approval_task
         WHERE did = $1 AND document_number = $2 AND version = $3

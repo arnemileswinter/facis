@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/actionflag"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
@@ -31,7 +32,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -41,7 +42,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 	approver := "Test User 5"
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    creator,
@@ -68,7 +69,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -86,7 +87,7 @@ func TestSubmit_SubmitContractTemplateInDraftState(t *testing.T) {
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -123,7 +124,7 @@ func TestSubmit_SubmitContractTemplateInDraftStateWithInvalidUser(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -139,7 +140,7 @@ func TestSubmit_SubmitContractTemplateInDraftStateWithInvalidUser(t *testing.T) 
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 6",
@@ -174,7 +175,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -204,7 +205,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 
 	verifyCmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
@@ -225,7 +226,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[0],
@@ -246,7 +247,7 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -277,7 +278,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testin
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -307,7 +308,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithInvalidUser(t *testin
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 4",
@@ -340,7 +341,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithoutVerifying(t *testi
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -370,7 +371,7 @@ func TestSubmit_ApproveContractTemplateInSubmittedStateWithoutVerifying(t *testi
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 1",
@@ -403,7 +404,7 @@ func TestSubmit_RejectContractTemplateInSubmittedStateWithInvalidUser(t *testing
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -433,7 +434,7 @@ func TestSubmit_RejectContractTemplateInSubmittedStateWithInvalidUser(t *testing
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 4",
@@ -466,7 +467,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -500,7 +501,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	for _, reviewer := range reviewers {
 		verifyCmd := command.VerifyCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
@@ -523,7 +524,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	for _, reviewer := range reviewers {
 		cmd := command.SubmitCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
@@ -545,7 +546,7 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -576,7 +577,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -608,7 +609,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[0],
@@ -631,7 +632,7 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -660,14 +661,14 @@ func TestSubmit_SubmitNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 1",
@@ -698,7 +699,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -707,7 +708,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithoutActionFlag(t *testi
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    creator,
@@ -738,7 +739,7 @@ func TestSubmit_SubmitContractTemplateInReviewedStateWithInvalidUser(t *testing.
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -753,7 +754,7 @@ func TestSubmit_SubmitContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    "Test User 2",
@@ -782,7 +783,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithApproverUser(t *testin
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -806,7 +807,7 @@ func TestSubmit_SubmitContractTemplateInSubmittedStateWithApproverUser(t *testin
 	aFlag := actionflag.Approval
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
@@ -838,7 +839,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -857,7 +858,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    creator,
@@ -880,7 +881,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -898,7 +899,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -924,7 +925,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	queryApprovalTasks := query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -946,7 +947,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	*/
 	verifyCmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
@@ -970,7 +971,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[0],
@@ -991,7 +992,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1009,7 +1010,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1027,7 +1028,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	queryApprovalTasks = query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1050,7 +1051,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[2],
@@ -1071,7 +1072,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1092,7 +1093,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	*/
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    creator,
@@ -1115,7 +1116,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1137,7 +1138,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	for _, reviewer := range reviewers {
 		verifyCmd := command.VerifyCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
@@ -1163,7 +1164,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	for _, reviewer := range reviewers {
 		cmd := command.SubmitCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
@@ -1185,7 +1186,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1206,7 +1207,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	*/
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
@@ -1228,7 +1229,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1250,7 +1251,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	for _, reviewer := range reviewers {
 		verifyCmd := command.VerifyCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
@@ -1276,7 +1277,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	for _, reviewer := range reviewers {
 		cmd := command.SubmitCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
@@ -1298,7 +1299,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1319,7 +1320,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 	*/
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
@@ -1341,7 +1342,7 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1372,7 +1373,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1391,7 +1392,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    creator,
@@ -1414,7 +1415,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1432,7 +1433,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1458,7 +1459,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	queryApprovalTasks := query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1480,7 +1481,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	verifyCmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
@@ -1504,7 +1505,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[0],
@@ -1525,7 +1526,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1543,7 +1544,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1561,7 +1562,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	queryApprovalTasks = query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1584,7 +1585,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[1],
@@ -1605,7 +1606,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1626,7 +1627,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    creator,
@@ -1649,7 +1650,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1671,7 +1672,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	for _, reviewer := range reviewers {
 		verifyCmd := command.VerifyCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
@@ -1697,7 +1698,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	for _, reviewer := range reviewers {
 		cmd := command.SubmitCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
@@ -1719,7 +1720,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1740,7 +1741,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
@@ -1762,7 +1763,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1784,7 +1785,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	for _, reviewer := range reviewers {
 		verifyCmd := command.VerifyCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
@@ -1810,7 +1811,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	for _, reviewer := range reviewers {
 		cmd := command.SubmitCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
@@ -1832,7 +1833,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1853,7 +1854,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	verifyCmd = command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     approver,
@@ -1875,7 +1876,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 	*/
 	approveCmd := command.ApproveCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		ApprovedBy:     approver,
@@ -1894,7 +1895,7 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -1923,7 +1924,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1943,7 +1944,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
@@ -1968,7 +1969,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -1986,7 +1987,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	queryReviewTasks := query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2012,7 +2013,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	queryApprovalTasks := query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2034,7 +2035,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	*/
 	verifyCmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		VerifiedBy:     reviewers[0],
@@ -2058,7 +2059,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[0],
@@ -2081,7 +2082,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2099,7 +2100,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	queryReviewTasks = query.GetAllReviewTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2117,7 +2118,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	queryApprovalTasks = query.GetAllApprovalTasksForDIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2140,7 +2141,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    reviewers[1],
@@ -2163,7 +2164,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2192,7 +2193,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	submittedBy = "Test User"
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    submittedBy,
@@ -2217,7 +2218,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2239,7 +2240,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	for _, reviewer := range reviewers {
 		verifyCmd := command.VerifyCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
@@ -2265,7 +2266,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	for _, reviewer := range reviewers {
 		cmd := command.SubmitCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
@@ -2289,7 +2290,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2310,7 +2311,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	*/
 	cmd = command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		SubmittedBy:    approver,
@@ -2334,7 +2335,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2356,7 +2357,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	for _, reviewer := range reviewers {
 		verifyCmd := command.VerifyCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			VerifiedBy:     reviewer,
@@ -2382,7 +2383,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	for _, reviewer := range reviewers {
 		cmd := command.SubmitCmd{
 			DID:            *did,
-			DocumentNumber: 1,
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			UpdatedAt:      time.Now(),
 			SubmittedBy:    reviewer,
@@ -2406,7 +2407,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2427,7 +2428,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 	*/
 	rejectCmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     approver,
@@ -2449,7 +2450,7 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 
 	qry = contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -2478,7 +2479,7 @@ func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -2489,7 +2490,7 @@ func TestSubmit_SubmitContractTemplateAfterUpdate(t *testing.T) {
 	approver := "Test User 5"
 	cmd := command.SubmitCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now().Add(-5 * time.Minute),
 		SubmittedBy:    submittedBy,
