@@ -61,11 +61,20 @@ go test -v ./...
 ## Running the API Server
 
 ### Environment Variables
-```
+```bash
+# Database configuration
 export DATABASE_URL="user=username password=password dbname=postgres sslmode=disable"
+
+# API routing
+export API_PATH_PREFIX="/api"
+
+# OIDC/Keycloak Authentication
+export OIDC_ISSUER_URL="https://keycloak.example.com/realms/yourrealm"
+export OIDC_CLIENT_ID="digital-contracting-service"
+export OIDC_REDIRECT_URI="http://localhost:5173/api/auth/callback"
+export OIDC_LOGOUT_REDIRECT_URI="http://localhost:8991/api/auth/logout-complete"
 ```
 
-```
 ### Start the DCS backend service
 ```bash
 go run ./cmd/dcs
@@ -78,6 +87,13 @@ curl http://0.0.0.0:8991/template/search
 
 ### Build a Docker image
 To build a Docker image, you can use the helper script [build-image.sh](./build-image.sh).
+
+**Important:** The Docker image embeds the frontend application. The build process:
+1. Builds the Vue.js frontend from `../frontend/ClientApp`
+2. Copies the built frontend into the backend image at `/app/web/dist`
+3. The backend serves the frontend at `/ui` (root `/` redirects to `/ui`), keeping API routes at the root level
+
+The build script must be run from the `backend/` directory, as it uses the parent directory (`implementation/`) as the Docker build context to access both backend and frontend code.
 
 **Parameters:**
 - `TAG` – Sets the image tag (default: `latest`)

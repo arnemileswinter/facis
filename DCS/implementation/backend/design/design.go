@@ -2,6 +2,7 @@ package design
 
 import (
 	. "goa.design/goa/v3/dsl"
+	cors "goa.design/plugins/v3/cors/dsl" // Kein Punkt, sondern Alias 'cors'
 )
 
 // JWTAuth defines the JWT-based security scheme backed by Keycloak OIDC.
@@ -33,6 +34,11 @@ var _ = API("dcs", func() {
 	Title("DCS API Server")
 	Version("0.0.1")
 
+	cors.Origin("*", func() {
+		cors.Headers("Content-Type", "Authorization", "X-Shared-Secret", "X-Api-Version")
+		cors.Methods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+		cors.MaxAge(100)
+	})
 	// Global error definitions mapped to HTTP status codes.
 	Error("unauthorized", String, "Credentials are invalid or missing.")
 	Error("forbidden", String, "Insufficient permissions.")

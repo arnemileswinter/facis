@@ -28,6 +28,28 @@ Thanks to ORCE’s orchestration features, deploying a Digital Contracting Servi
 
 ---
 
+## Helm Chart Composition (Bundled + Optional Dependencies)
+
+The chart bundles `postgresql`, `keycloak`, and `nats` as dependencies, but each can be enabled or disabled independently.
+
+- Enable bundled dependencies when needed:
+  - `postgresql.enabled=true`
+  - `keycloak.enabled=true`
+  - `nats.enabled=true`
+- Or disable them and point DCS to external services:
+  - `serviceDiscovery.postgresqlHost`
+  - `serviceDiscovery.keycloakHost`
+  - `serviceDiscovery.natsHost`
+
+For DCS routing paths, configure:
+
+- `route.basePath` for a single base route (example: `/tenant-a/dcs`)
+- `paths.api` and `paths.ui` for explicit API/UI path overrides
+
+Ingress is disabled by default and uses standard Kubernetes Ingress resources.
+
+---
+
 ## ⚡️ Click-to-Deploy
 
 ---
@@ -47,11 +69,7 @@ The following CLI tools must be installed and accessible in your PATH:
 
 ### Kubernetes Cluster
 - A working Kubernetes cluster
-- **Traefik ingress controller** installed in the cluster (`kube-system` namespace)
-  ```bash
-  # Install Traefik (if not already installed)
-  kubectl apply -f https://raw.githubusercontent.com/traefik/traefik-helm-chart/master/traefik/templates/deployment.yaml
-  ```
+- An ingress controller installed in the cluster (for example NGINX or Traefik) when `ingress.enabled=true`
 
 ### Files & Credentials
 - **Kubeconfig file**: Path to your Kubernetes cluster configuration (e.g., `~/.kube/config`)
@@ -389,8 +407,12 @@ For production deployments:
 ### Keycloak Configuration
 - Use a properly secured external Keycloak instance (not the quickstart)
 - Configure valid redirect URIs in your client settings:
-  - Add: `https://<your-domain>/<path>/*`
-  - Example: `https://example.com/dcs/*`
+  - **Valid Redirect URIs**: For login callback (backend)
+    - Add: `https://<your-domain>/<path>/api/auth/callback`
+    - Example: `https://example.com/dcs/api/auth/callback`
+  - **Valid Post Logout Redirect URIs**: For logout callback (backend)
+    - Add: `https://<your-domain>/<path>/api/auth/logout-complete`
+    - Example: `https://example.com/dcs/api/auth/logout-complete`
 - Enable **Client authentication**, **Authorization**, **Standard flow enabled**
 - Consider using a service account with proper RBAC for automation
 
@@ -520,6 +542,20 @@ Once all prerequisites are in place, you can deploy the Digital Contracting Serv
   - Must be registered as a valid redirect URI in your Keycloak client configuration
   - Used by the login and callback handlers to build the authorization and token exchange URLs
   - Note: `deploy.sh` defaults to `http://localhost:8991` if unset, but the backend requires it explicitly
+
+- **`OIDC_LOGOUT_REDIRECT_URI`** - The post-logout redirect URI when user logs out
+  - **Optional** - if not set, defaults to `https://<domain>/<path>/api/auth/logout-complete`
+  - This is a **backend URL** where Keycloak redirects after logout
+  - Example: `https://example.com/api/dcs/auth/logout-complete` or `http://localhost:8991/api/auth/logout-complete`
+  - Must be registered as a valid post-logout redirect URI in your Keycloak client configuration
+  - The backend's `/api/auth/logout-complete` endpoint receives this redirect, clears the cookie, and redirects to frontend home
+  - **In development**: Add the backend logout URL to Keycloak
+  - **In production**: Ensure the backend logout URL is registered in the Keycloak client settings
+
+- **`API_PATH_PREFIX`** - Optional API base path prefix added by reverse proxies
+  - Default: empty
+  - Example: `/api` or `/gateway/dcs`
+  - Used e.g. by backend cookie path construction: `<API_PATH_PREFIX>/auth/refresh`
 
 **Example:**
 ```bash

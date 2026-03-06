@@ -2,8 +2,12 @@ package service
 
 import (
 	"context"
+	"digital-contracting-service/internal/pathutil"
 	"net/http"
 )
+
+const apiPathPrefixEnv = "DCS_API_PATH"
+const defaultAPIPathPrefix = ""
 
 // contextKey is a private type for context keys in this package.
 type contextKey int
@@ -46,13 +50,32 @@ func SetRefreshTokenInContext(ctx context.Context, refreshToken string) {
 	if !ok || refreshToken == "" {
 		return
 	}
+	cookiePath := pathutil.JoinPaths(apiPathPrefixEnv, defaultAPIPathPrefix, "/auth/refresh")
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
-		Path:     "/auth/refresh",
+		Path:     cookiePath,
 		MaxAge:   7 * 24 * 60 * 60, // 7 days
+	})
+}
+
+// ClearRefreshTokenCookie clears the refresh token cookie by setting MaxAge to -1.
+func ClearRefreshTokenCookie(ctx context.Context) {
+	w, ok := ResponseWriterFromContext(ctx)
+	if !ok {
+		return
+	}
+	cookiePath := pathutil.JoinPaths(apiPathPrefixEnv, defaultAPIPathPrefix, "/auth/refresh")
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Path:     cookiePath,
+		MaxAge:   -1, // Delete the cookie
 	})
 }
