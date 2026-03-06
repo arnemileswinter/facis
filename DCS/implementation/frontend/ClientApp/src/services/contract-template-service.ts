@@ -34,10 +34,12 @@ export const ContractTemplateService = {
     return http.put<ContractTemplateUpdateResponse>('/template/update', request).then((res) => res.data)
   },
 
-  async search(request: ContractTemplateSearchRequest) {
+  async search(request: ContractTemplateSearchRequest): Promise<ContractTemplateSearchResponse[]> {
     return http
-      .get<ContractTemplateSearchResponse>('/template/search', { params: request })
-      .then((res) => res.data.search_results)
+      .get<ContractTemplateSearchResponse[]>('/template/search', { params: request })
+      .then((res) => {
+        return res.data
+      })
       .catch((err) => {
         console.error('Search Error:', err)
         return []

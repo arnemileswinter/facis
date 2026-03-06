@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { PartialContractTemplate } from '@/models/contract-template'
+import type { ContractTemplateSearchResponse } from '@/models/responses/template-response'
 import { ContractTemplateService } from '@/services/contract-template-service'
+import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
 import { computed, ref, useTemplateRef, type Ref } from 'vue'
 
 const props = defineProps<{
@@ -12,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const search = ref('')
+const isSearching = ref(false)
 
 const filterLabels = {
   did: 'DID',
@@ -21,17 +24,27 @@ const filterLabels = {
   state: 'State',
   name: 'Name',
   description: 'Description',
-  filter: 'Filter',
+  // filter: 'Filter',
 } as const
 type FilterLabels = typeof filterLabels
 type FilterLabelKey = keyof FilterLabels
 type FilterLabelValue = FilterLabels[FilterLabelKey]
 
+const empyt: PartialContractTemplate = {
+  did: '12',
+  document_number: -1,
+  version: -1,
+  created_at: '',
+  updated_at: '',
+  name: '',
+  template_type: 'FRAME_CONTRACT',
+  state: 'DRAFT',
+}
+
 const selectedFilter = ref<FilterLabelValue>('Name')
-
 const filterPopover = useTemplateRef('filterPopover')
-
-const searchResults: Ref<Set<string>> = ref(new Set())
+const selectedItem: Ref<PartialContractTemplate> = ref(empyt)
+const searchResults: Ref<ContractTemplateSearchResponse[]> = ref([])
 
 const searchKey = computed(() => {
   return (Object.keys(filterLabels) as FilterLabelKey[]).find((key) => filterLabels[key] === selectedFilter.value)
@@ -39,25 +52,69 @@ const searchKey = computed(() => {
 
 const searchedItems = computed(() => {
   if (search.value.length < 1) return props.items
-  return props.items.filter((item) => searchResults.value.has(`${item.did}|${item.document_number}|${item.version}`))
+
+  if (searchResults.value.length === 0) return []
+
+  const backendIds = new Set(searchResults.value.map((item) => `${item.did}|${item.document_number}|${item.version}`))
+
+  return props.items.filter((item) => backendIds.has(`${item.did}|${item.document_number}|${item.version}`))
 })
 
-async function searchList() {
+const inputValue: Ref<PartialContractTemplate> = computed(() => {
+  return search.value.length < 1 || !searchKey.value ? empyt : { ...empyt, [searchKey.value]: search.value }
+})
+
+async function searchRequest() {
   if (search.value.length < 1 || !searchKey.value) {
-    emit('searchResult', props.items)
+    searchResults.value = []
     return
   }
 
-  const request = { [searchKey.value]: search.value }
-  const searchResult = await ContractTemplateService.search(request)
-  searchResults.value = new Set(searchResult.map((item) => `${item.did}|${item.document_number}|${item.version}`))
+  isSearching.value = true
+  try {
+    const request = { [searchKey.value]: search.value }
+    const result = await ContractTemplateService.search(request)
+    searchResults.value = result || []
+  } finally {
+    isSearching.value = false
+  }
+}
+
+function searchList() {
   emit('searchResult', searchedItems.value)
+}
+
+const getDisplayValue = (template: PartialContractTemplate | null): string => {
+  return searchKey.value && template ? String(template[searchKey.value]) : ''
+}
+
+const autocompleteOptionClasses = (active: boolean, selected: boolean) => [
+  'cursor-pointer px-4 py-2',
+  active ? 'bg-secondary text-secondary-content' : 'bg-base-100',
+  selected ? 'font-bold' : '',
+]
+
+async function onComboboxFocus() {
+  await searchRequest()
+}
+
+function onSearchChange(event: Event) {
+  search.value = (event.target as HTMLInputElement).value
+  searchRequest()
+}
+
+function onComboboxUpdate(item: PartialContractTemplate) {
+  selectedItem.value = item
+  if (item) {
+    search.value = ''
+    searchResults.value = []
+    emit('searchResult', [item])
+  }
 }
 
 function onFilterSelect(label: FilterLabelValue) {
   selectedFilter.value = label
   filterPopover.value?.hidePopover()
-  searchList()
 }
 </script>
 
@@ -83,25 +140,52 @@ function onFilterSelect(label: FilterLabelValue) {
         </li>
         <template v-for="[key, label] in Object.entries(filterLabels)" :key="key">
           <li>
-            <a
-              :class="{ 'bg-primary text-primary-content': label === selectedFilter }"
-              @click="onFilterSelect(label)"
-            >
+            <a :class="{ 'bg-primary text-primary-content': label === selectedFilter }" @click="onFilterSelect(label)">
               {{ label }}
             </a>
           </li>
         </template>
       </ul>
     </div>
-    <label class="input input-secondary join-item grow">
-      <input
-        type="text"
-        v-model="search"
-        @keyup.enter="searchList"
-        placeholder="Search templates"
-        aria-label="Search templates"
-      />
-    </label>
+    <div class="relative grow">
+      <Combobox v-model="selectedItem" @update:model-value="onComboboxUpdate" nullable>
+        <label class="input input-secondary join-item w-full">
+          <ComboboxInput
+            @change="onSearchChange"
+            @focus="onComboboxFocus"
+            @keyup.enter="searchList"
+            :display-value="getDisplayValue as (item: unknown) => string"
+            placeholder="Search templates"
+            class="w-full bg-transparent"
+          />
+        </label>
+
+        <ComboboxOptions
+          v-if="search.length > 0"
+          class="absolute left-0 right-0 top-full z-10 rounded-lg border border-base-300 bg-base-100 shadow-lg"
+        >
+          <ComboboxOption :value="inputValue" class="hidden"></ComboboxOption>
+
+          <div v-if="isSearching" class="px-4 py-2 text-base-content/50">Searching...</div>
+          <template v-else-if="searchedItems.length > 0">
+            <ComboboxOption
+              v-for="item in searchedItems"
+              :key="`${item.did}|${item.document_number}|${item.version}`"
+              :value="item"
+              as="template"
+              v-slot="{ active, selected }"
+            >
+              <li v-if="searchKey" :class="autocompleteOptionClasses(active, selected)">
+                {{ item[searchKey] }}
+                <span v-if="selected" class="ml-2">✓</span>
+              </li>
+            </ComboboxOption>
+          </template>
+
+          <div v-else class="px-4 py-2 text-base-content/50">No templates found</div>
+        </ComboboxOptions>
+      </Combobox>
+    </div>
     <button @click="searchList" class="btn btn-secondary join-item">Search</button>
   </div>
 </template>

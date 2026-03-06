@@ -16,16 +16,12 @@ export interface ContractTemplateSubmitResponse extends ContractTemplateBaseResp
 
 export interface ContractTemplateUpdateResponse extends ContractTemplateBaseResponse {}
 
-export interface ContractTemplateSearchResponseItem extends ContractTemplateBaseResponse {
+export interface ContractTemplateSearchResponse extends ContractTemplateBaseResponse {
   state: ContractTemplateState
   name?: string
   description?: string
   created_at: string
   updated_at: string
-}
-
-export interface ContractTemplateSearchResponse {
-  search_results: ContractTemplateSearchResponseItem[]
 }
 
 export interface ContractTemplateRetrieveResponse {
