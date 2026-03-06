@@ -14,6 +14,7 @@ import (
 	"digital-contracting-service/internal/pathutil"
 
 	"goa.design/clue/log"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // authSvc implements the generated auth.Service interface.
@@ -86,17 +87,17 @@ func (s *authSvc) Refresh(ctx context.Context) (*genauth.RefreshResult, error) {
 	// Extract *http.Request from context (injected by RequestContextMiddleware).
 	r, ok := HTTPRequestFromContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("missing HTTP request in context")
+		return nil, goa.PermanentError("unauthorized", "missing HTTP request in context")
 	}
 
 	cookie, err := r.Cookie("refresh_token")
 	if err != nil {
-		return nil, fmt.Errorf("missing refresh token cookie")
+		return nil, goa.PermanentError("unauthorized", "missing or invalid refresh token")
 	}
 
 	tokenResp, err := s.refreshAccessToken(ctx, cookie.Value)
 	if err != nil {
-		return nil, fmt.Errorf("token refresh failed: %w", err)
+		return nil, goa.PermanentError("unauthorized", "token refresh failed: %v", err)
 	}
 
 	return &genauth.RefreshResult{
