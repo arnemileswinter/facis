@@ -136,8 +136,8 @@ var ContractTemplateSearchResponse = Type("ContractTemplateSearchResponse", func
 	Attribute("did", String, "Decentralized Identifier of the contract template")
 	Attribute("document_number", String, "The document number of the contract template")
 	Attribute("version", Int, "The version number of the contract template")
-
 	Attribute("state", String, "The state of the contract template")
+	Attribute("template_type", String, "The type of the template")
 
 	Attribute("name", String, "The name of the contract template")
 	Attribute("description", String, "A description for that template")
@@ -146,7 +146,7 @@ var ContractTemplateSearchResponse = Type("ContractTemplateSearchResponse", func
 
 	Attribute("updated_at", String, "The timestamp when the contract template was updated")
 
-	Required("did", "document_number", "version", "state", "created_at", "updated_at")
+	Required("did", "document_number", "version", "state", "template_type", "created_at", "updated_at")
 })
 
 var ContractTemplateRetrieveRequest = Type("ContractTemplateRetrieveRequest", func() {
@@ -166,7 +166,7 @@ var ContractTemplateItem = Type("ContractTemplateItem", func() {
 	Attribute("created_at", String, "Created at")
 	Attribute("updated_at", String, "Updated at")
 
-	Required("did", "document_number", "version", "state", "created_at", "updated_at")
+	Required("did", "document_number", "version", "state", "template_type", "created_at", "updated_at")
 })
 
 var ReviewTaskItem = Type("ReviewTaskItem", func() {
@@ -235,7 +235,7 @@ var ContractTemplateRetrieveByIDResponse = Type("ContractTemplateRetrieveByIDRes
 
 	Attribute("template_data", Any, "The template data of the contract template")
 
-	Required("did", "document_number", "version", "state", "created_by", "created_at", "updated_at", "template_data")
+	Required("did", "document_number", "version", "state", "template_type", "created_by", "created_at", "updated_at", "template_data")
 })
 
 var ContractTemplateApproveRequest = Type("ContractTemplateApproveRequest", func() {
