@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
@@ -26,7 +27,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -35,7 +36,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -54,7 +55,7 @@ func TestArchive_ArchiveContractTemplateDataInDraftState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -84,7 +85,7 @@ func TestArchive_ArchiveNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -121,7 +122,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 	creator := "Test User"
 
 	ctx := context.Background()
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	ctxTx, cancel := context.WithTimeout(ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctxTx)
@@ -130,7 +131,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -149,7 +150,7 @@ func TestArchive_ArchiveContractTemplateDataInSubmittedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -181,7 +182,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 	creator := "Test User"
 
 	ctx := context.Background()
-	ctxTx, cancel := context.WithTimeout(ctx, base.TransactionTimeout())
+	ctxTx, cancel := context.WithTimeout(ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctxTx)
@@ -190,7 +191,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -209,7 +210,7 @@ func TestArchive_ArchiveContractTemplateDataInRejectedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -241,7 +242,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -250,7 +251,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -269,7 +270,7 @@ func TestArchive_ArchiveContractTemplateDataInReviewedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -301,7 +302,7 @@ func TestArchive_ArchiveContractTemplateDataInApprovedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -310,7 +311,7 @@ func TestArchive_ArchiveContractTemplateDataInApprovedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -329,7 +330,7 @@ func TestArchive_ArchiveContractTemplateDataInApprovedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -361,7 +362,7 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -370,7 +371,7 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -389,7 +390,7 @@ func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -421,7 +422,7 @@ func TestArchive_ArchiveContractTemplateDataInDeletedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -430,7 +431,7 @@ func TestArchive_ArchiveContractTemplateDataInDeletedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),
@@ -461,7 +462,7 @@ func TestArchive_ArchiveContractTemplateDataInDeprecatedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -470,7 +471,7 @@ func TestArchive_ArchiveContractTemplateDataInDeprecatedState(t *testing.T) {
 
 	cmd := command.ArchiveCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		ArchivedBy:     creator,
 		UpdatedAt:      time.Now(),

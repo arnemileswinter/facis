@@ -2,7 +2,7 @@ package query
 
 import (
 	"context"
-	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	aopprovaltaskstate "digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/db"
 	"fmt"
@@ -38,7 +38,7 @@ type GetAllApprovalTasksForDIDHandler struct {
 
 func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDIDQry) ([]GetAllApprovalTasksForDIDResult, error) {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)

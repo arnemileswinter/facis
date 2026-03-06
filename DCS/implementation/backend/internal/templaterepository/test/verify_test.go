@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
@@ -27,7 +28,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -39,7 +40,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 
 	cmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		VerifiedBy:     reviewers[0],
 		UpdatedAt:      time.Now(),
@@ -62,7 +63,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, "", 1, reviewtaskstate.Verified.String())
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, conf.DefaultDocumentNumber(), 1, reviewtaskstate.Verified.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}
@@ -87,7 +88,7 @@ func TestVerify_VerifyNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -125,7 +126,7 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -137,7 +138,7 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 
 	cmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		VerifiedBy:     approver,
 		UpdatedAt:      time.Now(),
@@ -160,7 +161,7 @@ func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := repo.ATRepo.TaskExistsInState(tx, *did, "", 1, approver, reviewtaskstate.Verified.String())
+	exists, err := repo.ATRepo.TaskExistsInState(tx, *did, conf.DefaultDocumentNumber(), 1, approver, reviewtaskstate.Verified.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of approval tasks: %v", err)
 	}
@@ -187,7 +188,7 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -196,7 +197,7 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 
 	cmd := command.VerifyCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		VerifiedBy:     creator,
 		UpdatedAt:      time.Now().Add(-5 * time.Second),

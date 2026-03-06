@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
@@ -29,7 +30,7 @@ func TestUpdateManage_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -49,7 +50,7 @@ func TestUpdateManage_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -73,7 +74,7 @@ func TestUpdateManage_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -108,7 +109,7 @@ func TestUpdateManage_UpdateContractTemplateDataInSubmitState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -128,7 +129,7 @@ func TestUpdateManage_UpdateContractTemplateDataInSubmitState(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -152,7 +153,7 @@ func TestUpdateManage_UpdateContractTemplateDataInSubmitState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -186,7 +187,7 @@ func TestUpdateManage_UpdateContractTemplateDataInRejectedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -206,7 +207,7 @@ func TestUpdateManage_UpdateContractTemplateDataInRejectedState(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -230,7 +231,7 @@ func TestUpdateManage_UpdateContractTemplateDataInRejectedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -264,7 +265,7 @@ func TestUpdateManage_UpdateContractTemplateDataInReviewedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -284,7 +285,7 @@ func TestUpdateManage_UpdateContractTemplateDataInReviewedState(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -308,7 +309,7 @@ func TestUpdateManage_UpdateContractTemplateDataInReviewedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -342,7 +343,7 @@ func TestUpdateManage_UpdateContractTemplateDataInApproveState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -362,7 +363,7 @@ func TestUpdateManage_UpdateContractTemplateDataInApproveState(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -396,7 +397,7 @@ func TestUpdateManage_UpdateContractTemplateDataInRegisteredState(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -416,7 +417,7 @@ func TestUpdateManage_UpdateContractTemplateDataInRegisteredState(t *testing.T) 
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -450,7 +451,7 @@ func TestUpdateManage_UpdateContractTemplateDataInArchiveState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -470,7 +471,7 @@ func TestUpdateManage_UpdateContractTemplateDataInArchiveState(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -502,7 +503,7 @@ func TestUpdateManage_UpdateNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -540,7 +541,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToDraft(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -561,7 +562,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToDraft(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -586,7 +587,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToDraft(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -618,7 +619,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToSubmitted(t *testing.T)
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -639,7 +640,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToSubmitted(t *testing.T)
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -674,7 +675,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToRejected(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -695,7 +696,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToRejected(t *testing.T) 
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -730,7 +731,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToReviewed(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -751,7 +752,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToReviewed(t *testing.T) 
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -786,7 +787,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToApproved(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -807,7 +808,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToApproved(t *testing.T) 
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -842,7 +843,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToRegistered(t *testing.T
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -863,7 +864,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToRegistered(t *testing.T
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -898,7 +899,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToArchive(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -919,7 +920,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToArchive(t *testing.T) {
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -944,7 +945,7 @@ func TestUpdateManage_SetContractTemplateStateFromDraftToArchive(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -976,7 +977,7 @@ func TestUpdateManage_SetContractTemplateStateFromSubmittedToDraft(t *testing.T)
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1001,7 +1002,7 @@ func TestUpdateManage_SetContractTemplateStateFromSubmittedToDraft(t *testing.T)
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1026,7 +1027,7 @@ func TestUpdateManage_SetContractTemplateStateFromSubmittedToDraft(t *testing.T)
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -1081,7 +1082,7 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToDraft(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1106,7 +1107,7 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToDraft(t *testing.T) 
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1131,7 +1132,7 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToDraft(t *testing.T) 
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -1186,7 +1187,7 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToDraft(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1211,7 +1212,7 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToDraft(t *testing.T) 
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1246,7 +1247,7 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToSubmitted(t *testing
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1271,7 +1272,7 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToSubmitted(t *testing
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1296,7 +1297,7 @@ func TestUpdateManage_SetContractTemplateStateFromReviewedToSubmitted(t *testing
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -1352,7 +1353,7 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToSubmitted(t *testing
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1379,7 +1380,7 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToSubmitted(t *testing
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1414,7 +1415,7 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToReviewed(t *testing.
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1441,7 +1442,7 @@ func TestUpdateManage_SetContractTemplateStateFromApprovedToReviewed(t *testing.
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1476,7 +1477,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToDraft(t *testing.T
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1497,7 +1498,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToDraft(t *testing.T
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1532,7 +1533,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToSubmitted(t *testi
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1553,7 +1554,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToSubmitted(t *testi
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1588,7 +1589,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToApproved(t *testin
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1609,7 +1610,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToApproved(t *testin
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1644,7 +1645,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToArchived(t *testin
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1665,7 +1666,7 @@ func TestUpdateManage_SetContractTemplateStateFromRegisteredToArchived(t *testin
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1700,7 +1701,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToDraft(t *testing.T) 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1721,7 +1722,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToDraft(t *testing.T) 
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1756,7 +1757,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToSubmitted(t *testing
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1777,7 +1778,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToSubmitted(t *testing
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1812,7 +1813,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToApproved(t *testing.
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1833,7 +1834,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToApproved(t *testing.
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,
@@ -1868,7 +1869,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToRegistered(t *testin
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -1889,7 +1890,7 @@ func TestUpdateManage_SetContractTemplateStateFromArchivedToRegistered(t *testin
 
 	cmd := command.UpdateManageCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		State:          &newState,
 		UpdatedBy:      creator,

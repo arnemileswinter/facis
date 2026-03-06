@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
@@ -167,7 +168,7 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *Tes
 	for _, reviewer := range reviewers {
 		reviewTask := database.ReviewTaskData{
 			DID:            did,
-			DocumentNumber: "",
+			DocumentNumber: conf.DefaultDocumentNumber(),
 			Version:        1,
 			Reviewer:       reviewer,
 			State:          state.String(),
@@ -194,7 +195,7 @@ func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *T
 
 	approvalTask := database.ApprovalTaskData{
 		DID:            did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		Approver:       approver,
 		State:          state.String(),

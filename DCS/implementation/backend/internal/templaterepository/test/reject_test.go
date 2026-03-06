@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
@@ -27,7 +28,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -40,7 +41,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     approver,
@@ -62,7 +63,7 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -93,7 +94,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -104,7 +105,7 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     "Test User 2",
@@ -134,7 +135,7 @@ func TestCreate_RejectNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -170,7 +171,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -181,7 +182,7 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     rejectedBy,
@@ -211,7 +212,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -222,7 +223,7 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now(),
 		RejectedBy:     rejectedBy,
@@ -252,7 +253,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -263,7 +264,7 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 
 	cmd := command.RejectCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
 		RejectedBy:     rejectedBy,

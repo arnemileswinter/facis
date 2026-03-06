@@ -20,14 +20,14 @@ type PostgresContractTemplateRepo struct {
 func (r *PostgresContractTemplateRepo) Create(tx *sqlx.Tx, data db.ContractTemplate) (*time.Time, error) {
 	statement := `
         INSERT INTO contract_templates (
-            did, created_by, state, name,
+            did, document_number, created_by, state, name,
             description, template_data, template_type
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING created_at
     `
 	var createdAt time.Time
 	err := tx.GetContext(r.Ctx, &createdAt, statement,
-		data.DID, data.CreatedBy, data.State, data.Name,
+		data.DID, data.DocumentNumber, data.CreatedBy, data.State, data.Name,
 		data.Description, data.TemplateData, data.TemplateType,
 	)
 	if err != nil {

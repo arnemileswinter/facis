@@ -2,7 +2,7 @@ package command
 
 import (
 	"context"
-	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
@@ -32,7 +32,7 @@ type Creator struct {
 
 func (h *Creator) Handle(cmd CreateCmd) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -42,13 +42,14 @@ func (h *Creator) Handle(cmd CreateCmd) error {
 	defer tx.Rollback()
 
 	data := db.ContractTemplate{
-		DID:          cmd.DID,
-		CreatedBy:    cmd.CreatedBy,
-		State:        contracttemplatestate.Draft.String(),
-		TemplateType: cmd.TemplateType.String(),
-		Name:         cmd.Name,
-		Description:  cmd.Description,
-		TemplateData: cmd.TemplateData,
+		DID:            cmd.DID,
+		DocumentNumber: conf.DefaultDocumentNumber(),
+		CreatedBy:      cmd.CreatedBy,
+		State:          contracttemplatestate.Draft.String(),
+		TemplateType:   cmd.TemplateType.String(),
+		Name:           cmd.Name,
+		Description:    cmd.Description,
+		TemplateData:   cmd.TemplateData,
 	}
 	createdAt, err := h.CTRepo.Create(tx, data)
 	if err != nil {

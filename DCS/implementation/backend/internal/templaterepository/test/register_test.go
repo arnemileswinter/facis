@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
@@ -26,7 +27,7 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -35,7 +36,7 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -54,7 +55,7 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    creator,
 	}
@@ -84,7 +85,7 @@ func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -122,7 +123,7 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -131,7 +132,7 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -162,7 +163,7 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -171,7 +172,7 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -202,7 +203,7 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -211,7 +212,7 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -242,7 +243,7 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -251,7 +252,7 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -282,7 +283,7 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -291,7 +292,7 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
@@ -322,7 +323,7 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -331,7 +332,7 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 
 	cmd := command.RegisterCmd{
 		DID:            *did,
-		DocumentNumber: "",
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RegisteredBy:   creator,
 		UpdatedAt:      time.Now(),
