@@ -13,7 +13,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    meta: { name: 'DCS', hideInSidebar: true, requiresAuth: true, layout: 'blank', title: 'DCS' },
+    meta: { name: 'DCS', hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS' },
     component: LoginView,
   },
   {
