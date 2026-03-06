@@ -88,6 +88,13 @@ curl http://0.0.0.0:8991/template/search
 ### Build a Docker image
 To build a Docker image, you can use the helper script [build-image.sh](./build-image.sh).
 
+**Important:** The Docker image embeds the frontend application. The build process:
+1. Builds the Vue.js frontend from `../frontend/ClientApp`
+2. Copies the built frontend into the backend image at `/app/web/dist`
+3. The backend serves the frontend at `/ui` (root `/` redirects to `/ui`), keeping API routes at the root level
+
+The build script must be run from the `backend/` directory, as it uses the parent directory (`implementation/`) as the Docker build context to access both backend and frontend code.
+
 **Parameters:**
 - `TAG` – Sets the image tag (default: `latest`)
 - `REGISTRY` – Docker registry (environment variable)

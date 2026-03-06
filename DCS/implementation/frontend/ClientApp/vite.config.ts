@@ -1,13 +1,34 @@
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath } from 'url'
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), 'DCS_')
+  const basePath = env.DCS_UI_PATH || '/ui/'
+
+  
+  // Plugin to inject base href in dev mode
+  const baseHrefPlugin: Plugin = {
+    name: 'base-href-inject',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        if (command === 'serve') {
+          // In dev mode, replace the placeholder with the actual base path
+          return html.replace('__DCS_UI_BASE_PATH__', basePath)
+        }
+        // In build mode, leave the placeholder for inject-config.sh to handle
+        return html
+      }
+    }
+  }
+
   return {
-    plugins: [vue(), tailwindcss()],
+    // during build, use relative paths such that we respect <base href>
+    base: command === 'build' ? './' : basePath,
+    plugins: [baseHrefPlugin, vue(), tailwindcss()],
     envPrefix: 'DCS',
     resolve: {
       alias: {
@@ -19,9 +40,8 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: env.DCS_API_BASE_URL,
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
+          target: env.DCS_API_TARGET || 'http://localhost:8991',
+          changeOrigin: true
         },
       },
     },

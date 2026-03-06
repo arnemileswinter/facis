@@ -15,6 +15,7 @@ import (
 	"digital-contracting-service/internal/auth"
 	"digital-contracting-service/internal/middleware"
 	"digital-contracting-service/internal/service"
+	"digital-contracting-service/migrations"
 	"digital-contracting-service/internal/templaterepository/db/pg"
 	"flag"
 	"fmt"
@@ -60,13 +61,24 @@ func main() {
 	}
 	defer db.Close()
 
-	log.Printf(ctx, "Connecting to database")
+	// Run database migrations
+	if err := migrations.Run(db); err != nil {
+		log.Fatalf(ctx, err, "Could not run database migrations")
+		os.Exit(1)
+	}
 
-	natsClient, err := nats.Connect(nats.DefaultURL)
+	// Connect to NATS (use NATS_URL env var or default)
+	natsURL := os.Getenv("NATS_URL")
+	if natsURL == "" {
+		natsURL = nats.DefaultURL
+	}
+	natsClient, err := nats.Connect(natsURL)
 	if err != nil {
 		log.Printf(ctx, "Nats support will be deactivated: Could not connect to nats service: %v", err)
 	}
-	defer natsClient.Close()
+	if natsClient != nil {
+		defer natsClient.Close()
+	}
 
 	// Initialize OIDC validator and JWT authenticator.
 	oidcIssuerURL := os.Getenv("OIDC_ISSUER_URL")

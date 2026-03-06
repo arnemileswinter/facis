@@ -91,7 +91,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute } from 'vue-router'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
 import { TemplateType, isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
@@ -119,8 +118,6 @@ const description = computed({
   get: () => store.description,
   set: (value: string) => store.updateDescription(value)
 })
-
-const route = useRoute()
 
 const selectedSubcontracts = ref<SubcontractKey[]>([])
 const showSubcontractPicker = ref(false)

@@ -2,12 +2,11 @@ package service
 
 import (
 	"context"
+	"digital-contracting-service/internal/pathutil"
 	"net/http"
-	"os"
 )
 
-const refreshCookiePath = "/auth/refresh"
-const apiPathPrefixEnv = "API_PATH_PREFIX"
+const apiPathPrefixEnv = "DCS_API_PATH"
 const defaultAPIPathPrefix = ""
 
 // contextKey is a private type for context keys in this package.
@@ -51,11 +50,7 @@ func SetRefreshTokenInContext(ctx context.Context, refreshToken string) {
 	if !ok || refreshToken == "" {
 		return
 	}
-	apiPathPrefix := defaultAPIPathPrefix
-	if configuredPrefix, ok := os.LookupEnv(apiPathPrefixEnv); ok {
-		apiPathPrefix = configuredPrefix
-	}
-	cookiePath := apiPathPrefix + refreshCookiePath
+	cookiePath := pathutil.JoinPaths(apiPathPrefixEnv, defaultAPIPathPrefix, "/auth/refresh")
 	http.SetCookie(w, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
@@ -69,22 +64,18 @@ func SetRefreshTokenInContext(ctx context.Context, refreshToken string) {
 
 // ClearRefreshTokenCookie clears the refresh token cookie by setting MaxAge to -1.
 func ClearRefreshTokenCookie(ctx context.Context) {
-w, ok := ResponseWriterFromContext(ctx)
-if !ok {
-return
-}
-apiPathPrefix := defaultAPIPathPrefix
-if configuredPrefix, ok := os.LookupEnv(apiPathPrefixEnv); ok {
-apiPathPrefix = configuredPrefix
-}
-cookiePath := apiPathPrefix + refreshCookiePath
-http.SetCookie(w, &http.Cookie{
-Name:     "refresh_token",
-Value:    "",
-HttpOnly: true,
-Secure:   true,
-SameSite: http.SameSiteLaxMode,
-Path:     cookiePath,
-MaxAge:   -1, // Delete the cookie
-})
+	w, ok := ResponseWriterFromContext(ctx)
+	if !ok {
+		return
+	}
+	cookiePath := pathutil.JoinPaths(apiPathPrefixEnv, defaultAPIPathPrefix, "/auth/refresh")
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+		Path:     cookiePath,
+		MaxAge:   -1, // Delete the cookie
+	})
 }

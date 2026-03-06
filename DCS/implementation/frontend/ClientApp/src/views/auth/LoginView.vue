@@ -8,9 +8,9 @@ const router = useRouter()
 
 onMounted(async () => {
   // Keycloak kann je nach Konfiguration auch auf '/' zurückleiten.
-  // In dem Fall direkt zu auth.callback forwarden, ohne beforeEach zu involvieren.
+  // In dem Fall direkt zu auth.success forwarden, ohne beforeEach zu involvieren.
   if (route.query.session_state && route.query.code && route.query.iss) {
-    router.replace({ name: 'auth.callback', query: route.query })
+    router.replace({ name: 'auth.success', query: route.query })
     return
   }
 

@@ -1,9 +1,8 @@
-import axios from 'axios'
-
-const API_BASE_URL = import.meta.env.DCS_API_URL
+import axios from "axios";
+import { getConfig } from '@/config'
 
 const http = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getConfig().API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 

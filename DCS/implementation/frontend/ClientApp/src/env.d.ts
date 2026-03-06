@@ -11,8 +11,8 @@ interface ViteTypeOptions {
 }
 
 interface ImportMetaEnv {
-  readonly DCS_API_BASE_URL: string
-  readonly DCS_API_URL: string
+  readonly DCS_API_PATH: string
+  readonly DCS_UI_PATH: string
 }
 
 interface ImportMeta {

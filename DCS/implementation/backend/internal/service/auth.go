@@ -11,8 +11,10 @@ import (
 	"strings"
 
 	genauth "digital-contracting-service/gen/auth"
+	"digital-contracting-service/internal/pathutil"
 
 	"goa.design/clue/log"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // authSvc implements the generated auth.Service interface.
@@ -21,6 +23,7 @@ type authSvc struct {
 	oidcClientID      string
 	redirectURI       string
 	logoutRedirectURI string
+	uiBasePath        string
 }
 
 // NewAuth returns the Auth service implementation.
@@ -30,6 +33,7 @@ func NewAuth() genauth.Service {
 		oidcClientID:      os.Getenv("OIDC_CLIENT_ID"),
 		redirectURI:       os.Getenv("OIDC_REDIRECT_URI"),
 		logoutRedirectURI: os.Getenv("OIDC_LOGOUT_REDIRECT_URI"),
+		uiBasePath:        pathutil.NormalizePath(os.Getenv("DCS_UI_PATH"), "/ui/", true),
 	}
 }
 
@@ -70,10 +74,9 @@ func (s *authSvc) Callback(ctx context.Context, p *genauth.CallbackPayload) (*ge
 	// This is picked up by SetRefreshTokenInContext which sets the cookie immediately.
 	SetRefreshTokenInContext(ctx, tokenResp.RefreshToken)
 
-	// Redirect to frontend /auth/success
-	// The frontend will then call /auth/refresh to get the access token
+	// Redirect to frontend auth success route under configured UI base path.
 	return &genauth.CallbackResult{
-		Location: "/auth/success",
+		Location: s.uiBasePath + "auth/success",
 	}, nil
 }
 
@@ -84,17 +87,17 @@ func (s *authSvc) Refresh(ctx context.Context) (*genauth.RefreshResult, error) {
 	// Extract *http.Request from context (injected by RequestContextMiddleware).
 	r, ok := HTTPRequestFromContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("missing HTTP request in context")
+		return nil, goa.PermanentError("unauthorized", "missing HTTP request in context")
 	}
 
 	cookie, err := r.Cookie("refresh_token")
 	if err != nil {
-		return nil, fmt.Errorf("missing refresh token cookie")
+		return nil, goa.PermanentError("unauthorized", "missing or invalid refresh token")
 	}
 
 	tokenResp, err := s.refreshAccessToken(ctx, cookie.Value)
 	if err != nil {
-		return nil, fmt.Errorf("token refresh failed: %w", err)
+		return nil, goa.PermanentError("unauthorized", "token refresh failed: %v", err)
 	}
 
 	return &genauth.RefreshResult{
@@ -104,12 +107,12 @@ func (s *authSvc) Refresh(ctx context.Context) (*genauth.RefreshResult, error) {
 	}, nil
 }
 
-// Logout redirects to the Keycloak logout endpoint.
+// Logout returns the Keycloak OIDC logout URL.
 func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
 	log.Printf(ctx, "auth.logout")
 
 	// Build Keycloak logout URL with configured post-logout redirect
-	postLogoutRedirect := "/"
+	postLogoutRedirect := s.uiBasePath
 	if s.logoutRedirectURI != "" {
 		postLogoutRedirect = s.logoutRedirectURI
 	}
@@ -120,7 +123,7 @@ func (s *authSvc) Logout(ctx context.Context) (*genauth.LogoutResult, error) {
 	logoutURL := s.oidcIssuerURL + "/protocol/openid-connect/logout?" + params.Encode()
 
 	return &genauth.LogoutResult{
-		Location: logoutURL,
+		LogoutURL: logoutURL,
 	}, nil
 }
 
@@ -242,8 +245,8 @@ func (s *authSvc) LogoutComplete(ctx context.Context) (*genauth.LogoutCompleteRe
 	// Clear the refresh token cookie
 	ClearRefreshTokenCookie(ctx)
 
-	// Redirect to home
+	// Redirect to frontend UI under configured base path
 	return &genauth.LogoutCompleteResult{
-		Location: "/",
+		Location: s.uiBasePath,
 	}, nil
 }
