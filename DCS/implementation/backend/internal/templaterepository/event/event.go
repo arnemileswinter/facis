@@ -152,7 +152,7 @@ type VerifyEvent struct {
 
 // EventType implements the Event interface.
 func (e VerifyEvent) EventType() string {
-	return eventtype.VerifyContractTemplate.String()
+	return eventtype.Verify.String()
 }
 
 // GetDID implements the Event interface.
@@ -255,7 +255,7 @@ type SearchEvent struct {
 
 // EventType implements the Event interface.
 func (e SearchEvent) EventType() string {
-	return eventtype.SearchContractTemplate.String()
+	return eventtype.Search.String()
 }
 
 // GetDID implements the Event interface.
