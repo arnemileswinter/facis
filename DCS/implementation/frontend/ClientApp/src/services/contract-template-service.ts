@@ -35,7 +35,13 @@ export const ContractTemplateService = {
   },
 
   async search(request: ContractTemplateSearchRequest) {
-    return http.get<ContractTemplateSearchResponse[]>('/template/search', { params: request }).then((res) => res.data)
+    return http
+      .get<ContractTemplateSearchResponse>('/template/search', { params: request })
+      .then((res) => res.data.search_results)
+      .catch((err) => {
+        console.error('Search Error:', err)
+        return []
+      })
   },
 
   async retrieve(_request?: ContractTemplateRetrieveRequest) {
