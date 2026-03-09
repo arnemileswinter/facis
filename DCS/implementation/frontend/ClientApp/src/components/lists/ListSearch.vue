@@ -13,7 +13,7 @@ const emit = defineEmits<{
   searchResult: [value: PartialContractTemplate[]]
 }>()
 
-const search = ref('')
+const searchQuery = ref('')
 const isSearching = ref(false)
 
 const filterLabels = {
@@ -34,8 +34,8 @@ const empyt: PartialContractTemplate = {
   did: '12',
   document_number: -1,
   version: -1,
-  created_at: '',
-  updated_at: '',
+  created_at: '2',
+  updated_at: '2',
   name: '',
   template_type: 'FRAME_CONTRACT',
   state: 'DRAFT',
@@ -43,15 +43,16 @@ const empyt: PartialContractTemplate = {
 
 const selectedFilter = ref<FilterLabelValue>('Name')
 const filterPopover = useTemplateRef('filterPopover')
-const selectedItem: Ref<PartialContractTemplate> = ref(empyt)
 const searchResults: Ref<ContractTemplateSearchResponse[]> = ref([])
+
+const selectedOption: Ref<PartialContractTemplate | null> = ref(null)
 
 const searchKey = computed(() => {
   return (Object.keys(filterLabels) as FilterLabelKey[]).find((key) => filterLabels[key] === selectedFilter.value)
 })
 
 const searchedItems = computed(() => {
-  if (search.value.length < 1) return props.items
+  if (searchQuery.value.length < 1) return props.items
 
   if (searchResults.value.length === 0) return []
 
@@ -61,26 +62,35 @@ const searchedItems = computed(() => {
 })
 
 const inputValue: Ref<PartialContractTemplate> = computed(() => {
-  return search.value.length < 1 || !searchKey.value ? empyt : { ...empyt, [searchKey.value]: search.value }
+  return searchQuery.value.length < 1 || !searchKey.value ? empyt : { ...empyt, [searchKey.value]: searchQuery.value }
 })
 
 async function searchRequest() {
-  if (search.value.length < 1 || !searchKey.value) {
+  if (searchQuery.value.length < 1 || !searchKey.value) {
     searchResults.value = []
     return
   }
 
   isSearching.value = true
   try {
-    const request = { [searchKey.value]: search.value }
-    const result = await ContractTemplateService.search(request)
-    searchResults.value = result || []
+    await retrieveSearch()
   } finally {
     isSearching.value = false
   }
 }
 
-function searchList() {
+async function retrieveSearch() {
+  if (!searchKey.value) return
+  const request = { [searchKey.value]: searchQuery.value}
+  const result = await ContractTemplateService.search(request)
+  searchResults.value = result
+}
+
+async function searchList(event?: Event) {
+  if (event && event.target instanceof HTMLInputElement) {
+    if (event.target.value !== searchQuery.value)
+      await searchRequest()
+  }
   emit('searchResult', searchedItems.value)
 }
 
@@ -99,17 +109,13 @@ async function onComboboxFocus() {
 }
 
 function onSearchChange(event: Event) {
-  search.value = (event.target as HTMLInputElement).value
+  searchQuery.value = (event.target as HTMLInputElement).value
   searchRequest()
 }
 
 function onComboboxUpdate(item: PartialContractTemplate) {
-  selectedItem.value = item
-  if (item) {
-    search.value = ''
-    searchResults.value = []
-    emit('searchResult', [item])
-  }
+  selectedOption.value = item
+  searchQuery.value = searchKey.value ? String(selectedOption.value[searchKey.value]) : ''
 }
 
 function onFilterSelect(label: FilterLabelValue) {
@@ -148,20 +154,20 @@ function onFilterSelect(label: FilterLabelValue) {
       </ul>
     </div>
     <div class="relative grow">
-      <Combobox v-model="selectedItem" @update:model-value="onComboboxUpdate" nullable>
+      <Combobox v-model="selectedOption" @update:model-value="onComboboxUpdate" nullable>
         <label class="input input-secondary join-item w-full">
           <ComboboxInput
             @change="onSearchChange"
             @focus="onComboboxFocus"
-            @keyup.enter="searchList"
-            :display-value="getDisplayValue as (item: unknown) => string"
+            @keydown.enter="searchList"
+            :display-value="getDisplayValue as (template: any) => string"
             placeholder="Search templates"
             class="w-full bg-transparent"
           />
         </label>
 
         <ComboboxOptions
-          v-if="search.length > 0"
+          v-if="searchQuery.length > 0"
           class="absolute left-0 right-0 top-full z-10 rounded-lg border border-base-300 bg-base-100 shadow-lg"
         >
           <ComboboxOption :value="inputValue" class="hidden"></ComboboxOption>
@@ -177,7 +183,6 @@ function onFilterSelect(label: FilterLabelValue) {
             >
               <li v-if="searchKey" :class="autocompleteOptionClasses(active, selected)">
                 {{ item[searchKey] }}
-                <span v-if="selected" class="ml-2">✓</span>
               </li>
             </ComboboxOption>
           </template>
