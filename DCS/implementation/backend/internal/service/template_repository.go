@@ -408,7 +408,6 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 		DB:     s.DB,
 		CTRepo: s.CTRepo,
 		RTRepo: s.RTRepo,
-		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {

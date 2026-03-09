@@ -5,7 +5,6 @@ import (
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/templaterepository/command"
-	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"testing"
@@ -50,7 +49,6 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
@@ -105,73 +103,10 @@ func TestVerify_VerifyNonExistingContractTemplate(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 
 	assert.NotNil(t, err)
-}
-
-func TestVerify_VerifyContractTemplateAsApprover(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to get new DID: %v", err)
-	}
-
-	creator := "Test User"
-
-	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
-	defer cancel()
-
-	repo := NewTestRepo(ctx)
-
-	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
-
-	approver := "Test User 1"
-	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
-
-	cmd := command.VerifyCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		VerifiedBy:     approver,
-		UpdatedAt:      time.Now(),
-	}
-	handler := command.Verifier{
-		Ctx:    ctx,
-		DB:     db,
-		CTRepo: repo.CTRepo,
-		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
-	}
-	err = handler.Handle(cmd)
-	if err != nil {
-		t.Fatalf("Failed to verify contract template: %v", err)
-	}
-
-	tx, err := db.BeginTxx(ctx, nil)
-	if err != nil {
-		t.Fatal("could not start transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	exists, err := repo.ATRepo.TaskExistsInState(tx, *did, conf.DefaultDocumentNumber(), 1, approver, reviewtaskstate.Verified.String())
-	if err != nil {
-		t.Fatalf("Failed to check existence of approval tasks: %v", err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		t.Fatal("could not commit transaction: %w", err)
-	}
-
-	assert.True(t, exists)
 }
 
 func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
@@ -207,7 +142,6 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = handler.Handle(cmd)
 

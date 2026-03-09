@@ -28,7 +28,6 @@ type Verifier struct {
 	DB     *sqlx.DB
 	CTRepo db.ContractTemplateRepo
 	RTRepo db.ReviewTaskRepo
-	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *Verifier) Handle(cmd VerifyCmd) error {
@@ -58,18 +57,6 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 
 	if hasTask {
 		err := h.RTRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified.String())
-		if err != nil {
-			return err
-		}
-	}
-
-	hasTask, err = h.ATRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open.String())
-	if err != nil {
-		return err
-	}
-
-	if hasTask {
-		err := h.ATRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified.String())
 		if err != nil {
 			return err
 		}

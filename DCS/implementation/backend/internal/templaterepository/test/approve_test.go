@@ -51,7 +51,6 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
@@ -94,50 +93,6 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contracttemplatestate.Approved, contractTemplate.State)
-}
-
-func TestApprove_ApproveContractTemplateInReviewedStateWithoutVerifying(t *testing.T) {
-
-	db := setupTestDB(t)
-
-	cleanupContractTemplateTable(t, db)
-
-	did, err := base.GetDID()
-	if err != nil {
-		t.Fatalf("Failed to get new DID: %v", err)
-	}
-
-	creator := "Test User"
-
-	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
-	defer cancel()
-
-	repo := NewTestRepo(ctx)
-
-	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
-
-	approver := "Test User 1"
-
-	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
-
-	cmd := command.ApproveCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     approver,
-		DecisionNotes:  []string{},
-	}
-	handler := command.Approver{
-		Ctx:    ctx,
-		DB:     db,
-		CTRepo: repo.CTRepo,
-		ATRepo: repo.ATRepo,
-	}
-	err = handler.Handle(cmd)
-
-	assert.NotNil(t, err)
 }
 
 func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {

@@ -539,6 +539,7 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:ui", "Template Builder, Template Approver, Template Management Dashboard")
 
 		Security(JWTAuth, func() {
+			Scope("Template Creator")
 			Scope("Template Reviewer")
 			Scope("Template Approver")
 			Scope("Template Manager")
@@ -566,6 +567,7 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:ui", "Template Builder, Template Approver, Template Management Dashboard")
 
 		Security(JWTAuth, func() {
+			Scope("Template Creator")
 			Scope("Template Reviewer")
 			Scope("Template Approver")
 			Scope("Template Manager")
@@ -672,7 +674,7 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:ui", "Template Management Dashboard")
 
 		Security(JWTAuth, func() {
-			Scope("Template Reviewer")
+			Scope("Template Manager")
 		})
 
 		Payload(ContractTemplateRegisterRequest)
@@ -697,7 +699,7 @@ var _ = Service("TemplateRepository", func() {
 		Meta("dcs:ui", "Template Management Dashboard")
 
 		Security(JWTAuth, func() {
-			Scope("Template Reviewer")
+			Scope("Template Manager")
 		})
 
 		Payload(ContractTemplateArchiveRequest)

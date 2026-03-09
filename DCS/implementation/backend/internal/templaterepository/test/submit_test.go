@@ -215,7 +215,6 @@ func TestSubmit_OneReviewerApprovedContractTemplateInSubmittedState(t *testing.T
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
@@ -511,7 +510,6 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 			DB:     db,
 			CTRepo: repo.CTRepo,
 			RTRepo: repo.RTRepo,
-			ATRepo: repo.ATRepo,
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
@@ -957,7 +955,6 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
@@ -1148,7 +1145,6 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 			DB:     db,
 			CTRepo: repo.CTRepo,
 			RTRepo: repo.RTRepo,
-			ATRepo: repo.ATRepo,
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
@@ -1261,7 +1257,6 @@ func TestSubmit_SubmitContractTemplateWithResubmission(t *testing.T) {
 			DB:     db,
 			CTRepo: repo.CTRepo,
 			RTRepo: repo.RTRepo,
-			ATRepo: repo.ATRepo,
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
@@ -1491,7 +1486,6 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
@@ -1682,7 +1676,6 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 			DB:     db,
 			CTRepo: repo.CTRepo,
 			RTRepo: repo.RTRepo,
-			ATRepo: repo.ATRepo,
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
@@ -1795,7 +1788,6 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 			DB:     db,
 			CTRepo: repo.CTRepo,
 			RTRepo: repo.RTRepo,
-			ATRepo: repo.ATRepo,
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
@@ -1864,7 +1856,6 @@ func TestSubmit_SubmitContractTemplateWithApproving(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
@@ -2045,7 +2036,6 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 		DB:     db,
 		CTRepo: repo.CTRepo,
 		RTRepo: repo.RTRepo,
-		ATRepo: repo.ATRepo,
 	}
 	err = verifyHandler.Handle(verifyCmd)
 	if err != nil {
@@ -2250,7 +2240,6 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 			DB:     db,
 			CTRepo: repo.CTRepo,
 			RTRepo: repo.RTRepo,
-			ATRepo: repo.ATRepo,
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {
@@ -2367,7 +2356,6 @@ func TestSubmit_SubmitContractTemplateWithRejecting(t *testing.T) {
 			DB:     db,
 			CTRepo: repo.CTRepo,
 			RTRepo: repo.RTRepo,
-			ATRepo: repo.ATRepo,
 		}
 		err = verifyHandler.Handle(verifyCmd)
 		if err != nil {

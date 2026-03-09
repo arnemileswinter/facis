@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS contract_templates_review_task
 
 ------------------------------------------------------------------------------------------------------------------------
 
-CREATE TYPE approval_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'RESUBMITTED', 'VERIFIED');
+CREATE TYPE approval_task_state AS ENUM ('OPEN', 'APPROVED', 'REJECTED', 'RESUBMITTED');
 
 CREATE TABLE IF NOT EXISTS contract_templates_approval_task
 (

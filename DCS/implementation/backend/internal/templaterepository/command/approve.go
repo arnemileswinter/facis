@@ -6,7 +6,6 @@ import (
 	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"errors"
@@ -63,15 +62,6 @@ func (h *Approver) Handle(cmd ApproveCmd) error {
 
 	if !valid {
 		return errors.New("invalid user")
-	}
-
-	exist, err := h.ATRepo.TaskExistsInState(tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.ApprovedBy, reviewtaskstate.Open.String())
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		return errors.New("contract template needs to be verified before")
 	}
 
 	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Approved.String())
