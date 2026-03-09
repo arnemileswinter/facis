@@ -454,7 +454,6 @@ var _ = Service("TemplateRepository", func() {
 		Security(JWTAuth, func() {
 			Scope("Template Creator")
 			Scope("Template Reviewer")
-			Scope("Template Approver")
 		})
 
 		Payload(ContractTemplateUpdateRequest)
