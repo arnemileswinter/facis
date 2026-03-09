@@ -8,7 +8,6 @@ import (
 )
 
 // CreateEvent is emitted when a new contract template is created.
-// This event signals initial template creation with metadata.
 type CreateEvent struct {
 	DID            string         `json:"did"`
 	DocumentNumber string         `json:"document_number"`
@@ -41,8 +40,7 @@ func (e CreateEvent) GetVersion() int {
 	return e.Version
 }
 
-// SubmitEvent is emitted when a template is submitted for review.
-// This event signals state transition and includes reviewer comments.
+// SubmitEvent is emitted when a template is submitted
 type SubmitEvent struct {
 	DID            string                 `json:"did"`
 	DocumentNumber string                 `json:"document_number"`
@@ -76,7 +74,6 @@ func (e SubmitEvent) GetVersion() int {
 }
 
 // ApproveEvent is emitted when a template is approved.
-// This event signals successful approval with optional decision notes.
 type ApproveEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber string    `json:"document_number"`
@@ -108,7 +105,6 @@ func (e ApproveEvent) GetVersion() int {
 }
 
 // RejectEvent is emitted when a template is rejected.
-// This event includes rejection reason and rejector information.
 type RejectEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber string    `json:"document_number"`
@@ -139,8 +135,7 @@ func (e RejectEvent) GetVersion() int {
 	return e.Version
 }
 
-// VerifyEvent is emitted when a template is approved.
-// This event signals successful approval with optional decision notes.
+// VerifyEvent is emitted when a template is verified.
 type VerifyEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber string    `json:"document_number"`
@@ -170,8 +165,7 @@ func (e VerifyEvent) GetVersion() int {
 	return e.Version
 }
 
-// UpdateEvent is emitted when template metadata is updated.
-// This event is used for audit and synchronization purposes.
+// UpdateEvent is emitted when template data is updated.
 type UpdateEvent struct {
 	DID             string         `json:"did"`
 	DocumentNumber  string         `json:"document_number"`
@@ -182,7 +176,7 @@ type UpdateEvent struct {
 	OldDescription  *string        `json:"old_description,omitempty"`
 	NewDescription  *string        `json:"new_description,omitempty"`
 	OldTemplateData *datatype.JSON `json:"old_template_data,omitempty"`
-	NewTemplateData *datatype.JSON `json:"new_metadata,omitempty"`
+	NewTemplateData *datatype.JSON `json:"new_template_data,omitempty"`
 	OccurredAt      time.Time      `json:"occurred_at"`
 }
 
@@ -206,8 +200,7 @@ func (e UpdateEvent) GetVersion() int {
 	return e.Version
 }
 
-// UpdateManageEvent is emitted when template metadata is updated.
-// This event is used for audit and synchronization purposes.
+// UpdateManageEvent is emitted when template data is updated.
 type UpdateManageEvent struct {
 	DID             string         `json:"did"`
 	DocumentNumber  string         `json:"document_number"`
@@ -220,7 +213,7 @@ type UpdateManageEvent struct {
 	OldDescription  *string        `json:"old_description,omitempty"`
 	NewDescription  *string        `json:"new_description,omitempty"`
 	OldTemplateData *datatype.JSON `json:"old_template_data,omitempty"`
-	NewTemplateData *datatype.JSON `json:"new_metadata,omitempty"`
+	NewTemplateData *datatype.JSON `json:"new_template_data,omitempty"`
 	OccurredAt      time.Time      `json:"occurred_at"`
 }
 
@@ -244,8 +237,7 @@ func (e UpdateManageEvent) GetVersion() int {
 	return e.Version
 }
 
-// SearchEvent is emitted when template metadata is updated.
-// This event is used for audit and synchronization purposes.
+// SearchEvent is emitted when template data is searched.
 type SearchEvent struct {
 	RetrievedBy    string    `json:"updated_by"`
 	DocumentNumber string    `json:"document_number"`
@@ -273,8 +265,7 @@ func (e SearchEvent) GetVersion() int {
 	return e.Version
 }
 
-// RetrieveAllEvent is emitted when template metadata is updated.
-// This event is used for audit and synchronization purposes.
+// RetrieveAllEvent is emitted when template data is retrieved.
 type RetrieveAllEvent struct {
 	RetrievedBy string    `json:"updated_by"`
 	OccurredAt  time.Time `json:"occurred_at"`
@@ -300,8 +291,7 @@ func (e RetrieveAllEvent) GetVersion() int {
 	return 0
 }
 
-// RetrieveByIDEvent is emitted when template metadata is updated.
-// This event is used for audit and synchronization purposes.
+// RetrieveByIDEvent is emitted when template data is retrieved.
 type RetrieveByIDEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber string    `json:"document_number"`
@@ -330,8 +320,7 @@ func (e RetrieveByIDEvent) GetVersion() int {
 	return e.Version
 }
 
-// ArchiveEvent is emitted when template metadata is updated.
-// This event is used for audit and synchronization purposes.
+// ArchiveEvent is emitted when template data is archived.
 type ArchiveEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber string    `json:"document_number"`
@@ -360,8 +349,7 @@ func (e ArchiveEvent) GetVersion() int {
 	return e.Version
 }
 
-// RegisterEvent is emitted when template metadata is updated.
-// This event is used for audit and synchronization purposes.
+// RegisterEvent is emitted when template data is registered.
 type RegisterEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber string    `json:"document_number"`

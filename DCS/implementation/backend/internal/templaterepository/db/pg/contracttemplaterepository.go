@@ -121,8 +121,6 @@ func (r *PostgresContractTemplateRepo) Update(tx *sqlx.Tx, data db.ContractTempl
 	return err
 }
 
-// --- Hilfsfunktionen (package-intern, keine Methoden) ---
-
 func createSearchConditions(values db.SearchValues) (*string, []interface{}, error) {
 	conditions := ""
 	var params []interface{}
@@ -199,7 +197,7 @@ func createQuery(data db.ContractTemplateUpdateData) (*string, []interface{}, er
 	if data.TemplateData != nil && data.TemplateData.IsNotNullValue() {
 		addParam("template_data", data.TemplateData)
 	}
-	if len(data.TemplateType) > 0 && data.TemplateData.IsNotNullValue() {
+	if len(data.TemplateType) > 0 {
 		addParam("template_type", data.TemplateType)
 	}
 	if len(columns) == 0 {

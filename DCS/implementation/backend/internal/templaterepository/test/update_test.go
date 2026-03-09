@@ -66,7 +66,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit contract template: %v", err)
+		t.Fatalf("Failed to update contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
@@ -296,7 +296,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit contract template: %v", err)
+		t.Fatalf("Failed to update contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
