@@ -345,7 +345,7 @@ func TestArchive_ArchiveContractTemplateDataInApprovedState(t *testing.T) {
 	}
 
 	assert.Equal(t, contractTemplate.DID, *did)
-	assert.Equal(t, contracttemplatestate.Deleted, contractTemplate.State)
+	assert.Equal(t, contracttemplatestate.Deprecated, contractTemplate.State)
 }
 
 func TestArchive_ArchiveContractTemplateDataInRegisteredState(t *testing.T) {

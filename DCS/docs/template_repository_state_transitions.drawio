@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2">
   <diagram name="Page-1" id="8EOUsIdQ52OLVLKBQwtr">
-    <mxGraphModel dx="1088" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1088" dy="1004" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -96,7 +96,7 @@
         <mxCell id="8r4Sdpe-njzXMF_7VQtj-15" edge="1" parent="1" source="8r4Sdpe-njzXMF_7VQtj-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="8r4Sdpe-njzXMF_7VQtj-6">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="414" y="1000" />
+              <mxPoint x="390" y="1000" />
               <mxPoint x="140" y="1000" />
             </Array>
           </mxGeometry>
@@ -109,7 +109,7 @@
         <mxCell id="8r4Sdpe-njzXMF_7VQtj-16" edge="1" parent="1" source="8r4Sdpe-njzXMF_7VQtj-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="8r4Sdpe-njzXMF_7VQtj-7">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="414" y="1000" />
+              <mxPoint x="450" y="1000" />
               <mxPoint x="690" y="1000" />
             </Array>
           </mxGeometry>
@@ -226,7 +226,7 @@
           <mxGeometry height="30" width="360" x="270" y="1230" as="geometry" />
         </mxCell>
         <mxCell id="EQYYbg-LYquxwnFnY_Af-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Deprecated" vertex="1">
-          <mxGeometry height="60" width="120" x="400" y="1070" as="geometry" />
+          <mxGeometry height="60" width="120" x="370" y="1070" as="geometry" />
         </mxCell>
         <mxCell id="EQYYbg-LYquxwnFnY_Af-5" parent="1" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Valid trasitions for /template/update_manage&lt;/h1&gt;&lt;p&gt;Draft -&amp;gt; Draft; Draft -&amp;gt; Deleted&lt;/p&gt;&lt;p&gt;Rejected -&amp;gt; Draft;&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Rejected -&amp;gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;Rejected;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Rejected -&amp;gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;Submitted;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Rejected -&amp;gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;Reviewed;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Rejected -&amp;gt;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp; Deleted&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Submitted -&amp;gt; Draft; Submitted -&amp;gt; Submitted;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Submitted -&amp;gt; Rejected;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Submitted -&amp;gt; Reviewed;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Submitted -&amp;gt; Delete&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Reviewd -&amp;gt; Draft;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Reviewd -&amp;gt; Rejected;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Reviewd -&amp;gt; Submitted;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Reviewd -&amp;gt; Reviewed;&amp;nbsp;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Approved -&amp;gt; Deleted;&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Registered -&amp;gt; Deprecated;&lt;/span&gt;&lt;/p&gt;" vertex="1">
           <mxGeometry height="260" width="740" x="44" y="1280" as="geometry" />
@@ -263,6 +263,19 @@
         <mxCell id="PCnTEnvOoU47jWESxt4F-6" connectable="0" parent="PCnTEnvOoU47jWESxt4F-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Reviewer:&lt;div&gt;PUT /template/update&lt;/div&gt;" vertex="1">
           <mxGeometry relative="1" x="-0.2757" y="2" as="geometry">
             <mxPoint x="58" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CFLbMOtxk8ZgfTkZXDd1-1" edge="1" parent="1" source="8r4Sdpe-njzXMF_7VQtj-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.358;entryY=-0.033;entryDx=0;entryDy=0;entryPerimeter=0;" target="EQYYbg-LYquxwnFnY_Af-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="413" y="990" />
+              <mxPoint x="413" y="990" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CFLbMOtxk8ZgfTkZXDd1-2" connectable="0" parent="CFLbMOtxk8ZgfTkZXDd1-1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Manager:&lt;div&gt;POST: /template/archive&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.2775" as="geometry">
+            <mxPoint x="67" y="11" as="offset" />
           </mxGeometry>
         </mxCell>
       </root>
