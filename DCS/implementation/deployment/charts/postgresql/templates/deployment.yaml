@@ -36,16 +36,13 @@ spec:
               # Create additional databases
               {{- range .Values.additionalDatabases }}
               echo "Creating database: {{ . }}"
-              psql -v ON_ERROR_STOP=0 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-                SELECT 'CREATE DATABASE {{ . }}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '{{ . }}')\gexec
-                GRANT ALL PRIVILEGES ON DATABASE {{ . }} TO "$POSTGRES_USER";
-              EOSQL
+              psql -v ON_ERROR_STOP=0 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -c "SELECT 'CREATE DATABASE {{ . }}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '{{ . }}')\gexec"
+              psql -v ON_ERROR_STOP=0 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -c "GRANT ALL PRIVILEGES ON DATABASE {{ . }} TO \"$POSTGRES_USER\";"
               echo "Database {{ . }} ready"
               {{- end }}
 
-              # Shutdown postgres gracefully
-              kill $PG_PID
-              wait $PG_PID
+              # Shutdown postgres gracefully (smart mode waits for clients to disconnect)
+              pg_ctl stop -D /var/lib/postgresql/data -m smart -w
               echo "Init container completed"
           env:
             - name: POSTGRES_USER
