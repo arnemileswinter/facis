@@ -121,7 +121,7 @@ postgresql:
     username: dcs
     password: dcs
     database: dcs
-    additionalDatabases: []
+  additionalDatabases: []
   persistence:
     enabled: false
     size: 1Gi
