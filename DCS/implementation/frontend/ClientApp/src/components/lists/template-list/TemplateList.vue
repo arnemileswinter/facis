@@ -78,7 +78,7 @@ function applySearchResult(searchResult: PartialContractTemplate[]) {
     </li>
     <TemplateListItem
       v-for="item in filteredItems"
-      :key="`${item.did},${item.document_number},${item.version}`"
+      :key="`${item.did}|${item.document_number}|${item.version}`"
       :item="item"
     />
   </ul>

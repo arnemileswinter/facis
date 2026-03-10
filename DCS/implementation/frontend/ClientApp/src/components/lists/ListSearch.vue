@@ -17,11 +17,11 @@ const searchQuery = ref('')
 const isSearching = ref(false)
 
 const filterLabels = {
-  did: 'DID',
+  // did: 'DID',
   document_number: 'Document number',
   version: 'Version',
   template_type: 'Template type',
-  state: 'State',
+  // state: 'State',
   name: 'Name',
   description: 'Description',
   // filter: 'Filter',
@@ -43,7 +43,7 @@ const empyt: PartialContractTemplate = {
 
 const selectedFilter = ref<FilterLabelValue>('Name')
 const filterPopover = useTemplateRef('filterPopover')
-const searchResults: Ref<ContractTemplateSearchResponse[]> = ref([])
+const searchResults: Ref<ContractTemplateSearchResponse> = ref([])
 
 const selectedOption: Ref<PartialContractTemplate | null> = ref(null)
 
@@ -182,7 +182,7 @@ function onFilterSelect(label: FilterLabelValue) {
               v-slot="{ active, selected }"
             >
               <li v-if="searchKey" :class="autocompleteOptionClasses(active, selected)">
-                {{ item[searchKey] }}
+                <span>{{ item[searchKey] }}</span>
               </li>
             </ComboboxOption>
           </template>

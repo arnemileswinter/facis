@@ -16,7 +16,7 @@ export interface ContractTemplateSubmitResponse extends ContractTemplateBaseResp
 
 export interface ContractTemplateUpdateResponse extends ContractTemplateBaseResponse {}
 
-export interface ContractTemplateSearchResponse extends ContractTemplateBaseResponse {
+interface ContractTemplateSearchResponseItem extends ContractTemplateBaseResponse {
   state: ContractTemplateState
   name?: string
   description?: string
@@ -24,6 +24,8 @@ export interface ContractTemplateSearchResponse extends ContractTemplateBaseResp
   created_at: string
   updated_at: string
 }
+
+export type ContractTemplateSearchResponse = ContractTemplateSearchResponseItem[]
 
 export interface ContractTemplateRetrieveResponse {
   contract_templates: PartialContractTemplate[]
