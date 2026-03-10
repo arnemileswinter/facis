@@ -5,8 +5,9 @@ export const TemplateState = {
     rejected: 'REJECTED',
     reviewed: 'REVIEWED',
     approved: 'APPROVED',
+    deleted: 'DELETED',
+    deprecated: 'DEPRECATED',
     registered: 'REGISTERED',
-    archived: 'ARCHIVED',
 } as const
 
 export const contractTemplateStates: ContractTemplateState[] = Object.values(TemplateState)

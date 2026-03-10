@@ -6,7 +6,7 @@ import type { ContractTemplateApprovalTask } from '../contract-template-approval
 
 interface ContractTemplateBaseResponse {
   did: string
-  document_number: number
+  document_number: string
   version: number
 }
 
@@ -20,6 +20,7 @@ export interface ContractTemplateSearchResponse extends ContractTemplateBaseResp
   state: ContractTemplateState
   name?: string
   description?: string
+  template_type: TemplateType
   created_at: string
   updated_at: string
 }
@@ -34,7 +35,7 @@ export interface ContractTemplateRetrieveByIdResponse extends ContractTemplateBa
   state: ContractTemplateState
   name?: string
   description?: string
-  template_type?: TemplateType
+  template_type: TemplateType
   created_by: string
   created_at: string
   updated_at: string

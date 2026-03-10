@@ -32,7 +32,7 @@ type FilterLabelValue = FilterLabels[FilterLabelKey]
 
 const empyt: PartialContractTemplate = {
   did: '12',
-  document_number: -1,
+  document_number: '-1',
   version: -1,
   created_at: '2',
   updated_at: '2',

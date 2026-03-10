@@ -5,7 +5,7 @@ import type { ContractTemplateData } from '../contract-template'
 
 interface ContractTemplateBaseRequest {
   did: string
-  document_number: number
+  document_number: string
   version: number
 }
 
@@ -33,7 +33,7 @@ export interface ContractTemplateUpdateRequest extends ContractTemplateBaseReque
 
 export interface ContractTemplateSearchRequest {
   did?: string
-  document_number?: number
+  document_number?: string
   version?: number
   template_type?: TemplateType
   state?: ContractTemplateState
