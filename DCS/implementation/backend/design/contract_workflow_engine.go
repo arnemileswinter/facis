@@ -22,7 +22,7 @@ var ContractCreateResponse = Type("ContractCreateResponse", func() {
 	Description("Result for creating a contract")
 
 	Attribute("did", String, "Decentralized Identifier of the contract")
-	Attribute("document_number", Int, "The number of the contract")
+	Attribute("document_number", String, "The number of the contract")
 	Attribute("version", Int, "The version of the contract")
 
 	Required("did", "document_number", "version")

@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
@@ -28,7 +29,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -48,7 +49,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -65,14 +66,14 @@ func TestUpdate_UpdateContractTemplateDataInDraftState(t *testing.T) {
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit contract template: %v", err)
+		t.Fatalf("Failed to update contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -104,14 +105,14 @@ func TestUpdate_UpdateNonExistingContractTemplate(t *testing.T) {
 	}
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 2,
+		DocumentNumber: "2",
 		Version:        2,
 		UpdatedAt:      time.Now(),
 		UpdatedBy:      "Test User 1",
@@ -142,7 +143,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -166,7 +167,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      "Test User 1",
 		UpdatedAt:      time.Now(),
@@ -200,7 +201,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -220,7 +221,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsCreator(t *testing.T
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -254,7 +255,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -278,7 +279,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      reviewers[0],
 		UpdatedAt:      time.Now(),
@@ -295,14 +296,14 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateAsReviewer(t *testing.
 	}
 	err = handler.Handle(cmd)
 	if err != nil {
-		t.Fatalf("Failed to submit contract template: %v", err)
+		t.Fatalf("Failed to update contract template: %v", err)
 	}
 
 	retrievedBy := "Test User"
 
 	qry := contracttemplate.GetByIDQry{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		RetrievedBy:    retrievedBy,
 	}
@@ -336,7 +337,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -360,7 +361,7 @@ func TestUpdate_UpdateContractTemplateDataInSubmittedStateWithInvalidUser(t *tes
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      "Test User 1",
 		UpdatedAt:      time.Now(),
@@ -394,7 +395,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -414,7 +415,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -448,7 +449,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -468,7 +469,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftPublishedState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -502,12 +503,12 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
 
-	createContractTemplate(t, db, repo, did, contracttemplatestate.Archived, creator)
+	createContractTemplate(t, db, repo, did, contracttemplatestate.Deleted, creator)
 
 	templateData := map[string]interface{}{
 		"test": "update",
@@ -522,7 +523,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftArchivedState(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now(),
@@ -556,7 +557,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -576,7 +577,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftApprovedStateWithInvalidUser(t 
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      "Test User 1",
 		UpdatedAt:      time.Now(),
@@ -610,7 +611,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -630,7 +631,7 @@ func TestUpdate_UpdateContractTemplateAfterUpdate(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      creator,
 		UpdatedAt:      time.Now().Add(-5 * time.Second),
@@ -664,7 +665,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 	creator := "Test User"
 
 	tmpCtx := context.Background()
-	ctx, cancel := context.WithTimeout(tmpCtx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(tmpCtx, conf.TransactionTimeout())
 	defer cancel()
 
 	repo := NewTestRepo(ctx)
@@ -692,7 +693,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 
 	cmd := command.UpdateCmd{
 		DID:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: conf.DefaultDocumentNumber(),
 		Version:        1,
 		UpdatedBy:      reviewers[1],
 		UpdatedAt:      time.Now(),
@@ -718,7 +719,7 @@ func TestUpdate_UpdateContractTemplateAndReopenTasks(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, 1, 1, contracttemplatestate.Approved.String(), reviewtaskstate.Verified.String(), contracttemplatestate.Rejected.String())
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, conf.DefaultDocumentNumber(), 1, contracttemplatestate.Approved.String(), reviewtaskstate.Verified.String(), contracttemplatestate.Rejected.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}

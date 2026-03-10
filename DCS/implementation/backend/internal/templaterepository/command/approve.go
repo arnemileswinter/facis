@@ -2,10 +2,10 @@ package command
 
 import (
 	"context"
-	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
-	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/db"
 	templateevents "digital-contracting-service/internal/templaterepository/event"
 	"errors"
@@ -17,7 +17,7 @@ import (
 
 type ApproveCmd struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	UpdatedAt      time.Time
 	ApprovedBy     string
@@ -33,7 +33,7 @@ type Approver struct {
 
 func (h *Approver) Handle(cmd ApproveCmd) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -64,15 +64,6 @@ func (h *Approver) Handle(cmd ApproveCmd) error {
 		return errors.New("invalid user")
 	}
 
-	exist, err := h.ATRepo.TaskExistsInState(tx, processData.DID, processData.DocumentNumber, processData.Version, cmd.ApprovedBy, reviewtaskstate.Open.String())
-	if err != nil {
-		return err
-	}
-
-	if exist {
-		return errors.New("contract template needs to be verified before")
-	}
-
 	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Approved.String())
 	if err != nil {
 		return fmt.Errorf("could not update current template state: %w", err)
@@ -86,7 +77,7 @@ func (h *Approver) Handle(cmd ApproveCmd) error {
 		DecisionNotes:  cmd.DecisionNotes,
 		OccurredAt:     time.Now(),
 	}
-	err = event.Create(ctx, tx, evt)
+	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return fmt.Errorf("could not create event: %w", err)
 	}

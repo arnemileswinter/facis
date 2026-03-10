@@ -15,7 +15,8 @@ const (
 	Rejected   ContractTemplateState = "REJECTED"
 	Reviewed   ContractTemplateState = "REVIEWED"
 	Approved   ContractTemplateState = "APPROVED"
-	Archived   ContractTemplateState = "ARCHIVED"
+	Deleted    ContractTemplateState = "DELETED"
+	Deprecated ContractTemplateState = "DEPRECATED"
 	Registered ContractTemplateState = "REGISTERED"
 )
 
@@ -25,7 +26,8 @@ var validState = map[ContractTemplateState]bool{
 	Rejected:   true,
 	Reviewed:   true,
 	Approved:   true,
-	Archived:   true,
+	Deleted:    true,
+	Deprecated: true,
 	Registered: true,
 }
 

@@ -2,7 +2,8 @@ package command
 
 import (
 	"context"
-	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/db"
@@ -16,7 +17,7 @@ import (
 
 type VerifyCmd struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	UpdatedAt      time.Time
 	VerifiedBy     string
@@ -27,12 +28,11 @@ type Verifier struct {
 	DB     *sqlx.DB
 	CTRepo db.ContractTemplateRepo
 	RTRepo db.ReviewTaskRepo
-	ATRepo db.ApprovalTaskRepo
 }
 
 func (h *Verifier) Handle(cmd VerifyCmd) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -62,18 +62,6 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 		}
 	}
 
-	hasTask, err = h.ATRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open.String())
-	if err != nil {
-		return err
-	}
-
-	if hasTask {
-		err := h.ATRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified.String())
-		if err != nil {
-			return err
-		}
-	}
-
 	evt := templateevents.VerifyEvent{
 		DID:            cmd.DID,
 		DocumentNumber: cmd.DocumentNumber,
@@ -81,7 +69,7 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 		VerifiedBy:     cmd.VerifiedBy,
 		OccurredAt:     time.Now(),
 	}
-	err = event.Create(ctx, tx, evt)
+	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return fmt.Errorf("could not create event: %w", err)
 	}

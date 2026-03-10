@@ -2,8 +2,9 @@ package command
 
 import (
 	"context"
-	"digital-contracting-service/internal/base"
+	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/base/datatype"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"digital-contracting-service/internal/base/event"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatetype"
@@ -18,7 +19,7 @@ import (
 
 type UpdateManageCmd struct {
 	DID            string
-	DocumentNumber int
+	DocumentNumber string
 	Version        int
 	State          *contracttemplatestate.ContractTemplateState
 	TemplateType   *contracttemplatetype.ContractTemplateType
@@ -40,7 +41,7 @@ type UpdateManager struct {
 
 func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 
-	ctx, cancel := context.WithTimeout(h.Ctx, base.TransactionTimeout())
+	ctx, cancel := context.WithTimeout(h.Ctx, conf.TransactionTimeout())
 	defer cancel()
 
 	tx, err := h.DB.BeginTxx(ctx, nil)
@@ -58,12 +59,15 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if oldData.State == contracttemplatestate.Approved.String() || oldData.State == contracttemplatestate.Registered.String() || oldData.State == contracttemplatestate.Archived.String() {
+	if oldData.State == contracttemplatestate.Approved.String() ||
+		oldData.State == contracttemplatestate.Registered.String() ||
+		oldData.State == contracttemplatestate.Deleted.String() ||
+		oldData.State == contracttemplatestate.Deprecated.String() {
 		return errors.New("invalid contract template state")
 	}
 
 	if cmd.State != nil {
-		isValidState := *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Archived
+		isValidState := *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Deleted
 		if oldData.State == contracttemplatestate.Draft.String() && !isValidState {
 			reviewTasksExist, err := h.RTRepo.TaskExist(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
@@ -83,7 +87,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 
 	newState := oldData.State
 	if cmd.State != nil {
-		if *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Archived {
+		if *cmd.State == contracttemplatestate.Draft || *cmd.State == contracttemplatestate.Deleted {
 
 			err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
 			if err != nil {
@@ -152,7 +156,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 		UpdatedBy:       cmd.UpdatedBy,
 		OccurredAt:      time.Now(),
 	}
-	err = event.Create(ctx, tx, evt)
+	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {
 		return fmt.Errorf("could not create event: %w", err)
 	}

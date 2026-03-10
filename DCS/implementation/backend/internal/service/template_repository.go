@@ -79,7 +79,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 
 	return &templaterepository.ContractTemplateCreateResponse{
 		Did:            *did,
-		DocumentNumber: 1,
+		DocumentNumber: "",
 		Version:        1,
 	}, nil
 }
@@ -281,6 +281,7 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 			DocumentNumber: item.DocumentNumber,
 			Version:        item.Version,
 			State:          item.State.String(),
+			TemplateType:   item.TemplateType.String(),
 			Name:           &item.Name,
 			Description:    &item.Description,
 			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
@@ -316,6 +317,7 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 			DocumentNumber: item.DocumentNumber,
 			Version:        item.Version,
 			State:          item.State.String(),
+			TemplateType:   item.TemplateType.String(),
 			Name:           &item.Name,
 			Description:    &item.Description,
 			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
@@ -378,6 +380,7 @@ func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *template
 		DocumentNumber: contractTemplate.DocumentNumber,
 		Version:        contractTemplate.Version,
 		State:          contractTemplate.State.String(),
+		TemplateType:   contractTemplate.TemplateType.String(),
 		Name:           contractTemplate.Name,
 		Description:    contractTemplate.Description,
 		CreatedBy:      contractTemplate.CreatedBy,
@@ -405,7 +408,6 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 		DB:     s.DB,
 		CTRepo: s.CTRepo,
 		RTRepo: s.RTRepo,
-		ATRepo: s.ATRepo,
 	}
 	err = handler.Handle(cmd)
 	if err != nil {

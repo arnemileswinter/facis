@@ -33,7 +33,7 @@ func (r *PostgresReviewTaskRepo) Create(tx *sqlx.Tx, data db.ReviewTaskData) (*t
 	return &createdAt, nil
 }
 
-func (r *PostgresReviewTaskRepo) IsValidReviewer(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string) (bool, error) {
+func (r *PostgresReviewTaskRepo) IsValidReviewer(tx *sqlx.Tx, did string, documentNumber string, version int, reviewer string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_review_task
         WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
@@ -46,7 +46,7 @@ func (r *PostgresReviewTaskRepo) IsValidReviewer(tx *sqlx.Tx, did string, docume
 	return count > 0, nil
 }
 
-func (r *PostgresReviewTaskRepo) ReopenTasks(tx *sqlx.Tx, did string, documentNumber int, version int) error {
+func (r *PostgresReviewTaskRepo) ReopenTasks(tx *sqlx.Tx, did string, documentNumber string, version int) error {
 	statement := `
         UPDATE contract_templates_review_task SET state = 'OPEN'
         WHERE did = $1 AND document_number = $2 AND version = $3
@@ -69,7 +69,7 @@ func (r *PostgresReviewTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]db.ReviewTa
 	return reviewTasks, nil
 }
 
-func (r *PostgresReviewTaskRepo) ReadAllByID(tx *sqlx.Tx, did string, documentNumber int, version int) ([]db.ReviewTaskData, error) {
+func (r *PostgresReviewTaskRepo) ReadAllByID(tx *sqlx.Tx, did string, documentNumber string, version int) ([]db.ReviewTaskData, error) {
 	query := `
         SELECT id, did, document_number, version, state, reviewer,
                created_by, created_at
@@ -97,7 +97,7 @@ func (r *PostgresReviewTaskRepo) ReadAllByReviewer(tx *sqlx.Tx, reviewer string)
 	return reviewTasks, nil
 }
 
-func (r *PostgresReviewTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state string) error {
+func (r *PostgresReviewTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber string, version int, reviewer string, state string) error {
 	statement := `
         UPDATE contract_templates_review_task SET state = $5
         WHERE did = $1 AND document_number = $2 AND version = $3 AND reviewer = $4
@@ -116,7 +116,7 @@ func (r *PostgresReviewTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber 
 	return nil
 }
 
-func (r *PostgresReviewTaskRepo) AnyTasksInState(tx *sqlx.Tx, did string, documentNumber int, version int, states ...string) (bool, error) {
+func (r *PostgresReviewTaskRepo) AnyTasksInState(tx *sqlx.Tx, did string, documentNumber string, version int, states ...string) (bool, error) {
 	placeholders := make([]string, len(states))
 	args := []interface{}{did, documentNumber, version}
 
@@ -139,7 +139,7 @@ func (r *PostgresReviewTaskRepo) AnyTasksInState(tx *sqlx.Tx, did string, docume
 	return count > 0, nil
 }
 
-func (r *PostgresReviewTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber int, version int, reviewer string, state string) (bool, error) {
+func (r *PostgresReviewTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber string, version int, reviewer string, state string) (bool, error) {
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_review_task 
@@ -153,7 +153,7 @@ func (r *PostgresReviewTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, docu
 	return count > 0, nil
 }
 
-func (r *PostgresReviewTaskRepo) TaskExist(tx *sqlx.Tx, did string, documentNumber int, version int) (bool, error) {
+func (r *PostgresReviewTaskRepo) TaskExist(tx *sqlx.Tx, did string, documentNumber string, version int) (bool, error) {
 	query := `
         SELECT COUNT(*) 
         FROM contract_templates_review_task 
@@ -167,7 +167,7 @@ func (r *PostgresReviewTaskRepo) TaskExist(tx *sqlx.Tx, did string, documentNumb
 	return count > 0, nil
 }
 
-func (r *PostgresReviewTaskRepo) Delete(tx *sqlx.Tx, did string, documentNumber int, version int) error {
+func (r *PostgresReviewTaskRepo) Delete(tx *sqlx.Tx, did string, documentNumber string, version int) error {
 	statement := `
         DELETE FROM contract_templates_review_task
         WHERE did = $1 AND document_number = $2 AND version = $3

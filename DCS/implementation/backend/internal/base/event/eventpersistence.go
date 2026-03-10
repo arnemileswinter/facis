@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"digital-contracting-service/internal/base/datatype/componenttype"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,7 +20,7 @@ type Event interface {
 	GetDID() string
 
 	// GetDocumentNumber returns the entity DocumentNumber for event reference and correlation.
-	GetDocumentNumber() int
+	GetDocumentNumber() string
 
 	// GetVersion returns the entity Version for event reference and correlation.
 	GetVersion() int
@@ -43,7 +44,7 @@ type Event interface {
 //	if err := event.Create(ctx, tx, evt); err != nil {
 //	    return err
 //	}
-func Create(ctx context.Context, tx *sqlx.Tx, evt Event) error {
+func Create(ctx context.Context, tx *sqlx.Tx, evt Event, component componenttype.ComponentType) error {
 	if evt == nil {
 		return errors.New("event cannot be nil")
 	}
@@ -71,8 +72,9 @@ func Create(ctx context.Context, tx *sqlx.Tx, evt Event) error {
 	// The outbox table ensures events are never lost, even if NATS is down.
 	_, err = tx.ExecContext(ctx,
 		`INSERT INTO outbox_events 
-		 (event_type, event_data, did, document_number, version, processed)
-		 VALUES ($1, $2, $3, $4, $5, FALSE)`,
+		 (component, event_type, event_data, did, document_number, version, processed)
+		 VALUES ($1, $2, $3, $4, $5, $6, FALSE)`,
+		component.String(),
 		eventType,
 		eventJSON,
 		did,
@@ -102,13 +104,13 @@ func Create(ctx context.Context, tx *sqlx.Tx, evt Event) error {
 //	if err := event.CreateNewEvents(ctx, tx, evts...); err != nil {
 //	    return err
 //	}
-func CreateNewEvents(ctx context.Context, tx *sqlx.Tx, events ...Event) error {
+func CreateNewEvents(ctx context.Context, tx *sqlx.Tx, component componenttype.ComponentType, events ...Event) error {
 	if len(events) == 0 {
 		return nil // Nothing to store
 	}
 
 	for _, evt := range events {
-		if err := Create(ctx, tx, evt); err != nil {
+		if err := Create(ctx, tx, evt, component); err != nil {
 			return err
 		}
 	}
