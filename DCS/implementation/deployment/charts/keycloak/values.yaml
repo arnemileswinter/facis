@@ -31,10 +31,8 @@ auth:
 extraEnv: []
 
 # Realm import configuration.
-# When enabled, imports the DCS realm with pre-configured client and roles on startup.
+# When enabled, imports the gaia-x realm with pre-configured clients (federated-catalogue, dcs-client) and roles on startup.
 realm:
   import: false
-  # Import GAIA-X realm for Federated Catalogue (set by parent chart when federatedCatalogue.enabled)
-  importGaiaX: false
 
 resources: {}

@@ -166,7 +166,7 @@ Uses external URL (istio/ingress host) for browser-based OIDC flows.
 {{- .Values.oidc.issuerURL -}}
 {{- else if and .Values.keycloak.enabled .Values.keycloak.route.path -}}
 {{- $scheme := default "https" .Values.oidc.keycloakScheme -}}
-{{- $realm := default "dcs" .Values.oidc.realm -}}
+{{- $realm := default "gaia-x" .Values.oidc.realm -}}
 {{- $basePath := printf "/%s" (trimAll "/" .Values.keycloak.route.path) -}}
 {{- $host := "" -}}
 {{- if and .Values.istio.enabled (gt (len .Values.istio.hosts) 0) -}}

@@ -1,4 +1,4 @@
-{{- if or .Values.realm.import .Values.realm.importGaiaX }}
+{{- if .Values.realm.import }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,12 +7,6 @@ metadata:
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/instance: {{ .Release.Name }}
 data:
-  {{- if .Values.realm.import }}
-  dcs-realm.json: |-
-{{ .Files.Get "files/dcs-realm.json" | indent 4 }}
-  {{- end }}
-  {{- if .Values.realm.importGaiaX }}
   gaia-x-realm.json: |-
 {{ .Files.Get "files/gaia-x-realm.json" | indent 4 }}
-  {{- end }}
 {{- end }}

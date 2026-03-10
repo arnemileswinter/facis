@@ -1,4 +1,6 @@
 {{- if .Values.istio.enabled -}}
+# Istio VirtualService for routing traffic to DCS and co-deployed services.
+# Attaches to an externally-managed Gateway (e.g., provisioned via Terraform).
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
