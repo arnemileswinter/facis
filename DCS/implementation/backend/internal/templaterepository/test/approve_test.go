@@ -40,11 +40,9 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
 
 	verifyCmd := command.VerifyCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		VerifiedBy:     approver,
+		DID:        *did,
+		UpdatedAt:  time.Now(),
+		VerifiedBy: approver,
 	}
 	verifyHandler := command.Verifier{
 		Ctx:    ctx,
@@ -58,12 +56,10 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 	}
 
 	cmd := command.ApproveCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     approver,
-		DecisionNotes:  []string{},
+		DID:           *did,
+		UpdatedAt:     time.Now(),
+		ApprovedBy:    approver,
+		DecisionNotes: []string{},
 	}
 	handler := command.Approver{
 		Ctx:    ctx,
@@ -77,10 +73,8 @@ func TestApprove_ApproveContractTemplateInReviewedState(t *testing.T) {
 	}
 
 	qry := contracttemplate.GetByIDQry{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RetrievedBy:    creator,
+		DID:         *did,
+		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx:    ctx,
@@ -113,12 +107,10 @@ func TestApprove_ApproveNonExistingContractTemplate(t *testing.T) {
 	repo := NewTestRepo(ctx)
 
 	cmd := command.ApproveCmd{
-		DID:            *did,
-		DocumentNumber: "2",
-		Version:        2,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
+		DID:           *did,
+		UpdatedAt:     time.Now(),
+		ApprovedBy:    "Test User 1",
+		DecisionNotes: []string{},
 	}
 	handler := command.Approver{
 		Ctx:    ctx,
@@ -155,12 +147,10 @@ func TestApprove_ApproveContractTemplateInReviewedStateWithInvalidUser(t *testin
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, "Test User 1")
 
 	cmd := command.ApproveCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 2",
-		DecisionNotes:  []string{},
+		DID:           *did,
+		UpdatedAt:     time.Now(),
+		ApprovedBy:    "Test User 2",
+		DecisionNotes: []string{},
 	}
 	handler := command.Approver{
 		Ctx:    ctx,
@@ -195,12 +185,10 @@ func TestApprove_ApproveContractTemplateInDraftState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	cmd := command.ApproveCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
+		DID:           *did,
+		UpdatedAt:     time.Now(),
+		ApprovedBy:    "Test User 1",
+		DecisionNotes: []string{},
 	}
 	handler := command.Approver{
 		Ctx:    ctx,
@@ -235,12 +223,10 @@ func TestApprove_ApproveContractTemplateInApprovedState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	cmd := command.ApproveCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
+		DID:           *did,
+		UpdatedAt:     time.Now(),
+		ApprovedBy:    "Test User 1",
+		DecisionNotes: []string{},
 	}
 	handler := command.Approver{
 		Ctx:    ctx,
@@ -275,12 +261,10 @@ func TestApprove_ApproveContractTemplateAfterUpdate(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	cmd := command.ApproveCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now().Add(-5 * time.Second),
-		ApprovedBy:     "Test User 1",
-		DecisionNotes:  []string{},
+		DID:           *did,
+		UpdatedAt:     time.Now().Add(-5 * time.Second),
+		ApprovedBy:    "Test User 1",
+		DecisionNotes: []string{},
 	}
 	handler := command.Approver{
 		Ctx:    ctx,

@@ -16,11 +16,9 @@ import (
 )
 
 type ArchiveCmd struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	UpdatedAt      time.Time
-	ArchivedBy     string
+	DID        string
+	UpdatedAt  time.Time
+	ArchivedBy string
 }
 
 type Archiver struct {
@@ -42,7 +40,7 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -58,14 +56,14 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 
 	if processData.State == contracttemplatestate.Approved.String() || processData.State == contracttemplatestate.Registered.String() {
 
-		err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Deprecated.String())
+		err = h.CTRepo.UpdateState(tx, cmd.DID, contracttemplatestate.Deprecated.String())
 		if err != nil {
 			return fmt.Errorf("could not update state: %w", err)
 		}
 
 	} else {
 
-		err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Deleted.String())
+		err = h.CTRepo.UpdateState(tx, cmd.DID, contracttemplatestate.Deleted.String())
 		if err != nil {
 			return fmt.Errorf("could not update state: %w", err)
 		}
@@ -73,8 +71,8 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 
 	evt := templateevents.ArchiveEvent{
 		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
 		ArchivedBy:     cmd.ArchivedBy,
 		OccurredAt:     time.Now(),
 	}
@@ -83,12 +81,12 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.RTRepo.Delete(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not delete review tasks: %w", err)
 	}
 
-	err = h.ATRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.ATRepo.Delete(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not delete approval tasks: %w", err)
 	}

@@ -16,13 +16,13 @@ type PostgresApprovalTaskRepo struct {
 func (r *PostgresApprovalTaskRepo) Create(tx *sqlx.Tx, data db.ApprovalTaskData) (*time.Time, error) {
 	statement := `
         INSERT INTO contract_templates_approval_task (
-            did, document_number, version, state, approver, created_by
-        ) VALUES ($1, $2, $3, $4, $5, $6)
+            did, state, approver, created_by
+        ) VALUES ($1, $2, $3, $4)
         RETURNING created_at
     `
 	var createdAt time.Time
 	err := tx.GetContext(r.Ctx, &createdAt, statement,
-		data.DID, data.DocumentNumber, data.Version,
+		data.DID,
 		data.State, data.Approver, data.CreatedBy,
 	)
 	if err != nil {
@@ -31,18 +31,18 @@ func (r *PostgresApprovalTaskRepo) Create(tx *sqlx.Tx, data db.ApprovalTaskData)
 	return &createdAt, nil
 }
 
-func (r *PostgresApprovalTaskRepo) ReopenTasks(tx *sqlx.Tx, did string, documentNumber string, version int) error {
+func (r *PostgresApprovalTaskRepo) ReopenTasks(tx *sqlx.Tx, did string) error {
 	statement := `
         UPDATE contract_templates_approval_task SET state = 'OPEN'
-        WHERE did = $1 AND document_number = $2 AND version = $3
+        WHERE did = $1
     `
-	_, err := tx.ExecContext(r.Ctx, statement, did, documentNumber, version)
+	_, err := tx.ExecContext(r.Ctx, statement, did)
 	return err
 }
 
 func (r *PostgresApprovalTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]db.ApprovalTaskData, error) {
 	query := `
-        SELECT id, did, document_number, version, state, approver,
+        SELECT id, did, state, approver,
                created_by, created_at
         FROM contract_templates_approval_task WHERE did = $1
     `
@@ -56,7 +56,7 @@ func (r *PostgresApprovalTaskRepo) ReadAll(tx *sqlx.Tx, did string) ([]db.Approv
 
 func (r *PostgresApprovalTaskRepo) ReadAllByApprover(tx *sqlx.Tx, approver string) ([]db.ApprovalTaskData, error) {
 	query := `
-        SELECT id, did, document_number, version, state, approver,
+        SELECT id, did, state, approver,
                created_by, created_at
         FROM contract_templates_approval_task WHERE approver = $1
     `
@@ -68,12 +68,12 @@ func (r *PostgresApprovalTaskRepo) ReadAllByApprover(tx *sqlx.Tx, approver strin
 	return approvalTasks, nil
 }
 
-func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, documentNumber string, version int, approver string, state string) error {
+func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, approver string, state string) error {
 	statement := `
-        UPDATE contract_templates_approval_task SET state = $5
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
+        UPDATE contract_templates_approval_task SET state = $3
+        WHERE did = $1 AND approver = $2
     `
-	result, err := tx.ExecContext(r.Ctx, statement, did, documentNumber, version, approver, state)
+	result, err := tx.ExecContext(r.Ctx, statement, did, approver, state)
 	if err != nil {
 		return err
 	}
@@ -87,50 +87,50 @@ func (r *PostgresApprovalTaskRepo) Update(tx *sqlx.Tx, did string, documentNumbe
 	return nil
 }
 
-func (r *PostgresApprovalTaskRepo) IsValidApprover(tx *sqlx.Tx, did string, documentNumber string, version int, approver string) (bool, error) {
+func (r *PostgresApprovalTaskRepo) IsValidApprover(tx *sqlx.Tx, did string, approver string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_approval_task
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4
+        WHERE did = $1 AND approver = $2
     `
 	var count int
-	err := tx.GetContext(r.Ctx, &count, query, did, documentNumber, version, approver)
+	err := tx.GetContext(r.Ctx, &count, query, did, approver)
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
 }
 
-func (r *PostgresApprovalTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, documentNumber string, version int, approver string, state string) (bool, error) {
+func (r *PostgresApprovalTaskRepo) TaskExistsInState(tx *sqlx.Tx, did string, approver string, state string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_approval_task
-        WHERE did = $1 AND document_number = $2 AND version = $3 AND approver = $4 AND state = $5
+        WHERE did = $1 AND approver = $2 AND state = $3
     `
 	var count int
-	err := tx.GetContext(r.Ctx, &count, query, did, documentNumber, version, approver, state)
+	err := tx.GetContext(r.Ctx, &count, query, did, approver, state)
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
 }
 
-func (r *PostgresApprovalTaskRepo) TaskExists(tx *sqlx.Tx, did string, documentNumber string, version int) (bool, error) {
+func (r *PostgresApprovalTaskRepo) TaskExists(tx *sqlx.Tx, did string) (bool, error) {
 	query := `
         SELECT COUNT(*) FROM contract_templates_approval_task
-        WHERE did = $1 AND document_number = $2 AND version = $3
+        WHERE did = $1
     `
 	var count int
-	err := tx.GetContext(r.Ctx, &count, query, did, documentNumber, version)
+	err := tx.GetContext(r.Ctx, &count, query, did)
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
 }
 
-func (r *PostgresApprovalTaskRepo) Delete(tx *sqlx.Tx, did string, documentNumber string, version int) error {
+func (r *PostgresApprovalTaskRepo) Delete(tx *sqlx.Tx, did string) error {
 	statement := `
         DELETE FROM contract_templates_approval_task
-        WHERE did = $1 AND document_number = $2 AND version = $3
+        WHERE did = $1
     `
-	_, err := tx.ExecContext(r.Ctx, statement, did, documentNumber, version)
+	_, err := tx.ExecContext(r.Ctx, statement, did)
 	return err
 }

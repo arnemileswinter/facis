@@ -35,10 +35,8 @@ func TestRetrieve_RetrieveContractTemplateById(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	qry := contracttemplate.GetByIDQry{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RetrievedBy:    creator,
+		DID:         *did,
+		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx:    ctx,
@@ -75,11 +73,14 @@ func TestRetrieve_RetrieveNonExistingContractTemplateById(t *testing.T) {
 
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
+	did2, err := base.GetDID()
+	if err != nil {
+		t.Fatalf("Failed to get another DID: %v", err)
+	}
+
 	qry := contracttemplate.GetByIDQry{
-		DID:            *did,
-		DocumentNumber: "2",
-		Version:        2,
-		RetrievedBy:    creator,
+		DID:         *did2,
+		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx:    ctx,

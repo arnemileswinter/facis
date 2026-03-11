@@ -40,12 +40,10 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, approver)
 
 	cmd := command.RejectCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		RejectedBy:     approver,
-		Reason:         "Test Reason",
+		DID:        *did,
+		UpdatedAt:  time.Now(),
+		RejectedBy: approver,
+		Reason:     "Test Reason",
 	}
 	handler := command.Rejecter{
 		Ctx:    ctx,
@@ -62,10 +60,8 @@ func TestCreate_RejectContractTemplateInReviewedState(t *testing.T) {
 	retrievedBy := "Test User"
 
 	qry := contracttemplate.GetByIDQry{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RetrievedBy:    retrievedBy,
+		DID:         *did,
+		RetrievedBy: retrievedBy,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx:    ctx,
@@ -104,12 +100,10 @@ func TestCreate_RejectContractTemplateInReviewedStateWithInvalidUser(t *testing.
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, "Test User 1")
 
 	cmd := command.RejectCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		RejectedBy:     "Test User 2",
-		Reason:         "Test Reason",
+		DID:        *did,
+		UpdatedAt:  time.Now(),
+		RejectedBy: "Test User 2",
+		Reason:     "Test Reason",
 	}
 	handler := command.Rejecter{
 		Ctx:    ctx,
@@ -141,11 +135,9 @@ func TestCreate_RejectNonExistingContractTemplate(t *testing.T) {
 	repo := NewTestRepo(ctx)
 
 	cmd := command.RejectCmd{
-		DID:            *did,
-		DocumentNumber: "2",
-		Version:        2,
-		UpdatedAt:      time.Now(),
-		RejectedBy:     "Test User 1",
+		DID:        *did,
+		UpdatedAt:  time.Now(),
+		RejectedBy: "Test User 1",
 	}
 	handler := command.Rejecter{
 		Ctx:    ctx,
@@ -181,12 +173,10 @@ func TestCreate_RejectContractTemplateInDraftState(t *testing.T) {
 	rejectedBy := "Test User"
 
 	cmd := command.RejectCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		RejectedBy:     rejectedBy,
-		Reason:         "Test Reason",
+		DID:        *did,
+		UpdatedAt:  time.Now(),
+		RejectedBy: rejectedBy,
+		Reason:     "Test Reason",
 	}
 	handler := command.Rejecter{
 		Ctx:    ctx,
@@ -222,12 +212,10 @@ func TestCreate_RejectContractTemplateInApprovedState(t *testing.T) {
 	rejectedBy := "Test User"
 
 	cmd := command.RejectCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now(),
-		RejectedBy:     rejectedBy,
-		Reason:         "Test Reason",
+		DID:        *did,
+		UpdatedAt:  time.Now(),
+		RejectedBy: rejectedBy,
+		Reason:     "Test Reason",
 	}
 	handler := command.Rejecter{
 		Ctx:    ctx,
@@ -263,12 +251,10 @@ func TestCreate_RejectContractTemplateAfterUpdate(t *testing.T) {
 	rejectedBy := "Test User"
 
 	cmd := command.RejectCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		UpdatedAt:      time.Now().Add(-5 * time.Second),
-		RejectedBy:     rejectedBy,
-		Reason:         "Test Reason",
+		DID:        *did,
+		UpdatedAt:  time.Now().Add(-5 * time.Second),
+		RejectedBy: rejectedBy,
+		Reason:     "Test Reason",
 	}
 	handler := command.Rejecter{
 		Ctx:    ctx,

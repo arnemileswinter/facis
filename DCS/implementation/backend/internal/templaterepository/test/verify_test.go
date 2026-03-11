@@ -38,11 +38,9 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
 	cmd := command.VerifyCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		VerifiedBy:     reviewers[0],
-		UpdatedAt:      time.Now(),
+		DID:        *did,
+		VerifiedBy: reviewers[0],
+		UpdatedAt:  time.Now(),
 	}
 	handler := command.Verifier{
 		Ctx:    ctx,
@@ -61,7 +59,7 @@ func TestVerify_VerifyContractTemplateAsReviewer(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, conf.DefaultDocumentNumber(), 1, reviewtaskstate.Verified.String())
+	exists, err := repo.RTRepo.AnyTasksInState(tx, *did, reviewtaskstate.Verified.String())
 	if err != nil {
 		t.Fatalf("Failed to check existence of review tasks: %v", err)
 	}
@@ -92,11 +90,9 @@ func TestVerify_VerifyNonExistingContractTemplate(t *testing.T) {
 	repo := NewTestRepo(ctx)
 
 	cmd := command.VerifyCmd{
-		DID:            *did,
-		DocumentNumber: "2",
-		Version:        2,
-		UpdatedAt:      time.Now(),
-		VerifiedBy:     "Test User 1",
+		DID:        *did,
+		UpdatedAt:  time.Now(),
+		VerifiedBy: "Test User 1",
 	}
 	handler := command.Verifier{
 		Ctx:    ctx,
@@ -131,11 +127,9 @@ func TestVerify_VerifyContractTemplateAfterUpdate(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	cmd := command.VerifyCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		VerifiedBy:     creator,
-		UpdatedAt:      time.Now().Add(-5 * time.Second),
+		DID:        *did,
+		VerifiedBy: creator,
+		UpdatedAt:  time.Now().Add(-5 * time.Second),
 	}
 	handler := command.Verifier{
 		Ctx:    ctx,

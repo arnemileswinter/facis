@@ -16,11 +16,9 @@ import (
 )
 
 type VerifyCmd struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	UpdatedAt      time.Time
-	VerifiedBy     string
+	DID        string
+	UpdatedAt  time.Time
+	VerifiedBy string
 }
 
 type Verifier struct {
@@ -41,7 +39,7 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -50,13 +48,13 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	hasTask, err := h.RTRepo.TaskExistsInState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Open.String())
+	hasTask, err := h.RTRepo.TaskExistsInState(tx, cmd.DID, cmd.VerifiedBy, reviewtaskstate.Open.String())
 	if err != nil {
 		return err
 	}
 
 	if hasTask {
-		err := h.RTRepo.Update(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.VerifiedBy, reviewtaskstate.Verified.String())
+		err := h.RTRepo.Update(tx, cmd.DID, cmd.VerifiedBy, reviewtaskstate.Verified.String())
 		if err != nil {
 			return err
 		}
@@ -64,8 +62,8 @@ func (h *Verifier) Handle(cmd VerifyCmd) error {
 
 	evt := templateevents.VerifyEvent{
 		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
 		VerifiedBy:     cmd.VerifiedBy,
 		OccurredAt:     time.Now(),
 	}

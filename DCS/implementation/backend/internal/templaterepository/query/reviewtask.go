@@ -12,21 +12,17 @@ import (
 )
 
 type GetAllReviewTasksForDIDQry struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	RetrievedBy    string
+	DID         string
+	RetrievedBy string
 }
 
 type GetAllReviewTasksForDIDResult struct {
-	ID             int
-	DID            string
-	DocumentNumber string
-	Version        int
-	State          reviewtaskstate.ReviewTaskState
-	Reviewer       string
-	CreatedBy      string
-	CreatedAt      time.Time
+	ID        int
+	DID       string
+	State     reviewtaskstate.ReviewTaskState
+	Reviewer  string
+	CreatedBy string
+	CreatedAt time.Time
 }
 
 type GetAllReviewTasksForDIDHandler struct {
@@ -65,13 +61,11 @@ func (h *GetAllReviewTasksForDIDHandler) Handle(query GetAllReviewTasksForDIDQry
 		}
 
 		result[i] = GetAllReviewTasksForDIDResult{
-			DID:            data.DID,
-			DocumentNumber: data.DocumentNumber,
-			Version:        data.Version,
-			State:          state,
-			Reviewer:       data.Reviewer,
-			CreatedBy:      data.CreatedBy,
-			CreatedAt:      data.CreatedAt,
+			DID:       data.DID,
+			State:     state,
+			Reviewer:  data.Reviewer,
+			CreatedBy: data.CreatedBy,
+			CreatedAt: data.CreatedAt,
 		}
 	}
 
