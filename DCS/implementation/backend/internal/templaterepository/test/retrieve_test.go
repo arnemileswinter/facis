@@ -4,7 +4,9 @@ import (
 	"context"
 	"digital-contracting-service/internal/base"
 	"digital-contracting-service/internal/base/conf"
+	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
 	"digital-contracting-service/internal/templaterepository/datatype/contracttemplatestate"
+	"digital-contracting-service/internal/templaterepository/datatype/reviewtaskstate"
 	"digital-contracting-service/internal/templaterepository/query/contracttemplate"
 	"slices"
 	"sort"
@@ -114,6 +116,15 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 		}
 		dids = append(dids, *did)
 		createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
+
+		reviewers := []string{
+			creator,
+		}
+
+		createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
+
+		createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, creator)
+
 	}
 	sort.Strings(dids)
 
@@ -132,7 +143,9 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
-	assert.NotEmpty(t, result)
+	assert.NotEmpty(t, result.ContractTemplates)
+	assert.NotEmpty(t, result.ReviewerTasks)
+	assert.NotEmpty(t, result.ApprovalTasks)
 
 	for _, ct := range result.ContractTemplates {
 		assert.Equal(t, contracttemplatestate.Draft, ct.State)
