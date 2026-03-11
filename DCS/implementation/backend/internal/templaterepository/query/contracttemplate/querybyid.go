@@ -17,16 +17,14 @@ import (
 )
 
 type GetByIDQry struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	RetrievedBy    string
+	DID         string
+	RetrievedBy string
 }
 
 type GetByIDResult struct {
 	DID            string
-	DocumentNumber string
-	Version        int
+	DocumentNumber *string
+	Version        *int
 	State          contracttemplatestate.ContractTemplateState
 	TemplateType   contracttemplatetype.ContractTemplateType
 	Name           *string
@@ -54,15 +52,15 @@ func (h *GetByIDHandler) Handle(query GetByIDQry) (*GetByIDResult, error) {
 	}
 	defer tx.Rollback()
 
-	data, err := h.CTRepo.ReadDataByID(tx, query.DID, query.DocumentNumber, query.Version)
+	data, err := h.CTRepo.ReadDataByID(tx, query.DID)
 	if err != nil {
 		return nil, fmt.Errorf("could not get contract template data: %w", err)
 	}
 
 	evt := templateevents.RetrieveByIDEvent{
 		DID:            query.DID,
-		DocumentNumber: query.DocumentNumber,
-		Version:        query.Version,
+		DocumentNumber: data.DocumentNumber,
+		Version:        data.Version,
 		RetrievedBy:    query.RetrievedBy,
 		OccurredAt:     time.Now(),
 	}

@@ -17,8 +17,7 @@ import (
 )
 
 type GetAllMetadataByFilterQry struct {
-	RetrievedBy string
-
+	RetrievedBy    string
 	DID            *string
 	DocumentNumber *string
 	Version        *int
@@ -31,12 +30,12 @@ type GetAllMetadataByFilterQry struct {
 
 type GetAllMetadataByFilterResult struct {
 	DID            string
-	DocumentNumber string
-	Version        int
+	DocumentNumber *string
+	Version        *int
 	State          contracttemplatestate.ContractTemplateState
 	TemplateType   contracttemplatetype.ContractTemplateType
-	Name           string
-	Description    string
+	Name           *string
+	Description    *string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	MetaData       datatype.JSON
@@ -102,12 +101,12 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) 
 	result := make([]GetAllMetadataByFilterResult, len(contractTemplates))
 	for i, data := range contractTemplates {
 
-		state, err := contracttemplatestate.NewContractTemplateState(data.State)
+		ctState, err := contracttemplatestate.NewContractTemplateState(data.State)
 		if err != nil {
 			return nil, fmt.Errorf("could not create contract template state: %w", err)
 		}
 
-		templateType, err := contracttemplatetype.NewContractTemplateType(data.TemplateType)
+		ctType, err := contracttemplatetype.NewContractTemplateType(data.TemplateType)
 		if err != nil {
 			return nil, fmt.Errorf("could not create contract template type: %w", err)
 		}
@@ -116,10 +115,10 @@ func (h *GetAllMetaDataByFilterHandler) Handle(query GetAllMetadataByFilterQry) 
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
-			State:          state,
-			TemplateType:   templateType,
-			Name:           *data.Name,
-			Description:    *data.Description,
+			State:          ctState,
+			TemplateType:   ctType,
+			Name:           data.Name,
+			Description:    data.Description,
 			CreatedAt:      data.CreatedAt,
 			UpdatedAt:      data.UpdatedAt,
 		}

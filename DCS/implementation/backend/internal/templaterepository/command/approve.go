@@ -16,12 +16,10 @@ import (
 )
 
 type ApproveCmd struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	UpdatedAt      time.Time
-	ApprovedBy     string
-	DecisionNotes  []string
+	DID           string
+	UpdatedAt     time.Time
+	ApprovedBy    string
+	DecisionNotes []string
 }
 
 type Approver struct {
@@ -42,7 +40,7 @@ func (h *Approver) Handle(cmd ApproveCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -55,7 +53,7 @@ func (h *Approver) Handle(cmd ApproveCmd) error {
 		return errors.New("invalid contract template state")
 	}
 
-	valid, err := h.ATRepo.IsValidApprover(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.ApprovedBy)
+	valid, err := h.ATRepo.IsValidApprover(tx, cmd.DID, cmd.ApprovedBy)
 	if err != nil {
 		return err
 	}
@@ -64,15 +62,15 @@ func (h *Approver) Handle(cmd ApproveCmd) error {
 		return errors.New("invalid user")
 	}
 
-	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Approved.String())
+	err = h.CTRepo.UpdateState(tx, cmd.DID, contracttemplatestate.Approved.String())
 	if err != nil {
 		return fmt.Errorf("could not update current template state: %w", err)
 	}
 
 	evt := templateevents.ApproveEvent{
 		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
 		ApprovedBy:     cmd.ApprovedBy,
 		DecisionNotes:  cmd.DecisionNotes,
 		OccurredAt:     time.Now(),

@@ -35,11 +35,9 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Approved, creator)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RegisteredBy:   creator,
-		UpdatedAt:      time.Now(),
+		DID:          *did,
+		RegisteredBy: creator,
+		UpdatedAt:    time.Now(),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -54,10 +52,8 @@ func TestRegister_RegisterContractTemplateDataInValidState(t *testing.T) {
 	}
 
 	qry := contracttemplate.GetByIDQry{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RetrievedBy:    creator,
+		DID:         *did,
+		RetrievedBy: creator,
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx:    ctx,
@@ -91,11 +87,9 @@ func TestRegister_RegisterNonExistingContractTemplate(t *testing.T) {
 	repo := NewTestRepo(ctx)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: "2",
-		Version:        2,
-		UpdatedAt:      time.Now(),
-		RegisteredBy:   "Test User 1",
+		DID:          *did,
+		UpdatedAt:    time.Now(),
+		RegisteredBy: "Test User 1",
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -131,11 +125,9 @@ func TestRegister_RegisterContractTemplateDataInDraftState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Draft, creator)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RegisteredBy:   creator,
-		UpdatedAt:      time.Now(),
+		DID:          *did,
+		RegisteredBy: creator,
+		UpdatedAt:    time.Now(),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -171,11 +163,9 @@ func TestRegister_RegisterContractTemplateDataInSubmittedState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Submitted, creator)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RegisteredBy:   creator,
-		UpdatedAt:      time.Now(),
+		DID:          *did,
+		RegisteredBy: creator,
+		UpdatedAt:    time.Now(),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -211,11 +201,9 @@ func TestRegister_RegisterContractTemplateDataInRejectedState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Rejected, creator)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RegisteredBy:   creator,
-		UpdatedAt:      time.Now(),
+		DID:          *did,
+		RegisteredBy: creator,
+		UpdatedAt:    time.Now(),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -251,11 +239,9 @@ func TestRegister_RegisterContractTemplateDataInReviewedState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Reviewed, creator)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RegisteredBy:   creator,
-		UpdatedAt:      time.Now(),
+		DID:          *did,
+		RegisteredBy: creator,
+		UpdatedAt:    time.Now(),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -291,11 +277,9 @@ func TestRegister_RegisterContractTemplateDataInRegisteredState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Registered, creator)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RegisteredBy:   creator,
-		UpdatedAt:      time.Now(),
+		DID:          *did,
+		RegisteredBy: creator,
+		UpdatedAt:    time.Now(),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -331,11 +315,9 @@ func TestRegister_RegisterContractTemplateDataInArchivedState(t *testing.T) {
 	createContractTemplate(t, db, repo, did, contracttemplatestate.Deleted, creator)
 
 	cmd := command.RegisterCmd{
-		DID:            *did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		RegisteredBy:   creator,
-		UpdatedAt:      time.Now(),
+		DID:          *did,
+		RegisteredBy: creator,
+		UpdatedAt:    time.Now(),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,

@@ -19,8 +19,8 @@ import (
 
 type UpdateCmd struct {
 	DID            string
-	DocumentNumber string
-	Version        int
+	DocumentNumber *string
+	Version        *int
 	TemplateType   *contracttemplatetype.ContractTemplateType
 	UpdatedAt      time.Time
 	UpdatedBy      string
@@ -48,7 +48,7 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 	}
 	defer tx.Rollback()
 
-	oldData, err := h.CTRepo.ReadDataByID(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	oldData, err := h.CTRepo.ReadDataByID(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
@@ -65,7 +65,7 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 	if oldData.State == contracttemplatestate.Draft.String() && oldData.CreatedBy == cmd.UpdatedBy {
 		isValidUser = true
 	} else if oldData.State == contracttemplatestate.Submitted.String() {
-		valid, err := h.RTRepo.IsValidReviewer(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.UpdatedBy)
+		valid, err := h.RTRepo.IsValidReviewer(tx, cmd.DID, cmd.UpdatedBy)
 		if err != nil {
 			return err
 		}
@@ -76,12 +76,12 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 		return fmt.Errorf("invalid user")
 	}
 
-	err = h.RTRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.RTRepo.ReopenTasks(tx, cmd.DID)
 	if err != nil {
 		return err
 	}
 
-	err = h.ATRepo.ReopenTasks(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.ATRepo.ReopenTasks(tx, cmd.DID)
 	if err != nil {
 		return err
 	}
@@ -106,17 +106,19 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 	}
 
 	evt := templateevents.UpdateEvent{
-		DID:             cmd.DID,
-		DocumentNumber:  cmd.DocumentNumber,
-		Version:         cmd.Version,
-		OldName:         oldData.Name,
-		NewName:         cmd.Name,
-		OldDescription:  oldData.Description,
-		NewDescription:  cmd.Description,
-		OldTemplateData: oldData.TemplateData,
-		NewTemplateData: cmd.TemplateData,
-		UpdatedBy:       cmd.UpdatedBy,
-		OccurredAt:      time.Now(),
+		DID:               cmd.DID,
+		OldDocumentNumber: oldData.DocumentNumber,
+		NewDocumentNumber: cmd.DocumentNumber,
+		OldVersion:        oldData.Version,
+		NewVersion:        cmd.Version,
+		OldName:           oldData.Name,
+		NewName:           cmd.Name,
+		OldDescription:    oldData.Description,
+		NewDescription:    cmd.Description,
+		OldTemplateData:   oldData.TemplateData,
+		NewTemplateData:   cmd.TemplateData,
+		UpdatedBy:         cmd.UpdatedBy,
+		OccurredAt:        time.Now(),
 	}
 	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {

@@ -24,12 +24,12 @@ type GetAllMetadataQry struct {
 
 type MetadataItem struct {
 	DID            string
-	DocumentNumber string
-	Version        int
+	DocumentNumber *string
+	Version        *int
 	State          contracttemplatestate.ContractTemplateState
 	TemplateType   contracttemplatetype.ContractTemplateType
-	Name           string
-	Description    string
+	Name           *string
+	Description    *string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	MetaData       datatype.JSON
@@ -37,8 +37,8 @@ type MetadataItem struct {
 
 type ReviewTaskItem struct {
 	DID            string
-	DocumentNumber string
-	Version        int
+	DocumentNumber *string
+	Version        *int
 	State          reviewtaskstate.ReviewTaskState
 	Reviewer       string
 	CreatedAt      time.Time
@@ -46,8 +46,8 @@ type ReviewTaskItem struct {
 
 type ApprovalTaskItem struct {
 	DID            string
-	DocumentNumber string
-	Version        int
+	DocumentNumber *string
+	Version        *int
 	State          approvaltaskstate.ApprovalTaskState
 	Approver       string
 	CreatedAt      time.Time
@@ -107,6 +107,7 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 		return nil, fmt.Errorf("could not commit transaction: %w", err)
 	}
 
+	didToMetadata := make(map[string]MetadataItem)
 	var contractTemplatesItems []MetadataItem
 	for _, data := range contractTemplates {
 
@@ -120,17 +121,20 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 			return nil, fmt.Errorf("could not create contract template type: %w", err)
 		}
 
-		contractTemplatesItems = append(contractTemplatesItems, MetadataItem{
+		metadata := MetadataItem{
 			DID:            data.DID,
 			DocumentNumber: data.DocumentNumber,
 			Version:        data.Version,
 			State:          state,
 			TemplateType:   templateType,
-			Name:           *data.Name,
-			Description:    *data.Description,
+			Name:           data.Name,
+			Description:    data.Description,
 			CreatedAt:      data.CreatedAt,
 			UpdatedAt:      data.UpdatedAt,
-		})
+		}
+		contractTemplatesItems = append(contractTemplatesItems)
+
+		didToMetadata[data.DID] = metadata
 	}
 
 	var reviewTaskItems []ReviewTaskItem
@@ -141,11 +145,19 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 			return nil, fmt.Errorf("could not create contract template state: %w", err)
 		}
 
+		metadata, exists := didToMetadata[data.DID]
+		var documentNumber *string
+		var version *int
+		if exists {
+			documentNumber = metadata.DocumentNumber
+			version = metadata.Version
+		}
+
 		reviewTaskItems = append(reviewTaskItems, ReviewTaskItem{
 			DID:            data.DID,
-			DocumentNumber: data.DocumentNumber,
-			Version:        data.Version,
 			State:          state,
+			DocumentNumber: documentNumber,
+			Version:        version,
 			Reviewer:       data.Reviewer,
 			CreatedAt:      data.CreatedAt,
 		})
@@ -159,10 +171,18 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 			return nil, fmt.Errorf("could not create contract template state: %w", err)
 		}
 
+		metadata, exists := didToMetadata[data.DID]
+		var documentNumber *string
+		var version *int
+		if exists {
+			documentNumber = metadata.DocumentNumber
+			version = metadata.Version
+		}
+
 		approvalTasksItems = append(approvalTasksItems, ApprovalTaskItem{
 			DID:            data.DID,
-			DocumentNumber: data.DocumentNumber,
-			Version:        data.Version,
+			DocumentNumber: documentNumber,
+			Version:        version,
 			State:          state,
 			Approver:       data.Approver,
 			CreatedAt:      data.CreatedAt,

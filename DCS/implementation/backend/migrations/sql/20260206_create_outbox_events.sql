@@ -1,8 +1,5 @@
--- Migration: Create Outbox Events Table for CQRS/Event Sourcing
--- Purpose: Persistent storage of events before publishing to NATS
--- This ensures events are never lost even if NATS is unavailable
-
 CREATE TYPE delivery_type AS ENUM ('LOCAL', 'EXTERNAL');
+
 
 CREATE TABLE IF NOT EXISTS outbox_events (
     id BIGSERIAL PRIMARY KEY,
@@ -23,27 +20,24 @@ CREATE TABLE IF NOT EXISTS outbox_events (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ✅ CRITICAL: Index for Poller query
--- The Poller does: SELECT * FROM outbox_events WHERE processed = FALSE
--- This index must be fast!
+
 CREATE INDEX idx_outbox_events_processed 
     ON outbox_events(processed, created_at)
     WHERE processed = FALSE;
 
--- Optional: Index for cleanup/audit queries
+
 CREATE INDEX idx_outbox_events_created_at 
     ON outbox_events(created_at);
 
--- Optional: Index for specific event queries
+
 CREATE INDEX idx_outbox_events_did
     ON outbox_events(did);
 
--- Optional: Index for event type filtering
-CREATE INDEX idx_outbox_events_type 
+
+CREATE INDEX idx_outbox_events_type
     ON outbox_events(event_type);
 
--- ✅ Stored Procedure: Add Event to Outbox (for consistency)
--- Usage in Handler: SELECT add_outbox_event('EventType', json_data, 'did');
+
 CREATE OR REPLACE FUNCTION add_outbox_event(
     p_event_type VARCHAR,
     p_event_data JSONB,
@@ -60,8 +54,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- ✅ Stored Procedure: Mark Event as Processed
--- Usage: SELECT mark_event_processed(123);
+
 CREATE OR REPLACE FUNCTION mark_event_processed(p_event_id BIGINT)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -73,9 +66,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- ✅ Stored Procedure: Cleanup old processed events
--- Usage: SELECT cleanup_old_events(interval '7 days');
--- Run periodically (e.g., daily) to prevent table from growing indefinitely
+
 CREATE OR REPLACE FUNCTION cleanup_old_events(p_retention_period INTERVAL DEFAULT '7 days')
 RETURNS INTEGER AS $$
 DECLARE
@@ -90,7 +81,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- ✅ View: Unprocessed Events (for monitoring)
+
 CREATE OR REPLACE VIEW v_unprocessed_events AS
 SELECT 
     id,
@@ -103,7 +94,7 @@ FROM outbox_events
 WHERE processed = FALSE
 ORDER BY created_at ASC;
 
--- ✅ View: Event Processing Statistics (for monitoring)
+
 CREATE OR REPLACE VIEW v_outbox_stats AS
 SELECT 
     event_type,

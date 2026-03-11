@@ -2,7 +2,6 @@ package test
 
 import (
 	"context"
-	"digital-contracting-service/internal/base/conf"
 	"digital-contracting-service/internal/base/datatype"
 	"digital-contracting-service/internal/templaterepository/command"
 	"digital-contracting-service/internal/templaterepository/datatype/approvaltaskstate"
@@ -121,7 +120,7 @@ func createContractTemplate(t *testing.T, db *sqlx.DB, repo *TestRepo, did *stri
 	}
 }
 
-func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state contracttemplatestate.ContractTemplateState, createdBy string, documentNumber string, version int, name string, description string, templateData map[string]interface{}) {
+func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRepo, did *string, state contracttemplatestate.ContractTemplateState, createdBy string, name string, description string, templateData map[string]interface{}) {
 	jsonTemplateData, err := datatype.NewJSON(templateData)
 	if err != nil {
 		t.Fatalf("Failed to create JSON template data: %v", err)
@@ -148,11 +147,11 @@ func createTestContractTemplateWithData(t *testing.T, db *sqlx.DB, repo *TestRep
 	}
 
 	updateStatement := `UPDATE contract_templates SET
-        	state = $2, document_number = $3, version = $4
+        	state = $2
     	WHERE did = $1
 `
 
-	_, err = db.Exec(updateStatement, *did, state, documentNumber, version)
+	_, err = db.Exec(updateStatement, *did, state)
 	if err != nil {
 		t.Fatalf("Failed to update template state: %v", err)
 	}
@@ -167,12 +166,10 @@ func createReviewTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *Tes
 
 	for _, reviewer := range reviewers {
 		reviewTask := database.ReviewTaskData{
-			DID:            did,
-			DocumentNumber: conf.DefaultDocumentNumber(),
-			Version:        1,
-			Reviewer:       reviewer,
-			State:          state.String(),
-			CreatedBy:      submittedBy,
+			DID:       did,
+			Reviewer:  reviewer,
+			State:     state.String(),
+			CreatedBy: submittedBy,
 		}
 		_, err = repo.RTRepo.Create(tx, reviewTask)
 		if err != nil {
@@ -194,12 +191,10 @@ func createApprovalTasks(t *testing.T, ctx context.Context, db *sqlx.DB, repo *T
 	}
 
 	approvalTask := database.ApprovalTaskData{
-		DID:            did,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		Version:        1,
-		Approver:       approver,
-		State:          state.String(),
-		CreatedBy:      submittedBy,
+		DID:       did,
+		Approver:  approver,
+		State:     state.String(),
+		CreatedBy: submittedBy,
 	}
 	_, err = repo.ATRepo.Create(tx, approvalTask)
 	if err != nil {

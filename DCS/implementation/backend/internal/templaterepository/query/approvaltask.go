@@ -12,22 +12,18 @@ import (
 )
 
 type GetAllApprovalTasksForDIDQry struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	RetrievedBy    string
+	DID         string
+	RetrievedBy string
 }
 
 type GetAllApprovalTasksForDIDResult struct {
-	ID             int
-	DID            string
-	DocumentNumber string
-	Version        int
-	State          aopprovaltaskstate.ApprovalTaskState
-	Approver       string
-	CreatedBy      string
-	CreatedAt      time.Time
-	CancelledAt    *time.Time
+	ID          int
+	DID         string
+	State       aopprovaltaskstate.ApprovalTaskState
+	Approver    string
+	CreatedBy   string
+	CreatedAt   time.Time
+	CancelledAt *time.Time
 }
 
 type GetAllApprovalTasksForDIDHandler struct {
@@ -66,13 +62,11 @@ func (h *GetAllApprovalTasksForDIDHandler) Handle(query GetAllApprovalTasksForDI
 		}
 
 		result[i] = GetAllApprovalTasksForDIDResult{
-			DID:            data.DID,
-			DocumentNumber: data.DocumentNumber,
-			Version:        data.Version,
-			State:          state,
-			Approver:       data.Approver,
-			CreatedBy:      data.CreatedBy,
-			CreatedAt:      data.CreatedAt,
+			DID:       data.DID,
+			State:     state,
+			Approver:  data.Approver,
+			CreatedBy: data.CreatedBy,
+			CreatedAt: data.CreatedAt,
 		}
 	}
 

@@ -42,14 +42,13 @@ func (h *Creator) Handle(cmd CreateCmd) error {
 	defer tx.Rollback()
 
 	data := db.ContractTemplate{
-		DID:            cmd.DID,
-		DocumentNumber: conf.DefaultDocumentNumber(),
-		CreatedBy:      cmd.CreatedBy,
-		State:          contracttemplatestate.Draft.String(),
-		TemplateType:   cmd.TemplateType.String(),
-		Name:           cmd.Name,
-		Description:    cmd.Description,
-		TemplateData:   cmd.TemplateData,
+		DID:          cmd.DID,
+		CreatedBy:    cmd.CreatedBy,
+		State:        contracttemplatestate.Draft.String(),
+		TemplateType: cmd.TemplateType.String(),
+		Name:         cmd.Name,
+		Description:  cmd.Description,
+		TemplateData: cmd.TemplateData,
 	}
 	createdAt, err := h.CTRepo.Create(tx, data)
 	if err != nil {
@@ -57,14 +56,12 @@ func (h *Creator) Handle(cmd CreateCmd) error {
 	}
 
 	evt := templateevents.CreateEvent{
-		DID:            cmd.DID,
-		DocumentNumber: "",
-		Version:        1,
-		CreatedBy:      cmd.CreatedBy,
-		Name:           cmd.Name,
-		Description:    cmd.Description,
-		TemplateData:   cmd.TemplateData,
-		OccurredAt:     *createdAt,
+		DID:          cmd.DID,
+		CreatedBy:    cmd.CreatedBy,
+		Name:         cmd.Name,
+		Description:  cmd.Description,
+		TemplateData: cmd.TemplateData,
+		OccurredAt:   *createdAt,
 	}
 	err = event.Create(ctx, tx, evt, componenttype.ContractTemplateRepo)
 	if err != nil {

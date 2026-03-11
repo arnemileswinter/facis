@@ -78,9 +78,7 @@ func (s *templateRepositorysrvc) Create(ctx context.Context, req *templatereposi
 	}
 
 	return &templaterepository.ContractTemplateCreateResponse{
-		Did:            *did,
-		DocumentNumber: "",
-		Version:        1,
+		Did: *did,
 	}, nil
 }
 
@@ -103,15 +101,13 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 	}
 
 	cmd := command.SubmitCmd{
-		DID:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
-		UpdatedAt:      updatedAt,
-		SubmittedBy:    middleware.GetUsername(ctx),
-		ActionFlag:     actionFlag,
-		Comments:       req.Comments,
-		Reviewer:       req.Reviewers,
-		Approver:       req.Approver,
+		DID:         req.Did,
+		UpdatedAt:   updatedAt,
+		SubmittedBy: middleware.GetUsername(ctx),
+		ActionFlag:  actionFlag,
+		Comments:    req.Comments,
+		Reviewer:    req.Reviewers,
+		Approver:    req.Approver,
 	}
 	handler := command.Submitter{
 		Ctx:    ctx,
@@ -126,9 +122,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 	}
 
 	return &templaterepository.ContractTemplateSubmitResponse{
-		Did:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
+		Did: req.Did,
 	}, nil
 }
 
@@ -177,9 +171,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 	}
 
 	return &templaterepository.ContractTemplateUpdateResponse{
-		Did:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
+		Did: req.Did,
 	}, nil
 }
 
@@ -285,8 +277,8 @@ func (s *templateRepositorysrvc) Search(ctx context.Context, req *templatereposi
 			Version:        item.Version,
 			State:          item.State.String(),
 			TemplateType:   item.TemplateType.String(),
-			Name:           &item.Name,
-			Description:    &item.Description,
+			Name:           item.Name,
+			Description:    item.Description,
 			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:      item.UpdatedAt.Format(time.RFC3339),
 		})
@@ -321,8 +313,8 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 			Version:        item.Version,
 			State:          item.State.String(),
 			TemplateType:   item.TemplateType.String(),
-			Name:           &item.Name,
-			Description:    &item.Description,
+			Name:           item.Name,
+			Description:    item.Description,
 			CreatedAt:      item.CreatedAt.Format(time.RFC3339),
 			UpdatedAt:      item.UpdatedAt.Format(time.RFC3339),
 		})
@@ -363,10 +355,8 @@ func (s *templateRepositorysrvc) Retrieve(ctx context.Context, req *templaterepo
 func (s *templateRepositorysrvc) RetrieveByID(ctx context.Context, req *templaterepository.ContractTemplateRetrieveByIDRequest) (res *templaterepository.ContractTemplateRetrieveByIDResponse, err error) {
 
 	qry := contracttemplate.GetByIDQry{
-		DID:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
-		RetrievedBy:    middleware.GetUsername(ctx),
+		DID:         req.Did,
+		RetrievedBy: middleware.GetUsername(ctx),
 	}
 	queryHandler := contracttemplate.GetByIDHandler{
 		Ctx:    ctx,
@@ -402,10 +392,8 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 	}
 
 	cmd := command.VerifyCmd{
-		DID:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
-		UpdatedAt:      updatedAt,
+		DID:       req.Did,
+		UpdatedAt: updatedAt,
 	}
 	handler := command.Verifier{
 		Ctx:    ctx,
@@ -419,9 +407,7 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 	}
 
 	return &templaterepository.ContractTemplateVerifyResponse{
-		Did:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
+		Did: req.Did,
 	}, nil
 }
 
@@ -434,12 +420,10 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 	}
 
 	cmd := command.ApproveCmd{
-		DID:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
-		UpdatedAt:      updatedAt,
-		ApprovedBy:     middleware.GetUsername(ctx),
-		DecisionNotes:  req.DecisionNotes,
+		DID:           req.Did,
+		UpdatedAt:     updatedAt,
+		ApprovedBy:    middleware.GetUsername(ctx),
+		DecisionNotes: req.DecisionNotes,
 	}
 	handler := command.Approver{
 		Ctx:    ctx,
@@ -453,9 +437,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 	}
 
 	return &templaterepository.ContractTemplateApproveResponse{
-		Did:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
+		Did: req.Did,
 	}, nil
 }
 
@@ -468,12 +450,10 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 	}
 
 	cmd := command.RejectCmd{
-		DID:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
-		UpdatedAt:      updatedAt,
-		RejectedBy:     middleware.GetUsername(ctx),
-		Reason:         req.Reason,
+		DID:        req.Did,
+		UpdatedAt:  updatedAt,
+		RejectedBy: middleware.GetUsername(ctx),
+		Reason:     req.Reason,
 	}
 	handler := command.Rejecter{
 		Ctx:    ctx,
@@ -488,9 +468,7 @@ func (s *templateRepositorysrvc) Reject(ctx context.Context, req *templatereposi
 	}
 
 	return &templaterepository.ContractTemplateRejectResponse{
-		Did:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
+		Did: req.Did,
 	}, nil
 }
 
@@ -503,11 +481,9 @@ func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepo
 	}
 
 	cmd := command.RegisterCmd{
-		DID:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
-		UpdatedAt:      updatedAt,
-		RegisteredBy:   middleware.GetUsername(ctx),
+		DID:          req.Did,
+		UpdatedAt:    updatedAt,
+		RegisteredBy: middleware.GetUsername(ctx),
 	}
 	handler := command.Registrar{
 		Ctx:    ctx,
@@ -522,9 +498,7 @@ func (s *templateRepositorysrvc) Register(ctx context.Context, req *templaterepo
 	}
 
 	return &templaterepository.ContractTemplateRegisterResponse{
-		Did:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
+		Did: req.Did,
 	}, nil
 }
 
@@ -537,11 +511,9 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 	}
 
 	cmd := command.ArchiveCmd{
-		DID:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
-		UpdatedAt:      updatedAt,
-		ArchivedBy:     middleware.GetUsername(ctx),
+		DID:        req.Did,
+		UpdatedAt:  updatedAt,
+		ArchivedBy: middleware.GetUsername(ctx),
 	}
 	handler := command.Archiver{
 		Ctx:    ctx,
@@ -556,9 +528,7 @@ func (s *templateRepositorysrvc) Archive(ctx context.Context, req *templaterepos
 	}
 
 	return &templaterepository.ContractTemplateArchiveResponse{
-		Did:            req.Did,
-		DocumentNumber: req.DocumentNumber,
-		Version:        req.Version,
+		Did: req.Did,
 	}, nil
 }
 

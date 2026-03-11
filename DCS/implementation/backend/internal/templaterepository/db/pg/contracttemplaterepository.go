@@ -36,14 +36,14 @@ func (r *PostgresContractTemplateRepo) Create(tx *sqlx.Tx, data db.ContractTempl
 	return &createdAt, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadDataByID(tx *sqlx.Tx, did string, documentNumber string, version int) (*db.ContractTemplate, error) {
+func (r *PostgresContractTemplateRepo) ReadDataByID(tx *sqlx.Tx, did string) (*db.ContractTemplate, error) {
 	query := `
         SELECT did, document_number, version, state, name, description,
                created_by, created_at, updated_at, template_data, template_type
-        FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
+        FROM contract_templates WHERE did = $1
     `
 	var ct db.ContractTemplate
-	err := tx.GetContext(r.Ctx, &ct, query, did, documentNumber, version)
+	err := tx.GetContext(r.Ctx, &ct, query, did)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("contract template with DID %s not found", did)
@@ -87,28 +87,28 @@ func (r *PostgresContractTemplateRepo) ReadAllMetaDataByFilter(tx *sqlx.Tx, valu
 	return cts, nil
 }
 
-func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string, documentNumber string, version int) (*db.ContractTemplateProcessData, error) {
+func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string) (*db.ContractTemplateProcessData, error) {
 	query := `
         SELECT did, document_number, version, state, updated_at, created_by
-        FROM contract_templates WHERE did = $1 AND document_number = $2 AND version = $3
+        FROM contract_templates WHERE did = $1
     `
 	var processData db.ContractTemplateProcessData
-	err := tx.GetContext(r.Ctx, &processData, query, did, documentNumber, version)
+	err := tx.GetContext(r.Ctx, &processData, query, did)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("contract template with DID %s, DocumentNumber %s and Version %d not found", did, documentNumber, version)
+			return nil, fmt.Errorf("contract template with DID %s", did)
 		}
 		return nil, err
 	}
 	return &processData, nil
 }
 
-func (r *PostgresContractTemplateRepo) UpdateState(tx *sqlx.Tx, did string, documentNumber string, version int, state string) error {
+func (r *PostgresContractTemplateRepo) UpdateState(tx *sqlx.Tx, did string, state string) error {
 	statement := `
-        UPDATE contract_templates SET state = $4
-        WHERE did = $1 AND document_number = $2 AND version = $3
+        UPDATE contract_templates SET state = $2
+        WHERE did = $1
     `
-	_, err := tx.ExecContext(r.Ctx, statement, did, documentNumber, version, state)
+	_, err := tx.ExecContext(r.Ctx, statement, did, state)
 	return err
 }
 
@@ -185,6 +185,12 @@ func createQuery(data db.ContractTemplateUpdateData) (*string, []interface{}, er
 		params = append(params, value)
 	}
 
+	if data.DocumentNumber != nil && len(*data.DocumentNumber) > 0 {
+		addParam("document_number", data.DocumentNumber)
+	}
+	if data.Version != nil && *data.Version > 0 {
+		addParam("version", data.Version)
+	}
 	if len(data.State) > 0 {
 		addParam("state", data.State)
 	}
@@ -206,9 +212,9 @@ func createQuery(data db.ContractTemplateUpdateData) (*string, []interface{}, er
 
 	fullQuery := queryBase + strings.Join(columns, ", ")
 	nextIdx := len(params) + 1
-	fullQuery += fmt.Sprintf(" WHERE did = $%d AND document_number = $%d AND version = $%d;",
-		nextIdx, nextIdx+1, nextIdx+2)
-	params = append(params, data.DID, data.DocumentNumber, data.Version)
+	fullQuery += fmt.Sprintf(" WHERE did = $%d;",
+		nextIdx)
+	params = append(params, data.DID)
 
 	return &fullQuery, params, nil
 }

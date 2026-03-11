@@ -16,11 +16,9 @@ import (
 )
 
 type RegisterCmd struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	UpdatedAt      time.Time
-	RegisteredBy   string
+	DID          string
+	UpdatedAt    time.Time
+	RegisteredBy string
 }
 
 type Registrar struct {
@@ -42,7 +40,7 @@ func (h *Registrar) Handle(cmd RegisterCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -55,15 +53,15 @@ func (h *Registrar) Handle(cmd RegisterCmd) error {
 		return errors.New("invalid contract template state")
 	}
 
-	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Registered.String())
+	err = h.CTRepo.UpdateState(tx, cmd.DID, contracttemplatestate.Registered.String())
 	if err != nil {
 		return fmt.Errorf("could not update state: %w", err)
 	}
 
 	evt := templateevents.RegisterEvent{
 		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
 		RegisteredBy:   cmd.RegisteredBy,
 		OccurredAt:     time.Now(),
 	}
@@ -72,12 +70,12 @@ func (h *Registrar) Handle(cmd RegisterCmd) error {
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.RTRepo.Delete(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not delete review tasks: %w", err)
 	}
 
-	err = h.ATRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.ATRepo.Delete(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not delete approval tasks: %w", err)
 	}

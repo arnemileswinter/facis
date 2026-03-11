@@ -16,12 +16,10 @@ import (
 )
 
 type RejectCmd struct {
-	DID            string
-	DocumentNumber string
-	Version        int
-	UpdatedAt      time.Time
-	RejectedBy     string
-	Reason         string
+	DID        string
+	UpdatedAt  time.Time
+	RejectedBy string
+	Reason     string
 }
 
 type Rejecter struct {
@@ -43,7 +41,7 @@ func (h *Rejecter) Handle(cmd RejectCmd) error {
 	}
 	defer tx.Rollback()
 
-	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	processData, err := h.CTRepo.ReadProcessData(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
@@ -56,7 +54,7 @@ func (h *Rejecter) Handle(cmd RejectCmd) error {
 		return errors.New("invalid contract template state")
 	}
 
-	exist, err := h.ATRepo.IsValidApprover(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, cmd.RejectedBy)
+	exist, err := h.ATRepo.IsValidApprover(tx, cmd.DID, cmd.RejectedBy)
 	if err != nil {
 		return err
 	}
@@ -65,15 +63,15 @@ func (h *Rejecter) Handle(cmd RejectCmd) error {
 		return errors.New("invalid user")
 	}
 
-	err = h.CTRepo.UpdateState(tx, cmd.DID, cmd.DocumentNumber, cmd.Version, contracttemplatestate.Draft.String())
+	err = h.CTRepo.UpdateState(tx, cmd.DID, contracttemplatestate.Draft.String())
 	if err != nil {
 		return fmt.Errorf("could not update current template state: %w", err)
 	}
 
 	evt := templateevents.RejectEvent{
 		DID:            cmd.DID,
-		DocumentNumber: cmd.DocumentNumber,
-		Version:        cmd.Version,
+		DocumentNumber: processData.DocumentNumber,
+		Version:        processData.Version,
 		RejectedBy:     cmd.RejectedBy,
 		Reason:         cmd.Reason,
 		OccurredAt:     time.Now(),
@@ -83,12 +81,12 @@ func (h *Rejecter) Handle(cmd RejectCmd) error {
 		return fmt.Errorf("could not create event: %w", err)
 	}
 
-	err = h.RTRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.RTRepo.Delete(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not delete review tasks: %w", err)
 	}
 
-	err = h.ATRepo.Delete(tx, cmd.DID, cmd.DocumentNumber, cmd.Version)
+	err = h.ATRepo.Delete(tx, cmd.DID)
 	if err != nil {
 		return fmt.Errorf("could not delete approval tasks: %w", err)
 	}
