@@ -56,7 +56,6 @@ type ApproveEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber *string   `json:"document_number,omitempty"`
 	Version        *int      `json:"version,omitempty"`
-	UpdatedAt      time.Time `json:"updated_at"`
 	ApprovedBy     string    `json:"approved_by"`
 	DecisionNotes  []string  `json:"decision_notes,omitempty"`
 	OccurredAt     time.Time `json:"occurred_at"`
@@ -77,7 +76,6 @@ type RejectEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber *string   `json:"document_number,omitempty"`
 	Version        *int      `json:"version,omitempty"`
-	UpdatedAt      time.Time `json:"updated_at"`
 	RejectedBy     string    `json:"rejected_by"`
 	Reason         string    `json:"reason"`
 	OccurredAt     time.Time `json:"occurred_at"`
@@ -98,7 +96,6 @@ type VerifyEvent struct {
 	DID            string    `json:"did"`
 	DocumentNumber *string   `json:"document_number,omitempty"`
 	Version        *int      `json:"version,omitempty"`
-	UpdatedAt      time.Time `json:"updated_at"`
 	VerifiedBy     string    `json:"verified_by"`
 	OccurredAt     time.Time `json:"occurred_at"`
 }
@@ -171,7 +168,7 @@ func (e UpdateManageEvent) GetDID() string {
 
 // SearchEvent is emitted when template data is searched.
 type SearchEvent struct {
-	RetrievedBy    string    `json:"updated_by"`
+	RetrievedBy    string    `json:"retrieved_by"`
 	DocumentNumber *string   `json:"document_number,omitempty"`
 	Version        *int      `json:"version,omitempty"`
 	OccurredAt     time.Time `json:"occurred_at"`
@@ -189,7 +186,7 @@ func (e SearchEvent) GetDID() string {
 
 // RetrieveAllEvent is emitted when template data is retrieved.
 type RetrieveAllEvent struct {
-	RetrievedBy string    `json:"updated_by"`
+	RetrievedBy string    `json:"retrieved_by"`
 	OccurredAt  time.Time `json:"occurred_at"`
 }
 
