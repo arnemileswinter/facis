@@ -112,6 +112,7 @@ func (s *templateRepositorysrvc) Submit(ctx context.Context, req *templatereposi
 		Comments:       req.Comments,
 	}
 	handler := command.Submitter{
+		Ctx:    ctx,
 		DB:     s.DB,
 		CTRepo: s.CTRepo,
 		RTRepo: s.RTRepo,
@@ -405,6 +406,7 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 		UpdatedAt:      updatedAt,
 	}
 	handler := command.Verifier{
+		Ctx:    ctx,
 		DB:     s.DB,
 		CTRepo: s.CTRepo,
 		RTRepo: s.RTRepo,
@@ -438,6 +440,7 @@ func (s *templateRepositorysrvc) Approve(ctx context.Context, req *templaterepos
 		DecisionNotes:  req.DecisionNotes,
 	}
 	handler := command.Approver{
+		Ctx:    ctx,
 		DB:     s.DB,
 		CTRepo: s.CTRepo,
 		ATRepo: s.ATRepo,
