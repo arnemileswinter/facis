@@ -85,7 +85,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 		return fmt.Errorf("could not process core data: %w", err)
 	}
 
-	if cmd.UpdatedAt.Before(processData.UpdatedAt) {
+	if cmd.UpdatedAt.Unix() < processData.UpdatedAt.Unix() {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
