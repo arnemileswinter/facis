@@ -132,7 +132,7 @@ func (h *GetAllMetadataHandler) Handle(query GetAllMetadataQry) (*GetAllMetadata
 			CreatedAt:      data.CreatedAt,
 			UpdatedAt:      data.UpdatedAt,
 		}
-		contractTemplatesItems = append(contractTemplatesItems)
+		contractTemplatesItems = append(contractTemplatesItems, metadata)
 
 		didToMetadata[data.DID] = metadata
 	}
