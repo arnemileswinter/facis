@@ -96,7 +96,7 @@ func (r *PostgresContractTemplateRepo) ReadProcessData(tx *sqlx.Tx, did string) 
 	err := tx.GetContext(r.Ctx, &processData, query, did)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("contract template with DID %s, DocumentNumber %s and Version %d not found", did)
+			return nil, fmt.Errorf("contract template with DID %s", did)
 		}
 		return nil, err
 	}
