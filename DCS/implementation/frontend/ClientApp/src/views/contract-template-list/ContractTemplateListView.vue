@@ -4,8 +4,6 @@
       {{ $route.meta.name }}
     </h2>
 
-    <UserSelectionDialog />
-
     <RouterLink
       :to="{ name: 'templates.new' }"
       class="btn rounded-box self-end btn-secondary gap-2"
@@ -26,7 +24,6 @@
 <script setup lang="ts">
 import { useTemplateTable } from './ContractTemplateListController'
 import TemplateList from '../../components/lists/template-list/TemplateList.vue'
-import UserSelectionDialog from '@/components/UserSelectionDialog.vue';
 
 const { templates, loading, error } = useTemplateTable()
 </script>

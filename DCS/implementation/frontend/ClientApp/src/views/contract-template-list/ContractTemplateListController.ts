@@ -30,9 +30,9 @@ export function useTemplateTable() {
 
     const refresh = () => loadTemplates()  // Für manuelles Refresh
 
-    const getTemplateById = async (did: string, version: number, document_number: string) => {
+    const getTemplateById = async (did: string) => {
         try {
-            return await ContractTemplateService.retrieveById({ did, version, document_number })
+            return await ContractTemplateService.retrieveById({ did })
         } catch (err: any) {
             console.error('Template konnte nicht geladen werden:', err)
             return null

@@ -53,6 +53,7 @@ export const ContractTemplateService = {
     return http
       .get<ContractTemplateRetrieveResponse>('/template/retrieve')
       .then((res) => {
+        console.log(res)
         return res.data
       })
       .catch((err) => {
@@ -62,9 +63,8 @@ export const ContractTemplateService = {
   },
 
   async retrieveById(request: ContractTemplateRetrieveByIdRequest): Promise<ContractTemplate | null> {
-    const queryParams = { document_number: request.document_number, version: request.version }
     return http
-      .get<ContractTemplateRetrieveByIdResponse>(`/template/retrieve/${request.did}`, { params: queryParams })
+      .get<ContractTemplateRetrieveByIdResponse>(`/template/retrieve/${request.did}`)
       .then((res) => {
         console.log(res.status)
         return { ...res.data }

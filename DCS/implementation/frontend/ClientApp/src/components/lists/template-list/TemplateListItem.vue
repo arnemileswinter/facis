@@ -15,8 +15,6 @@ async function submitTemplate(result: SelectedUserRole[]) {
   const approver = result.find((user) => user.role === 'TEMPLATE_APPROVER')?.user.id
   const request: ContractTemplateSubmitRequest = {
     did: props.item.did,
-    document_number: props.item.document_number,
-    version: props.item.version,
     updated_at: props.item.updated_at,
     reviewers: reviewers,
     approver: approver!,
@@ -53,7 +51,6 @@ async function submitTemplate(result: SelectedUserRole[]) {
               :to="{
                 name: 'templates.edit',
                 params: { did: item.did },
-                query: { document_number: item.document_number, version: item.version },
               }"
               class="btn btn-sm btn-primary rounded-box gap-2"
             >

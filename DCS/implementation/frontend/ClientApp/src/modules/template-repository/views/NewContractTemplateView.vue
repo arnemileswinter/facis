@@ -132,7 +132,6 @@ import BuilderPreviewDialog from '@template-repository/components/builder-editor
 import TemplateTypeSelect from '@template-repository/components/TemplateTypeSelect.vue'
 import { storeToRefs } from 'pinia'
 import { ContractTemplateService } from '@/services/contract-template-service'
-import { useToNumber } from '@vueuse/core'
 import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
 import { isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
 
@@ -163,9 +162,7 @@ watch(isEditMode, (isEdit) => {
         hasChosenType.value = true
         // load template data into draftStore
         const did = `${route.params.did}`
-        const version = useToNumber(`${route.query.version}`).value
-        const document_number = useToNumber(`${route.query.document_number}`).value
-        ContractTemplateService.retrieveById({ did, version, document_number })
+        ContractTemplateService.retrieveById({ did })
             .then(async template => {
                 if (!template) {
                     draftStore.reset()
@@ -191,8 +188,6 @@ watch(isEditMode, (isEdit) => {
                 for (const block of approvedBlocks) {
                     const template = await ContractTemplateService.retrieveById({
                         did: block.templateId,
-                        version: block.version,
-                        document_number: block.document_number,
                     })
                     if (template) {
                         approvedSubTemplateStore.addTemplate(template)

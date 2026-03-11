@@ -3,30 +3,41 @@ import type { ActionFlag } from '../../types/action-flag'
 import type { ContractTemplateState } from '@/types/contract-template-state'
 import type { ContractTemplateData } from '../contract-template'
 
-interface ContractTemplateBaseRequest {
-  did: string
-  document_number: string
-  version: number
-}
-
 export interface ContractTemplateCreateRequest {
+  template_type: TemplateType
   name?: string
   description?: string
-  template_type?: TemplateType
   /** The template data of the contract template */
   template_data?: ContractTemplateData
 }
 
-export interface ContractTemplateSubmitRequest extends ContractTemplateBaseRequest {
+export interface ContractTemplateSubmitRequest {
+  did: string
   updated_at: string
-  reviewers: string[]
-  approver: string
+  reviewers?: string[]
+  approver?: string
   forward_to?: ActionFlag
   comments?: string[]
 }
 
-export interface ContractTemplateUpdateRequest extends ContractTemplateBaseRequest {
+export interface ContractTemplateUpdateRequest {
+  did: string
   updated_at: string
+  document_number?: string
+  version?: number
+  name?: string
+  description?: string
+  /** The template data of the contract template */
+  template_data?: ContractTemplateData
+}
+
+export interface ContractTemplateUpdateManageRequest {
+  did: string
+  state?: ContractTemplateState
+  updated_at: string
+  document_number?: string
+  version?: number
+  template_type?: TemplateType
   name?: string
   description?: string
   /** The template data of the contract template */
@@ -46,15 +57,39 @@ export interface ContractTemplateSearchRequest {
 
 export interface ContractTemplateRetrieveRequest {}
 
-export interface ContractTemplateRetrieveByIdRequest extends ContractTemplateBaseRequest {}
+export interface ContractTemplateRetrieveByIdRequest {
+  did: string
+}
 
-export interface ContractTemplateApproveRequest extends ContractTemplateBaseRequest {
+export interface ContractTemplateApproveRequest {
+  did: string
   updated_at: string
   decision_notes?: string[]
 }
 
-export interface ContractTemplateRejectRequest extends ContractTemplateBaseRequest {
+export interface ContractTemplateRejectRequest {
+  did: string
   updated_at: string
   /** Reason for rejecting the contract template */
   reason: string
+}
+
+export interface ContractTemplateVerifyRequest {
+  did: string
+  updated_at: string
+  decision_notes: string[]
+}
+
+export interface ContractTemplateArchiveRequest {
+  did: string
+  updated_at: string
+}
+
+export interface ContractTemplateRegisterRequest {
+  did: string
+  updated_at: string
+}
+
+export interface ContractTemplateAuditRequest {
+  did: string
 }
