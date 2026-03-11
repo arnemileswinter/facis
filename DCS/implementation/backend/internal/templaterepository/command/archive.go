@@ -47,7 +47,7 @@ func (h *Archiver) Handle(cmd ArchiveCmd) error {
 		return fmt.Errorf("could not read process data: %w", err)
 	}
 
-	if cmd.UpdatedAt.Before(processData.UpdatedAt) {
+	if cmd.UpdatedAt.Unix() < processData.UpdatedAt.Unix() {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 

@@ -55,7 +55,7 @@ func (h *UpdateManager) Handle(cmd UpdateManageCmd) error {
 		return fmt.Errorf("could not read template data: %w", err)
 	}
 
-	if cmd.UpdatedAt.Before(oldData.UpdatedAt) {
+	if cmd.UpdatedAt.Unix() < oldData.UpdatedAt.Unix() {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
