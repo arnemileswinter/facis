@@ -3,7 +3,6 @@ import type { TemplateDraftState, AddBlockPayload, AddBlockOptions } from "@temp
 import type { DocumentOutline, DocumentOutlineBlock, DocumentBlock, TemplateTypeValue, SemanticCondition, MetaData } from "@template-repository/models/contract-templace"
 import { DocumentBlockType, TemplateType, isClauseBlock, isSectionBlock, isApprovedTemplateBlock } from "@template-repository/models/contract-templace"
 import type { ContractTemplateCreateRequest, ContractTemplateUpdateRequest } from '@/models/requests/template-request'
-import { TemplateState } from '@/types/contract-template-state'
 
 const storeId = "templateDraft"
 const defaultState: Readonly<TemplateDraftState> = {
@@ -18,6 +17,7 @@ const defaultState: Readonly<TemplateDraftState> = {
   state: null,
   document_number: null,
   version: null,
+  updated_at: null,
 }
 
 export const useTemplateDraftStore = defineStore(storeId, {
@@ -43,8 +43,10 @@ export const useTemplateDraftStore = defineStore(storeId, {
       }
     },
     templateUpdateRequestData(): ContractTemplateUpdateRequest | null {
-      if (!this.did || this.version === null || this.document_number === null) return null
+      if (!this.did || !this.updated_at) return null
       return {
+        did: this.did,
+        updated_at: this.updated_at,
         name: this.name,
         description: this.description,
         template_data: {
@@ -53,16 +55,7 @@ export const useTemplateDraftStore = defineStore(storeId, {
           semanticConditions: this.semanticConditions,
           customMetaData: this.customMetaData,
         },
-        updated_at: new Date().toISOString(),
-        version: this.version,
-        document_number: this.document_number,
-        did: this.did,
       }
-    },
-    isEditable(): boolean {
-      if (!this.state) return true
-      const uneditableStates = [TemplateState.approved].map((s) => s.toLowerCase())
-      return !(uneditableStates.includes(this.state.toLowerCase()))
     }
   },
   actions: {
@@ -348,7 +341,7 @@ function createBlockFromPayload(blockId: string, payload: AddBlockPayload): Docu
         text,
         templateId: payload.templateId ?? '',
         version: payload.version ?? 1,
-        document_number: payload.document_number ?? 1,
+        document_number: payload.document_number ?? '',
       }
     default:
       throw new Error(`Unknown blockType: ${payload.blockType}`)

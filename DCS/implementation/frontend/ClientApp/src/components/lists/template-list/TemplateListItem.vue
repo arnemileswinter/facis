@@ -41,13 +41,19 @@ async function submitTemplate(result: SelectedUserRole[]) {
         <div class="flex justify-between">
           <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
           <div class="card-actions justify-end">
-            <button class="btn btn-sm btn-primary rounded-box">View</button>
+            <RouterLink
+              :to="{ name: 'templates.view', params: { did: item.did } }"
+              class="btn btn-sm btn-primary rounded-box"
+            >
+              View
+            </RouterLink>
             <UserSelectionDialog
               v-if="item.state === TemplateState.draft"
               @submit="submitTemplate"
               class="btn btn-sm btn-secondary rounded-box"
             />
             <RouterLink
+              v-if="item.state === TemplateState.draft || item.state === TemplateState.rejected"
               :to="{
                 name: 'templates.edit',
                 params: { did: item.did },
@@ -56,7 +62,22 @@ async function submitTemplate(result: SelectedUserRole[]) {
             >
               Edit
             </RouterLink>
+            <RouterLink
+              v-if="item.state === TemplateState.submitted"
+              :to="{ name: 'templates.review', params: { did: item.did } }"
+              class="btn btn-sm btn-primary rounded-box gap-2"
+            >
+              Review
+            </RouterLink>
+            <RouterLink
+              v-if="item.state === TemplateState.reviewed"
+              :to="{ name: 'templates.approve', params: { did: item.did } }"
+              class="btn btn-sm btn-primary rounded-box gap-2"
+            >
+              Approve
+            </RouterLink>
           </div>
+
         </div>
       </div>
     </div>

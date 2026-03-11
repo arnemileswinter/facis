@@ -27,12 +27,12 @@
 
         <fieldset class="fieldset p-0 border-none">
             <legend class="fieldset-legend">Global Name</legend>
-            <input v-model="name" class="input input-bordered w-full" type="text" required :disabled="!store.isEditable"/>
+            <input v-model="name" class="input input-bordered w-full" type="text" required :disabled="!uiStore.isTemplateEditable"/>
         </fieldset>
 
         <fieldset class="fieldset p-0 border-none">
             <legend class="fieldset-legend">Base Description</legend>
-            <textarea v-model="description" class="textarea textarea-bordered w-full h-24" required :disabled="!store.isEditable"></textarea>
+            <textarea v-model="description" class="textarea textarea-bordered w-full h-24" required :disabled="!uiStore.isTemplateEditable"></textarea>
         </fieldset>
 
         <!-- Subcontracts (only for frame contracts) -->
@@ -97,14 +97,16 @@ import { TemplateType, isApprovedTemplateBlock } from '@template-repository/mode
 import { ContractTemplateService } from '@/services/contract-template-service'
 import { useTemplateTable } from '@/views/contract-template-list/ContractTemplateListController'
 import { TemplateState } from '@/types/contract-template-state'
+import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore'
 
 interface SubcontractKey {
     did: string
-    version: number
-    document_number: number
+    version?: number
+    document_number?: string
 }
 
 const store = useTemplateDraftStore()
+const uiStore = useTemplateEditorUiStore()
 const approvedSubTemplateStore = useApprovedSubTemplateStore()
 const { templates: allTemplates } = useTemplateTable()
 const { templateType, documentBlocks } = storeToRefs(store)
@@ -138,7 +140,7 @@ const filteredSubcontractTemplates = computed(() => {
 const getSubcontractTemplateName = (item: SubcontractKey) =>
     allTemplates.value.find(t => isSameTemplate(t, item))?.name ?? item.did
 
-const addSubcontractTemplate = async (template: { did: string; version: number; document_number: number }) => {
+const addSubcontractTemplate = async (template: { did: string; version?: number; document_number?: string }) => {
     if (!isSelected(template)) {
         selectedSubcontracts.value.push({
             did: template.did,

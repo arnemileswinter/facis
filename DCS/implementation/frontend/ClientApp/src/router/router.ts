@@ -1,3 +1,5 @@
+import ApproveContractTemplateView from '@/modules/template-repository/views/ApproveContractTemplateView.vue'
+import ViewContractTemplateView from '@/modules/template-repository/views/ViewContractTemplateView.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
@@ -8,6 +10,7 @@ import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { getUIBasePath } from '@/config'
+import ReviewContractTemplateView from '@/modules/template-repository/views/ReviewContractTemplateView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -33,6 +36,24 @@ const routes: RouteRecordRaw[] = [
     name: 'templates.edit',
     component: NewContractTemplateView,
     meta: { name: 'Edit Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Edit Template' },
+  },
+  {
+    path: '/templates/view/:did',
+    name: 'templates.view',
+    component: ViewContractTemplateView,
+    meta: { name: 'View Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - View Template' },
+  },
+  {
+    path: '/templates/review/:did',
+    name: 'templates.review',
+    component: ReviewContractTemplateView,
+    meta: { name: 'Review Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Review Template' },
+  },
+  {
+    path: '/templates/approve/:did',
+    name: 'templates.approve',
+    component: ApproveContractTemplateView,
+    meta: { name: 'Approve Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Approve Template' },
   },
   {
     path: '/table',

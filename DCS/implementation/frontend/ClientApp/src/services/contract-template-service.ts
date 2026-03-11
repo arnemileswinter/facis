@@ -9,6 +9,7 @@ import type {
   ContractTemplateSearchRequest,
   ContractTemplateSubmitRequest,
   ContractTemplateUpdateRequest,
+  ContractTemplateVerifyRequest,
 } from '@/models/requests/template-request'
 import type {
   ContractTemplateApproveResponse,
@@ -19,6 +20,7 @@ import type {
   ContractTemplateSearchResponse,
   ContractTemplateSubmitResponse,
   ContractTemplateUpdateResponse,
+  ContractTemplateVerifyResponse,
 } from '@/models/responses/template-response'
 
 export const ContractTemplateService = {
@@ -81,5 +83,9 @@ export const ContractTemplateService = {
 
   async reject(request: ContractTemplateRejectRequest) {
     return http.post<ContractTemplateRejectResponse>('/template/reject', request).then((res) => res.data)
+  },
+
+  async verify(request: ContractTemplateVerifyRequest) {
+    return http.post<ContractTemplateVerifyResponse>('/template/verify', request).then((res) => res.data)
   },
 }

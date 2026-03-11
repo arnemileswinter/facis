@@ -18,8 +18,9 @@ interface TemplateDraftState {
   customMetaData: MetaData[]
   templateType: TemplateTypeValue
   state: ContractTemplateState | null
-  document_number: number | null
+  document_number: string | null
   version: number | null
+  updated_at: string | null
 }
 
 /** Payload for adding a new block. */
@@ -33,7 +34,7 @@ export interface AddBlockPayload {
   // #### For ApprovedTemplate ####
   templateId?: string
   version?: number
-  document_number?: number
+  document_number?: string
 }
 
 export interface AddBlockOptions {

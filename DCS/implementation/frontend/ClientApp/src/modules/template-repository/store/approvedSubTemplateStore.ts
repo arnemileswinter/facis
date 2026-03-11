@@ -17,7 +17,7 @@ export const useApprovedSubTemplateStore = defineStore(storeId, {
       newTemplates.push(template)
       this.templates = newTemplates
     },
-    removeTemplate(template: { did: string, version: number, document_number: number }) {
+    removeTemplate(template: { did: string, version?: number, document_number?: string }) {
       this.templates = this.templates.filter(t => !isSameTemplate(t, template))
     },
     resetTemplates() {
@@ -26,7 +26,7 @@ export const useApprovedSubTemplateStore = defineStore(storeId, {
   }
 })
 
-const isSameTemplate = (t1: { did: string, version: number, document_number: number }, t2: { did: string, version: number, document_number: number }) => {
+const isSameTemplate = (t1: { did: string, version?: number, document_number?: string }, t2: { did: string, version?: number, document_number?: string }) => {
   return t1.did === t2.did && t1.version === t2.version && t1.document_number === t2.document_number
 }
 
