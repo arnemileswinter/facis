@@ -1,5 +1,5 @@
 import type { UserRole } from "@/types/user-role"
-import type { UserProfile } from "../user-profile"
+import type { UserProfile } from "../user"
 
 export interface UserAllResponse {
   totalCount: number

@@ -27,7 +27,10 @@ export const ContractTemplateService = {
   },
 
   async submit(request: ContractTemplateSubmitRequest) {
-    return http.post<ContractTemplateSubmitResponse>('/template/submit', request).then((res) => res.data)
+    return http
+      .post<ContractTemplateSubmitResponse>('/template/submit', request)
+      .then((res) => res.data)
+      .catch((err) => console.error(err))
   },
 
   async update(request: ContractTemplateUpdateRequest) {
@@ -50,11 +53,11 @@ export const ContractTemplateService = {
     return http
       .get<ContractTemplateRetrieveResponse>('/template/retrieve')
       .then((res) => {
-        return Array.isArray(res.data.contract_templates) ? res.data.contract_templates : []
+        return res.data
       })
       .catch((err) => {
         console.error('Retrieve Error:', err)
-        return []
+        return { contract_templates: [], approval_tasks: [], review_tasks: [] } as ContractTemplateRetrieveResponse
       })
   },
 

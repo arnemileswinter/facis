@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { UserProfile } from '@/models/user-profile'
+import type { SelectedUserRole, UserProfile } from '@/models/user'
 import { UserService } from '@/services/user-service'
 import type { UserRole } from '@/types/user-role'
 import { toProperCase } from '@/utils/string'
 import { computed, ref, useTemplateRef, type Ref } from 'vue'
 
 const emit = defineEmits<{
-  submit: [value: { user: UserProfile; role: UserRole }[]]
+  submit: [value: SelectedUserRole[]]
 }>()
 
 const userSelectionModal = useTemplateRef('user-selection-modal')
@@ -69,7 +69,7 @@ function onCheckboxChange(event: Event, userId: string) {
 </script>
 
 <template>
-  <button class="btn btn-neutral" @click="openModal">Open User Selection</button>
+  <button :="$attrs" @click="openModal">Submit</button>
   <dialog ref="user-selection-modal" class="modal transition-none" @close="onModalClose">
     <div class="modal-box flex flex-col max-h-2/3">
       <h3 class="text-lg font-bold">User Selection</h3>
@@ -102,7 +102,7 @@ function onCheckboxChange(event: Event, userId: string) {
           <span v-else-if="!allSelectedUsersHaveRoles">Assign a role to all selected users</span>
           <span v-else>Select one Approver and at least one Reviewer</span>
         </div>
-        <button @click="onModalSubmit" :disabled="isSubmitDisabled" class="btn btn-primary">Submit</button>
+        <button @click="onModalSubmit" :disabled="isSubmitDisabled" class="btn btn-primary">Apply</button>
         <button @click="onModalClose" class="btn btn-secondary">Cancel</button>
       </div>
     </div>

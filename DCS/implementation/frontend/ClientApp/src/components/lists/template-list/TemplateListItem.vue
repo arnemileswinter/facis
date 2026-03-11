@@ -1,9 +1,31 @@
 <script setup lang="ts">
+import UserSelectionDialog from '@/components/UserSelectionDialog.vue'
+import type { ContractTemplateSubmitRequest } from '@/models/requests/template-request'
+import type { SelectedUserRole } from '@/models/user'
+import { ContractTemplateService } from '@/services/contract-template-service'
+import { TemplateState } from '@/types/contract-template-state'
 import type { PartialContractTemplate } from '../../../models/contract-template'
 
 const props = defineProps<{
   item: PartialContractTemplate
 }>()
+
+async function submitTemplate(result: SelectedUserRole[]) {
+  const reviewers = result.filter((user) => user.role === 'TEMPLATE_REVIEWER').map((user) => user.user.id)
+  const approver = result.find((user) => user.role === 'TEMPLATE_APPROVER')?.user.id
+  const request: ContractTemplateSubmitRequest = {
+    did: props.item.did,
+    document_number: props.item.document_number,
+    version: props.item.version,
+    updated_at: props.item.updated_at,
+    reviewers: reviewers,
+    approver: approver!,
+  }
+  const response = await ContractTemplateService.submit(request)
+  if (response) {
+    console.log('Successful submitted.')
+  }
+}
 </script>
 
 <template>
@@ -20,19 +42,24 @@ const props = defineProps<{
         </div>
         <div class="flex justify-between">
           <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
-        <div class="card-actions justify-end">
-          <button class="btn btn-sm rounded-box btn-primary">View</button>
-          <RouterLink
-            :to="{
-              name: 'templates.edit',
-              params: { did: item.did },
-              query: { document_number: item.document_number, version: item.version },
-            }"
-            class="btn btn-sm rounded-box btn-secondary gap-2"
-          >
-            Edit
-          </RouterLink>
-        </div>
+          <div class="card-actions justify-end">
+            <button class="btn btn-sm btn-primary rounded-box">View</button>
+            <UserSelectionDialog
+              v-if="item.state === TemplateState.draft"
+              @submit="submitTemplate"
+              class="btn btn-sm btn-secondary rounded-box"
+            />
+            <RouterLink
+              :to="{
+                name: 'templates.edit',
+                params: { did: item.did },
+                query: { document_number: item.document_number, version: item.version },
+              }"
+              class="btn btn-sm btn-primary rounded-box gap-2"
+            >
+              Edit
+            </RouterLink>
+          </div>
         </div>
       </div>
     </div>

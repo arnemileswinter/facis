@@ -1,7 +1,7 @@
 import http from '@/api/http'
 import type { UserAllRequest, UserRolesByUserIdRequest } from '@/models/requests/user-request'
 import type { UserAllResponse, UserRolesByUserIdResponse } from '@/models/responses/user-response'
-import type { UserProfile } from '@/models/user-profile'
+import type { UserProfile } from '@/models/user'
 import type { UserRole } from '@/types/user-role'
 import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
 

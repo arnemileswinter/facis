@@ -19,6 +19,8 @@ export interface ContractTemplateCreateRequest {
 
 export interface ContractTemplateSubmitRequest extends ContractTemplateBaseRequest {
   updated_at: string
+  reviewers: string[]
+  approver: string
   forward_to?: ActionFlag
   comments?: string[]
 }

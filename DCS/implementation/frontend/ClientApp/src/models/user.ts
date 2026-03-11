@@ -9,3 +9,8 @@ export interface UserProfile {
   id: string
   username: string
 }
+
+export interface SelectedUserRole {
+  user: UserProfile
+  role: UserRole
+}
