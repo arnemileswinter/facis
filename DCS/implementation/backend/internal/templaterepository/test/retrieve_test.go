@@ -132,6 +132,8 @@ func TestRetrieve_RetrieveAllContractTemplates(t *testing.T) {
 		t.Fatalf("Failed to query contract template: %v", err)
 	}
 
+	assert.NotEmpty(t, result)
+
 	for _, ct := range result.ContractTemplates {
 		assert.Equal(t, contracttemplatestate.Draft, ct.State)
 
