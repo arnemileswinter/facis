@@ -7,6 +7,6 @@ metadata:
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/instance: {{ .Release.Name }}
 data:
-  dcs-realm.json: |-
-{{ .Files.Get "files/dcs-realm.json" | indent 4 }}
+  gaia-x-realm.json: |-
+{{ .Files.Get "files/gaia-x-realm.json" | indent 4 }}
 {{- end }}

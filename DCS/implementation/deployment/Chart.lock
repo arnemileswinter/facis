@@ -8,5 +8,8 @@ dependencies:
 - name: nats
   repository: file://charts/nats
   version: 0.1.0
-digest: sha256:2f787478cf60270e7e7fe8540065f45bf4c4feb8b1c1afa35c3cc5bfbe5d5241
-generated: "2026-03-05T14:15:31.066836467+01:00"
+- name: neo4j
+  repository: file://charts/neo4j
+  version: 0.1.0
+digest: sha256:161935ada7b639acfffae0ca5de339575b768d58ee7c0f071a037f6c9ef850cf
+generated: "2026-03-06T12:31:03.120900323+01:00"

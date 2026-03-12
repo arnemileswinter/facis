@@ -11,6 +11,9 @@ auth:
   password: dcs
   database: dcs
 
+# Additional databases to create on init (list of names)
+additionalDatabases: []
+
 persistence:
   enabled: false
   size: 8Gi
