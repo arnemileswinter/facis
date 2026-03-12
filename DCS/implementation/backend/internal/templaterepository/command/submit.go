@@ -35,7 +35,7 @@ type Submitter struct {
 	ATRepo db.ApprovalTaskRepo
 }
 
-func createTasks(tx *sqlx.Tx, rtRepo db.ReviewTaskRepo, atRepo db.ApprovalTaskRepo, processData *db.ContractTemplateProcessData, cmd SubmitCmd) error {
+func createTasks(tx *sqlx.Tx, rtRepo db.ReviewTaskRepo, atRepo db.ApprovalTaskRepo, cmd SubmitCmd) error {
 	for _, reviewer := range cmd.Reviewer {
 		reviewTask := db.ReviewTaskData{
 			DID:       cmd.DID,
@@ -98,7 +98,7 @@ func (h *Submitter) Handle(cmd SubmitCmd) error {
 			return errors.New("no approver provided")
 		}
 
-		err := createTasks(tx, h.RTRepo, h.ATRepo, processData, cmd)
+		err := createTasks(tx, h.RTRepo, h.ATRepo, cmd)
 		if err != nil {
 			return err
 		}
