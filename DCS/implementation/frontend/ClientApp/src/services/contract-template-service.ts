@@ -54,10 +54,7 @@ export const ContractTemplateService = {
   async retrieve(_request?: ContractTemplateRetrieveRequest) {
     return http
       .get<ContractTemplateRetrieveResponse>('/template/retrieve')
-      .then((res) => {
-        console.log(res)
-        return res.data
-      })
+      .then((res) => res.data)
       .catch((err) => {
         console.error('Retrieve Error:', err)
         return { contract_templates: [], approval_tasks: [], review_tasks: [] } as ContractTemplateRetrieveResponse

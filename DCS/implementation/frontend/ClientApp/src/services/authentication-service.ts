@@ -25,7 +25,9 @@ export const AuthenticationService: AuthService = {
         const resp = res.data
         authTokenStore.setTokens(resp.token_type, resp.access_token)
         const authStore = useAuthStore()
-        authStore.setUser(resp.access_token)
+        const userId = authTokenStore.getUserId
+        if (!userId) throw new Error('JWT Error')
+        authStore.setUser(userId)
         return res.data
       })
       .catch((err) => {

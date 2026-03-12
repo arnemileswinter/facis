@@ -1,7 +1,7 @@
 {
   "name": "digital-contracting-service",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,9 @@
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
     "@vueuse/core": "^14.2.1",
+    "@vueuse/integrations": "^14.2.1",
     "axios": "^1.13.5",
+    "jwt-decode": "^4.0.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.24",
     "vue-router": "^5.0.2"

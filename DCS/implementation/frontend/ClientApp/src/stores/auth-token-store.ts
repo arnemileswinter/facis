@@ -1,4 +1,5 @@
 import { useLocalStorage } from '@vueuse/core'
+import { useJwt } from '@vueuse/integrations/useJwt'
 import { defineStore } from 'pinia'
 import { computed } from 'vue'
 
@@ -8,6 +9,7 @@ export const useAuthTokenStore = defineStore('token', () => {
 
   const isAuthSet = computed(() => tokenType.value && accessToken.value)
   const getAuthenticationHeader = computed(() => `${tokenType.value} ${accessToken.value}`)
+  const getUserId = computed(() => useJwt(accessToken.value).payload.value?.sub)
 
   function setTokens(type: string, access_token: string) {
     tokenType.value = type
@@ -19,5 +21,5 @@ export const useAuthTokenStore = defineStore('token', () => {
     accessToken.value = null
   }
 
-  return { tokenType, accessToken, isAuthSet, getAuthenticationHeader, setTokens, remove }
+  return { tokenType, accessToken, isAuthSet, getAuthenticationHeader, getUserId, setTokens, remove }
 })

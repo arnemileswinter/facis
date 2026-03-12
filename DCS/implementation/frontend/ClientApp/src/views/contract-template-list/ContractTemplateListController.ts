@@ -4,11 +4,16 @@ import { ContractTemplateService } from '../../services/contract-template-servic
 import type { ContractTemplateApprovalTask } from '@/models/contract-template-approval-task'
 import type { ContractTemplateReviewTask } from '@/models/contract-template-review-task'
 import { useAuthStore } from '@/stores/auth-store'
+import { useContractTemplatesStore } from '@/stores/contract-templates-store'
+import type { UserRole } from '@/types/user-role'
+import { UserService } from '@/services/user-service'
 
 export function useTemplateTable() {
+    const templatesStore = useContractTemplatesStore()
     const templates: Ref<PartialContractTemplate[]> = ref([])
-    const approvalTasks: Ref<ContractTemplateApprovalTask[]> = ref([])
     const reviewTasks: Ref<ContractTemplateReviewTask[]> = ref([])
+    const approvalTasks: Ref<ContractTemplateApprovalTask[]> = ref([])
+    const roles: Ref<UserRole[]> = ref([])
     const loading = ref(true)
     const error = ref('')
     const authStore = useAuthStore()
@@ -20,9 +25,11 @@ export function useTemplateTable() {
             const data = await ContractTemplateService.retrieve()
             console.log(data)
             templates.value = data.contract_templates
+            templatesStore.contractTemplates = templates.value
             approvalTasks.value = data.approval_tasks
             reviewTasks.value = data.review_tasks
-
+            const userId = authStore.user
+            roles.value = userId ? await UserService.getRolesByUser({ userId }) : []
         } catch (err: any) {
             error.value = err.message || 'Fehler beim Laden der Templates'
         } finally {
@@ -40,6 +47,7 @@ export function useTemplateTable() {
             return null
         }
     }
+
     onMounted(loadTemplates)
 
     const hasReviewTask = (template: PartialContractTemplate): boolean => {
@@ -77,8 +85,9 @@ export function useTemplateTable() {
 
     return {
         templates,
-        approvalTasks,
         reviewTasks,
+        approvalTasks,
+        roles,
         loading,
         error,
         loadTemplates,

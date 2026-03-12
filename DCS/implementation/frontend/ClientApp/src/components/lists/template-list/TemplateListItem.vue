@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import UserSelectionDialog from '@/components/UserSelectionDialog.vue'
+import SubmitContractTemplateUserSelectionDialog from '@/components/SubmitContractTemplateUserSelectionDialog.vue'
 import type { ContractTemplateSubmitRequest } from '@/models/requests/template-request'
 import type { SelectedUserRole } from '@/models/user'
 import { ContractTemplateService } from '@/services/contract-template-service'
 import { TemplateState } from '@/types/contract-template-state'
 import type { PartialContractTemplate } from '../../../models/contract-template'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   item: PartialContractTemplate
@@ -12,9 +13,11 @@ const props = defineProps<{
   hasApprovalTask: boolean
 }>()
 
+const router = useRouter()
+
 async function submitTemplate(result: SelectedUserRole[]) {
-  const reviewers = result.filter((user) => user.role === 'TEMPLATE_REVIEWER').map((user) => user.user.id)
-  const approver = result.find((user) => user.role === 'TEMPLATE_APPROVER')?.user.id
+  const reviewers = result.filter((user) => user.role === 'TEMPLATE_REVIEWER').map((user) => user.user.username)
+  const approver = result.find((user) => user.role === 'TEMPLATE_APPROVER')?.user.username
   const request: ContractTemplateSubmitRequest = {
     did: props.item.did,
     updated_at: props.item.updated_at,
@@ -23,7 +26,7 @@ async function submitTemplate(result: SelectedUserRole[]) {
   }
   const response = await ContractTemplateService.submit(request)
   if (response) {
-    console.log('Successful submitted.')
+    router.go(0)
   }
 }
 </script>
@@ -37,8 +40,8 @@ async function submitTemplate(result: SelectedUserRole[]) {
           <div class="badge badge-secondary">{{ item.state }}</div>
         </h2>
         <div class="flex justify-between">
-          <div>Document number: {{ item.document_number }}</div>
-          <div>Version: {{ item.version }}</div>
+          <div v-if="item.document_number">Document number: {{ item.document_number }}</div>
+          <div v-if="item.version">Version: {{ item.version }}</div>
         </div>
         <div class="flex justify-between">
           <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
@@ -49,7 +52,7 @@ async function submitTemplate(result: SelectedUserRole[]) {
             >
               View
             </RouterLink>
-            <UserSelectionDialog
+            <SubmitContractTemplateUserSelectionDialog
               v-if="item.state === TemplateState.draft"
               @submit="submitTemplate"
               class="btn btn-sm btn-secondary rounded-box"
