@@ -5,13 +5,14 @@ import type { UserService as UserServiceI } from '@/models/services/user-service
 import type { UserProfile } from '@/models/user'
 import type { UserRole } from '@/types/user-role'
 import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
+import { ref, type Ref } from 'vue'
 
 const USER_BASE_URL = http.defaults.baseURL + '/users'
 
 export const UserService: UserServiceI = {
   async getAllUsers(request?: UserAllRequest) {
     return Promise.resolve<AxiosResponse<UserAllResponse>>({
-      data: { totalCount: mockUsers.length, items: mockUsers } as UserAllResponse,
+      data: { totalCount: users.value.length, items: users.value } as UserAllResponse,
       status: 200,
       statusText: 'OK',
       headers: {},
@@ -33,7 +34,7 @@ export const UserService: UserServiceI = {
 
   async getRolesByUser(request: UserRolesByUserIdRequest) {
     return Promise.resolve<AxiosResponse<UserRolesByUserIdResponse>>({
-      data: mockUsers.find((user) => user.id === request.userId)?.roleIds ?? [],
+      data: users.value.find((user) => user.id === request.userId)?.roleIds ?? [],
       status: 200,
       statusText: 'OK',
       headers: {},
@@ -71,12 +72,21 @@ export const UserService: UserServiceI = {
 
 const mockUsers: UserProfile[] = [
   {
+    participantId: 'part-000',
+    firstName: 'Test',
+    lastName: 'User',
+    email: 'test@example.com',
+    roleIds: ['TEMPLATE_APPROVER', 'TEMPLATE_CREATOR', 'TEMPLATE_MANAGER', 'TEMPLATE_REVIEWER'],
+    id: 'user-000',
+    username: 'test',
+  },
+  {
     participantId: 'part-001',
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@example.com',
     roleIds: ['TEMPLATE_APPROVER', 'TEMPLATE_CREATOR', 'TEMPLATE_MANAGER', 'TEMPLATE_REVIEWER'],
-    id: '218979cc-47ac-4c14-88de-235bb18652a8',
+    id: 'user-001',
     username: 'johndoe',
   },
   {
@@ -85,7 +95,7 @@ const mockUsers: UserProfile[] = [
     lastName: 'Smith',
     email: 'jane.smith@example.com',
     roleIds: ['TEMPLATE_MANAGER', 'TEMPLATE_REVIEWER'],
-    id: 'fcec22ac-e094-406b-930a-6ed3b7920414',
+    id: 'user-002',
     username: 'janesmith',
   },
   {
@@ -94,7 +104,7 @@ const mockUsers: UserProfile[] = [
     lastName: 'Johnson',
     email: 'bob.johnson@example.com',
     roleIds: ['TEMPLATE_APPROVER', 'TEMPLATE_MANAGER'],
-    id: '4302ffb4-2dcb-4509-ae12-2863ec6b221b',
+    id: 'user-003',
     username: 'bobjohnson',
   },
   {
@@ -103,7 +113,7 @@ const mockUsers: UserProfile[] = [
     lastName: 'Williams',
     email: 'alice.williams@example.com',
     roleIds: ['TEMPLATE_REVIEWER'],
-    id: '56775562-5fde-4396-ab37-0ae6d3812061',
+    id: 'user-004',
     username: 'alicewilliams',
   },
   {
@@ -111,7 +121,8 @@ const mockUsers: UserProfile[] = [
     firstName: 'Charlie',
     lastName: 'Brown',
     email: 'charlie.brown@example.com',
-    id: '927bc415-f163-4282-bc89-614f0aa5da8f',
+    roleIds: ['TEMPLATE_CREATOR', 'TEMPLATE_REVIEWER'],
+    id: 'user-005',
     username: 'charliebrown',
   },
   {
@@ -120,7 +131,9 @@ const mockUsers: UserProfile[] = [
     lastName: 'Conrad',
     email: 'saoirse.conrad@example.com',
     roleIds: ['TEMPLATE_APPROVER', 'TEMPLATE_MANAGER'],
-    id: '82d76203-6920-488a-9308-36984890bdd5',
+    id: 'user-006',
     username: 'saoirseconrad',
   },
 ]
+
+export const users: Ref<UserProfile[]> = ref(mockUsers)

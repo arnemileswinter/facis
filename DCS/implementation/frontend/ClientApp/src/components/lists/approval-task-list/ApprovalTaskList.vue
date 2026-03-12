@@ -25,8 +25,8 @@ function getTemplateName(item: ContractTemplateApprovalTask) {
             <div class="badge badge-secondary">{{ item.state }}</div>
           </h2>
           <div class="flex justify-between">
-            <div>Document number: {{ item.document_number }}</div>
-            <div>Version: {{ item.version }}</div>
+            <div v-if="item.document_number">Document number: {{ item.document_number }}</div>
+            <div v-if="item.version">Version: {{ item.version }}</div>
           </div>
           <div class="flex justify-between">
             <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
