@@ -16,7 +16,10 @@
     <div v-if="loading">Lade Templates...</div>
     <div v-else-if="error">{{ error }}</div>
     <div v-else>
-      <TemplateList :items="templates" />
+      <TemplateList :items="templates"
+        :has-review-task="hasReviewTask"
+        :has-approval-task="hasApprovalTask"
+      />
     </div>
   </div>
 </template>
@@ -25,5 +28,5 @@
 import { useTemplateTable } from './ContractTemplateListController'
 import TemplateList from '../../components/lists/template-list/TemplateList.vue'
 
-const { templates, loading, error } = useTemplateTable()
+const { templates, loading, error, hasReviewTask, hasApprovalTask } = useTemplateTable()
 </script>

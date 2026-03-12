@@ -9,6 +9,8 @@ import TemplateListItem from './TemplateListItem.vue'
 
 const props = defineProps<{
   items: PartialContractTemplate[]
+  hasReviewTask: (template: PartialContractTemplate) => boolean
+  hasApprovalTask: (template: PartialContractTemplate) => boolean
 }>()
 
 const sorter = new Map([
@@ -80,6 +82,8 @@ function applySearchResult(searchResult: PartialContractTemplate[]) {
       v-for="item in filteredItems"
       :key="`${item.did}|${item.document_number}|${item.version}`"
       :item="item"
+      :has-review-task="props.hasReviewTask(item)"
+      :has-approval-task="props.hasApprovalTask(item)"
     />
   </ul>
 </template>

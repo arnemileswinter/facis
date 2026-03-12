@@ -8,6 +8,8 @@ import type { PartialContractTemplate } from '../../../models/contract-template'
 
 const props = defineProps<{
   item: PartialContractTemplate
+  hasReviewTask: boolean
+  hasApprovalTask: boolean
 }>()
 
 async function submitTemplate(result: SelectedUserRole[]) {
@@ -63,14 +65,14 @@ async function submitTemplate(result: SelectedUserRole[]) {
               Edit
             </RouterLink>
             <RouterLink
-              v-if="item.state === TemplateState.submitted"
+              v-if="item.state === TemplateState.submitted && hasReviewTask"
               :to="{ name: 'templates.review', params: { did: item.did } }"
               class="btn btn-sm btn-primary rounded-box gap-2"
             >
               Review
             </RouterLink>
             <RouterLink
-              v-if="item.state === TemplateState.reviewed"
+              v-if="item.state === TemplateState.reviewed && hasApprovalTask"
               :to="{ name: 'templates.approve', params: { did: item.did } }"
               class="btn btn-sm btn-primary rounded-box gap-2"
             >
