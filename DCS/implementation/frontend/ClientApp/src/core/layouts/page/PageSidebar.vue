@@ -11,10 +11,10 @@
         <RouterLink :to="route.path" @click="closeMobileDrawer" :class="[
           'flex items-center gap-4 py-3 rounded-btn',
           isSidebarCollapsed ? 'justify-center px-0' : 'px-4'
-        ]" active-class="active bg-primary text-primary-content" :data-tip="isSidebarCollapsed ? route.meta.name : ''">
+        ]" active-class="active bg-primary text-primary-content" :data-tip="isSidebarCollapsed ? route.meta?.name : ''">
           <component :is="route.meta?.icon" class="w-6 h-6 shrink-0" aria-hidden="true" />
           <span v-if="!isSidebarCollapsed" class="font-medium whitespace-nowrap">
-            {{ route.meta.name }}
+            {{ route.meta?.name }}
           </span>
         </RouterLink>
       </li>
@@ -65,12 +65,15 @@ const closeMobileDrawer = () => {
 
 const navigationRoutes = computed(() => {
   try {
-    return router.getRoutes().filter(route =>
-      route.name &&
-      !route.path.includes(':') &&
-      route.meta?.name &&
-      route.meta?.hideInSidebar !== true
-    )
+    return router.getRoutes()
+      .filter(route =>
+        route.name &&
+        !route.path.includes(':') &&
+        route.meta?.name &&
+        route.meta?.hideInSidebar !== true &&
+        (!route.meta.roles || user.value?.roles?.some(role => route.meta.roles?.includes(role)))
+      )
+      .sort((routeA, routeB) => (routeA.meta.order || 999) - (routeB.meta.order || 999))
   } catch (e) {
     return []
   }

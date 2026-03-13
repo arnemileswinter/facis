@@ -45,6 +45,10 @@ async function submitTemplate(result: SelectedUserRole[]) {
         </div>
         <div class="flex justify-between">
           <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
+          <div v-if="item.description" class="px-4 max-w-1/12 whitespace-nowrap overflow-hidden text-ellipsis">
+            {{ item.description }}
+          </div>
+          <div class="flex-1"></div>
           <div class="card-actions justify-end">
             <RouterLink
               :to="{ name: 'templates.view', params: { did: item.did } }"
@@ -82,7 +86,6 @@ async function submitTemplate(result: SelectedUserRole[]) {
               Approve
             </RouterLink>
           </div>
-
         </div>
       </div>
     </div>

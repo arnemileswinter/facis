@@ -6,7 +6,6 @@ import type { ContractTemplateReviewTask } from '@/models/contract-template-revi
 import { useAuthStore } from '@/stores/auth-store'
 import { useContractTemplatesStore } from '@/stores/contract-templates-store'
 import type { UserRole } from '@/types/user-role'
-import { UserService } from '@/services/user-service'
 
 export function useTemplateTable() {
     const templatesStore = useContractTemplatesStore()
@@ -29,7 +28,7 @@ export function useTemplateTable() {
             approvalTasks.value = data.approval_tasks
             reviewTasks.value = data.review_tasks
             const userId = authStore.user?.id
-            roles.value = userId ? await UserService.getRolesByUser({ userId }) : []
+            roles.value = authStore.user?.roles ?? []
         } catch (err: any) {
             error.value = err.message || 'Fehler beim Laden der Templates'
         } finally {
