@@ -4,7 +4,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
-import TableView from '@/views/TableView.vue'
 import { AuthenticationService } from '@/services/authentication-service'
 import { DocumentTextIcon } from '@heroicons/vue/20/solid'
 import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
@@ -54,12 +53,6 @@ const routes: RouteRecordRaw[] = [
     name: 'templates.approve',
     component: ApproveContractTemplateView,
     meta: { name: 'Approve Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Approve Template' },
-  },
-  {
-    path: '/table',
-    name: 'table',
-    component: TableView,
-    meta: { name: 'Table', requiresAuth: false, title: 'DCS - Table' },
   },
   {
     path: '/auth/success',

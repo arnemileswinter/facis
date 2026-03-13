@@ -31,7 +31,6 @@ export const useAuthTokenStore = defineStore('token', () => {
   }
 
   function setUsername() {
-    console.log(useJwt(accessToken.value).payload.value)
     const username = useJwt<JwtPayload>(accessToken.value).payload.value?.preferred_username
     const userId = useJwt(accessToken.value).payload.value?.sub
     const user = users.value.find((user) => user.username === username)

@@ -39,11 +39,9 @@ async function openModal() {
 
 function onModalSubmit() {
   if (isSubmitDisabled.value) return
-  console.log('Saving chosen users...')
   const result = users.value
     .filter((user) => selectedUsers.value[user.id] && selectedRole.value[user.id])
     .map((user) => ({ user, role: selectedRole.value[user.id]! }))
-  console.log(result)
   emit('submit', result)
   onModalClose()
 }

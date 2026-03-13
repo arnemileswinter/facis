@@ -28,7 +28,7 @@ export function useTemplateTable() {
             templatesStore.contractTemplates = templates.value
             approvalTasks.value = data.approval_tasks
             reviewTasks.value = data.review_tasks
-            const userId = authStore.user
+            const userId = authStore.user?.id
             roles.value = userId ? await UserService.getRolesByUser({ userId }) : []
         } catch (err: any) {
             error.value = err.message || 'Fehler beim Laden der Templates'
@@ -62,7 +62,7 @@ export function useTemplateTable() {
                 isDidMatch &&
                 isVersionMatch &&
                 isDocumentNumberMatch &&
-                task.reviewer === currentUser
+                task.reviewer === currentUser.username
             )
         })
     }
@@ -78,7 +78,7 @@ export function useTemplateTable() {
                 isDidMatch &&
                 isVersionMatch &&
                 isDocumentNumberMatch &&
-                task.approver === currentUser
+                task.approver === currentUser.username
             )
         })
     }

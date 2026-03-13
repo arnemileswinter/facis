@@ -65,7 +65,6 @@ export const ContractTemplateService = {
     return http
       .get<ContractTemplateRetrieveByIdResponse>(`/template/retrieve/${request.did}`)
       .then((res) => {
-        console.log(res.status)
         return { ...res.data }
       })
       .catch((err) => {

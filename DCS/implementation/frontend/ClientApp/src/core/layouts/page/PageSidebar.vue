@@ -34,17 +34,17 @@
             alt="Profile" />
         </div>
       </div>
-      <div v-if="!isSidebarCollapsed" class="overflow-hidden">
-        <p class="text-sm font-bold truncate">Tom Cook</p>
-        <p class="text-xs opacity-60">Admin</p>
+      <div v-if="!isSidebarCollapsed && user" class="overflow-hidden">
+        <p class="text-sm font-bold truncate">{{ user.name }}</p>
+        <p class="text-xs opacity-60">{{ user.username }}</p>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup lang="ts">
 import TemplateListStateFilter from '@/components/lists/template-list/TemplateListStateFilter.vue'
+import { useAuthStore } from '@/stores/auth-store'
 import { usePageStore } from '@core/store/page'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
@@ -54,6 +54,9 @@ const router = useRouter()
 
 const pageStore = usePageStore()
 const { isSidebarCollapsed } = storeToRefs(pageStore)
+
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const closeMobileDrawer = () => {
   const drawerToggle = document.getElementById(pageStore.pageSidebarId) as HTMLInputElement | null

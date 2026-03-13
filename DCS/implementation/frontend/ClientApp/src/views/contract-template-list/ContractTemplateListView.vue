@@ -6,25 +6,28 @@
 
     <div role="tablist" class="tabs tabs-box tabs-sm">
       <template v-for="(tab, index) in tabs" :key="index">
-      <button
-        v-show="isTabVisible(tab, index)"
-        role="tab"
-        class="tab"
-        :class="{ 'tab-active': activeTab === index, 'tab-disabled': isTabDisabled(tab) }"
-        :disabled="isTabDisabled(tab)"
-        @click="activeTab = index"
-      >
-        {{ tab }}
-      </button></template>
+        <button
+          v-show="isTabVisible(tab, index)"
+          role="tab"
+          class="tab"
+          :class="{ 'tab-active': activeTab === index, 'tab-disabled': isTabDisabled(tab) }"
+          :disabled="isTabDisabled(tab)"
+          @click="activeTab = index"
+        >
+          {{ tab }}
+        </button>
+      </template>
     </div>
 
     <RouterLink
+      v-if="isTemplateCreator()"
       :to="{ name: 'templates.new' }"
       class="btn rounded-box self-end btn-secondary gap-2"
       #default="{ route }"
     >
       {{ route.meta.name }}
     </RouterLink>
+    <div v-else></div>
   </div>
   <div class="p-6 bg-base-100">
     <div v-if="loading">Lade Templates...</div>
@@ -73,5 +76,9 @@ function isTabDisabled(tab: string) {
     (tab === 'Review Tasks' && reviewTasks.value.length < 1) ||
     (tab === 'Approval Tasks' && approvalTasks.value.length < 1)
   )
+}
+
+function isTemplateCreator() {
+  return roles.value.includes('TEMPLATE_CREATOR')
 }
 </script>
