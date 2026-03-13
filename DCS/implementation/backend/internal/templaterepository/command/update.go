@@ -57,12 +57,15 @@ func (h *Updater) Handle(cmd UpdateCmd) error {
 		return errors.New("contract template was updated elsewhere, please reload")
 	}
 
-	if oldData.State != contracttemplatestate.Draft.String() && oldData.State != contracttemplatestate.Submitted.String() {
+	if oldData.State != contracttemplatestate.Draft.String() &&
+		oldData.State != contracttemplatestate.Rejected.String() &&
+		oldData.State != contracttemplatestate.Submitted.String() {
 		return errors.New("invalid contract template state")
 	}
 
 	isValidUser := false
-	if oldData.State == contracttemplatestate.Draft.String() && oldData.CreatedBy == cmd.UpdatedBy {
+	if (oldData.State == contracttemplatestate.Draft.String() || oldData.State == contracttemplatestate.Rejected.String()) &&
+		oldData.CreatedBy == cmd.UpdatedBy {
 		isValidUser = true
 	} else if oldData.State == contracttemplatestate.Submitted.String() {
 		valid, err := h.RTRepo.IsValidReviewer(tx, cmd.DID, cmd.UpdatedBy)
