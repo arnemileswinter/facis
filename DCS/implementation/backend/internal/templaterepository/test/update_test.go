@@ -162,8 +162,7 @@ func TestUpdate_UpdateContractTemplateDataInDraftStateWithInvalidUser(t *testing
 	description := "Updated Description"
 
 	cmd := command.UpdateCmd{
-		DID: *did,
-
+		DID:          *did,
 		UpdatedBy:    "Test User 1",
 		UpdatedAt:    time.Now(),
 		Name:         &name,

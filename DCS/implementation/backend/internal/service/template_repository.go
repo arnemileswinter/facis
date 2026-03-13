@@ -157,6 +157,7 @@ func (s *templateRepositorysrvc) Update(ctx context.Context, req *templatereposi
 		Name:           req.Name,
 		Description:    req.Description,
 		TemplateData:   &metaData,
+		UpdatedBy:      middleware.GetUsername(ctx),
 	}
 	handler := command.Updater{
 		Ctx:    ctx,
@@ -216,6 +217,7 @@ func (s *templateRepositorysrvc) UpdateManage(ctx context.Context, req *template
 		Name:           req.Name,
 		Description:    req.Description,
 		TemplateData:   &metaData,
+		UpdatedBy:      middleware.GetUsername(ctx),
 	}
 	handler := command.UpdateManager{
 		Ctx:    ctx,
@@ -392,8 +394,9 @@ func (s *templateRepositorysrvc) Verify(ctx context.Context, req *templatereposi
 	}
 
 	cmd := command.VerifyCmd{
-		DID:       req.Did,
-		UpdatedAt: updatedAt,
+		DID:        req.Did,
+		UpdatedAt:  updatedAt,
+		VerifiedBy: middleware.GetUsername(ctx),
 	}
 	handler := command.Verifier{
 		Ctx:    ctx,
