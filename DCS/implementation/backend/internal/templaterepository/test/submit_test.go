@@ -408,22 +408,10 @@ func TestSubmit_RejectContractTemplateInSubmittedStateWithInvalidUser(t *testing
 
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
-	tx, err := db.BeginTxx(ctx, nil)
-	defer tx.Rollback()
-	if err != nil {
-		t.Fatalf("Failed to begin transaction: %v", err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		t.Fatalf("Failed to commit transaction: %v", err)
-	}
-
 	actionFlag := actionflag.Draft
 
 	cmd := command.SubmitCmd{
-		DID: *did,
-
+		DID:         *did,
 		UpdatedAt:   time.Now(),
 		SubmittedBy: "Test User 4",
 		ActionFlag:  &actionFlag,
@@ -471,17 +459,6 @@ func TestSubmit_AllReviewersApprovedContractTemplateInSubmittedState(t *testing.
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, "Test User 4")
-
-	tx, err := db.BeginTxx(ctx, nil)
-	defer tx.Rollback()
-	if err != nil {
-		t.Fatalf("Failed to begin transaction: %v", err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		t.Fatalf("Failed to commit transaction: %v", err)
-	}
 
 	/**
 	All reviewers verify contract template
@@ -575,17 +552,6 @@ func TestSubmit_OneReviewerDeclinesContractTemplateInSubmittedState(t *testing.T
 	createReviewTasks(t, ctx, db, repo, *did, reviewtaskstate.Open, creator, reviewers)
 
 	createApprovalTasks(t, ctx, db, repo, *did, approvaltaskstate.Open, creator, "Test User 4")
-
-	tx, err := db.BeginTxx(ctx, nil)
-	defer tx.Rollback()
-	if err != nil {
-		t.Fatalf("Failed to begin transaction: %v", err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		t.Fatalf("Failed to commit transaction: %v", err)
-	}
 
 	actionFlag := actionflag.Draft
 
