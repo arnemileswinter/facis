@@ -4,12 +4,6 @@ import type { ContractTemplateData, PartialContractTemplate } from '../contract-
 import type { ContractTemplateReviewTask } from '../contract-template-review-task'
 import type { ContractTemplateApprovalTask } from '../contract-template-approval-task'
 
-// interface ContractTemplateBaseResponse {
-//   did: string
-//   document_number: string
-//   version: number
-// }
-
 export interface ContractTemplateCreateResponse {
   did: string
 }

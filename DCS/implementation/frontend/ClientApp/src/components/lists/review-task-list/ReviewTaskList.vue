@@ -49,6 +49,13 @@ function getTemplateName(item: ContractTemplateReviewTask) {
               >
                 Edit
               </RouterLink>
+            <RouterLink
+              v-if="item.state === 'OPEN'"
+              :to="{ name: 'templates.review', params: { did: item.did } }"
+              class="btn btn-sm btn-primary rounded-box gap-2"
+            >
+              Review
+            </RouterLink>
             </div>
           </div>
         </div>

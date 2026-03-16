@@ -1,11 +1,10 @@
+import { users } from '@/services/user-service'
+import type { UserRole } from '@/types/user-role'
 import { defineStore } from 'pinia'
 import { computed, ref, type Ref } from 'vue'
 import { useAuthTokenStore } from './auth-token-store'
-import { users } from '@/services/user-service'
-import type { UserRole } from '@/types/user-role'
 
-type User = string | null
-interface UserI {
+interface User {
   id: string
   username: string
   name: string
@@ -14,12 +13,12 @@ interface UserI {
 
 export const useAuthStore = defineStore('auth', () => {
   const authTokenStore = useAuthTokenStore()
-  const user: Ref<UserI | null> = ref(null)
+  const user: Ref<User | null> = ref(null)
 
   const isAuthenticated = computed(() => !!user.value && authTokenStore.isAuthSet)
 
-  function setUser(newUser: User) {
-    const userProfile = users.value.find((user) => user.id === newUser)
+  function setUser(userId: string) {
+    const userProfile = users.value.find((user) => user.id === userId)
     if (!userProfile) return console.error('User Error: User not set')
     user.value = {
       id: userProfile.id,

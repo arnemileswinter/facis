@@ -1,11 +1,11 @@
-import { onMounted, ref, type Ref } from 'vue'
-import type { PartialContractTemplate } from '../../models/contract-template'
-import { ContractTemplateService } from '../../services/contract-template-service'
+import type { PartialContractTemplate } from '@/models/contract-template'
 import type { ContractTemplateApprovalTask } from '@/models/contract-template-approval-task'
 import type { ContractTemplateReviewTask } from '@/models/contract-template-review-task'
+import { ContractTemplateService } from '@/services/contract-template-service'
 import { useAuthStore } from '@/stores/auth-store'
 import { useContractTemplatesStore } from '@/stores/contract-templates-store'
 import type { UserRole } from '@/types/user-role'
+import { onMounted, ref, type Ref } from 'vue'
 
 export function useTemplateTable() {
     const templatesStore = useContractTemplatesStore()

@@ -6,8 +6,8 @@ import type { SelectedUserRole } from '@/models/user'
 import { ContractTemplateService } from '@/services/contract-template-service'
 import { useAuthStore } from '@/stores/auth-store'
 import { TemplateState } from '@/types/contract-template-state'
-import type { UserRole } from '@/types/user-role'
 import { toProperCase } from '@/utils/string'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps<{
@@ -15,6 +15,8 @@ const props = defineProps<{
   hasReviewTask: boolean
   hasApprovalTask: boolean
 }>()
+
+const canEdit = ref(false)
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -34,9 +36,23 @@ async function submitTemplate(result: SelectedUserRole[]) {
   }
 }
 
-function canEdit() {
-  return authStore.user?.roles?.some(role => (['TEMPLATE_CREATOR', 'TEMPLATE_REVIEWER'] as UserRole[]).includes(role))
-}
+watch(
+  canEdit,
+  async () => {
+    try {
+      const template = await ContractTemplateService.retrieveById({ did: props.item.did })
+      const creator = template?.created_by
+      canEdit.value =
+        ((props.item.state === TemplateState.draft || props.item.state === TemplateState.rejected) &&
+          authStore.user?.username === creator) ||
+        (props.item.state === TemplateState.submitted && props.hasReviewTask)
+    } catch (err) {
+      console.error('Error:', err)
+      canEdit.value = false
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -72,7 +88,7 @@ function canEdit() {
               class="btn btn-sm btn-secondary rounded-box"
             />
             <RouterLink
-              v-if="item.state === TemplateState.draft || item.state === TemplateState.rejected || canEdit()"
+              v-if="canEdit"
               :to="{
                 name: 'templates.edit',
                 params: { did: item.did },
