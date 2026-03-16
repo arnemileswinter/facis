@@ -49,7 +49,6 @@ export function useTemplateTable() {
     onMounted(loadTemplates)
 
     const hasReviewTask = (template: PartialContractTemplate): boolean => {
-        // Bug: authStore.user is not userId, it's a JWT token. We need to decode it to get the userId.
         const currentUser = authStore.user
         if (!currentUser) return false
         return reviewTasks.value.some((task) => {

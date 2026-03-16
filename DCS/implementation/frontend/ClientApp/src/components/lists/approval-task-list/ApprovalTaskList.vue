@@ -31,7 +31,15 @@ function getTemplateName(item: ContractTemplateApprovalTask) {
           <div class="flex justify-between">
             <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
             <div class="card-actions justify-end">
-              <button class="btn btn-sm btn-primary rounded-box">View</button>
+              <RouterLink
+                :to="{
+                  name: 'templates.view',
+                  params: { did: item.did },
+                }"
+                class="btn btn-sm btn-primary rounded-box"
+              >
+                View
+              </RouterLink>
               <RouterLink
                 :to="{
                   name: 'templates.edit',
