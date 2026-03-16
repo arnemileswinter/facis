@@ -27,7 +27,6 @@ export function useTemplateTable() {
             templatesStore.contractTemplates = templates.value
             approvalTasks.value = data.approval_tasks
             reviewTasks.value = data.review_tasks
-            const userId = authStore.user?.id
             roles.value = authStore.user?.roles ?? []
         } catch (err: any) {
             error.value = err.message || 'Fehler beim Laden der Templates'

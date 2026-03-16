@@ -41,8 +41,8 @@ const sortedItems = computed(() => {
     return searchedItems.value
   }
   return searchedItems.value.slice().sort((a, b) => {
-    let aSortValue = a[sortBy.value as keyof PartialContractTemplate]
-    let bSortValue = b[sortBy.value as keyof PartialContractTemplate]
+    const aSortValue = a[sortBy.value as keyof PartialContractTemplate]
+    const bSortValue = b[sortBy.value as keyof PartialContractTemplate]
     const aValue = valueToComparable(aSortValue)
     const bValue = valueToComparable(bSortValue)
     if (!aValue && !bValue) return 0

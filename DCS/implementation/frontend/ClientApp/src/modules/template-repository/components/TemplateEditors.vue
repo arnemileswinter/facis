@@ -23,8 +23,11 @@
         <div v-show="activeTab === 'details'">
           <div class="card bg-base-100 border border-base-300 shadow-sm">
             <div class="card-body gap-5">
-              <h2 class="card-title text-sm">
-                <span class="badge badge-primary">01</span> Template Details
+              <h2 class="card-title text-sm justify-between">
+                <div class="flex gap-2">
+                  <span class="badge badge-sm badge-primary">01</span> Template Details
+                </div>
+                <div v-if="state" class="badge badge-sm badge-secondary">{{ state }}</div>
               </h2>
               <DetailsEditor />
             </div>
@@ -113,7 +116,7 @@ const props = withDefaults(
 const templateEditorUiStore = useTemplateEditorUiStore()
 const draftStore = useTemplateDraftStore()
 const { activeTab } = storeToRefs(templateEditorUiStore)
-const { templateType } = storeToRefs(draftStore)
+const { state, templateType } = storeToRefs(draftStore)
 const { setActiveTab, togglePreviewDialog } = templateEditorUiStore
 const tabs = computed(() => templateEditorUiStore.availableTabs(templateType.value))
 

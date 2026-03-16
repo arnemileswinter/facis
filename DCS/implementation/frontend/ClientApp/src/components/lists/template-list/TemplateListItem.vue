@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import SubmitContractTemplateUserSelectionDialog from '@/components/SubmitContractTemplateUserSelectionDialog.vue'
+import type { PartialContractTemplate } from '@/models/contract-template'
 import type { ContractTemplateSubmitRequest } from '@/models/requests/template-request'
 import type { SelectedUserRole } from '@/models/user'
 import { ContractTemplateService } from '@/services/contract-template-service'
+import { useAuthStore } from '@/stores/auth-store'
 import { TemplateState } from '@/types/contract-template-state'
-import type { PartialContractTemplate } from '../../../models/contract-template'
+import type { UserRole } from '@/types/user-role'
+import { toProperCase } from '@/utils/string'
 import { useRouter } from 'vue-router'
 
 const props = defineProps<{
@@ -14,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 async function submitTemplate(result: SelectedUserRole[]) {
   const reviewers = result.filter((user) => user.role === 'TEMPLATE_REVIEWER').map((user) => user.user.username)
@@ -29,27 +33,33 @@ async function submitTemplate(result: SelectedUserRole[]) {
     router.go(0)
   }
 }
+
+function canEdit() {
+  return authStore.user?.roles?.some(role => (['TEMPLATE_CREATOR', 'TEMPLATE_REVIEWER'] as UserRole[]).includes(role))
+}
 </script>
 
 <template>
-  <li class="list-row">
-    <div class="list-col-grow card bg-base-200 card-border hover:bg-base-300">
-      <div class="card-body">
+  <li class="list-row min-w-0 w-full">
+    <div class="list-col-grow card bg-base-200 card-border hover:bg-base-300 min-w-0 w-full">
+      <div class="card-body min-w-0">
         <h2 class="card-title justify-between">
-          <div>Name: {{ item.name }}</div>
+          <div class="flex gap-8 h-full">
+            <div>Name: {{ item.name }}</div>
+            <div class="badge badge-md badge-accent h-full">{{ toProperCase(item.template_type) }}</div>
+          </div>
           <div class="badge badge-secondary">{{ item.state }}</div>
         </h2>
         <div class="flex justify-between">
           <div v-if="item.document_number">Document number: {{ item.document_number }}</div>
           <div v-if="item.version">Version: {{ item.version }}</div>
         </div>
-        <div class="flex justify-between">
-          <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
-          <div v-if="item.description" class="px-4 max-w-1/12 whitespace-nowrap overflow-hidden text-ellipsis">
+        <div class="flex justify-between min-w-0">
+          <div class="flex-none">Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
+          <div v-if="item.description" class="px-10 flex-1 min-w-0 truncate">
             {{ item.description }}
           </div>
-          <div class="flex-1"></div>
-          <div class="card-actions justify-end">
+          <div class="card-actions justify-end flex-none">
             <RouterLink
               :to="{ name: 'templates.view', params: { did: item.did } }"
               class="btn btn-sm btn-primary rounded-box"
@@ -57,12 +67,12 @@ async function submitTemplate(result: SelectedUserRole[]) {
               View
             </RouterLink>
             <SubmitContractTemplateUserSelectionDialog
-              v-if="item.state === TemplateState.draft"
+              v-if="item.state === TemplateState.draft || item.state === TemplateState.rejected"
               @submit="submitTemplate"
               class="btn btn-sm btn-secondary rounded-box"
             />
             <RouterLink
-              v-if="item.state === TemplateState.draft || item.state === TemplateState.rejected"
+              v-if="item.state === TemplateState.draft || item.state === TemplateState.rejected || canEdit()"
               :to="{
                 name: 'templates.edit',
                 params: { did: item.did },
