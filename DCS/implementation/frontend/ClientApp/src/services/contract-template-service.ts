@@ -35,7 +35,7 @@ export const ContractTemplateService = {
     return http
       .post<ContractTemplateSubmitResponse>('/template/submit', request)
       .then((res) => res.data)
-      .catch((err) => console.error('Submit Erro:', err))
+      .catch((err) => console.error('Submit Error:', err))
   },
 
   async update(request: ContractTemplateUpdateRequest) {

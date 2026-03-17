@@ -39,6 +39,7 @@ const empyt: PartialContractTemplate = {
   name: '',
   template_type: 'FRAME_CONTRACT',
   state: 'DRAFT',
+  created_by: '',
 }
 
 const selectedFilter = ref<FilterLabelValue>('Name')

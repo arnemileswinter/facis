@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import SubmitContractTemplateUserSelectionDialog from '@/components/SubmitContractTemplateUserSelectionDialog.vue'
 import type { PartialContractTemplate } from '@/models/contract-template'
-import type { ContractTemplateSubmitRequest } from '@/models/requests/template-request'
-import type { SelectedUserRole } from '@/models/user'
-import { ContractTemplateService } from '@/services/contract-template-service'
 import { useAuthStore } from '@/stores/auth-store'
 import { TemplateState } from '@/types/contract-template-state'
 import { toProperCase } from '@/utils/string'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   item: PartialContractTemplate
   hasReviewTask: boolean
   hasApprovalTask: boolean
 }>()
+
+const authStore = useAuthStore()
 
 const canEdit = computed(() => {
   return (
@@ -24,23 +21,6 @@ const canEdit = computed(() => {
   )
 })
 
-const router = useRouter()
-const authStore = useAuthStore()
-
-async function submitTemplate(result: SelectedUserRole[]) {
-  const reviewers = result.filter((user) => user.role === 'TEMPLATE_REVIEWER').map((user) => user.user.username)
-  const approver = result.find((user) => user.role === 'TEMPLATE_APPROVER')?.user.username
-  const request: ContractTemplateSubmitRequest = {
-    did: props.item.did,
-    updated_at: props.item.updated_at,
-    reviewers: reviewers,
-    approver: approver!,
-  }
-  const response = await ContractTemplateService.submit(request)
-  if (response) {
-    router.go(0)
-  }
-}
 </script>
 
 <template>
@@ -59,22 +39,17 @@ async function submitTemplate(result: SelectedUserRole[]) {
           <div v-if="item.version">Version: {{ item.version }}</div>
         </div>
         <div class="flex justify-between min-w-0">
-          <div class="flex-none">Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
+          <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
           <div v-if="item.description" class="px-10 flex-1 min-w-0 truncate">
             {{ item.description }}
           </div>
-          <div class="card-actions justify-end flex-none">
+          <div class="card-actions justify-end">
             <RouterLink
               :to="{ name: 'templates.view', params: { did: item.did } }"
               class="btn btn-sm btn-primary rounded-box"
             >
               View
             </RouterLink>
-            <SubmitContractTemplateUserSelectionDialog
-              v-if="item.state === TemplateState.draft || item.state === TemplateState.rejected"
-              @submit="submitTemplate"
-              class="btn btn-sm btn-secondary rounded-box"
-            />
             <RouterLink
               v-if="canEdit"
               :to="{

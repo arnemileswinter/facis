@@ -8,7 +8,7 @@
       <!-- Comments container -->
       <div class="max-w-4xl mx-auto px-6 py-3 flex flex-col md:flex-row gap-3">
         <textarea v-model="comment" :disabled="isSubmitting"
-          class="textarea textarea-ghost textarea-sm w-full mt-0.5 text-sm min-h-[2.5rem] resize-y border border-base-300/50 rounded-lg"
+          class="textarea textarea-ghost textarea-sm w-full mt-0.5 text-sm min-h-10 resize-y border border-base-300/50 rounded-lg"
           placeholder="Comment" rows="4" />
       </div>
       <div class="max-w-4xl mx-auto px-6 py-3 flex flex-col md:flex-row gap-3">

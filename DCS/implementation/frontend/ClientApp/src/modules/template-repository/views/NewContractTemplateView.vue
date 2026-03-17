@@ -19,6 +19,11 @@
                         <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
                         {{ isEditMode ? 'Update Template' : 'Create' }}
                     </button>
+                    <SubmitContractTemplateUserSelectionDialog
+                        v-if="isEditMode && (state === TemplateState.draft || state === TemplateState.rejected)"
+                        @submit="submitTemplate"
+                        class="btn btn-primary flex-1"
+                    />
                 </div>
             </div>
         </template>
@@ -26,17 +31,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
-import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
+import SubmitContractTemplateUserSelectionDialog from '@/components/SubmitContractTemplateUserSelectionDialog.vue'
+import type { ContractTemplateSubmitRequest } from '@/models/requests/template-request'
+import type { SelectedUserRole } from '@/models/user'
+import { ContractTemplateService } from '@/services/contract-template-service'
+import { TemplateState } from '@/types/contract-template-state'
 import TemplateEditors from '@template-repository/components/TemplateEditors.vue'
 import TemplateTypeSelect from '@template-repository/components/TemplateTypeSelect.vue'
-import { storeToRefs } from 'pinia'
-import { ContractTemplateService } from '@/services/contract-template-service'
-import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
 import { isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
-import { TemplateState } from '@/types/contract-template-state'
+import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
+import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
+import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
+import { storeToRefs } from 'pinia'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
@@ -44,7 +52,7 @@ const route = useRoute()
 const templateEditorUiStore = useTemplateEditorUiStore()
 const approvedSubTemplateStore = useApprovedSubTemplateStore()
 const draftStore = useTemplateDraftStore()
-const { templateType } = storeToRefs(draftStore)
+const { state, templateType } = storeToRefs(draftStore)
 
 const isEditMode = computed(() => !!route.params.did)
 const hasChosenType = ref(false)
@@ -131,6 +139,22 @@ const submit = async () => {
         console.error('Submission failed', error)
     } finally {
         isSubmitting.value = false
+    }
+}
+
+const submitTemplate = async (result: SelectedUserRole[]) => {
+    if (!draftStore.did || !draftStore.updated_at) return
+    const reviewers = result.filter((user) => user.role === 'TEMPLATE_REVIEWER').map((user) => user.user.username)
+    const approver = result.find((user) => user.role === 'TEMPLATE_APPROVER')?.user.username!
+    const request: ContractTemplateSubmitRequest = {
+        did: draftStore.did,
+        updated_at: draftStore.updated_at,
+        reviewers: reviewers,
+        approver: approver,
+    }
+    const response = await ContractTemplateService.submit(request)
+    if (response?.did) {
+        router.push({ name: 'templates.list'})
     }
 }
 </script>
