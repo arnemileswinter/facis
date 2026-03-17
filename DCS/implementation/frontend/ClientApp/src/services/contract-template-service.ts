@@ -25,18 +25,24 @@ import type {
 
 export const ContractTemplateService = {
   async create(request: ContractTemplateCreateRequest) {
-    return http.post<ContractTemplateCreateResponse>('/template/create', request).then((res) => res.data)
+    return http
+      .post<ContractTemplateCreateResponse>('/template/create', request)
+      .then((res) => res.data)
+      .catch((err) => console.error('Create Error:', err))
   },
 
   async submit(request: ContractTemplateSubmitRequest) {
     return http
       .post<ContractTemplateSubmitResponse>('/template/submit', request)
       .then((res) => res.data)
-      .catch((err) => console.error(err))
+      .catch((err) => console.error('Submit Erro:', err))
   },
 
   async update(request: ContractTemplateUpdateRequest) {
-    return http.put<ContractTemplateUpdateResponse>('/template/update', request).then((res) => res.data)
+    return http
+      .put<ContractTemplateUpdateResponse>('/template/update', request)
+      .then((res) => res.data)
+      .catch((err) => console.error('Update Error:', err))
   },
 
   async search(request: ContractTemplateSearchRequest): Promise<ContractTemplateSearchResponse> {
@@ -68,7 +74,7 @@ export const ContractTemplateService = {
         return { ...res.data }
       })
       .catch((err) => {
-        console.error('Retrieve ID Error:', err.message)
+        console.error('Retrieve ID Error:', err)
         return null
       })
   },

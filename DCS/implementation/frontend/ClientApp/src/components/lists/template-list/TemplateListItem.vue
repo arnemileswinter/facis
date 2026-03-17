@@ -7,7 +7,7 @@ import { ContractTemplateService } from '@/services/contract-template-service'
 import { useAuthStore } from '@/stores/auth-store'
 import { TemplateState } from '@/types/contract-template-state'
 import { toProperCase } from '@/utils/string'
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps<{
@@ -16,7 +16,13 @@ const props = defineProps<{
   hasApprovalTask: boolean
 }>()
 
-const canEdit = ref(false)
+const canEdit = computed(() => {
+  return (
+    ((props.item.state === TemplateState.draft || props.item.state === TemplateState.rejected) &&
+      props.item.created_by === authStore.user?.username) ||
+    (props.item.state === TemplateState.submitted && props.hasReviewTask)
+  )
+})
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -35,24 +41,6 @@ async function submitTemplate(result: SelectedUserRole[]) {
     router.go(0)
   }
 }
-
-watch(
-  canEdit,
-  async () => {
-    try {
-      const template = await ContractTemplateService.retrieveById({ did: props.item.did })
-      const creator = template?.created_by
-      canEdit.value =
-        ((props.item.state === TemplateState.draft || props.item.state === TemplateState.rejected) &&
-          authStore.user?.username === creator) ||
-        (props.item.state === TemplateState.submitted && props.hasReviewTask)
-    } catch (err) {
-      console.error('Error:', err)
-      canEdit.value = false
-    }
-  },
-  { immediate: true },
-)
 </script>
 
 <template>

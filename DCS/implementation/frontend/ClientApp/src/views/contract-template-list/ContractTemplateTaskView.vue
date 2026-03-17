@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import ApprovalTaskList from '@/components/lists/approval-task-list/ApprovalTaskList.vue'
 import ReviewTaskList from '@/components/lists/review-task-list/ReviewTaskList.vue'
-import { useTemplateTable } from './ContractTemplateListController'
+import { useContractTemplatesStore } from '@/stores/contract-templates-store';
+import { storeToRefs } from 'pinia';
 
-const { reviewTasks, approvalTasks } = useTemplateTable()
+const templatesStore = useContractTemplatesStore()
+const { reviewTasks, approvalTasks } = storeToRefs(templatesStore)
 </script>
 
 <template>
