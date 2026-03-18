@@ -1,7 +1,7 @@
 import http from '@/api/http'
 import type { UserAllRequest, UserRolesByUserIdRequest } from '@/models/requests/user-request'
 import type { UserAllResponse, UserRolesByUserIdResponse } from '@/models/responses/user-response'
-import type { UserService as UserServiceI } from '@/models/services/user-service'
+import type { UserService } from '@/models/services/user-service'
 import type { UserProfile } from '@/models/user'
 import type { UserRole } from '@/types/user-role'
 import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
@@ -9,7 +9,7 @@ import { ref, type Ref } from 'vue'
 
 const USER_BASE_URL = http.defaults.baseURL + '/users'
 
-export const UserService: UserServiceI = {
+export const userService: UserService = {
   async getAllUsers(request?: UserAllRequest) {
     return Promise.resolve<AxiosResponse<UserAllResponse>>({
       data: { totalCount: users.value.length, items: users.value } as UserAllResponse,

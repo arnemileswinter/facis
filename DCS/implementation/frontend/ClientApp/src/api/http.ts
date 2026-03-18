@@ -1,4 +1,4 @@
-import { AuthenticationService } from '@/services/authentication-service'
+import { authenticationService } from '@/services/authentication-service'
 import { useAuthTokenStore } from '@/stores/auth-token-store'
 import axios from 'axios'
 import { storeToRefs } from 'pinia'
@@ -27,7 +27,7 @@ http.interceptors.response.use(
   (resp) => resp,
   async (err) => {
     if (err.status === 401) {
-      const res = await AuthenticationService.refresh()
+      const res = await authenticationService.refresh()
       if (res) {
         return http(err.config)
       }

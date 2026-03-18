@@ -34,7 +34,7 @@
 import SubmitContractTemplateUserSelectionDialog from '@/components/SubmitContractTemplateUserSelectionDialog.vue'
 import type { ContractTemplateSubmitRequest } from '@/models/requests/template-request'
 import type { SelectedUserRole } from '@/models/user'
-import { ContractTemplateService } from '@/services/contract-template-service'
+import { contractTemplateService } from '@/services/contract-template-service'
 import { TemplateState } from '@/types/contract-template-state'
 import TemplateEditors from '@template-repository/components/TemplateEditors.vue'
 import TemplateTypeSelect from '@template-repository/components/TemplateTypeSelect.vue'
@@ -71,7 +71,7 @@ watch(isEditMode, (isEdit) => {
         hasChosenType.value = true
         // load template data into draftStore
         const did = `${route.params.did}`
-        ContractTemplateService.retrieveById({ did })
+        contractTemplateService.retrieveById({ did })
             .then(async template => {
                 if (!template) {
                     draftStore.reset()
@@ -98,7 +98,7 @@ watch(isEditMode, (isEdit) => {
                 const approvedBlocks = draftStore.documentBlocks.filter((b) => isApprovedTemplateBlock(b))
 
                 for (const block of approvedBlocks) {
-                    const template = await ContractTemplateService.retrieveById({
+                    const template = await contractTemplateService.retrieveById({
                         did: block.templateId,
                     })
                     if (template) {
@@ -126,12 +126,12 @@ const submit = async () => {
         if (!draftStore.hasTemplateId) {
             // create a draft template
             const data = draftStore.templateCreateRequestData
-            await ContractTemplateService.create(data)
+            await contractTemplateService.create(data)
         } else {
             // update existing template
             const data = draftStore.templateUpdateRequestData
             if (data) {
-                await ContractTemplateService.update(data)
+                await contractTemplateService.update(data)
             }
         }
         router.push({ name: 'templates.list' })
@@ -152,7 +152,7 @@ const submitTemplate = async (result: SelectedUserRole[]) => {
         reviewers: reviewers,
         approver: approver,
     }
-    const response = await ContractTemplateService.submit(request)
+    const response = await contractTemplateService.submit(request)
     if (response?.did) {
         router.push({ name: 'templates.list'})
     }

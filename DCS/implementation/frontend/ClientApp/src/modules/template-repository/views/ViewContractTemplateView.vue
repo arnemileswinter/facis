@@ -17,7 +17,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import TemplateEditors from '@template-repository/components/TemplateEditors.vue'
-import { ContractTemplateService } from '@/services/contract-template-service'
+import { contractTemplateService } from '@/services/contract-template-service'
 import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
 import { isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
 
@@ -38,7 +38,7 @@ watch(hasDid, (hasDid) => {
 
   hasChosenType.value = true
   const did = `${route.params.did}`
-  ContractTemplateService.retrieveById({ did })
+  contractTemplateService.retrieveById({ did })
     .then(async template => {
       if (!template) {
         draftStore.reset()
@@ -64,7 +64,7 @@ watch(hasDid, (hasDid) => {
       const approvedBlocks = draftStore.documentBlocks.filter((b) => isApprovedTemplateBlock(b))
 
       for (const block of approvedBlocks) {
-        const template = await ContractTemplateService.retrieveById({ did: block.templateId })
+        const template = await contractTemplateService.retrieveById({ did: block.templateId })
         if (template) {
           approvedSubTemplateStore.addTemplate(template)
         }

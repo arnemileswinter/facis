@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import type { ContractTemplateApprovalTask } from '@/models/contract-template-approval-task'
 import { useContractTemplatesStore } from '@/stores/contract-templates-store'
-import { computed } from 'vue'
 
 const props = defineProps<{
   items: ContractTemplateApprovalTask[]
 }>()
 
 const templatesStore = useContractTemplatesStore()
-const templates = computed(() => templatesStore.contractTemplates)
 
 function getTemplateName(item: ContractTemplateApprovalTask) {
-  return templates.value.find(template => template.did === item.did)?.name ?? 'Nameless Template'
+  return templatesStore.contractTemplates.find(template => template.did === item.did)?.name ?? 'Nameless Template'
 }
 </script>
 
@@ -39,15 +37,6 @@ function getTemplateName(item: ContractTemplateApprovalTask) {
                 class="btn btn-sm btn-primary rounded-box"
               >
                 View
-              </RouterLink>
-              <RouterLink
-                :to="{
-                  name: 'templates.edit',
-                  params: { did: item.did },
-                }"
-                class="btn btn-sm btn-secondary rounded-box gap-2"
-              >
-                Edit
               </RouterLink>
               <RouterLink
                 v-if="item.state === 'OPEN'"

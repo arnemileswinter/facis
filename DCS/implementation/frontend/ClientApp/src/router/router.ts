@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
-import { AuthenticationService } from '@/services/authentication-service'
+import { authenticationService } from '@/services/authentication-service'
 import { DocumentCheckIcon, DocumentMagnifyingGlassIcon, DocumentTextIcon } from '@heroicons/vue/20/solid'
 import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
@@ -23,19 +23,37 @@ const routes: RouteRecordRaw[] = [
     path: '/templates',
     name: 'templates.list',
     component: ContractTemplateListView,
-    meta: { name: 'Contract Templates', icon: DocumentTextIcon, requiresAuth: true, title: 'DCS - Templates', order: 1 },
+    meta: {
+      name: 'Contract Templates',
+      icon: DocumentTextIcon,
+      requiresAuth: true,
+      title: 'DCS - Templates',
+      order: 1,
+    },
   },
   {
     path: '/templates/new',
     name: 'templates.new',
     component: NewContractTemplateView,
-    meta: { name: 'New Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - New Template' },
+    meta: {
+      name: 'New Template',
+      hideInSidebar: true,
+      requiresAuth: true,
+      title: 'DCS - New Template',
+      roles: ['TEMPLATE_CREATOR'],
+    },
   },
   {
     path: '/templates/edit/:did',
     name: 'templates.edit',
     component: NewContractTemplateView,
-    meta: { name: 'Edit Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Edit Template' },
+    meta: {
+      name: 'Edit Template',
+      hideInSidebar: true,
+      requiresAuth: true,
+      title: 'DCS - Edit Template',
+      roles: ['TEMPLATE_CREATOR', 'TEMPLATE_REVIEWER'],
+    },
   },
   {
     path: '/templates/view/:did',
@@ -47,13 +65,25 @@ const routes: RouteRecordRaw[] = [
     path: '/templates/review/:did',
     name: 'templates.review',
     component: ReviewContractTemplateView,
-    meta: { name: 'Review Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Review Template' },
+    meta: {
+      name: 'Review Template',
+      hideInSidebar: true,
+      requiresAuth: true,
+      title: 'DCS - Review Template',
+      roles: ['TEMPLATE_REVIEWER'],
+    },
   },
   {
     path: '/templates/approve/:did',
     name: 'templates.approve',
     component: ApproveContractTemplateView,
-    meta: { name: 'Approve Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - Approve Template' },
+    meta: {
+      name: 'Approve Template',
+      hideInSidebar: true,
+      requiresAuth: true,
+      title: 'DCS - Approve Template',
+      roles: ['TEMPLATE_APPROVER'],
+    },
   },
   {
     path: '/templates/tasks/review',
@@ -65,7 +95,7 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'DCS - Review Tasks',
       order: 2,
-      roles: ['TEMPLATE_REVIEWER']
+      roles: ['TEMPLATE_REVIEWER'],
     },
   },
   {
@@ -78,7 +108,7 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
       title: 'DCS - Approval Tasks',
       order: 3,
-      roles: ['TEMPLATE_APPROVER']
+      roles: ['TEMPLATE_APPROVER'],
     },
   },
   {
@@ -104,18 +134,29 @@ router.beforeEach(async (to) => {
     return true
   }
 
-  await AuthenticationService.refresh()
+  await authenticationService.refresh()
   if (authStore.isAuthenticated) {
     return true
   }
 
-  const loginUrl = await AuthenticationService.getLoginPath()
+  const loginUrl = await authenticationService.loginPath()
   if (loginUrl) {
     window.location.href = loginUrl
     return false
   }
 
   return { name: 'home' }
+})
+
+router.beforeEach((to) => {
+  if (!to.meta.roles) {
+    return true
+  }
+  const authStore = useAuthStore()
+  const hasAuthorizedRole = authStore.user?.roles?.some((role) => to.meta.roles?.includes(role)) ?? false
+  if (!hasAuthorizedRole) {
+    return { name: 'home' }
+  }
 })
 
 export { router }

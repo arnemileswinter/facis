@@ -22,27 +22,37 @@ import type {
   ContractTemplateUpdateResponse,
   ContractTemplateVerifyResponse,
 } from '@/models/responses/template-response'
+import type { ContractTemplateService } from '@/models/services/contract-template-service'
 
-export const ContractTemplateService = {
+export const contractTemplateService: ContractTemplateService = {
   async create(request: ContractTemplateCreateRequest) {
     return http
       .post<ContractTemplateCreateResponse>('/template/create', request)
       .then((res) => res.data)
-      .catch((err) => console.error('Create Error:', err))
+      .catch((err) => {
+        console.error('Create Error:', err)
+        throw err
+      })
   },
 
   async submit(request: ContractTemplateSubmitRequest) {
     return http
       .post<ContractTemplateSubmitResponse>('/template/submit', request)
       .then((res) => res.data)
-      .catch((err) => console.error('Submit Error:', err))
+      .catch((err) => {
+        console.error('Submit Error:', err)
+        throw err
+      })
   },
 
   async update(request: ContractTemplateUpdateRequest) {
     return http
       .put<ContractTemplateUpdateResponse>('/template/update', request)
       .then((res) => res.data)
-      .catch((err) => console.error('Update Error:', err))
+      .catch((err) => {
+        console.error('Update Error:', err)
+        throw err
+      })
   },
 
   async search(request: ContractTemplateSearchRequest): Promise<ContractTemplateSearchResponse> {

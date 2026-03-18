@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PartialContractTemplate } from '@/models/contract-template'
 import type { ContractTemplateSearchResponse } from '@/models/responses/template-response'
-import { ContractTemplateService } from '@/services/contract-template-service'
+import { contractTemplateService } from '@/services/contract-template-service'
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/vue'
 import { computed, ref, useTemplateRef, type Ref } from 'vue'
 
@@ -83,7 +83,7 @@ async function searchRequest() {
 async function retrieveSearch() {
   if (!searchKey.value) return
   const request = { [searchKey.value]: searchQuery.value}
-  const result = await ContractTemplateService.search(request)
+  const result = await contractTemplateService.search(request)
   searchResults.value = result
 }
 

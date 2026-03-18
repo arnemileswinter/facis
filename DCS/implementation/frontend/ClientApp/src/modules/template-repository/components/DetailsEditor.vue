@@ -94,7 +94,7 @@ import { storeToRefs } from 'pinia'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import { useApprovedSubTemplateStore } from '@template-repository/store/approvedSubTemplateStore'
 import { TemplateType, isApprovedTemplateBlock } from '@template-repository/models/contract-templace'
-import { ContractTemplateService } from '@/services/contract-template-service'
+import { contractTemplateService } from '@/services/contract-template-service'
 import { useTemplateTable } from '@/views/contract-template-list/ContractTemplateListController'
 import { TemplateState } from '@/types/contract-template-state'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore'
@@ -148,7 +148,7 @@ const addSubcontractTemplate = async (template: { did: string; version?: number;
             document_number: template.document_number,
         })
     }
-    await ContractTemplateService.retrieveById(template).then(fullTemplate => {
+    await contractTemplateService.retrieveById(template).then(fullTemplate => {
         if (fullTemplate) approvedSubTemplateStore.addTemplate(fullTemplate)
     })
     subcontractSearchQuery.value = ''

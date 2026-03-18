@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SelectedUserRole, UserProfile } from '@/models/user'
-import { UserService } from '@/services/user-service'
+import { userService } from '@/services/user-service'
 import type { UserRole } from '@/types/user-role'
 import { toProperCase } from '@/utils/string'
 import { computed, ref, useTemplateRef, type Ref } from 'vue'
@@ -33,7 +33,7 @@ const isSubmitDisabled = computed(() => !hasValidSelection.value || !allSelected
 
 async function openModal() {
   userSelectionModal.value?.showModal()
-  users.value = await UserService.getAuthorizedUsersWithRoles('TEMPLATE_APPROVER', 'TEMPLATE_REVIEWER')
+  users.value = await userService.getAuthorizedUsersWithRoles('TEMPLATE_APPROVER', 'TEMPLATE_REVIEWER')
   isLoading.value = false
 }
 

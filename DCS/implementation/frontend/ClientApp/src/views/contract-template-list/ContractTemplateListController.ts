@@ -1,7 +1,7 @@
 import type { PartialContractTemplate } from '@/models/contract-template'
 import type { ContractTemplateApprovalTask } from '@/models/contract-template-approval-task'
 import type { ContractTemplateReviewTask } from '@/models/contract-template-review-task'
-import { ContractTemplateService } from '@/services/contract-template-service'
+import { contractTemplateService } from '@/services/contract-template-service'
 import { useAuthStore } from '@/stores/auth-store'
 import { useContractTemplatesStore } from '@/stores/contract-templates-store'
 import type { UserRole } from '@/types/user-role'
@@ -21,8 +21,7 @@ export function useTemplateTable() {
         loading.value = true
         error.value = ''
         try {
-            const data = await ContractTemplateService.retrieve()
-            console.log(data)
+            const data = await contractTemplateService.retrieve()
             templates.value = data.contract_templates
             templatesStore.contractTemplates = templates.value
             reviewTasks.value = data.review_tasks
@@ -41,7 +40,7 @@ export function useTemplateTable() {
 
     const getTemplateById = async (did: string) => {
         try {
-            return await ContractTemplateService.retrieveById({ did })
+            return await contractTemplateService.retrieveById({ did })
         } catch (err: any) {
             console.error('Template konnte nicht geladen werden:', err)
             return null

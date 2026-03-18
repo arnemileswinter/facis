@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AuthenticationService } from '@/services/authentication-service'
+import { authenticationService } from '@/services/authentication-service'
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -14,7 +14,7 @@ onMounted(async () => {
     return
   }
 
-  const loginUrl = await AuthenticationService.getLoginPath()
+  const loginUrl = await authenticationService.loginPath()
   if (loginUrl) {
     window.location.href = loginUrl
   }
