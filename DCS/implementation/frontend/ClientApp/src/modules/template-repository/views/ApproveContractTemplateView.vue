@@ -17,6 +17,10 @@
           <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
           Return to draft
         </button>
+        <button @click="reopenReviews" class="btn btn-primary flex-1" :disabled="isSubmitting">
+          <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
+          Reopen review
+        </button>
         <button @click="approve" class="btn btn-primary flex-1" :disabled="isSubmitting">
           <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
           Approve
@@ -112,6 +116,28 @@ async function approve() {
     router.push({ name: 'templates.list' })
   } catch (error) {
     console.error('Approval failed', error)
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+async function reopenReviews() {
+  const did = draftStore.did
+  const updatedAt = draftStore.updated_at
+  if (!did || !updatedAt) {
+    console.error('Missing did or updated_at for reopen reviews')
+    return
+  }
+  isSubmitting.value = true
+  try {
+    await contractTemplateService.submit({
+      did,
+      updated_at: updatedAt,
+      comments: decisionNote.value ? [decisionNote.value] : []
+    })
+    router.push({ name: 'templates.list' })
+  } catch (error) {
+    console.error('Reopen reviews failed', error)
   } finally {
     isSubmitting.value = false
   }

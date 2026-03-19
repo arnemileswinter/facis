@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import type { ContractTemplateApprovalTask } from '@/models/contract-template-approval-task'
 import { useContractTemplatesStore } from '@/stores/contract-templates-store'
+import { TemplateState } from '@/types/contract-template-state';
 
-const props = defineProps<{
+defineProps<{
   items: ContractTemplateApprovalTask[]
 }>()
 
 const templatesStore = useContractTemplatesStore()
 
-function getTemplateName(item: ContractTemplateApprovalTask) {
-  return templatesStore.contractTemplates.find(template => template.did === item.did)?.name ?? 'Nameless Template'
+const getTemplateName = (item: ContractTemplateApprovalTask) => {
+  return templatesStore.contractTemplates.find((template) => template.did === item.did)?.name ?? 'Nameless Template'
+}
+
+const getTemplateState = (item: ContractTemplateApprovalTask) => {
+  return templatesStore.contractTemplates.find((template) => template.did === item.did)?.state
 }
 </script>
 
@@ -39,7 +44,7 @@ function getTemplateName(item: ContractTemplateApprovalTask) {
                 View
               </RouterLink>
               <RouterLink
-                v-if="item.state === 'OPEN'"
+                v-if="item.state === 'OPEN' && getTemplateState(item) === TemplateState.reviewed"
                 :to="{ name: 'templates.approve', params: { did: item.did } }"
                 class="btn btn-sm btn-primary rounded-box gap-2"
               >

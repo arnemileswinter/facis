@@ -1,17 +1,28 @@
 <script setup lang="ts">
 import type { ContractTemplateReviewTask } from '@/models/contract-template-review-task'
-import { useContractTemplatesStore } from '@/stores/contract-templates-store';
-import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth-store'
+import { useContractTemplatesStore } from '@/stores/contract-templates-store'
+import { TemplateState } from '@/types/contract-template-state'
 
-const props = defineProps<{
+defineProps<{
   items: ContractTemplateReviewTask[]
 }>()
 
 const templatesStore = useContractTemplatesStore()
-const templates = computed(() => templatesStore.contractTemplates)
+const authStore = useAuthStore()
 
-function getTemplateName(item: ContractTemplateReviewTask) {
-  return templates.value.find(template => template.did === item.did)?.name ?? 'Nameless Template'
+const getTemplateName = (item: ContractTemplateReviewTask) => {
+  return templatesStore.contractTemplates.find((template) => template.did === item.did)?.name ?? 'Nameless Template'
+}
+
+const canEdit = (item: ContractTemplateReviewTask) => {
+  const template = templatesStore.contractTemplates.find((template) => template.did === item.did)
+  const state = template?.state
+  return (
+    (template?.created_by === authStore.user?.username &&
+      (state === TemplateState.draft || state === TemplateState.rejected)) ||
+    state === TemplateState.submitted
+  )
 }
 </script>
 
@@ -41,6 +52,7 @@ function getTemplateName(item: ContractTemplateReviewTask) {
                 View
               </RouterLink>
               <RouterLink
+                v-if="canEdit(item)"
                 :to="{
                   name: 'templates.edit',
                   params: { did: item.did },
@@ -49,13 +61,13 @@ function getTemplateName(item: ContractTemplateReviewTask) {
               >
                 Edit
               </RouterLink>
-            <RouterLink
-              v-if="item.state === 'OPEN'"
-              :to="{ name: 'templates.review', params: { did: item.did } }"
-              class="btn btn-sm btn-primary rounded-box gap-2"
-            >
-              Review
-            </RouterLink>
+              <RouterLink
+                v-if="item.state === 'OPEN'"
+                :to="{ name: 'templates.review', params: { did: item.did } }"
+                class="btn btn-sm btn-primary rounded-box gap-2"
+              >
+                Review
+              </RouterLink>
             </div>
           </div>
         </div>
