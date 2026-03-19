@@ -20,12 +20,9 @@
               <div class="card-body min-w-0">
                 <h2 class="card-title justify-between">
                   <div class="flex gap-8 h-full">
-                    <div class="truncate">
-                      {{ item.name || '' }}
-                    </div>
-                    <div v-if="item.templateType" class="badge badge-md badge-accent h-full">
-                      {{ toProperCase(item.templateType) }}
-                    </div>
+                    <div>Name: {{ item.name }}</div>
+                    <div v-if="item.templateType" class="badge badge-md badge-accent h-full">{{
+                      toProperCase(item.templateType) }}</div>
                   </div>
                 </h2>
                 <div class="flex justify-between flex-col gap-2">

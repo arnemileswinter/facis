@@ -1,6 +1,8 @@
 import type { TemplateTypeValue } from "@/modules/template-repository/models/contract-templace"
 
 export interface FederatedCatalogueSdMeta {
+  /** credentialSubject ID */
+  id: string
   sdHash: string
   issuer: string
   uploadDatetime: string

@@ -1,35 +1,31 @@
 import { ref } from "vue";
-import type { FederatedCatalogueSdMeta, SelfDescriptionContent, TemplateCatalogue } from "../models/template-catalogue";
+import type { FederatedCatalogueSdMeta, TemplateCatalogue } from "../models/template-catalogue";
 import { FederatedCatalogueService } from "@/services/federated-catalogue-services";
 import { SelfDescriptionStateValue } from "@/models/requests/federated-catalogue-request";
 
 async function enrichWithSdMeta(
-  catalogues: Omit<TemplateCatalogue, "sdMeta">[],
+  catalogues: Omit<TemplateCatalogue, "sdMeta">[], didById: Record<string, string>
 ): Promise<TemplateCatalogue[]> {
   const metaByDid: Record<string, FederatedCatalogueSdMeta> = {}
+  const metaResp = await FederatedCatalogueService.getSelfDescriptions({
+    ids: Object.keys(didById),
+    withMeta: true,
+    withContent: false,
+    statuses: [SelfDescriptionStateValue.active],
+  })
 
-  const dids = Array.from(new Set(catalogues.map((c) => c.did)))
+  metaResp.items.forEach((item) => {
+    const id = item?.meta?.id
+    const sdHash = item?.meta?.sdHash
+    const issuer = item?.meta?.issuer
+    const uploadDatetime = item?.meta?.uploadDatetime
+    const statusDatetime = item?.meta?.statusDatetime
+    const did = didById[id]
 
-  if (dids.length > 0) {
-    const metaResp = await FederatedCatalogueService.getSelfDescriptions({
-      ids: dids,
-      withMeta: true,
-      withContent: false,
-      statuses: [SelfDescriptionStateValue.active],
-    })
+    if (!did || !id || !sdHash || !issuer || !uploadDatetime || !statusDatetime) return
 
-    metaResp.items.forEach((item) => {
-      const id = item?.meta?.id
-      const sdHash = item?.meta?.sdHash
-      const issuer = item?.meta?.issuer
-      const uploadDatetime = item?.meta?.uploadDatetime
-      const statusDatetime = item?.meta?.statusDatetime
-
-      if (!id || !sdHash || !issuer || !uploadDatetime || !statusDatetime) return
-
-      metaByDid[id] = { sdHash, issuer, uploadDatetime, statusDatetime }
-    })
-  }
+    metaByDid[did] = { id, sdHash, issuer, uploadDatetime, statusDatetime }
+  })
 
   return catalogues.map((c) => ({
     ...c,
@@ -61,16 +57,17 @@ export function useSelfDescriptionConverter() {
       totalCount.value = queryResp.totalCount ?? queryResp.items.length
 
       const catalogues: Omit<TemplateCatalogue, "sdMeta">[] = []
+      const didById: Record<string, string> = {}
+
 
       queryResp.items.forEach((row) => {
         const node = row?.n
         if (!node) return
-
-        const did = node.did ?? node.claimsGraphUri?.[0]
-        if (!did) return
+        const id = node.claimsGraphUri?.[0]
+        if (!id) return
 
         catalogues.push({
-          did,
+          did: node.did,
           documentNumber: node.documentNumber,
           version: node.version,
           name: node.name,
@@ -80,9 +77,10 @@ export function useSelfDescriptionConverter() {
           createdAt: node.createdAt,
           updatedAt: node.updatedAt,
         })
+        didById[id] = node.did
       })
 
-      result = await enrichWithSdMeta(catalogues)
+      result = await enrichWithSdMeta(catalogues, didById)
     } catch (err: any) {
       error.value = err.message || "Error loading template catalogues"
     } finally {
@@ -108,6 +106,7 @@ export function useSelfDescriptionConverter() {
       const queryResp = await FederatedCatalogueService.query<{ n: any; claimsGraphUri?: string[] }>(statement)
       const row = queryResp.items?.[0]
       const node = (row as any)?.n ?? (row as any)?.["n"]
+      const didById: Record<string, string> = {}
       if (!node) return result
 
       const baseCatalogue: Omit<TemplateCatalogue, "sdMeta"> = {
@@ -121,7 +120,9 @@ export function useSelfDescriptionConverter() {
         createdAt: node.createdAt,
         updatedAt: node.updatedAt,
       }
-      const catalogues = await enrichWithSdMeta([baseCatalogue])
+      const id = row?.claimsGraphUri?.[0] ?? ""
+      didById[id] = node.did
+      const catalogues = await enrichWithSdMeta([baseCatalogue], didById)
       if (catalogues.length > 0) result = catalogues[0] ?? null
       else result = baseCatalogue
     } catch (err: any) {
