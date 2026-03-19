@@ -3,9 +3,19 @@ import ApprovalTaskList from '@/components/lists/approval-task-list/ApprovalTask
 import ReviewTaskList from '@/components/lists/review-task-list/ReviewTaskList.vue'
 import { useContractTemplatesStore } from '@/stores/contract-templates-store';
 import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 
 const templatesStore = useContractTemplatesStore()
 const { reviewTasks, approvalTasks } = storeToRefs(templatesStore)
+
+onMounted(() => {
+  if (!templatesStore.hasTemplates) {
+    router.push({ name: 'templates.list' })
+  }
+})
 </script>
 
 <template>

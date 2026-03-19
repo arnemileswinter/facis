@@ -82,15 +82,16 @@ async function searchRequest() {
 
 async function retrieveSearch() {
   if (!searchKey.value) return
-  const request = { [searchKey.value]: searchQuery.value}
+  const request = { [searchKey.value]: searchQuery.value }
   const result = await contractTemplateService.search(request)
   searchResults.value = result
 }
 
 async function searchList(event?: Event) {
   if (event && event.target instanceof HTMLInputElement) {
-    if (event.target.value !== searchQuery.value)
+    if (event.target.value !== searchQuery.value) {
       await searchRequest()
+    }
   }
   emit('searchResult', searchedItems.value)
 }
@@ -126,12 +127,12 @@ function onFilterSelect(label: FilterLabelValue) {
 </script>
 
 <template>
-  <div class="join m-2">
+  <div class="join m-2 flex-col sm:flex-row">
     <div class="join-item">
       <button
         id="list-btn-search"
         type="button"
-        class="select select-secondary join-item"
+        class="select select-secondary w-full rounded-t-md rounded-b-none sm:rounded-l-md sm:rounded-tr-none"
         popovertarget="list-popover-search"
       >
         {{ selectedFilter }}
@@ -156,7 +157,7 @@ function onFilterSelect(label: FilterLabelValue) {
     </div>
     <div class="relative grow">
       <Combobox v-model="selectedOption" @update:model-value="onComboboxUpdate" nullable>
-        <label class="input input-secondary join-item w-full">
+        <label class="input input-secondary join-item w-full rounded-none -mt-px ms-0 sm:mt-0 sm:-ms-px">
           <ComboboxInput
             @change="onSearchChange"
             @focus="onComboboxFocus"
@@ -192,7 +193,12 @@ function onFilterSelect(label: FilterLabelValue) {
         </ComboboxOptions>
       </Combobox>
     </div>
-    <button @click="searchList" class="btn btn-secondary join-item">Search</button>
+    <button
+      @click="searchList"
+      class="btn btn-secondary join-item rounded-b-md rounded-t-none sm:rounded-r-md sm:rounded-bl-none -mt-px ms-0 sm:mt-0 sm:-ms-px"
+    >
+      Search
+    </button>
   </div>
 </template>
 

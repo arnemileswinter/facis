@@ -27,10 +27,10 @@ const canEdit = computed(() => {
   <li class="list-row min-w-0 w-full">
     <div class="list-col-grow card bg-base-200 card-border hover:bg-base-300 min-w-0 w-full">
       <div class="card-body min-w-0">
-        <h2 class="card-title justify-between">
-          <div class="flex gap-8 h-full">
+        <h2 class="card-title flex-wrap sm:justify-between">
+          <div class="flex gap-8 sm:h-full">
             <div>Name: {{ item.name }}</div>
-            <div class="badge badge-md badge-accent h-full">{{ toProperCase(item.template_type) }}</div>
+            <div class="badge sm:badge-md badge-accent sm:h-full">{{ toProperCase(item.template_type) }}</div>
           </div>
           <div class="badge badge-secondary">{{ item.state }}</div>
         </h2>
@@ -40,7 +40,7 @@ const canEdit = computed(() => {
         </div>
         <div class="flex justify-between min-w-0">
           <div>Creation date: {{ new Date(item.created_at).toLocaleDateString() }}</div>
-          <div v-if="item.description" class="px-10 flex-1 min-w-0 truncate">
+          <div v-if="item.description" class="px-10 flex-1 min-w-0 truncate hidden sm:block">
             {{ item.description }}
           </div>
           <div class="card-actions justify-end">

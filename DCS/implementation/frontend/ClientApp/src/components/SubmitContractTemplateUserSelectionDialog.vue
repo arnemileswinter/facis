@@ -68,7 +68,7 @@ function onCheckboxChange(event: Event, userId: string) {
 
 <template>
   <button :="$attrs" @click="openModal">Submit</button>
-  <dialog ref="user-selection-modal" class="modal transition-none" @close="onModalClose">
+  <dialog ref="user-selection-modal" class="modal modal-bottom sm:modal-middle transition-none" @close="onModalClose">
     <div class="modal-box flex flex-col max-h-2/3">
       <h3 class="text-lg font-bold">User Selection</h3>
       <p class="text-sm py-4">Select one Approver and at least one Reviewer</p>
@@ -85,7 +85,7 @@ function onCheckboxChange(event: Event, userId: string) {
               />
               {{ `${user.firstName} ${user.lastName}` }}
             </label>
-            <select v-model="selectedRole[user.id]" class="select select-primary" :disabled="!selectedUsers[user.id]">
+            <select v-model="selectedRole[user.id]" class="select select-sm sm:select-md select-primary" :disabled="!selectedUsers[user.id]">
               <option selected :value="selectedRole['']">No role</option>
               <option v-for="role in user.roleIds" :key="role" :value="role" :disabled="isRoleDisabled(role, user.id)">
                 {{ toProperCase(role) }}

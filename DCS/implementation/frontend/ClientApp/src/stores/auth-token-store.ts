@@ -13,7 +13,7 @@ export const useAuthTokenStore = defineStore('token', () => {
   const tokenType = useLocalStorage<string>('token_type', null)
   const accessToken = useLocalStorage<string>('access_token', null)
 
-  const isAuthSet = computed(() => tokenType.value && accessToken.value)
+  const isAuthSet = computed(() => !!tokenType.value && !!accessToken.value)
   const getAuthenticationHeader = computed(() => `${tokenType.value} ${accessToken.value}`)
   const getUserId = computed(() => {
     setUsername()
