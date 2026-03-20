@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import type { ContractTemplateReviewTask } from '@/models/contract-template-review-task'
+import { ROUTES } from '@/router/router'
 import { useAuthStore } from '@/stores/auth-store'
 import { useContractTemplatesStore } from '@/stores/contract-templates-store'
 import { TemplateState } from '@/types/contract-template-state'
+import { computed } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   items: ContractTemplateReviewTask[]
 }>()
 
 const templatesStore = useContractTemplatesStore()
 const authStore = useAuthStore()
+
+const sortedItems = computed(() =>
+  props.items.sort((taskA, taskB) =>
+    new Date(taskA.created_at).getTime() < new Date(taskB.created_at).getTime() ? 1 : -1,
+  ),
+)
 
 const getTemplateName = (item: ContractTemplateReviewTask) => {
   return templatesStore.contractTemplates.find((template) => template.did === item.did)?.name ?? 'Nameless Template'
@@ -28,7 +36,7 @@ const canEdit = (item: ContractTemplateReviewTask) => {
 
 <template>
   <ul class="list">
-    <li v-for="item in items" class="list-row">
+    <li v-for="item in sortedItems" class="list-row">
       <div class="list-col-grow card bg-base-200 card-border hover:bg-base-300">
         <div class="card-body">
           <h2 class="card-title justify-between">
@@ -44,7 +52,7 @@ const canEdit = (item: ContractTemplateReviewTask) => {
             <div class="card-actions justify-end">
               <RouterLink
                 :to="{
-                  name: 'templates.view',
+                  name: ROUTES.TEMPLATES.VIEW,
                   params: { did: item.did },
                 }"
                 class="btn btn-sm btn-primary rounded-box"
@@ -54,7 +62,7 @@ const canEdit = (item: ContractTemplateReviewTask) => {
               <RouterLink
                 v-if="canEdit(item)"
                 :to="{
-                  name: 'templates.edit',
+                  name: ROUTES.TEMPLATES.EDIT,
                   params: { did: item.did },
                 }"
                 class="btn btn-sm btn-secondary rounded-box gap-2"
@@ -63,7 +71,7 @@ const canEdit = (item: ContractTemplateReviewTask) => {
               </RouterLink>
               <RouterLink
                 v-if="item.state === 'OPEN'"
-                :to="{ name: 'templates.review', params: { did: item.did } }"
+                :to="{ name: ROUTES.TEMPLATES.REVIEW, params: { did: item.did } }"
                 class="btn btn-sm btn-primary rounded-box gap-2"
               >
                 Review

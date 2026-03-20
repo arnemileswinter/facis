@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ROUTES } from '@/router/router'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import TemplateEditors from '@template-repository/components/TemplateEditors.vue'
@@ -119,7 +120,7 @@ const forwardToApproval = async () => {
       approver: '',
       reviewers: [],
     })
-    router.push({ name: 'templates.list' })
+    router.push({ name: ROUTES.TEMPLATES.LIST })
   } catch (error) {
     console.error('Submission failed', error)
   } finally {
@@ -144,7 +145,7 @@ const returnToDraft = async () => {
       approver: '',
       reviewers: [],
     })
-    router.push({ name: 'templates.list' })
+    router.push({ name: ROUTES.TEMPLATES.LIST })
   } catch (error) {
     console.error('Rejection failed', error)
   } finally {

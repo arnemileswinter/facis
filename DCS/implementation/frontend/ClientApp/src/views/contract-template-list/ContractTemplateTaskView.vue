@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ApprovalTaskList from '@/components/lists/approval-task-list/ApprovalTaskList.vue'
 import ReviewTaskList from '@/components/lists/review-task-list/ReviewTaskList.vue'
+import { ROUTES } from '@/router/router';
 import { useContractTemplatesStore } from '@/stores/contract-templates-store';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
@@ -13,7 +14,7 @@ const { reviewTasks, approvalTasks } = storeToRefs(templatesStore)
 
 onMounted(() => {
   if (!templatesStore.hasTemplates) {
-    router.push({ name: 'templates.list' })
+    router.push({ name: ROUTES.TEMPLATES.LIST })
   }
 })
 </script>
@@ -23,10 +24,10 @@ onMounted(() => {
     {{ $route.meta.name }}
   </h2>
 
-  <div v-if="$route.name === 'templates.tasks.review'">
+  <div v-if="$route.name === ROUTES.TEMPLATES.TASKS.REVIEW">
     <ReviewTaskList :items="reviewTasks" />
   </div>
-  <div v-else-if="$route.name === 'templates.tasks.approval'">
+  <div v-else-if="$route.name === ROUTES.TEMPLATES.TASKS.APPROVAL">
     <ApprovalTaskList :items="approvalTasks" />
   </div>
 </template>

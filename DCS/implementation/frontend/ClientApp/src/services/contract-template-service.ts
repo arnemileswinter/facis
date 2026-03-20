@@ -2,7 +2,9 @@ import http from '@/api/http'
 import type { ContractTemplate } from '@/models/contract-template'
 import type {
   ContractTemplateApproveRequest,
+  ContractTemplateArchiveRequest,
   ContractTemplateCreateRequest,
+  ContractTemplateRegisterRequest,
   ContractTemplateRejectRequest,
   ContractTemplateRetrieveByIdRequest,
   ContractTemplateRetrieveRequest,
@@ -13,7 +15,9 @@ import type {
 } from '@/models/requests/template-request'
 import type {
   ContractTemplateApproveResponse,
+  ContractTemplateArchiveResponse,
   ContractTemplateCreateResponse,
+  ContractTemplateRegisterResponse,
   ContractTemplateRejectResponse,
   ContractTemplateRetrieveByIdResponse,
   ContractTemplateRetrieveResponse,
@@ -99,5 +103,13 @@ export const contractTemplateService: ContractTemplateService = {
 
   async verify(request: ContractTemplateVerifyRequest) {
     return http.post<ContractTemplateVerifyResponse>('/template/verify', request).then((res) => res.data)
+  },
+
+  async archive(request: ContractTemplateArchiveRequest) {
+    return http.post<ContractTemplateArchiveResponse>('/template/archive', request).then((res) => res.data)
+  },
+
+  async register(request: ContractTemplateRegisterRequest) {
+    return http.post<ContractTemplateRegisterResponse>('/template/archive', request).then((res) => res.data)
   },
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center h-16 px-4 overflow-hidden">
-    <RouterLink :to="{ name: 'home' }" #default="{ route }" class="font-bold text-2xl tracking-tight text-base-content uppercase">
+    <RouterLink :to="{ name: ROUTES.HOME }" #default="{ route }" class="font-bold text-2xl tracking-tight text-base-content uppercase">
       {{ route.meta.name }}
     </RouterLink>
   </div>
@@ -21,7 +21,7 @@
     </ul>
   </nav>
 
-  <TemplateListStateFilter v-if="$route.matched.some(route => route.name === 'templates.list') && !isSidebarCollapsed" class="px-3" />
+  <TemplateListStateFilter v-if="$route.matched.some(route => route.name === ROUTES.TEMPLATES.LIST) && !isSidebarCollapsed" class="px-3" />
 
   <div class="flex-1"></div>
 
@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import TemplateListStateFilter from '@/components/lists/template-list/TemplateListStateFilter.vue'
+import { ROUTES } from '@/router/router'
 import { useAuthStore } from '@/stores/auth-store'
 import { usePageStore } from '@core/store/page'
 import { storeToRefs } from 'pinia'

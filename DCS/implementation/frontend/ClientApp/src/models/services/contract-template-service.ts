@@ -1,23 +1,27 @@
 import type { ContractTemplate } from '../contract-template'
 import type {
+  ContractTemplateApproveRequest,
+  ContractTemplateArchiveRequest,
   ContractTemplateCreateRequest,
+  ContractTemplateRegisterRequest,
+  ContractTemplateRejectRequest,
+  ContractTemplateRetrieveByIdRequest,
+  ContractTemplateRetrieveRequest,
+  ContractTemplateSearchRequest,
   ContractTemplateSubmitRequest,
   ContractTemplateUpdateRequest,
-  ContractTemplateSearchRequest,
-  ContractTemplateRetrieveRequest,
-  ContractTemplateRetrieveByIdRequest,
-  ContractTemplateApproveRequest,
-  ContractTemplateRejectRequest,
   ContractTemplateVerifyRequest,
 } from '../requests/template-request'
 import type {
+  ContractTemplateApproveResponse,
+  ContractTemplateArchiveResponse,
   ContractTemplateCreateResponse,
+  ContractTemplateRegisterResponse,
+  ContractTemplateRejectResponse,
+  ContractTemplateRetrieveResponse,
+  ContractTemplateSearchResponse,
   ContractTemplateSubmitResponse,
   ContractTemplateUpdateResponse,
-  ContractTemplateSearchResponse,
-  ContractTemplateRetrieveResponse,
-  ContractTemplateApproveResponse,
-  ContractTemplateRejectResponse,
   ContractTemplateVerifyResponse,
 } from '../responses/template-response'
 
@@ -31,4 +35,6 @@ export interface ContractTemplateService {
   approve: (request: ContractTemplateApproveRequest) => Promise<ContractTemplateApproveResponse>
   reject: (request: ContractTemplateRejectRequest) => Promise<ContractTemplateRejectResponse>
   verify: (request: ContractTemplateVerifyRequest) => Promise<ContractTemplateVerifyResponse>
+  archive: (request: ContractTemplateArchiveRequest) => Promise<ContractTemplateArchiveResponse>
+  register: (request: ContractTemplateRegisterRequest) => Promise<ContractTemplateRegisterResponse>
 }

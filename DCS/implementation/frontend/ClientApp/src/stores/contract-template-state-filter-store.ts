@@ -13,5 +13,9 @@ export const useContractTemplateStateFilterStore = defineStore('contractTemplate
     stateFilters.value.delete(filter)
   }
 
-  return { stateFilters, setFilter, removeFilter }
+  function reset() {
+    stateFilters.value.clear()
+  }
+
+  return { stateFilters, setFilter, removeFilter, reset }
 })

@@ -1,7 +1,5 @@
 import authHttp from '@/api/auth-http'
-import type { AuthCallbackResponse } from '@/models/responses/auth-callback-response'
-import type { LoginResponse } from '@/models/responses/login-response'
-import type { LogoutResponse } from '@/models/responses/logout-response'
+import type { AuthCallbackResponse, LoginResponse, LogoutResponse } from '@/models/responses/auth-response'
 import type { AuthenticationService } from '@/models/services/authentication-service'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAuthTokenStore } from '@/stores/auth-token-store'

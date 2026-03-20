@@ -34,6 +34,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ROUTES } from '@/router/router'
 import { useTemplateEditorUiStore } from '@template-repository/store/templateEditorUiStore.ts'
 import { useTemplateDraftStore } from '@template-repository/store/templateDraftStore'
 import TemplateEditors from '@template-repository/components/TemplateEditors.vue'
@@ -113,7 +114,7 @@ async function approve() {
       updated_at: updatedAt,
       decision_notes: decisionNote.value ? [decisionNote.value] : [],
     })
-    router.push({ name: 'templates.list' })
+    router.push({ name: ROUTES.TEMPLATES.LIST })
   } catch (error) {
     console.error('Approval failed', error)
   } finally {
@@ -135,7 +136,7 @@ async function reopenReviews() {
       updated_at: updatedAt,
       comments: decisionNote.value ? [decisionNote.value] : []
     })
-    router.push({ name: 'templates.list' })
+    router.push({ name: ROUTES.TEMPLATES.LIST })
   } catch (error) {
     console.error('Reopen reviews failed', error)
   } finally {
@@ -161,7 +162,7 @@ async function returnToDraft() {
       updated_at: updatedAt,
       reason: decisionNote.value.trim(),
     })
-    router.push({ name: 'templates.list' })
+    router.push({ name: ROUTES.TEMPLATES.LIST })
   } catch (error) {
     console.error('Rejection failed', error)
   } finally {

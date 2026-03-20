@@ -42,7 +42,7 @@ const empyt: PartialContractTemplate = {
   created_by: '',
 }
 
-const selectedFilter = ref<FilterLabelValue>('Name')
+const selectedFilter = ref<FilterLabelValue>(filterLabels.name)
 const filterPopover = useTemplateRef('filterPopover')
 const searchResults: Ref<ContractTemplateSearchResponse> = ref([])
 
@@ -117,7 +117,9 @@ function onSearchChange(event: Event) {
 
 function onComboboxUpdate(item: PartialContractTemplate) {
   selectedOption.value = item
-  searchQuery.value = searchKey.value ? String(selectedOption.value[searchKey.value]) : ''
+  if (selectedOption.value) {
+    searchQuery.value = searchKey.value ? String(selectedOption.value[searchKey.value]) : ''
+  }
 }
 
 function onFilterSelect(label: FilterLabelValue) {
@@ -162,7 +164,7 @@ function onFilterSelect(label: FilterLabelValue) {
             @change="onSearchChange"
             @focus="onComboboxFocus"
             @keydown.enter="searchList"
-            :display-value="getDisplayValue as (template: any) => string"
+            :display-value="(template) => getDisplayValue(template as PartialContractTemplate | null)"
             placeholder="Search templates"
             class="w-full bg-transparent"
           />

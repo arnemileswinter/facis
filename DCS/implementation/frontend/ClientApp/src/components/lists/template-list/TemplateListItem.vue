@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PartialContractTemplate } from '@/models/contract-template'
+import { ROUTES } from '@/router/router'
 import { useAuthStore } from '@/stores/auth-store'
 import { TemplateState } from '@/types/contract-template-state'
 import { toProperCase } from '@/utils/string'
@@ -20,7 +21,6 @@ const canEdit = computed(() => {
     (props.item.state === TemplateState.submitted && props.hasReviewTask)
   )
 })
-
 </script>
 
 <template>
@@ -45,7 +45,7 @@ const canEdit = computed(() => {
           </div>
           <div class="card-actions justify-end">
             <RouterLink
-              :to="{ name: 'templates.view', params: { did: item.did } }"
+              :to="{ name: ROUTES.TEMPLATES.VIEW, params: { did: item.did } }"
               class="btn btn-sm btn-primary rounded-box"
             >
               View
@@ -53,7 +53,7 @@ const canEdit = computed(() => {
             <RouterLink
               v-if="canEdit"
               :to="{
-                name: 'templates.edit',
+                name: ROUTES.TEMPLATES.EDIT,
                 params: { did: item.did },
               }"
               class="btn btn-sm btn-primary rounded-box gap-2"
@@ -62,14 +62,14 @@ const canEdit = computed(() => {
             </RouterLink>
             <RouterLink
               v-if="item.state === TemplateState.submitted && hasReviewTask"
-              :to="{ name: 'templates.review', params: { did: item.did } }"
+              :to="{ name: ROUTES.TEMPLATES.REVIEW, params: { did: item.did } }"
               class="btn btn-sm btn-primary rounded-box gap-2"
             >
               Review
             </RouterLink>
             <RouterLink
               v-if="item.state === TemplateState.reviewed && hasApprovalTask"
-              :to="{ name: 'templates.approve', params: { did: item.did } }"
+              :to="{ name: ROUTES.TEMPLATES.APPROVE, params: { did: item.did } }"
               class="btn btn-sm btn-primary rounded-box gap-2"
             >
               Approve

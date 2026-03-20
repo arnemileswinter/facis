@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ROUTES } from '@/router/router'
 import { authenticationService } from '@/services/authentication-service'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -10,9 +11,9 @@ onMounted(async () => {
   const result = await authenticationService.refresh()
   // Redirect to templates list on success
   if (result) {
-    router.replace({ name: 'templates.list' })
+    router.replace({ name: ROUTES.TEMPLATES.LIST })
   } else {
-    router.replace({ name: 'home' })
+    router.replace({ name: ROUTES.HOME })
   }
 })
 </script>

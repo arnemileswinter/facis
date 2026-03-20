@@ -2,7 +2,7 @@
 import type { PartialContractTemplate } from '@/models/contract-template'
 import { useContractTemplateStateFilterStore } from '@/stores/contract-template-state-filter-store'
 import { storeToRefs } from 'pinia'
-import { computed, ref, type Ref } from 'vue'
+import { computed, onUnmounted, ref, type Ref } from 'vue'
 import ListSearch from '../ListSearch.vue'
 import ListSort from '../ListSort.vue'
 import TemplateListItem from './TemplateListItem.vue'
@@ -60,9 +60,8 @@ const sortedItems = computed(() => {
 })
 
 const filteredItems = computed(() => {
-  const filters = stateFilters.value
-  if (filters.size > 0) {
-    return sortedItems.value.filter((item) => filters.has(item.state))
+  if (stateFilters.value.size > 0) {
+    return sortedItems.value.filter((item) => stateFilters.value.has(item.state))
   }
   return sortedItems.value
 })
@@ -70,6 +69,8 @@ const filteredItems = computed(() => {
 function applySearchResult(searchResult: PartialContractTemplate[]) {
   searchedItems.value = searchResult
 }
+
+onUnmounted(() => stateFilterStore.reset())
 </script>
 
 <template>

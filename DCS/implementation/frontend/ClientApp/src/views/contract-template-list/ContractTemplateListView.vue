@@ -6,7 +6,7 @@
 
     <RouterLink
       v-if="isTemplateCreator()"
-      :to="{ name: 'templates.new' }"
+      :to="{ name: ROUTES.TEMPLATES.NEW }"
       class="btn rounded-box self-end btn-secondary gap-2"
       #default="{ route }"
     >
@@ -29,6 +29,7 @@
 <script setup lang="ts">
 import TemplateList from '@/components/lists/template-list/TemplateList.vue'
 import { useTemplateTable } from './ContractTemplateListController'
+import { ROUTES } from '@/router/router';
 
 const { templates, roles, loading, error, hasReviewTask, hasApprovalTask } = useTemplateTable()
 

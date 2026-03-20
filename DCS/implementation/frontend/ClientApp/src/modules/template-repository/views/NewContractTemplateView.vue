@@ -34,6 +34,7 @@
 import SubmitContractTemplateUserSelectionDialog from '@/components/SubmitContractTemplateUserSelectionDialog.vue'
 import type { ContractTemplateSubmitRequest } from '@/models/requests/template-request'
 import type { SelectedUserRole } from '@/models/user'
+import { ROUTES } from '@/router/router'
 import { contractTemplateService } from '@/services/contract-template-service'
 import { TemplateState } from '@/types/contract-template-state'
 import TemplateEditors from '@template-repository/components/TemplateEditors.vue'
@@ -134,7 +135,7 @@ const submit = async () => {
                 await contractTemplateService.update(data)
             }
         }
-        router.push({ name: 'templates.list' })
+        router.push({ name: ROUTES.TEMPLATES.LIST })
     } catch (error) {
         console.error('Submission failed', error)
     } finally {
@@ -154,7 +155,7 @@ const submitTemplate = async (result: SelectedUserRole[]) => {
     }
     const response = await contractTemplateService.submit(request)
     if (response?.did) {
-        router.push({ name: 'templates.list'})
+        router.push({ name: ROUTES.TEMPLATES.LIST })
     }
 }
 </script>

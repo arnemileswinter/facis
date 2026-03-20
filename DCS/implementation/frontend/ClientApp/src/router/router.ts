@@ -1,27 +1,46 @@
+import { getUIBasePath } from '@/config'
 import ApproveContractTemplateView from '@/modules/template-repository/views/ApproveContractTemplateView.vue'
+import ReviewContractTemplateView from '@/modules/template-repository/views/ReviewContractTemplateView.vue'
 import ViewContractTemplateView from '@/modules/template-repository/views/ViewContractTemplateView.vue'
+import { authenticationService } from '@/services/authentication-service'
 import { useAuthStore } from '@/stores/auth-store'
 import AuthSuccessView from '@/views/auth/AuthSuccessView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import ContractTemplateListView from '@/views/contract-template-list/ContractTemplateListView.vue'
-import { authenticationService } from '@/services/authentication-service'
+import ContractTemplateTaskView from '@/views/contract-template-list/ContractTemplateTaskView.vue'
 import { DocumentCheckIcon, DocumentMagnifyingGlassIcon, DocumentTextIcon } from '@heroicons/vue/20/solid'
 import NewContractTemplateView from '@template-repository/views/NewContractTemplateView.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { getUIBasePath } from '@/config'
-import ReviewContractTemplateView from '@/modules/template-repository/views/ReviewContractTemplateView.vue'
-import ContractTemplateTaskView from '@/views/contract-template-list/ContractTemplateTaskView.vue'
+
+const ROUTES = {
+  HOME: 'home',
+  TEMPLATES: {
+    LIST: 'templates.list',
+    NEW: 'templates.new',
+    EDIT: 'templates.edit',
+    VIEW: 'templates.view',
+    REVIEW: 'templates.review',
+    APPROVE: 'templates.approve',
+    TASKS: {
+      REVIEW: 'templates.tasks.review',
+      APPROVAL: 'templates.tasks.approve',
+    },
+  },
+  AUTH: {
+    SUCCESS: 'auth.success',
+  },
+} as const
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'home',
+    name: ROUTES.HOME,
     meta: { name: 'DCS', hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS' },
     component: LoginView,
   },
   {
     path: '/templates',
-    name: 'templates.list',
+    name: ROUTES.TEMPLATES.LIST,
     component: ContractTemplateListView,
     meta: {
       name: 'Contract Templates',
@@ -33,7 +52,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/templates/new',
-    name: 'templates.new',
+    name: ROUTES.TEMPLATES.NEW,
     component: NewContractTemplateView,
     meta: {
       name: 'New Template',
@@ -45,7 +64,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/templates/edit/:did',
-    name: 'templates.edit',
+    name: ROUTES.TEMPLATES.EDIT,
     component: NewContractTemplateView,
     meta: {
       name: 'Edit Template',
@@ -57,13 +76,13 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/templates/view/:did',
-    name: 'templates.view',
+    name: ROUTES.TEMPLATES.VIEW,
     component: ViewContractTemplateView,
     meta: { name: 'View Template', hideInSidebar: true, requiresAuth: true, title: 'DCS - View Template' },
   },
   {
     path: '/templates/review/:did',
-    name: 'templates.review',
+    name: ROUTES.TEMPLATES.REVIEW,
     component: ReviewContractTemplateView,
     meta: {
       name: 'Review Template',
@@ -75,7 +94,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/templates/approve/:did',
-    name: 'templates.approve',
+    name: ROUTES.TEMPLATES.APPROVE,
     component: ApproveContractTemplateView,
     meta: {
       name: 'Approve Template',
@@ -87,7 +106,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/templates/tasks/review',
-    name: 'templates.tasks.review',
+    name: ROUTES.TEMPLATES.TASKS.REVIEW,
     component: ContractTemplateTaskView,
     meta: {
       name: 'Assigned Review Tasks',
@@ -99,8 +118,8 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/templates/tasks/approval',
-    name: 'templates.tasks.approval',
+    path: '/templates/tasks/approve',
+    name: ROUTES.TEMPLATES.TASKS.APPROVAL,
     component: ContractTemplateTaskView,
     meta: {
       name: 'Assigned Approval Tasks',
@@ -113,7 +132,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/auth/success',
-    name: 'auth.success',
+    name: ROUTES.AUTH.SUCCESS,
     meta: { hideInSidebar: true, requiresAuth: false, layout: 'blank', title: 'DCS - Auth Success' },
     component: AuthSuccessView,
   },
@@ -145,7 +164,7 @@ router.beforeEach(async (to) => {
     return false
   }
 
-  return { name: 'home' }
+  return { name: ROUTES.HOME }
 })
 
 router.beforeEach((to) => {
@@ -155,8 +174,8 @@ router.beforeEach((to) => {
   const authStore = useAuthStore()
   const hasAuthorizedRole = authStore.user?.roles?.some((role) => to.meta.roles?.includes(role)) ?? false
   if (!hasAuthorizedRole) {
-    return { name: 'home' }
+    return { name: ROUTES.HOME }
   }
 })
 
-export { router }
+export { router, ROUTES }
