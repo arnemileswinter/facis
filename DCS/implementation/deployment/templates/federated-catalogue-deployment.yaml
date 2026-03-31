@@ -81,7 +81,7 @@ spec:
             {{- end }}
             {{- if $keycloakInternalUrl }}
             - name: KEYCLOAK_AUTH_SERVER_URL
-              value: {{ $keycloakInternalUrl | quote }}
+              value: {{ $keycloakIssuerUrl | quote }}
             - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
               value: {{ printf "%s/realms/%s" $keycloakIssuerUrl (.Values.federatedCatalogue.keycloak.realm | default "gaia-x") | quote }}
             {{- /* JWK set URI for fetching keys from internal Keycloak */}}
