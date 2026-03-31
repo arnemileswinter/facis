@@ -15,6 +15,10 @@ spec:
         app.kubernetes.io/name: federated-catalogue
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: fc-service
           image: "{{ .Values.federatedCatalogue.image.repository }}:{{ .Values.federatedCatalogue.image.tag }}"
